@@ -29,7 +29,7 @@ export function FirstConversationForm({
       />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <CharacterCounter current={reflection.length} max={characterLimit} />
-        <Button className="sm:min-w-36" type="button">
+        <Button className="sm:min-w-36" href="/reflection">
           Continue
         </Button>
       </div>
