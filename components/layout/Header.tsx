@@ -14,10 +14,10 @@ export interface HeaderProps {
 }
 
 const defaultNavItems: HeaderNavItem[] = [
-  { label: "Why", href: "#why" },
+  { label: "Problem", href: "#problem" },
+  { label: "Solution", href: "#solution" },
+  { label: "Mentors", href: "#mentors" },
   { label: "How it Works", href: "#how-it-works" },
-  { label: "Testimonials", href: "#testimonials" },
-  { label: "FAQ", href: "#faq" },
 ];
 
 export function Header({ navItems = defaultNavItems }: HeaderProps) {
