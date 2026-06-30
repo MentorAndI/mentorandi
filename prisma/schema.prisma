@@ -1,0 +1,148 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum MessageRole {
+  USER
+  MENTOR
+  SYSTEM
+}
+
+enum GoalStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+  ARCHIVED
+}
+
+model User {
+  id         String   @id @default(uuid()) @db.Uuid
+  authUserId String   @unique @db.Uuid
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  conversations  Conversation[]
+  goals          Goal[]
+  journalEntries JournalEntry[]
+  memories       Memory[]
+  reflections    Reflection[]
+
+  @@index([createdAt])
+}
+
+model Mentor {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String
+  slug        String   @unique
+  description String
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  conversations Conversation[]
+
+  @@index([active])
+  @@index([slug])
+}
+
+model Conversation {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  mentorId  String   @db.Uuid
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mentor   Mentor    @relation(fields: [mentorId], references: [id], onDelete: Restrict)
+  memories Memory[]  @relation("ConversationMemories")
+  messages Message[]
+
+  @@index([userId])
+  @@index([mentorId])
+  @@index([userId, updatedAt])
+  @@index([mentorId, updatedAt])
+}
+
+model Message {
+  id             String      @id @default(uuid()) @db.Uuid
+  conversationId String      @db.Uuid
+  role           MessageRole
+  content        String
+  createdAt      DateTime    @default(now())
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId, createdAt])
+  @@index([role])
+}
+
+model Memory {
+  id                   String   @id @default(uuid()) @db.Uuid
+  userId               String   @db.Uuid
+  category             String
+  title                String
+  content              String
+  importance           Int      @default(3)
+  confidence           Float    @default(0.5)
+  sourceConversationId String?  @db.Uuid
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sourceConversation Conversation? @relation("ConversationMemories", fields: [sourceConversationId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([userId, category])
+  @@index([userId, importance])
+  @@index([sourceConversationId])
+}
+
+model Goal {
+  id          String     @id @default(uuid()) @db.Uuid
+  userId      String     @db.Uuid
+  title       String
+  description String?
+  status      GoalStatus @default(ACTIVE)
+  targetDate  DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, status])
+  @@index([userId, targetDate])
+}
+
+model Reflection {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  summary   String
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, createdAt])
+}
+
+model JournalEntry {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @db.Uuid
+  title     String
+  content   String
+  mood      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([userId, createdAt])
+  @@index([userId, mood])
+}
