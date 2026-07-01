@@ -9,7 +9,8 @@
     "start": "next start",
     "prelint": "prisma generate",
     "lint": "eslint",
-    "prisma": "prisma"
+    "prisma": "prisma",
+    "db:seed": "prisma generate && node --experimental-strip-types prisma/seed.ts"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
