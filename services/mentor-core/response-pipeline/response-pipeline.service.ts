@@ -1,4 +1,9 @@
+import { MessageRole } from "@/lib/generated/prisma/client";
 import { LlmService } from "@/services/llm/llm.service";
+import {
+  MessageService,
+  MessageServiceError,
+} from "@/services/message/message.service";
 import {
   ContextBuilderService,
   ContextBuilderServiceError,
@@ -27,6 +32,7 @@ export class MentorResponsePipelineService {
     private readonly contextBuilder = new ContextBuilderService(),
     private readonly promptComposer = new PromptComposerService(),
     private readonly llmService = new LlmService(),
+    private readonly messageService = new MessageService(),
   ) {}
 
   async run(
@@ -34,6 +40,15 @@ export class MentorResponsePipelineService {
     authContext: MentorResponsePipelineAuthContext,
   ): Promise<MentorResponsePipelineResult> {
     try {
+      const userMessage = await this.messageService.createMessage(
+        input.conversationId,
+        {
+          content: input.message,
+          role: MessageRole.USER,
+        },
+        authContext,
+      );
+
       const context = await this.contextBuilder.buildMentorContext(
         {
           conversationId: input.conversationId,
@@ -56,16 +71,33 @@ export class MentorResponsePipelineService {
         userMessage: promptPackage.userPrompt,
       });
 
+      const mentorMessage = await this.messageService.createMessage(
+        input.conversationId,
+        {
+          content: llmResponse.content,
+          role: MessageRole.MENTOR,
+        },
+        authContext,
+      );
+
       return {
         contextUsed: context,
         createdAt: new Date().toISOString(),
+        mentorMessage,
         model: llmResponse.metadata.model,
         promptPackage,
         provider: llmResponse.metadata.provider,
-        responseText: llmResponse.content,
+        userMessage,
       };
     } catch (error) {
       if (error instanceof ContextBuilderServiceError) {
+        throw new MentorResponsePipelineServiceError(
+          error.message,
+          error.statusCode,
+        );
+      }
+
+      if (error instanceof MessageServiceError) {
         throw new MentorResponsePipelineServiceError(
           error.message,
           error.statusCode,
