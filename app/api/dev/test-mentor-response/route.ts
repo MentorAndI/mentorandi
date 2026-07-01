@@ -79,6 +79,8 @@ export async function POST(request: Request) {
       {
         conversation,
         mentorMessage: response.mentorMessage,
+        model: response.model,
+        provider: response.provider,
         userMessage: response.userMessage,
       },
       { status: 200 },
