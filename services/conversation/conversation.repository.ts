@@ -9,6 +9,12 @@ export class ConversationRepository {
     });
   }
 
+  async findUserById(userId: string) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+  }
+
   async createUserForAuthUser(authUserId: string) {
     return this.prisma.user.create({
       data: { authUserId },
@@ -40,6 +46,25 @@ export class ConversationRepository {
         updatedAt: "desc",
       },
       where: { userId },
+    });
+  }
+
+  async findConversationForUser(userId: string, conversationId: string) {
+    return this.prisma.conversation.findFirst({
+      include: {
+        mentor: {
+          select: {
+            description: true,
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
+      where: {
+        id: conversationId,
+        userId,
+      },
     });
   }
 

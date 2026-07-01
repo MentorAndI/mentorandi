@@ -52,6 +52,52 @@ export class ConversationService {
     return toConversationDto(conversation);
   }
 
+  async getConversationForUserId(
+    userId: string,
+    conversationId: string,
+  ): Promise<ConversationDto> {
+    const conversation = await this.repository.findConversationForUser(
+      userId,
+      conversationId,
+    );
+
+    if (!conversation) {
+      throw new ConversationServiceError(
+        "Conversation was not found for this user.",
+        404,
+      );
+    }
+
+    return toConversationDto(conversation);
+  }
+
+  async createConversationForUserId(
+    userId: string,
+    input: CreateConversationInput,
+  ): Promise<ConversationDto> {
+    const user = await this.repository.findUserById(userId);
+
+    if (!user) {
+      throw new ConversationServiceError("User was not found.", 404);
+    }
+
+    const mentor = await this.repository.findActiveMentorById(input.mentorId);
+
+    if (!mentor) {
+      throw new ConversationServiceError(
+        "Mentor was not found or is not available.",
+        404,
+      );
+    }
+
+    const conversation = await this.repository.createConversation(
+      user.id,
+      mentor.id,
+    );
+
+    return toConversationDto(conversation);
+  }
+
   private async ensureUser(authUserId: string) {
     const existingUser =
       await this.repository.findUserByAuthUserId(authUserId);
