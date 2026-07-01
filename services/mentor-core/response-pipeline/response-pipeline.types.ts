@@ -6,6 +6,8 @@ import type { PromptPackage } from "@/services/mentor-core/prompt-composer/promp
 export interface MentorResponsePipelineInput {
   conversationId: string;
   message: string;
+  model?: string;
+  provider?: LlmProviderName;
   userId: string;
 }
 

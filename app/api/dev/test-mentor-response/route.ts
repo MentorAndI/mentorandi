@@ -12,10 +12,14 @@ import type { MentorResponsePipelineAuthContext } from "@/services/mentor-core/r
 
 export const dynamic = "force-dynamic";
 
+type DevMentorResponseProvider = "mock" | "openai";
+
 interface DevMentorResponseInput {
   conversationId?: string;
   mentorId: string;
   message: string;
+  model?: string;
+  provider: DevMentorResponseProvider;
   userId: string;
 }
 
@@ -28,6 +32,8 @@ interface DevMentorResponseValidationResult {
 const uuidPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const maxMessageLength = 10000;
+const maxModelLength = 100;
+const supportedDevProviders: DevMentorResponseProvider[] = ["mock", "openai"];
 
 function getDevMentorResponseAuthContext(): MentorResponsePipelineAuthContext {
   return {
@@ -70,6 +76,8 @@ export async function POST(request: Request) {
       {
         conversationId: conversation.id,
         message: validation.input.message,
+        model: validation.input.model,
+        provider: validation.input.provider,
         userId: validation.input.userId,
       },
       getDevMentorResponseAuthContext(),
@@ -121,11 +129,14 @@ function validateDevMentorResponseInput(
 
   const userId = readStringField(body, "userId");
   const mentorId = readStringField(body, "mentorId");
-  const conversationId = readOptionalStringField(body, "conversationId");
+  const conversationId = readOptionalTrimmedStringField(body, "conversationId");
   const message = readStringField(body, "message");
+  const model = readOptionalTrimmedStringField(body, "model");
+  const provider = readOptionalTrimmedStringField(body, "provider") ?? "mock";
 
   validateUuidField(errors, "userId", userId, "User ID");
   validateUuidField(errors, "mentorId", mentorId, "Mentor ID");
+  validateProviderField(errors, provider);
 
   if (conversationId !== undefined) {
     validateUuidField(
@@ -142,6 +153,10 @@ function validateDevMentorResponseInput(
     errors.message = `Message must be ${maxMessageLength} characters or fewer.`;
   }
 
+  if (model !== undefined && model.length > maxModelLength) {
+    errors.model = `Model must be ${maxModelLength} characters or fewer.`;
+  }
+
   if (Object.keys(errors).length > 0) {
     return { errors, isValid: false };
   }
@@ -152,6 +167,8 @@ function validateDevMentorResponseInput(
       conversationId,
       mentorId,
       message,
+      model,
+      provider: provider as DevMentorResponseProvider,
       userId,
     },
     isValid: true,
@@ -164,14 +181,18 @@ function readStringField(body: object, field: string) {
     : "";
 }
 
-function readOptionalStringField(body: object, field: string) {
+function readOptionalTrimmedStringField(body: object, field: string) {
   if (!(field in body) || body[field as keyof typeof body] === null) {
     return undefined;
   }
 
-  return typeof body[field as keyof typeof body] === "string"
-    ? String(body[field as keyof typeof body]).trim()
-    : "";
+  if (typeof body[field as keyof typeof body] !== "string") {
+    return undefined;
+  }
+
+  const value = String(body[field as keyof typeof body]).trim();
+
+  return value || undefined;
 }
 
 function validateUuidField(
@@ -184,5 +205,14 @@ function validateUuidField(
     errors[field] = `${label} is required.`;
   } else if (!uuidPattern.test(value)) {
     errors[field] = `${label} must be a valid UUID.`;
+  }
+}
+
+function validateProviderField(
+  errors: Record<string, string>,
+  provider: string,
+) {
+  if (!supportedDevProviders.includes(provider as DevMentorResponseProvider)) {
+    errors.provider = "Provider must be mock or openai.";
   }
 }

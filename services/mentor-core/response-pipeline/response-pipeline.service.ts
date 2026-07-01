@@ -62,11 +62,15 @@ export class MentorResponsePipelineService {
         context,
         currentUserMessage: input.message,
       });
+      const provider = input.provider ?? "mock";
+      const model =
+        input.model?.trim() ||
+        (provider === "mock" ? mockProviderModel : undefined);
 
       const llmResponse = await this.llmService.complete({
         context,
-        model: mockProviderModel,
-        provider: "mock",
+        model,
+        provider,
         systemPrompt: promptPackage.systemPrompt,
         userMessage: promptPackage.userPrompt,
       });

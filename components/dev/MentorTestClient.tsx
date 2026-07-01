@@ -7,10 +7,14 @@ import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 
+type MentorTestProvider = "mock" | "openai";
+
 interface MentorTestFormState {
   conversationId: string;
   mentorId: string;
   message: string;
+  model: string;
+  provider: MentorTestProvider;
   userId: string;
 }
 
@@ -49,6 +53,8 @@ const initialFormState: MentorTestFormState = {
   conversationId: "",
   mentorId: "",
   message: "",
+  model: "",
+  provider: "mock",
   userId: "",
 };
 
@@ -131,10 +137,12 @@ export function MentorTestClient() {
     const payload = {
       mentorId: formState.mentorId.trim(),
       message: formState.message.trim(),
+      provider: formState.provider,
       userId: formState.userId.trim(),
       ...(formState.conversationId.trim()
         ? { conversationId: formState.conversationId.trim() }
         : {}),
+      ...(formState.model.trim() ? { model: formState.model.trim() } : {}),
     };
 
     try {
@@ -171,7 +179,10 @@ export function MentorTestClient() {
     }
   }
 
-  function updateField(field: keyof MentorTestFormState, value: string) {
+  function updateField<K extends keyof MentorTestFormState>(
+    field: K,
+    value: MentorTestFormState[K],
+  ) {
     setFormState((currentState) => ({
       ...currentState,
       [field]: value,
@@ -186,6 +197,49 @@ export function MentorTestClient() {
             {isLoadingSeedData
               ? "Loading seeded development data..."
               : seedDataMessage}
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <div className="space-y-2">
+              <label
+                className="block text-sm font-medium text-zinc-900"
+                htmlFor="mentor-test-provider"
+              >
+                Provider
+              </label>
+              <select
+                className="block h-11 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/10"
+                id="mentor-test-provider"
+                onChange={(event) =>
+                  updateField(
+                    "provider",
+                    event.target.value === "openai" ? "openai" : "mock",
+                  )
+                }
+                value={formState.provider}
+              >
+                <option value="mock">mock</option>
+                <option value="openai">openai</option>
+              </select>
+            </div>
+
+            <Input
+              autoComplete="off"
+              hint={
+                formState.provider === "openai"
+                  ? "Leave blank to use OPENAI_MODEL."
+                  : "Optional for local mock labeling."
+              }
+              id="mentor-test-model"
+              label="Model"
+              onChange={(event) => updateField("model", event.target.value)}
+              placeholder={
+                formState.provider === "openai"
+                  ? "Uses OPENAI_MODEL if empty"
+                  : "mock-deterministic-v1"
+              }
+              value={formState.model}
+            />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2">
