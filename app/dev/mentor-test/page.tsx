@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+import { MentorTestClient } from "@/components/dev/MentorTestClient";
 import { Container } from "@/components/layout/Container";
 import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
-import { MentorTestClient } from "@/app/dev/mentor-test/MentorTestClient";
 
 export const metadata: Metadata = {
   title: "Mentor Pipeline Test | MentorAndI",

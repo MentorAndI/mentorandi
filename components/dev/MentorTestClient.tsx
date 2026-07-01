@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -34,6 +34,12 @@ interface MentorTestResponse {
   userMessage: MentorTestMessage;
 }
 
+interface MentorTestSeedDataResponse {
+  conversationId: string | null;
+  mentorId: string;
+  userId: string;
+}
+
 interface MentorTestErrorResponse {
   error?: string;
   errors?: Record<string, string>;
@@ -50,8 +56,70 @@ export function MentorTestClient() {
   const [formState, setFormState] =
     useState<MentorTestFormState>(initialFormState);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isLoadingSeedData, setIsLoadingSeedData] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<MentorTestResponse | null>(null);
+  const [seedDataMessage, setSeedDataMessage] = useState("");
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let isActive = true;
+
+    async function loadSeedData() {
+      try {
+        const response = await fetch("/api/dev/seed-data", {
+          signal: controller.signal,
+        });
+        const responseBody = (await response.json()) as
+          | MentorTestSeedDataResponse
+          | MentorTestErrorResponse;
+
+        if (!response.ok) {
+          if (isActive) {
+            setSeedDataMessage(
+              formatErrorResponse(responseBody as MentorTestErrorResponse),
+            );
+          }
+          return;
+        }
+
+        const seedData = responseBody as MentorTestSeedDataResponse;
+
+        if (isActive) {
+          setFormState((currentState) => ({
+            ...currentState,
+            conversationId: seedData.conversationId ?? "",
+            mentorId: seedData.mentorId,
+            userId: seedData.userId,
+          }));
+          setSeedDataMessage(
+            seedData.conversationId
+              ? "Seeded development data loaded."
+              : "Seeded user and mentor loaded. A conversation will be created.",
+          );
+        }
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
+        if (isActive) {
+          setSeedDataMessage("Unable to load seeded development data.");
+        }
+      } finally {
+        if (isActive) {
+          setIsLoadingSeedData(false);
+        }
+      }
+    }
+
+    void loadSeedData();
+
+    return () => {
+      isActive = false;
+      controller.abort();
+    };
+  }, []);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -83,7 +151,9 @@ export function MentorTestClient() {
         | MentorTestErrorResponse;
 
       if (!response.ok) {
-        setErrorMessage(formatErrorResponse(responseBody as MentorTestErrorResponse));
+        setErrorMessage(
+          formatErrorResponse(responseBody as MentorTestErrorResponse),
+        );
         return;
       }
 
@@ -112,6 +182,12 @@ export function MentorTestClient() {
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
       <Card className="space-y-6" variant="bordered">
         <form className="space-y-5" onSubmit={handleSubmit}>
+          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-600">
+            {isLoadingSeedData
+              ? "Loading seeded development data..."
+              : seedDataMessage}
+          </div>
+
           <div className="grid gap-4 sm:grid-cols-2">
             <Input
               autoComplete="off"
