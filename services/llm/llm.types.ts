@@ -13,10 +13,12 @@ export interface LlmCompletionRequest {
 
 export interface LlmCompletionResponse {
   content: string;
+  createdAt?: string;
   metadata: {
     model: string;
     provider: LlmProviderName;
   };
+  raw?: unknown;
 }
 
 export interface LlmValidationResult<TInput> {
