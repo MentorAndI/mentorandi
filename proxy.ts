@@ -2,7 +2,10 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { getSupabasePublicConfig } from "@/lib/supabase/config";
-import { isProtectedAuthRoute } from "@/services/auth/routes";
+import {
+  isDevelopmentMentorRouteBypass,
+  isProtectedAuthRoute,
+} from "@/services/auth/routes";
 
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({
@@ -36,7 +39,12 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user && isProtectedAuthRoute(request.nextUrl.pathname)) {
+  // Local-only bypass so the seeded /mentor experience can be tested before auth is wired in.
+  const shouldRequireAuth =
+    isProtectedAuthRoute(request.nextUrl.pathname) &&
+    !isDevelopmentMentorRouteBypass(request.nextUrl.pathname);
+
+  if (!user && shouldRequireAuth) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/login";
     redirectUrl.searchParams.set(

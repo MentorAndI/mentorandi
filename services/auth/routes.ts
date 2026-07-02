@@ -10,3 +10,10 @@ export function isProtectedAuthRoute(pathname: string) {
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
 }
+
+export function isDevelopmentMentorRouteBypass(pathname: string) {
+  return (
+    process.env.NODE_ENV !== "production" &&
+    (pathname === "/mentor" || pathname.startsWith("/mentor/"))
+  );
+}
