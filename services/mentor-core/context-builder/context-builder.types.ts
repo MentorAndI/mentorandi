@@ -75,6 +75,7 @@ export interface RecommendedMentorFocus {
 export interface MentorResponseContext {
   conversation: MentorContextConversation;
   currentUserMessage: string | null;
+  goals: MentorContextGoal[];
   memories: MentorContextMemory[];
   mentor: MentorContextMentor;
   recentMessages: MentorContextMessage[];

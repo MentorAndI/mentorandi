@@ -12,7 +12,7 @@ const recentMessageLimit = 16;
 const relevantMemoryLimit = 10;
 const minimumMemoryConfidence = 0.6;
 const minimumMemoryImportance = 3;
-const activeGoalLimit = 8;
+const activeGoalLimit = 5;
 const recentReflectionLimit = 5;
 
 export class ContextBuilderServiceError extends Error {
@@ -70,6 +70,13 @@ export class ContextBuilderService {
         this.repository.findRecentReflections(user.id, recentReflectionLimit),
       ]);
     const contextMemories = relevantMemories.map(toContextMemory);
+    const contextGoals = activeGoals.map((goal) => ({
+      description: goal.description,
+      id: goal.id,
+      status: goal.status,
+      targetDate: goal.targetDate?.toISOString() ?? null,
+      title: goal.title,
+    }));
 
     return {
       conversation: {
@@ -78,6 +85,7 @@ export class ContextBuilderService {
         updatedAt: conversation.updatedAt.toISOString(),
       },
       currentUserMessage: input.currentMessage ?? null,
+      goals: contextGoals,
       memories: contextMemories,
       mentor: {
         active: conversation.mentor.active,
@@ -108,13 +116,7 @@ export class ContextBuilderService {
         authUserId: user.authUserId,
         id: user.id,
       },
-      userGoals: activeGoals.map((goal) => ({
-        description: goal.description,
-        id: goal.id,
-        status: goal.status,
-        targetDate: goal.targetDate?.toISOString() ?? null,
-        title: goal.title,
-      })),
+      userGoals: contextGoals,
     };
   }
 

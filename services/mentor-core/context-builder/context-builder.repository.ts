@@ -36,7 +36,10 @@ export class ContextBuilderRepository {
 
   async findActiveGoals(userId: string, limit: number) {
     return this.prisma.goal.findMany({
-      orderBy: [{ targetDate: "asc" }, { updatedAt: "desc" }],
+      orderBy: [
+        { targetDate: { sort: "asc", nulls: "last" } },
+        { createdAt: "desc" },
+      ],
       take: limit,
       where: {
         status: GoalStatus.ACTIVE,

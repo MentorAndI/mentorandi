@@ -3,7 +3,10 @@ import type {
   LlmCompletionRequest,
   LlmCompletionResponse,
 } from "@/services/llm/llm.types";
-import type { MentorContextMemory } from "@/services/mentor-core/context-builder/context-builder.types";
+import type {
+  MentorContextGoal,
+  MentorContextMemory,
+} from "@/services/mentor-core/context-builder/context-builder.types";
 
 const defaultMockModel = "mock-deterministic-v1";
 
@@ -19,6 +22,16 @@ export class MockLlmProvider implements LlmProvider {
       request.context.memories.length > 0
         ? request.context.memories
         : request.context.relevantMemories;
+
+    if (request.context.goals.length > 0) {
+      return {
+        content: buildGoalAwareMockResponse(request.context.goals[0]),
+        metadata: {
+          model: request.model ?? defaultMockModel,
+          provider: this.name,
+        },
+      };
+    }
 
     if (memories.length > 0) {
       return {
@@ -38,6 +51,17 @@ export class MockLlmProvider implements LlmProvider {
       },
     };
   }
+}
+
+function buildGoalAwareMockResponse(goal: MentorContextGoal) {
+  return [
+    `I remember that you're working toward ${formatGoalTitle(goal.title)}.`,
+    "Let's keep today's step small and concrete.",
+  ].join(" ");
+}
+
+function formatGoalTitle(title: string) {
+  return trimTrailingPunctuation(title).replace(/\s+/g, " ").trim().toLowerCase();
 }
 
 function buildMemoryAwareMockResponse(memories: MentorContextMemory[]) {
