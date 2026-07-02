@@ -1,6 +1,11 @@
 import { MessageRole } from "@/lib/generated/prisma/client";
 import { LlmService } from "@/services/llm/llm.service";
 import {
+  MemoryService,
+  MemoryServiceError,
+} from "@/services/memory/memory.service";
+import type { CreateMemoryInput } from "@/services/memory/memory.types";
+import {
   MessageService,
   MessageServiceError,
 } from "@/services/message/message.service";
@@ -8,6 +13,11 @@ import {
   ContextBuilderService,
   ContextBuilderServiceError,
 } from "@/services/mentor-core/context-builder/context-builder.service";
+import {
+  MemoryExtractorService,
+  MemoryExtractorServiceError,
+} from "@/services/mentor-core/memory-extractor/memory-extractor.service";
+import type { MemoryCandidate } from "@/services/mentor-core/memory-extractor/memory-extractor.types";
 import { PromptComposerService } from "@/services/mentor-core/prompt-composer/prompt-composer.service";
 import type {
   MentorResponsePipelineAuthContext,
@@ -16,6 +26,8 @@ import type {
 } from "@/services/mentor-core/response-pipeline/response-pipeline.types";
 
 const mockProviderModel = "mock-deterministic-v1";
+const minimumMemoryConfidence = 0.6;
+const minimumMemoryImportance = 3;
 
 export class MentorResponsePipelineServiceError extends Error {
   constructor(
@@ -33,6 +45,8 @@ export class MentorResponsePipelineService {
     private readonly promptComposer = new PromptComposerService(),
     private readonly llmService = new LlmService(),
     private readonly messageService = new MessageService(),
+    private readonly memoryExtractor = new MemoryExtractorService(),
+    private readonly memoryService = new MemoryService(),
   ) {}
 
   async run(
@@ -83,10 +97,12 @@ export class MentorResponsePipelineService {
         },
         authContext,
       );
+      const extractedMemories = await this.extractAndStoreMemories(input);
 
       return {
         contextUsed: context,
         createdAt: new Date().toISOString(),
+        extractedMemories,
         mentorMessage,
         model: llmResponse.metadata.model,
         promptPackage,
@@ -108,6 +124,17 @@ export class MentorResponsePipelineService {
         );
       }
 
+      if (error instanceof MemoryServiceError) {
+        throw new MentorResponsePipelineServiceError(
+          error.message,
+          error.statusCode,
+        );
+      }
+
+      if (error instanceof MemoryExtractorServiceError) {
+        throw new MentorResponsePipelineServiceError(error.message, 400);
+      }
+
       if (error instanceof Error) {
         throw new MentorResponsePipelineServiceError(error.message, 500);
       }
@@ -118,4 +145,48 @@ export class MentorResponsePipelineService {
       );
     }
   }
+
+  private async extractAndStoreMemories(input: MentorResponsePipelineInput) {
+    const extractionResult = this.memoryExtractor.extract({
+      conversationId: input.conversationId,
+      userId: input.userId,
+      userMessage: input.message,
+    });
+    const usefulCandidates = extractionResult.memoryCandidates.filter(
+      isUsefulMemoryCandidate,
+    );
+    const storedMemories = [];
+
+    for (const candidate of usefulCandidates) {
+      const storedMemory =
+        await this.memoryService.createUniqueMentorUnderstandingForUserId(
+          input.userId,
+          toCreateMemoryInput(candidate),
+        );
+
+      if (storedMemory) {
+        storedMemories.push(storedMemory);
+      }
+    }
+
+    return storedMemories;
+  }
+}
+
+function isUsefulMemoryCandidate(candidate: MemoryCandidate) {
+  return (
+    candidate.confidence >= minimumMemoryConfidence &&
+    candidate.importance >= minimumMemoryImportance
+  );
+}
+
+function toCreateMemoryInput(candidate: MemoryCandidate): CreateMemoryInput {
+  return {
+    category: candidate.category,
+    confidence: candidate.confidence,
+    content: candidate.content,
+    importance: candidate.importance,
+    sourceConversationId: candidate.sourceConversationId,
+    title: candidate.title,
+  };
 }

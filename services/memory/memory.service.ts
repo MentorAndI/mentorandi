@@ -53,6 +53,35 @@ export class MemoryService {
     return toMentorUnderstandingDto(memory);
   }
 
+  async createUniqueMentorUnderstandingForUserId(
+    userId: string,
+    input: CreateMemoryInput,
+  ): Promise<MentorUnderstandingDto | null> {
+    await this.ensureUserById(userId);
+
+    if (input.sourceConversationId) {
+      await this.ensureSourceConversationBelongsToUser(
+        input.sourceConversationId,
+        userId,
+      );
+    }
+
+    const existingMemory =
+      await this.repository.findMemoryForUserByTitleAndCategory(
+        userId,
+        input.title,
+        input.category,
+      );
+
+    if (existingMemory) {
+      return null;
+    }
+
+    const memory = await this.repository.createMemoryForUser(userId, input);
+
+    return toMentorUnderstandingDto(memory);
+  }
+
   async getMentorUnderstanding(
     authContext: MemoryAuthContext,
     memoryId: string,
@@ -109,6 +138,16 @@ export class MemoryService {
     }
 
     return this.repository.createUserForAuthUser(authContext.authUserId);
+  }
+
+  private async ensureUserById(userId: string) {
+    const existingUser = await this.repository.findUserById(userId);
+
+    if (!existingUser) {
+      throw new MemoryServiceError("User was not found.", 404);
+    }
+
+    return existingUser;
   }
 
   private async ensureSourceConversationBelongsToUser(

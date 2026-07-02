@@ -20,6 +20,12 @@ export class MemoryRepository {
     });
   }
 
+  async findUserById(userId: string) {
+    return this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+  }
+
   async findSourceConversationForUser(
     sourceConversationId: string,
     userId: string,
@@ -52,6 +58,20 @@ export class MemoryRepository {
     return this.prisma.memory.findFirst({
       where: {
         id: memoryId,
+        userId,
+      },
+    });
+  }
+
+  async findMemoryForUserByTitleAndCategory(
+    userId: string,
+    title: string,
+    category: string,
+  ) {
+    return this.prisma.memory.findFirst({
+      where: {
+        category,
+        title,
         userId,
       },
     });

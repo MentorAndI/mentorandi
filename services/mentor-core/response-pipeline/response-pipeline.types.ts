@@ -1,4 +1,5 @@
 import type { LlmProviderName } from "@/services/llm/llm.types";
+import type { MentorUnderstandingDto } from "@/services/memory/memory.types";
 import type { MessageDto } from "@/services/message/message.types";
 import type { MentorResponseContext } from "@/services/mentor-core/context-builder/context-builder.types";
 import type { PromptPackage } from "@/services/mentor-core/prompt-composer/prompt-composer.types";
@@ -18,6 +19,7 @@ export interface MentorResponsePipelineAuthContext {
 export interface MentorResponsePipelineResult {
   contextUsed: MentorResponseContext;
   createdAt: string;
+  extractedMemories: MentorUnderstandingDto[];
   mentorMessage: MessageDto;
   model: string;
   promptPackage: PromptPackage;
