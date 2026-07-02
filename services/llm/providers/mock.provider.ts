@@ -42,7 +42,7 @@ export class MockLlmProvider implements LlmProvider {
 
 function buildMemoryAwareMockResponse(memories: MentorContextMemory[]) {
   const memorySummaries = memories
-    .slice(0, 2)
+    .slice(0, 3)
     .map((memory) => formatMemoryReference(memory));
 
   return [
@@ -52,19 +52,21 @@ function buildMemoryAwareMockResponse(memories: MentorContextMemory[]) {
 }
 
 function formatMemoryReference(memory: MentorContextMemory) {
+  const content = normalizeMemoryContent(memory.content);
+
   switch (memory.category) {
     case "CHALLENGE":
-      return `${memory.content} has been difficult for you`;
+      return `${content} has been difficult for you`;
     case "GOAL":
-      return `you want ${memory.content}`;
+      return `you want ${normalizeGoalContent(content)}`;
     case "INTEREST":
-      return `you are interested in ${memory.content}`;
+      return `you are interested in ${content}`;
     case "PREFERENCE":
-      return `you prefer ${memory.content}`;
+      return `you prefer ${content}`;
     case "VALUE":
-      return `you value ${memory.content}`;
+      return `you value ${content}`;
     default:
-      return memory.content;
+      return `you've told me ${content}`;
   }
 }
 
@@ -73,5 +75,34 @@ function joinMemorySummaries(memorySummaries: string[]) {
     return memorySummaries[0];
   }
 
-  return `${memorySummaries[0]} and that ${memorySummaries[1]}`;
+  if (memorySummaries.length === 2) {
+    return `${memorySummaries[0]} and that ${memorySummaries[1]}`;
+  }
+
+  return `${memorySummaries[0]}, that ${memorySummaries[1]}, and that ${memorySummaries[2]}`;
+}
+
+function normalizeMemoryContent(content: string) {
+  return trimTrailingPunctuation(content)
+    .replace(/^user\s+wants\s+/i, "")
+    .replace(/^user\s+needs\s+/i, "")
+    .replace(/^user\s+is\s+trying\s+to\s+/i, "")
+    .replace(/^user\s+values\s+/i, "")
+    .replace(/^user\s+prefers\s+/i, "")
+    .replace(/^user\s+likes\s+/i, "")
+    .replace(/^user\s+doesn't\s+like\s+/i, "")
+    .replace(/^user\s+struggles\s+with\s+/i, "")
+    .replace(/^user\s+struggles\s+/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function normalizeGoalContent(content: string) {
+  return content
+    .replace(/^help\s+/i, "to ")
+    .replace(/^to\s+to\s+/i, "to ");
+}
+
+function trimTrailingPunctuation(value: string) {
+  return value.replace(/[.!?]+$/g, "");
 }
