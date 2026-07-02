@@ -38,6 +38,19 @@ interface MentorTestResponse {
   userMessage: MentorTestMessage;
 }
 
+interface MentorTestMemory {
+  category: string;
+  confidence: number;
+  content: string;
+  id: string;
+  importance: number;
+  title: string;
+}
+
+interface MentorTestMemoriesResponse {
+  understandings: MentorTestMemory[];
+}
+
 interface MentorTestMessagesResponse {
   messages: MentorTestMessage[];
 }
@@ -67,9 +80,12 @@ export function MentorTestClient() {
     useState<MentorTestFormState>(initialFormState);
   const [errorMessage, setErrorMessage] = useState("");
   const [historyErrorMessage, setHistoryErrorMessage] = useState("");
+  const [isLoadingMemories, setIsLoadingMemories] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isLoadingSeedData, setIsLoadingSeedData] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [memories, setMemories] = useState<MentorTestMemory[]>([]);
+  const [memoriesErrorMessage, setMemoriesErrorMessage] = useState("");
   const [messages, setMessages] = useState<MentorTestMessage[]>([]);
   const [result, setResult] = useState<MentorTestResponse | null>(null);
   const [seedDataMessage, setSeedDataMessage] = useState("");
@@ -98,6 +114,31 @@ export function MentorTestClient() {
       setHistoryErrorMessage("Unable to load conversation history.");
     } finally {
       setIsLoadingHistory(false);
+    }
+  }
+
+  async function loadStoredMemories() {
+    setMemoriesErrorMessage("");
+    setIsLoadingMemories(true);
+
+    try {
+      const response = await fetch("/api/memories");
+      const responseBody = (await response.json()) as
+        | MentorTestMemoriesResponse
+        | MentorTestErrorResponse;
+
+      if (!response.ok) {
+        setMemoriesErrorMessage(
+          formatErrorResponse(responseBody as MentorTestErrorResponse),
+        );
+        return;
+      }
+
+      setMemories((responseBody as MentorTestMemoriesResponse).understandings);
+    } catch {
+      setMemoriesErrorMessage("Unable to load stored memories.");
+    } finally {
+      setIsLoadingMemories(false);
     }
   }
 
@@ -143,6 +184,8 @@ export function MentorTestClient() {
           if (conversationId) {
             await loadConversationHistory(conversationId);
           }
+
+          await loadStoredMemories();
         }
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") {
@@ -213,7 +256,10 @@ export function MentorTestClient() {
         ...currentState,
         conversationId,
       }));
-      await loadConversationHistory(conversationId);
+      await Promise.all([
+        loadConversationHistory(conversationId),
+        loadStoredMemories(),
+      ]);
     } catch {
       setErrorMessage("Unable to send the test message.");
     } finally {
@@ -240,6 +286,10 @@ export function MentorTestClient() {
     }
 
     await loadConversationHistory(conversationId);
+  }
+
+  async function handleRefreshMemories() {
+    await loadStoredMemories();
   }
 
   return (
@@ -387,41 +437,80 @@ export function MentorTestClient() {
         </Card>
       </div>
 
-      <Card
-        aria-live="polite"
-        className="space-y-5 self-start"
-        variant="bordered"
-      >
-        <div>
-          <h2 className="text-lg font-semibold text-zinc-950">Result</h2>
-          <p className="mt-1 text-sm text-zinc-500">
-            The latest persisted pipeline response appears here.
-          </p>
-        </div>
+      <div className="space-y-6">
+        <Card
+          aria-live="polite"
+          className="space-y-5 self-start"
+          variant="bordered"
+        >
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-zinc-950">
+                Stored Memories
+              </h2>
+              <p className="mt-1 text-sm text-zinc-500">
+                Current mentor understanding stored for the seeded user.
+              </p>
+            </div>
 
-        {result ? (
-          <div className="space-y-5">
-            <ResultField
-              label="Created conversation id"
-              value={result.conversation.id}
-            />
-            <ResultField label="Provider" value={result.provider} />
-            <ResultField label="Model" value={result.model} />
-            <ResultField
-              label="User message"
-              value={result.userMessage.content}
-            />
-            <ResultField
-              label="Mentor message"
-              value={result.mentorMessage.content}
-            />
+            <Button
+              disabled={isLoadingMemories}
+              onClick={handleRefreshMemories}
+              type="button"
+              variant="secondary"
+            >
+              {isLoadingMemories ? "Refreshing..." : "Refresh"}
+            </Button>
           </div>
-        ) : (
-          <p className="text-sm leading-6 text-zinc-500">
-            No response has been generated yet.
-          </p>
-        )}
-      </Card>
+
+          {memoriesErrorMessage ? (
+            <p className="text-sm text-red-600" role="alert">
+              {memoriesErrorMessage}
+            </p>
+          ) : null}
+
+          <StoredMemories
+            isLoading={isLoadingMemories}
+            memories={memories}
+          />
+        </Card>
+
+        <Card
+          aria-live="polite"
+          className="space-y-5 self-start"
+          variant="bordered"
+        >
+          <div>
+            <h2 className="text-lg font-semibold text-zinc-950">Result</h2>
+            <p className="mt-1 text-sm text-zinc-500">
+              The latest persisted pipeline response appears here.
+            </p>
+          </div>
+
+          {result ? (
+            <div className="space-y-5">
+              <ResultField
+                label="Created conversation id"
+                value={result.conversation.id}
+              />
+              <ResultField label="Provider" value={result.provider} />
+              <ResultField label="Model" value={result.model} />
+              <ResultField
+                label="User message"
+                value={result.userMessage.content}
+              />
+              <ResultField
+                label="Mentor message"
+                value={result.mentorMessage.content}
+              />
+            </div>
+          ) : (
+            <p className="text-sm leading-6 text-zinc-500">
+              No response has been generated yet.
+            </p>
+          )}
+        </Card>
+      </div>
     </div>
   );
 }
@@ -492,6 +581,63 @@ function ConversationMessage({ message }: ConversationMessageProps) {
   );
 }
 
+interface StoredMemoriesProps {
+  isLoading: boolean;
+  memories: MentorTestMemory[];
+}
+
+function StoredMemories({ isLoading, memories }: StoredMemoriesProps) {
+  if (isLoading && memories.length === 0) {
+    return (
+      <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 text-sm text-zinc-500">
+        Loading stored memories...
+      </p>
+    );
+  }
+
+  if (memories.length === 0) {
+    return (
+      <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 text-sm text-zinc-500">
+        No stored memories yet.
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {memories.map((memory) => (
+        <StoredMemory key={memory.id} memory={memory} />
+      ))}
+    </div>
+  );
+}
+
+interface StoredMemoryProps {
+  memory: MentorTestMemory;
+}
+
+function StoredMemory({ memory }: StoredMemoryProps) {
+  return (
+    <article className="space-y-2 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-3">
+      <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+        <div>
+          <p className="text-xs font-semibold uppercase text-zinc-500">
+            {memory.category}
+          </p>
+          <h3 className="text-sm font-medium leading-6 text-zinc-950">
+            {memory.title}
+          </h3>
+        </div>
+        <p className="text-xs text-zinc-500">
+          importance {memory.importance} / confidence{" "}
+          {formatConfidence(memory.confidence)}
+        </p>
+      </div>
+      <p className="text-sm leading-6 text-zinc-700">{memory.content}</p>
+    </article>
+  );
+}
+
 interface ResultFieldProps {
   label: string;
   value: string;
@@ -528,4 +674,8 @@ function formatMessageTimestamp(value: string) {
   }
 
   return date.toLocaleString();
+}
+
+function formatConfidence(value: number) {
+  return value.toFixed(2);
 }

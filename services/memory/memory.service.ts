@@ -7,7 +7,7 @@ import type {
   UpdateMemoryInput,
 } from "@/services/memory/memory.types";
 
-const developmentAuthUserId = "00000000-0000-4000-8000-000000000001";
+const developmentAuthUserId = "00000000-0000-0000-0000-000000000001";
 
 export class MemoryServiceError extends Error {
   constructor(
