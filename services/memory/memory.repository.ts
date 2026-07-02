@@ -38,9 +38,18 @@ export class MemoryRepository {
     });
   }
 
-  async findMemoriesForUser(userId: string, filters: MemoryFilters) {
+  async findMemoriesForUser(
+    userId: string,
+    filters: MemoryFilters,
+    limit?: number,
+  ) {
     return this.prisma.memory.findMany({
-      orderBy: [{ importance: "desc" }, { updatedAt: "desc" }],
+      orderBy: [
+        { importance: "desc" },
+        { confidence: "desc" },
+        { updatedAt: "desc" },
+      ],
+      ...(limit !== undefined ? { take: limit } : {}),
       where: {
         userId,
         ...(filters.category ? { category: filters.category } : {}),

@@ -34,34 +34,6 @@ export class ContextBuilderRepository {
     return messages.reverse();
   }
 
-  async findRelevantMemories(userId: string, conversationId: string, limit: number) {
-    const conversationMemories = await this.prisma.memory.findMany({
-      orderBy: [{ importance: "desc" }, { confidence: "desc" }, { updatedAt: "desc" }],
-      take: limit,
-      where: {
-        sourceConversationId: conversationId,
-        userId,
-      },
-    });
-
-    if (conversationMemories.length >= limit) {
-      return conversationMemories;
-    }
-
-    const remainingMemories = await this.prisma.memory.findMany({
-      orderBy: [{ importance: "desc" }, { confidence: "desc" }, { updatedAt: "desc" }],
-      take: limit - conversationMemories.length,
-      where: {
-        sourceConversationId: {
-          not: conversationId,
-        },
-        userId,
-      },
-    });
-
-    return [...conversationMemories, ...remainingMemories];
-  }
-
   async findActiveGoals(userId: string, limit: number) {
     return this.prisma.goal.findMany({
       orderBy: [{ targetDate: "asc" }, { updatedAt: "desc" }],

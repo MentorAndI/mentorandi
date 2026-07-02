@@ -1,13 +1,17 @@
 import { ContextBuilderRepository } from "@/services/mentor-core/context-builder/context-builder.repository";
+import { MemoryService } from "@/services/memory/memory.service";
 import type {
   BuildMentorContextAuthContext,
   BuildMentorContextInput,
+  MentorContextMemory,
   MentorResponseContext,
   RecommendedMentorFocus,
 } from "@/services/mentor-core/context-builder/context-builder.types";
 
 const recentMessageLimit = 16;
-const relevantMemoryLimit = 12;
+const relevantMemoryLimit = 10;
+const minimumMemoryConfidence = 0.6;
+const minimumMemoryImportance = 3;
 const activeGoalLimit = 8;
 const recentReflectionLimit = 5;
 
@@ -24,6 +28,7 @@ export class ContextBuilderServiceError extends Error {
 export class ContextBuilderService {
   constructor(
     private readonly repository = new ContextBuilderRepository(),
+    private readonly memoryService = new MemoryService(),
   ) {}
 
   async buildMentorContext(
@@ -53,14 +58,18 @@ export class ContextBuilderService {
     const [recentMessages, relevantMemories, activeGoals, recentReflections] =
       await Promise.all([
         this.repository.findRecentMessages(conversation.id, recentMessageLimit),
-        this.repository.findRelevantMemories(
+        this.memoryService.listRelevantMentorUnderstandingsForUserId(
           user.id,
-          conversation.id,
+          {
+            minimumConfidence: minimumMemoryConfidence,
+            minimumImportance: minimumMemoryImportance,
+          },
           relevantMemoryLimit,
         ),
         this.repository.findActiveGoals(user.id, activeGoalLimit),
         this.repository.findRecentReflections(user.id, recentReflectionLimit),
       ]);
+    const contextMemories = relevantMemories.map(toContextMemory);
 
     return {
       conversation: {
@@ -69,6 +78,7 @@ export class ContextBuilderService {
         updatedAt: conversation.updatedAt.toISOString(),
       },
       currentUserMessage: input.currentMessage ?? null,
+      memories: contextMemories,
       mentor: {
         active: conversation.mentor.active,
         description: conversation.mentor.description,
@@ -93,16 +103,7 @@ export class ContextBuilderService {
         relevantMemoryCount: relevantMemories.length,
         recentReflectionCount: recentReflections.length,
       }),
-      relevantMemories: relevantMemories.map((memory) => ({
-        category: memory.category,
-        confidence: memory.confidence,
-        content: memory.content,
-        id: memory.id,
-        importance: memory.importance,
-        sourceConversationId: memory.sourceConversationId,
-        title: memory.title,
-        updatedAt: memory.updatedAt.toISOString(),
-      })),
+      relevantMemories: contextMemories,
       user: {
         authUserId: user.authUserId,
         id: user.id,
@@ -123,6 +124,28 @@ export class ContextBuilderService {
   ) {
     void authContext;
   }
+}
+
+function toContextMemory(memory: {
+  category: string;
+  confidence: number;
+  content: string;
+  id: string;
+  importance: number;
+  sourceConversationId: string | null;
+  title: string;
+  updatedAt: string;
+}): MentorContextMemory {
+  return {
+    category: memory.category,
+    confidence: memory.confidence,
+    content: memory.content,
+    id: memory.id,
+    importance: memory.importance,
+    sourceConversationId: memory.sourceConversationId,
+    title: memory.title,
+    updatedAt: memory.updatedAt,
+  };
 }
 
 // The Context Builder returns structured context, not a prompt.

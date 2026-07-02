@@ -35,6 +35,22 @@ export class MemoryService {
     return memories.map(toMentorUnderstandingDto);
   }
 
+  async listRelevantMentorUnderstandingsForUserId(
+    userId: string,
+    filters: MemoryFilters,
+    limit: number,
+  ): Promise<MentorUnderstandingDto[]> {
+    await this.ensureUserById(userId);
+
+    const memories = await this.repository.findMemoriesForUser(
+      userId,
+      filters,
+      limit,
+    );
+
+    return memories.map(toMentorUnderstandingDto);
+  }
+
   async createMentorUnderstanding(
     authContext: MemoryAuthContext,
     input: CreateMemoryInput,
