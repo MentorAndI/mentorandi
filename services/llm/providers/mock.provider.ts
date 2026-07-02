@@ -55,14 +55,68 @@ export class MockLlmProvider implements LlmProvider {
 
 function buildGoalAwareMockResponse(goal: MentorContextGoal) {
   return [
-    `I remember that you're working toward ${formatGoalTitle(goal.title)}.`,
+    `I remember that you're working toward ${formatGoalReference(goal.title)}.`,
     "Let's keep today's step small and concrete.",
   ].join(" ");
 }
 
-function formatGoalTitle(title: string) {
-  return trimTrailingPunctuation(title).replace(/\s+/g, " ").trim().toLowerCase();
+function formatGoalReference(title: string) {
+  const normalizedTitle = trimTrailingPunctuation(title)
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase()
+    .replace(/^to\s+/i, "");
+
+  return gerundifyLeadingVerb(normalizedTitle);
 }
+
+function gerundifyLeadingVerb(phrase: string) {
+  if (!phrase) {
+    return phrase;
+  }
+
+  const [firstWord = "", ...remainingWords] = phrase.split(" ");
+
+  if (firstWord.endsWith("ing")) {
+    return phrase;
+  }
+
+  const gerund = leadingGoalVerbGerunds[firstWord];
+
+  if (!gerund) {
+    return phrase;
+  }
+
+  return [gerund, ...remainingWords].join(" ");
+}
+
+const leadingGoalVerbGerunds: Record<string, string> = {
+  achieve: "achieving",
+  be: "being",
+  become: "becoming",
+  build: "building",
+  create: "creating",
+  develop: "developing",
+  feel: "feeling",
+  find: "finding",
+  get: "getting",
+  grow: "growing",
+  improve: "improving",
+  learn: "learning",
+  live: "living",
+  make: "making",
+  manage: "managing",
+  organize: "organizing",
+  practice: "practicing",
+  pursue: "pursuing",
+  reduce: "reducing",
+  start: "starting",
+  stay: "staying",
+  stop: "stopping",
+  strengthen: "strengthening",
+  think: "thinking",
+  understand: "understanding",
+};
 
 function buildMemoryAwareMockResponse(memories: MentorContextMemory[]) {
   const memorySummaries = memories
