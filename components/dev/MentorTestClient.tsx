@@ -38,6 +38,10 @@ interface MentorTestResponse {
   userMessage: MentorTestMessage;
 }
 
+interface MentorTestMessagesResponse {
+  messages: MentorTestMessage[];
+}
+
 interface MentorTestSeedDataResponse {
   conversationId: string | null;
   mentorId: string;
@@ -62,10 +66,40 @@ export function MentorTestClient() {
   const [formState, setFormState] =
     useState<MentorTestFormState>(initialFormState);
   const [errorMessage, setErrorMessage] = useState("");
+  const [historyErrorMessage, setHistoryErrorMessage] = useState("");
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isLoadingSeedData, setIsLoadingSeedData] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [messages, setMessages] = useState<MentorTestMessage[]>([]);
   const [result, setResult] = useState<MentorTestResponse | null>(null);
   const [seedDataMessage, setSeedDataMessage] = useState("");
+
+  async function loadConversationHistory(conversationId: string) {
+    setHistoryErrorMessage("");
+    setIsLoadingHistory(true);
+
+    try {
+      const response = await fetch(
+        `/api/conversations/${encodeURIComponent(conversationId)}/messages`,
+      );
+      const responseBody = (await response.json()) as
+        | MentorTestMessagesResponse
+        | MentorTestErrorResponse;
+
+      if (!response.ok) {
+        setHistoryErrorMessage(
+          formatErrorResponse(responseBody as MentorTestErrorResponse),
+        );
+        return;
+      }
+
+      setMessages((responseBody as MentorTestMessagesResponse).messages);
+    } catch {
+      setHistoryErrorMessage("Unable to load conversation history.");
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  }
 
   useEffect(() => {
     const controller = new AbortController();
@@ -92,9 +126,11 @@ export function MentorTestClient() {
         const seedData = responseBody as MentorTestSeedDataResponse;
 
         if (isActive) {
+          const conversationId = seedData.conversationId ?? "";
+
           setFormState((currentState) => ({
             ...currentState,
-            conversationId: seedData.conversationId ?? "",
+            conversationId,
             mentorId: seedData.mentorId,
             userId: seedData.userId,
           }));
@@ -103,6 +139,10 @@ export function MentorTestClient() {
               ? "Seeded development data loaded."
               : "Seeded user and mentor loaded. A conversation will be created.",
           );
+
+          if (conversationId) {
+            await loadConversationHistory(conversationId);
+          }
         }
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") {
@@ -166,12 +206,14 @@ export function MentorTestClient() {
       }
 
       const mentorTestResponse = responseBody as MentorTestResponse;
+      const conversationId = mentorTestResponse.conversation.id;
 
       setResult(mentorTestResponse);
       setFormState((currentState) => ({
         ...currentState,
-        conversationId: mentorTestResponse.conversation.id,
+        conversationId,
       }));
+      await loadConversationHistory(conversationId);
     } catch {
       setErrorMessage("Unable to send the test message.");
     } finally {
@@ -189,113 +231,161 @@ export function MentorTestClient() {
     }));
   }
 
+  async function handleRefreshHistory() {
+    const conversationId = formState.conversationId.trim();
+
+    if (!conversationId) {
+      setHistoryErrorMessage("Enter a conversation ID to load history.");
+      return;
+    }
+
+    await loadConversationHistory(conversationId);
+  }
+
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
-      <Card className="space-y-6" variant="bordered">
-        <form className="space-y-5" onSubmit={handleSubmit}>
-          <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-600">
-            {isLoadingSeedData
-              ? "Loading seeded development data..."
-              : seedDataMessage}
+      <div className="space-y-6">
+        <Card className="space-y-5" variant="bordered">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-zinc-950">
+                Conversation history
+              </h2>
+              <p className="mt-1 text-sm text-zinc-500">
+                Persisted messages for the active conversation.
+              </p>
+            </div>
+
+            <Button
+              disabled={isLoadingHistory || !formState.conversationId.trim()}
+              onClick={handleRefreshHistory}
+              type="button"
+              variant="secondary"
+            >
+              {isLoadingHistory ? "Refreshing..." : "Refresh"}
+            </Button>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
-              <label
-                className="block text-sm font-medium text-zinc-900"
-                htmlFor="mentor-test-provider"
-              >
-                Provider
-              </label>
-              <select
-                className="block h-11 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/10"
-                id="mentor-test-provider"
-                onChange={(event) =>
-                  updateField(
-                    "provider",
-                    event.target.value === "openai" ? "openai" : "mock",
-                  )
+          {historyErrorMessage ? (
+            <p className="text-sm text-red-600" role="alert">
+              {historyErrorMessage}
+            </p>
+          ) : null}
+
+          <ConversationHistory
+            isLoading={isLoadingHistory}
+            messages={messages}
+          />
+        </Card>
+
+        <Card className="space-y-6" variant="bordered">
+          <form className="space-y-5" onSubmit={handleSubmit}>
+            <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-600">
+              {isLoadingSeedData
+                ? "Loading seeded development data..."
+                : seedDataMessage}
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <label
+                  className="block text-sm font-medium text-zinc-900"
+                  htmlFor="mentor-test-provider"
+                >
+                  Provider
+                </label>
+                <select
+                  className="block h-11 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/10"
+                  id="mentor-test-provider"
+                  onChange={(event) =>
+                    updateField(
+                      "provider",
+                      event.target.value === "openai" ? "openai" : "mock",
+                    )
+                  }
+                  value={formState.provider}
+                >
+                  <option value="mock">mock</option>
+                  <option value="openai">openai</option>
+                </select>
+              </div>
+
+              <Input
+                autoComplete="off"
+                hint={
+                  formState.provider === "openai"
+                    ? "Leave blank to use OPENAI_MODEL."
+                    : "Optional for local mock labeling."
                 }
-                value={formState.provider}
-              >
-                <option value="mock">mock</option>
-                <option value="openai">openai</option>
-              </select>
+                id="mentor-test-model"
+                label="Model"
+                onChange={(event) => updateField("model", event.target.value)}
+                placeholder={
+                  formState.provider === "openai"
+                    ? "Uses OPENAI_MODEL if empty"
+                    : "mock-deterministic-v1"
+                }
+                value={formState.model}
+              />
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Input
+                autoComplete="off"
+                id="mentor-test-user-id"
+                label="User ID"
+                onChange={(event) => updateField("userId", event.target.value)}
+                placeholder="User UUID"
+                required
+                value={formState.userId}
+              />
+              <Input
+                autoComplete="off"
+                id="mentor-test-mentor-id"
+                label="Mentor ID"
+                onChange={(event) =>
+                  updateField("mentorId", event.target.value)
+                }
+                placeholder="Mentor UUID"
+                required
+                value={formState.mentorId}
+              />
             </div>
 
             <Input
               autoComplete="off"
-              hint={
-                formState.provider === "openai"
-                  ? "Leave blank to use OPENAI_MODEL."
-                  : "Optional for local mock labeling."
+              hint="Leave blank to create a new conversation."
+              id="mentor-test-conversation-id"
+              label="Conversation ID"
+              onChange={(event) =>
+                updateField("conversationId", event.target.value)
               }
-              id="mentor-test-model"
-              label="Model"
-              onChange={(event) => updateField("model", event.target.value)}
-              placeholder={
-                formState.provider === "openai"
-                  ? "Uses OPENAI_MODEL if empty"
-                  : "mock-deterministic-v1"
-              }
-              value={formState.model}
+              placeholder="Optional conversation UUID"
+              value={formState.conversationId}
             />
-          </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <Input
-              autoComplete="off"
-              id="mentor-test-user-id"
-              label="User ID"
-              onChange={(event) => updateField("userId", event.target.value)}
-              placeholder="User UUID"
+            <Textarea
+              id="mentor-test-message"
+              label="Message"
+              onChange={(event) => updateField("message", event.target.value)}
+              placeholder="Write a test message for Marcus."
               required
-              value={formState.userId}
+              rows={8}
+              value={formState.message}
             />
-            <Input
-              autoComplete="off"
-              id="mentor-test-mentor-id"
-              label="Mentor ID"
-              onChange={(event) => updateField("mentorId", event.target.value)}
-              placeholder="Mentor UUID"
-              required
-              value={formState.mentorId}
-            />
-          </div>
 
-          <Input
-            autoComplete="off"
-            hint="Leave blank to create a new conversation."
-            id="mentor-test-conversation-id"
-            label="Conversation ID"
-            onChange={(event) =>
-              updateField("conversationId", event.target.value)
-            }
-            placeholder="Optional conversation UUID"
-            value={formState.conversationId}
-          />
+            {errorMessage ? (
+              <p className="text-sm text-red-600" role="alert">
+                {errorMessage}
+              </p>
+            ) : null}
 
-          <Textarea
-            id="mentor-test-message"
-            label="Message"
-            onChange={(event) => updateField("message", event.target.value)}
-            placeholder="Write a test message for Marcus."
-            required
-            rows={8}
-            value={formState.message}
-          />
-
-          {errorMessage ? (
-            <p className="text-sm text-red-600" role="alert">
-              {errorMessage}
-            </p>
-          ) : null}
-
-          <Button disabled={isSubmitting} type="submit">
-            {isSubmitting ? "Sending..." : "Send test message"}
-          </Button>
-        </form>
-      </Card>
+            <Button disabled={isSubmitting} type="submit">
+              {isSubmitting ? "Sending..." : "Send test message"}
+            </Button>
+          </form>
+        </Card>
+      </div>
 
       <Card
         aria-live="polite"
@@ -336,6 +426,72 @@ export function MentorTestClient() {
   );
 }
 
+interface ConversationHistoryProps {
+  isLoading: boolean;
+  messages: MentorTestMessage[];
+}
+
+function ConversationHistory({
+  isLoading,
+  messages,
+}: ConversationHistoryProps) {
+  if (isLoading && messages.length === 0) {
+    return (
+      <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 text-sm text-zinc-500">
+        Loading conversation history...
+      </p>
+    );
+  }
+
+  if (messages.length === 0) {
+    return (
+      <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 text-sm text-zinc-500">
+        No persisted messages for this conversation yet.
+      </p>
+    );
+  }
+
+  return (
+    <ol className="space-y-3">
+      {messages.map((message) => (
+        <li key={message.id}>
+          <ConversationMessage message={message} />
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+interface ConversationMessageProps {
+  message: MentorTestMessage;
+}
+
+function ConversationMessage({ message }: ConversationMessageProps) {
+  const isUser = message.role === "USER";
+
+  return (
+    <article
+      className={`rounded-md border px-4 py-3 ${
+        isUser
+          ? "border-zinc-300 bg-white"
+          : "border-zinc-200 bg-zinc-50"
+      }`}
+    >
+      <div className="mb-2 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-xs font-semibold uppercase text-zinc-600">
+          {isUser ? "USER" : "MENTOR"}
+        </p>
+        <time className="text-xs text-zinc-500" dateTime={message.createdAt}>
+          {formatMessageTimestamp(message.createdAt)}
+        </time>
+      </div>
+      <p className="whitespace-pre-wrap text-sm leading-6 text-zinc-800">
+        {message.content}
+      </p>
+    </article>
+  );
+}
+
 interface ResultFieldProps {
   label: string;
   value: string;
@@ -362,4 +518,14 @@ function formatErrorResponse(responseBody: MentorTestErrorResponse) {
   }
 
   return "Unable to send the test message.";
+}
+
+function formatMessageTimestamp(value: string) {
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return date.toLocaleString();
 }
