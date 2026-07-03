@@ -63,6 +63,7 @@ type CurrentMessageKind =
   | "project-focus"
   | "project-update"
   | "reflection"
+  | "travel-location"
   | "update";
 
 function buildCurrentMessageResponse({
@@ -85,6 +86,7 @@ function buildCurrentMessageResponse({
   );
   const shouldUseStoredContext =
     messageKind !== "follow-up" &&
+    messageKind !== "travel-location" &&
     !wasSimilarContextRecentlyUsed(recentMessages, relevantGoal, relevantMemory);
   const responseParts = [
     buildCurrentMessageAcknowledgement(
@@ -100,6 +102,7 @@ function buildCurrentMessageResponse({
       shouldUseStoredContext ? relevantMemory : undefined,
       conversationState.previousUserMessage,
       projectDesignContext,
+      currentMessage,
     ),
   ].filter(Boolean);
 
@@ -117,9 +120,14 @@ function classifyCurrentMessage(
 ): CurrentMessageKind {
   const normalizedMessage = normalizeForMatching(message);
 
+  if (hasTravelLocationSignal(normalizedMessage)) {
+    return "travel-location";
+  }
+
   if (
     projectDesignContext?.hasContext &&
-    isProjectDesignFocusQuestion(normalizedMessage)
+    isProjectDesignFocusQuestion(normalizedMessage) &&
+    !hasCompetingTopicShiftSignal(normalizedMessage)
   ) {
     return "project-focus";
   }
@@ -180,6 +188,8 @@ function buildCurrentMessageAcknowledgement(
       return "Good. For the design, focus on one thing first.";
     case "reflection":
       return "I hear you.";
+    case "travel-location":
+      return "Good question.";
     case "update":
       return "That is a useful update.";
   }
@@ -206,7 +216,12 @@ function buildNextStepQuestion(
   relevantMemory?: MentorContextMemory,
   previousUserMessage?: MentorContextMessage,
   projectDesignContext?: ProjectDesignContext,
+  currentMessage?: string,
 ) {
+  if (kind === "travel-location") {
+    return buildTravelLocationGuidance(currentMessage ?? "");
+  }
+
   if (kind === "project-focus") {
     if (projectDesignContext?.mentionsMentorAndI) {
       return "The next thing to focus on is whether MentorAndI feels like a personal mentor before it tries to explain features.";
@@ -298,6 +313,43 @@ function hasProjectDesignSignal(normalizedText: string) {
   return /\b(mentorandi|project|design|website|product|ui|ux|user experience|interface|page|prototype)\b/.test(
     normalizedText,
   );
+}
+
+function hasTravelLocationSignal(normalizedText: string) {
+  return /\b(where|places|visit|city|country|cyprus|paphos|restaurant|beach|museum|trip|travel|harbour|harbor|old town)\b/.test(
+    normalizedText,
+  );
+}
+
+function hasCompetingTopicShiftSignal(normalizedText: string) {
+  return (
+    hasTravelLocationSignal(normalizedText) ||
+    /\b(health|doctor|medical|sleep|exercise|workout|diet|anxiety|stress|pain|symptom|therapy|relationship|family|friend|partner|money|budget|tax|taxes|career|job|interview)\b/.test(
+      normalizedText,
+    )
+  );
+}
+
+function buildTravelLocationGuidance(currentMessage: string) {
+  const normalizedMessage = normalizeForMatching(currentMessage);
+
+  if (/\bpaphos\b/.test(normalizedMessage)) {
+    return "If you're in Paphos, start with places that give you a mix of history, sea and calm: the harbour, the Tombs of the Kings, the archaeological park and a walk near the old town. What kind of place are you looking for today: relaxing, historic or social?";
+  }
+
+  if (/\bcyprus\b/.test(normalizedMessage)) {
+    return "For Cyprus, choose one place for history, one for the sea and one for an unhurried walk. Are you looking for something relaxing, historic or social today?";
+  }
+
+  if (/\brestaurant\b/.test(normalizedMessage)) {
+    return "For a restaurant, start by choosing the mood first: quiet, local, seaside or lively. What kind of evening do you want it to support?";
+  }
+
+  if (/\bbeach\b/.test(normalizedMessage)) {
+    return "For a beach, decide whether you want calm water, space to think or somewhere more social. Which of those would fit today?";
+  }
+
+  return "Start with the kind of experience you want: calm, historic, social or restorative. Which one would make today feel better?";
 }
 
 function getConversationState(recentMessages: MentorContextMessage[]) {
