@@ -2,6 +2,7 @@ export type MemoryCandidateCategory =
   | "GOAL"
   | "CHALLENGE"
   | "PREFERENCE"
+  | "PROJECT"
   | "VALUE"
   | "IDENTITY"
   | "INTEREST"

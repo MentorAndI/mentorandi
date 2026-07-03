@@ -23,6 +23,13 @@ const extractionRules: ExtractionRule[] = [
     titlePrefix: "User goal",
   },
   {
+    category: "PROJECT",
+    confidence: 0.7,
+    importance: 3,
+    pattern: /\b(?:i am|i'm|we are|we're)\s+(?:building|creating|designing|developing|working on)\s+(.+)/i,
+    titlePrefix: "User project",
+  },
+  {
     category: "CHALLENGE",
     confidence: 0.86,
     importance: 4,
@@ -117,6 +124,10 @@ function extractCandidateFromSentence(
     return [];
   }
 
+  if (rule.category === "PROJECT" && !isUsefulProjectMemory(sentence, content)) {
+    return [];
+  }
+
   return [
     {
       category: rule.category,
@@ -152,6 +163,23 @@ function isUsefulLongTermMemory(content: string) {
   }
 
   return /\s/.test(content);
+}
+
+function isUsefulProjectMemory(sentence: string, content: string) {
+  const normalizedSentence = sentence.toLowerCase();
+  const normalizedContent = content.toLowerCase();
+
+  if (
+    /\b(finishing|finished|wrapping up|just|today|tonight|this morning|this afternoon)\b/.test(
+      normalizedSentence,
+    )
+  ) {
+    return false;
+  }
+
+  return /\b(mentorandi|mentor and i|project|platform|product|app|business|company)\b/.test(
+    `${normalizedSentence} ${normalizedContent}`,
+  );
 }
 
 function buildMemoryTitle(prefix: string, content: string) {

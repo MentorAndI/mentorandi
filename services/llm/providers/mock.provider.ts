@@ -22,29 +22,20 @@ export class MockLlmProvider implements LlmProvider {
       request.context.memories.length > 0
         ? request.context.memories
         : request.context.relevantMemories;
-
-    if (request.context.goals.length > 0) {
-      return {
-        content: buildGoalAwareMockResponse(request.context.goals[0]),
-        metadata: {
-          model: request.model ?? defaultMockModel,
-          provider: this.name,
-        },
-      };
-    }
-
-    if (memories.length > 0) {
-      return {
-        content: buildMemoryAwareMockResponse(memories),
-        metadata: {
-          model: request.model ?? defaultMockModel,
-          provider: this.name,
-        },
-      };
-    }
+    const relevantMemory = findRelevantMemory(request.userMessage, memories);
+    const relevantGoal = findRelevantGoal(
+      request.userMessage,
+      request.context.goals,
+    );
 
     return {
-      content: `Mock response from ${mentorName}. Focus: ${focus}.`,
+      content: buildCurrentMessageResponse({
+        currentMessage: request.userMessage,
+        focus,
+        mentorName,
+        relevantGoal,
+        relevantMemory,
+      }),
       metadata: {
         model: request.model ?? defaultMockModel,
         provider: this.name,
@@ -53,11 +44,149 @@ export class MockLlmProvider implements LlmProvider {
   }
 }
 
-function buildGoalAwareMockResponse(goal: MentorContextGoal) {
-  return [
-    `I remember that you're working toward ${formatGoalReference(goal.title)}.`,
-    "Let's keep today's step small and concrete.",
-  ].join(" ");
+interface CurrentMessageResponseInput {
+  currentMessage: string;
+  focus: string;
+  mentorName: string;
+  relevantGoal?: MentorContextGoal;
+  relevantMemory?: MentorContextMemory;
+}
+
+type CurrentMessageKind =
+  | "challenge"
+  | "decision"
+  | "intention"
+  | "project-update"
+  | "reflection";
+
+function buildCurrentMessageResponse({
+  currentMessage,
+  focus,
+  mentorName,
+  relevantGoal,
+  relevantMemory,
+}: CurrentMessageResponseInput) {
+  const messageKind = classifyCurrentMessage(currentMessage);
+  const responseParts = [
+    buildCurrentMessageAcknowledgement(messageKind),
+    buildRelevantContextLine(relevantGoal, relevantMemory),
+    buildNextStepQuestion(messageKind, relevantGoal, relevantMemory),
+  ].filter(Boolean);
+
+  if (responseParts.length > 0) {
+    return responseParts.join(" ");
+  }
+
+  return `I'm here with you. ${mentorName} is focused on ${focus || "helping you find the next clear step"}. What would be useful to look at first?`;
+}
+
+function classifyCurrentMessage(message: string): CurrentMessageKind {
+  const normalizedMessage = normalizeForMatching(message);
+
+  if (
+    /\b(mentorandi|mentor and i|project|design|prototype|product)\b/.test(
+      normalizedMessage,
+    ) &&
+    /\b(finishing|working|building|designing|creating|developing|shipping|launched|launching|revising|improving)\b/.test(
+      normalizedMessage,
+    )
+  ) {
+    return "project-update";
+  }
+
+  if (
+    /\b(struggle|struggling|stuck|hard|difficult|overwhelmed|confused|worried)\b/.test(
+      normalizedMessage,
+    )
+  ) {
+    return "challenge";
+  }
+
+  if (/\b(decide|decision|choose|whether|should i)\b/.test(normalizedMessage)) {
+    return "decision";
+  }
+
+  if (/\b(i want|i need|trying to|my goal is)\b/.test(normalizedMessage)) {
+    return "intention";
+  }
+
+  return "reflection";
+}
+
+function buildCurrentMessageAcknowledgement(kind: CurrentMessageKind) {
+  switch (kind) {
+    case "challenge":
+      return "That sounds like something worth slowing down around.";
+    case "decision":
+      return "That sounds like a decision that deserves a clear frame.";
+    case "intention":
+      return "Good. Naming that clearly gives us something concrete to work with.";
+    case "project-update":
+      return "That sounds like progress.";
+    case "reflection":
+      return "I hear you.";
+  }
+}
+
+function buildRelevantContextLine(
+  relevantGoal?: MentorContextGoal,
+  relevantMemory?: MentorContextMemory,
+) {
+  if (relevantMemory) {
+    return formatSubtleMemoryLine(relevantMemory);
+  }
+
+  if (relevantGoal) {
+    return `It also connects with your goal of ${formatGoalReference(relevantGoal.title)}.`;
+  }
+
+  return "";
+}
+
+function buildNextStepQuestion(
+  kind: CurrentMessageKind,
+  relevantGoal?: MentorContextGoal,
+  relevantMemory?: MentorContextMemory,
+) {
+  if (kind === "project-update") {
+    if (relevantGoal || relevantMemory) {
+      return "What is the one thing this next pass still needs to communicate more clearly?";
+    }
+
+    return "Before you move on, take a moment to ask: does it make the work feel more human, clear and personal?";
+  }
+
+  if (kind === "challenge") {
+    return "What is the smallest part of it that we can name honestly right now?";
+  }
+
+  if (kind === "decision") {
+    return "What would make this choice feel clearer rather than just more urgent?";
+  }
+
+  if (kind === "intention") {
+    return "What is one small step that would make this real today?";
+  }
+
+  return "What feels like the most useful place to begin?";
+}
+
+function formatSubtleMemoryLine(memory: MentorContextMemory) {
+  const content = normalizeMemoryContent(memory.content);
+
+  switch (memory.category) {
+    case "CHALLENGE":
+      return `It may also touch the challenge you've named around ${content}.`;
+    case "GOAL":
+    case "PROJECT":
+      return `That connects with the work you've been moving toward: ${normalizeGoalContent(content)}.`;
+    case "PREFERENCE":
+      return `That fits with your preference for ${content}.`;
+    case "VALUE":
+      return `That fits with how much you value ${content}.`;
+    default:
+      return "";
+  }
 }
 
 function formatGoalReference(title: string) {
@@ -118,48 +247,6 @@ const leadingGoalVerbGerunds: Record<string, string> = {
   understand: "understanding",
 };
 
-function buildMemoryAwareMockResponse(memories: MentorContextMemory[]) {
-  const memorySummaries = memories
-    .slice(0, 3)
-    .map((memory) => formatMemoryReference(memory));
-
-  return [
-    `I remember that ${joinMemorySummaries(memorySummaries)}.`,
-    "Let's start with one small step today.",
-  ].join(" ");
-}
-
-function formatMemoryReference(memory: MentorContextMemory) {
-  const content = normalizeMemoryContent(memory.content);
-
-  switch (memory.category) {
-    case "CHALLENGE":
-      return `${content} has been difficult for you`;
-    case "GOAL":
-      return `you want ${normalizeGoalContent(content)}`;
-    case "INTEREST":
-      return `you are interested in ${content}`;
-    case "PREFERENCE":
-      return `you prefer ${content}`;
-    case "VALUE":
-      return `you value ${content}`;
-    default:
-      return `you've told me ${content}`;
-  }
-}
-
-function joinMemorySummaries(memorySummaries: string[]) {
-  if (memorySummaries.length === 1) {
-    return memorySummaries[0];
-  }
-
-  if (memorySummaries.length === 2) {
-    return `${memorySummaries[0]} and that ${memorySummaries[1]}`;
-  }
-
-  return `${memorySummaries[0]}, that ${memorySummaries[1]}, and that ${memorySummaries[2]}`;
-}
-
 function normalizeMemoryContent(content: string) {
   return trimTrailingPunctuation(content)
     .replace(/^user\s+wants\s+/i, "")
@@ -176,11 +263,90 @@ function normalizeMemoryContent(content: string) {
 }
 
 function normalizeGoalContent(content: string) {
-  return content
-    .replace(/^help\s+/i, "to ")
+  const normalizedContent = content.trim();
+
+  if (/^help\s+\w+ing\b/i.test(normalizedContent)) {
+    return `getting ${normalizedContent}`;
+  }
+
+  return normalizedContent
+    .replace(/^help\s+/i, "getting help with ")
     .replace(/^to\s+to\s+/i, "to ");
 }
 
 function trimTrailingPunctuation(value: string) {
   return value.replace(/[.!?]+$/g, "");
 }
+
+function findRelevantGoal(
+  currentMessage: string,
+  goals: MentorContextGoal[],
+) {
+  const currentTerms = getSignalTerms(currentMessage);
+
+  return goals.find((goal) =>
+    hasRelevantOverlap(currentTerms, `${goal.title} ${goal.description ?? ""}`),
+  );
+}
+
+function findRelevantMemory(
+  currentMessage: string,
+  memories: MentorContextMemory[],
+) {
+  const currentTerms = getSignalTerms(currentMessage);
+
+  return memories.find((memory) =>
+    isMemoryCategoryWorthReferencing(memory.category) &&
+    hasRelevantOverlap(currentTerms, `${memory.title} ${memory.content}`),
+  );
+}
+
+function isMemoryCategoryWorthReferencing(category: string) {
+  return ["CHALLENGE", "GOAL", "PREFERENCE", "PROJECT", "VALUE"].includes(
+    category,
+  );
+}
+
+function hasRelevantOverlap(currentTerms: Set<string>, context: string) {
+  if (currentTerms.size === 0) {
+    return false;
+  }
+
+  const contextTerms = getSignalTerms(context);
+
+  return Array.from(currentTerms).some((term) => contextTerms.has(term));
+}
+
+function getSignalTerms(value: string) {
+  return new Set(
+    normalizeForMatching(value)
+      .split(" ")
+      .map((term) => term.trim())
+      .filter((term) => term.length >= 5 && !genericSignalTerms.has(term)),
+  );
+}
+
+function normalizeForMatching(value: string) {
+  return value
+    .toLowerCase()
+    .replace(/mentor\s+and\s+i/g, "mentorandi")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+const genericSignalTerms = new Set([
+  "about",
+  "again",
+  "clear",
+  "going",
+  "maybe",
+  "really",
+  "right",
+  "something",
+  "still",
+  "thing",
+  "think",
+  "today",
+  "would",
+]);
