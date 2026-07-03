@@ -1,10 +1,20 @@
+import { Button } from "@/components/ui/Button";
+
 export interface MentorHeaderProps {
+  isStartingNewConversation?: boolean;
   name: string;
+  onNewConversation?: () => void;
   role: string;
   tagline: string;
 }
 
-export function MentorHeader({ name, role, tagline }: MentorHeaderProps) {
+export function MentorHeader({
+  isStartingNewConversation = false,
+  name,
+  onNewConversation,
+  role,
+  tagline,
+}: MentorHeaderProps) {
   return (
     <header className="border-b border-zinc-200 pb-6">
       <p className="text-sm font-medium text-zinc-500">{role}</p>
@@ -17,6 +27,18 @@ export function MentorHeader({ name, role, tagline }: MentorHeaderProps) {
             {tagline}
           </p>
         </div>
+
+        {onNewConversation ? (
+          <Button
+            disabled={isStartingNewConversation}
+            onClick={onNewConversation}
+            size="sm"
+            type="button"
+            variant="secondary"
+          >
+            {isStartingNewConversation ? "Starting..." : "New conversation"}
+          </Button>
+        ) : null}
       </div>
     </header>
   );

@@ -22,6 +22,10 @@ interface MentorMemoriesResponse {
   understandings: MentorMemory[];
 }
 
+interface MentorNewConversationResponse {
+  conversationId: string;
+}
+
 interface MentorResponsePayload {
   conversation: {
     id: string;
@@ -43,6 +47,8 @@ export function MentorConversationClient() {
   const [isLoadingMemories, setIsLoadingMemories] = useState(false);
   const [isLoadingSession, setIsLoadingSession] = useState(true);
   const [isSending, setIsSending] = useState(false);
+  const [isStartingNewConversation, setIsStartingNewConversation] =
+    useState(false);
   const [memories, setMemories] = useState<MentorMemory[]>([]);
   const [messages, setMessages] = useState<MentorConversationMessage[]>([]);
   const [message, setMessage] = useState("");
@@ -200,11 +206,49 @@ export function MentorConversationClient() {
     }
   }
 
+  async function handleStartNewConversation() {
+    setErrorMessage("");
+    setMessageError("");
+    setIsStartingNewConversation(true);
+
+    try {
+      const response = await fetch("/api/mentor-session/new", {
+        method: "POST",
+      });
+      const responseBody = (await response.json()) as
+        | MentorNewConversationResponse
+        | MentorApiError;
+
+      if (!response.ok) {
+        setErrorMessage(formatErrorResponse(responseBody as MentorApiError));
+        return;
+      }
+
+      const nextConversationId = (
+        responseBody as MentorNewConversationResponse
+      ).conversationId;
+
+      setConversationId(nextConversationId);
+      setMessage("");
+      setMessages([]);
+
+      await loadMemories();
+    } catch {
+      setErrorMessage("Unable to start a new conversation.");
+    } finally {
+      setIsStartingNewConversation(false);
+    }
+  }
+
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
       <Card className="space-y-7 p-5 sm:p-7" variant="bordered">
         <MentorHeader
+          isStartingNewConversation={isStartingNewConversation}
           name={mentor.name}
+          onNewConversation={
+            isLoadingSession ? undefined : handleStartNewConversation
+          }
           role={mentor.role}
           tagline={mentor.tagline}
         />
@@ -221,7 +265,9 @@ export function MentorConversationClient() {
         />
 
         <MentorMessageForm
-          disabled={isLoadingSession || !conversationId}
+          disabled={
+            isLoadingSession || isStartingNewConversation || !conversationId
+          }
           error={messageError}
           isSending={isSending}
           message={message}

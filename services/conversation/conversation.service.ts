@@ -135,6 +135,33 @@ export class ConversationService {
     return toConversationDto(conversation);
   }
 
+  async createConversationForUserAndMentorSlug(
+    userId: string,
+    mentorSlug: string,
+  ): Promise<ConversationDto> {
+    const user = await this.repository.findUserById(userId);
+
+    if (!user) {
+      throw new ConversationServiceError("User was not found.", 404);
+    }
+
+    const mentor = await this.repository.findActiveMentorBySlug(mentorSlug);
+
+    if (!mentor) {
+      throw new ConversationServiceError(
+        "Mentor was not found or is not available.",
+        404,
+      );
+    }
+
+    const conversation = await this.repository.createConversation(
+      user.id,
+      mentor.id,
+    );
+
+    return toConversationDto(conversation);
+  }
+
   private async ensureUser(authUserId: string) {
     const existingUser =
       await this.repository.findUserByAuthUserId(authUserId);
