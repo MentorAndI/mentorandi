@@ -29,11 +29,19 @@ import {
 } from "@/services/mentor-core/memory-extractor/memory-extractor.service";
 import type { MemoryCandidate } from "@/services/mentor-core/memory-extractor/memory-extractor.types";
 import { PromptComposerService } from "@/services/mentor-core/prompt-composer/prompt-composer.service";
+import {
+  ReflectionEngineService,
+  ReflectionEngineServiceError,
+} from "@/services/mentor-core/reflection-engine/reflection-engine.service";
 import type {
   MentorResponsePipelineAuthContext,
   MentorResponsePipelineInput,
   MentorResponsePipelineResult,
 } from "@/services/mentor-core/response-pipeline/response-pipeline.types";
+import {
+  ReflectionService,
+  ReflectionServiceError,
+} from "@/services/reflection/reflection.service";
 import {
   UserService,
   UserServiceError,
@@ -63,6 +71,8 @@ export class MentorResponsePipelineService {
     private readonly goalService = new GoalService(),
     private readonly memoryExtractor = new MemoryExtractorService(),
     private readonly memoryService = new MemoryService(),
+    private readonly reflectionEngine = new ReflectionEngineService(),
+    private readonly reflectionService = new ReflectionService(),
     private readonly userService = new UserService(),
   ) {}
 
@@ -118,10 +128,15 @@ export class MentorResponsePipelineService {
         authContext,
       );
       const extractedMemories = await this.extractAndStoreMemories(input);
+      const createdReflection = await this.createReflectionForMoment(
+        input,
+        mentorMessage.content,
+      );
 
       return {
         contextUsed: context,
         createdAt: new Date().toISOString(),
+        createdReflection,
         createdGoals,
         extractedMemories,
         mentorMessage,
@@ -168,6 +183,17 @@ export class MentorResponsePipelineService {
       }
 
       if (error instanceof MemoryExtractorServiceError) {
+        throw new MentorResponsePipelineServiceError(error.message, 400);
+      }
+
+      if (error instanceof ReflectionServiceError) {
+        throw new MentorResponsePipelineServiceError(
+          error.message,
+          error.statusCode,
+        );
+      }
+
+      if (error instanceof ReflectionEngineServiceError) {
         throw new MentorResponsePipelineServiceError(error.message, 400);
       }
 
@@ -235,6 +261,26 @@ export class MentorResponsePipelineService {
     }
 
     return storedMemories;
+  }
+
+  private async createReflectionForMoment(
+    input: MentorResponsePipelineInput,
+    mentorMessage: string,
+  ) {
+    const reflectionResult = this.reflectionEngine.buildReflectionCandidate({
+      conversationId: input.conversationId,
+      mentorMessage,
+      userId: input.userId,
+      userMessage: input.message,
+    });
+
+    if (!reflectionResult.reflectionCandidate) {
+      return null;
+    }
+
+    return this.reflectionService.createReflectionForUserId(input.userId, {
+      summary: reflectionResult.reflectionCandidate.summary,
+    });
   }
 
   private async assertCanRunForUser(

@@ -4,6 +4,7 @@ import type { MentorUnderstandingDto } from "@/services/memory/memory.types";
 import type { MessageDto } from "@/services/message/message.types";
 import type { MentorResponseContext } from "@/services/mentor-core/context-builder/context-builder.types";
 import type { PromptPackage } from "@/services/mentor-core/prompt-composer/prompt-composer.types";
+import type { ReflectionDto } from "@/services/reflection/reflection.types";
 
 export interface MentorResponsePipelineInput {
   conversationId: string;
@@ -20,6 +21,7 @@ export interface MentorResponsePipelineAuthContext {
 export interface MentorResponsePipelineResult {
   contextUsed: MentorResponseContext;
   createdAt: string;
+  createdReflection: ReflectionDto | null;
   createdGoals: GoalDto[];
   extractedMemories: MentorUnderstandingDto[];
   mentorMessage: MessageDto;

@@ -87,6 +87,7 @@ export async function POST(request: Request) {
       {
         conversation,
         createdGoals: response.createdGoals,
+        createdReflection: response.createdReflection,
         extractedMemories: response.extractedMemories,
         mentorMessage: response.mentorMessage,
         model: response.model,
