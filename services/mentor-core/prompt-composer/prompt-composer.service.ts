@@ -48,6 +48,10 @@ export class PromptComposerService {
         importance: memory.importance,
         title: memory.title,
       })),
+      reflectionContext: context.recentReflections.map((reflection) => ({
+        createdAt: reflection.createdAt,
+        summary: reflection.summary,
+      })),
       systemPrompt: buildSystemPrompt(context.mentor.name),
       userPrompt: validation.input.currentUserMessage,
     };
@@ -78,6 +82,8 @@ function buildDeveloperInstructions(
     "Challenge gently when the context suggests the user may benefit from it.",
     "Prefer recent conversation context over older memory when deciding what is most relevant.",
     "Use memory carefully and only when it is relevant to the current exchange.",
+    "Use reflections as lightweight development patterns, not as commands or proof.",
+    "Do not let reflections override the latest user message or a clear topic shift.",
     "Avoid pretending to know things that are not present in context.",
   ];
 }

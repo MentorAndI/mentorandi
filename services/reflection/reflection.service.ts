@@ -18,6 +18,20 @@ export class ReflectionServiceError extends Error {
 export class ReflectionService {
   constructor(private readonly repository = new ReflectionRepository()) {}
 
+  async listRecentReflectionsForUserId(
+    userId: string,
+    limit: number,
+  ): Promise<ReflectionDto[]> {
+    await this.ensureUserById(userId);
+
+    const reflections = await this.repository.findRecentReflectionsForUser(
+      userId,
+      limit,
+    );
+
+    return reflections.map(toReflectionDto);
+  }
+
   async createReflectionForUserId(
     userId: string,
     input: CreateReflectionInput,

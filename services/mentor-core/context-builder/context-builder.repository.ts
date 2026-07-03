@@ -48,13 +48,4 @@ export class ContextBuilderRepository {
     });
   }
 
-  async findRecentReflections(userId: string, limit: number) {
-    return this.prisma.reflection.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
-      take: limit,
-      where: { userId },
-    });
-  }
 }

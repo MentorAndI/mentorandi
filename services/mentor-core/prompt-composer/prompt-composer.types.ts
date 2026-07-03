@@ -37,12 +37,18 @@ export interface PromptConversationContextItem {
   role: string;
 }
 
+export interface PromptReflectionContextItem {
+  createdAt: string;
+  summary: string;
+}
+
 export interface PromptPackage {
   constraints: string[];
   conversationContext: PromptConversationContextItem[];
   developerInstructions: string[];
   goalContext: PromptGoalContextItem[];
   memoryContext: PromptMemoryContextItem[];
+  reflectionContext: PromptReflectionContextItem[];
   systemPrompt: string;
   userPrompt: string;
 }

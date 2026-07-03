@@ -1,5 +1,9 @@
 import { ContextBuilderRepository } from "@/services/mentor-core/context-builder/context-builder.repository";
 import { MemoryService } from "@/services/memory/memory.service";
+import {
+  ReflectionService,
+  ReflectionServiceError,
+} from "@/services/reflection/reflection.service";
 import type {
   BuildMentorContextAuthContext,
   BuildMentorContextInput,
@@ -29,6 +33,7 @@ export class ContextBuilderService {
   constructor(
     private readonly repository = new ContextBuilderRepository(),
     private readonly memoryService = new MemoryService(),
+    private readonly reflectionService = new ReflectionService(),
   ) {}
 
   async buildMentorContext(
@@ -67,8 +72,13 @@ export class ContextBuilderService {
           relevantMemoryLimit,
         ),
         this.repository.findActiveGoals(user.id, activeGoalLimit),
-        this.repository.findRecentReflections(user.id, recentReflectionLimit),
-      ]);
+        this.reflectionService.listRecentReflectionsForUserId(
+          user.id,
+          recentReflectionLimit,
+        ),
+      ]).catch((error: unknown) => {
+        throw this.toContextBuilderError(error);
+      });
     const contextMemories = relevantMemories.map(toContextMemory);
     const contextGoals = activeGoals.map((goal) => ({
       description: goal.description,
@@ -100,7 +110,7 @@ export class ContextBuilderService {
         role: message.role,
       })),
       recentReflections: recentReflections.map((reflection) => ({
-        createdAt: reflection.createdAt.toISOString(),
+        createdAt: reflection.createdAt,
         id: reflection.id,
         summary: reflection.summary,
       })),
@@ -126,6 +136,14 @@ export class ContextBuilderService {
     if (authContext.authUserId && authContext.authUserId !== userAuthUserId) {
       throw new ContextBuilderServiceError("Forbidden.", 403);
     }
+  }
+
+  private toContextBuilderError(error: unknown) {
+    if (error instanceof ReflectionServiceError) {
+      return new ContextBuilderServiceError(error.message, error.statusCode);
+    }
+
+    return error;
   }
 }
 

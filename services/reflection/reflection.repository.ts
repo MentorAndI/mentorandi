@@ -21,4 +21,14 @@ export class ReflectionRepository {
       },
     });
   }
+
+  async findRecentReflectionsForUser(userId: string, limit: number) {
+    return this.prisma.reflection.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      take: limit,
+      where: { userId },
+    });
+  }
 }
