@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import {
   signInWithEmailPassword,
+  syncCurrentUser,
   type EmailPasswordCredentials,
 } from "@/services/auth/client";
 import { validateLoginForm } from "@/services/auth/validation";
@@ -57,6 +58,7 @@ export function LoginForm({ redirectPath = "/" }: LoginFormProps) {
         return;
       }
 
+      await syncCurrentUser();
       router.replace(redirectPath);
       router.refresh();
     } catch {

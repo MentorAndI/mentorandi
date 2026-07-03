@@ -17,14 +17,24 @@ export async function signInWithEmailPassword({
   });
 }
 
+export interface SignupCredentials extends EmailPasswordCredentials {
+  emailRedirectTo?: string;
+}
+
 export async function signUpWithEmailPassword({
   email,
+  emailRedirectTo,
   password,
-}: EmailPasswordCredentials) {
+}: SignupCredentials) {
   const supabase = createSupabaseBrowserClient();
 
   return supabase.auth.signUp({
     email,
+    options: emailRedirectTo
+      ? {
+          emailRedirectTo,
+        }
+      : undefined,
     password,
   });
 }
@@ -35,4 +45,21 @@ export async function requestPasswordReset(email: string, redirectTo: string) {
   return supabase.auth.resetPasswordForEmail(email, {
     redirectTo,
   });
+}
+
+export async function syncCurrentUser() {
+  const response = await fetch("/api/me", {
+    headers: {
+      Accept: "application/json",
+    },
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    const responseBody = (await response.json().catch(() => null)) as {
+      error?: string;
+    } | null;
+
+    throw new Error(responseBody?.error ?? "Unable to resolve current user.");
+  }
 }

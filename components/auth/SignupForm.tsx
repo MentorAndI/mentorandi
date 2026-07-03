@@ -1,12 +1,16 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useState } from "react";
 
 import { AuthStatusMessage } from "@/components/auth/AuthStatusMessage";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
-import { signUpWithEmailPassword } from "@/services/auth/client";
+import {
+  signUpWithEmailPassword,
+  syncCurrentUser,
+} from "@/services/auth/client";
 import { validateSignupForm } from "@/services/auth/validation";
 
 interface SignupFormValues {
@@ -23,12 +27,15 @@ interface SignupFormErrors {
 }
 
 export interface SignupFormProps {
+  redirectPath?: string;
   successMessage?: string;
 }
 
 export function SignupForm({
-  successMessage = "Check your email to confirm your account.",
+  redirectPath = "/start",
+  successMessage = "Account created. Taking you to your first conversation...",
 }: SignupFormProps) {
+  const router = useRouter();
   const [values, setValues] = useState<SignupFormValues>({
     email: "",
     password: "",
@@ -57,8 +64,12 @@ export function SignupForm({
     setIsSubmitting(true);
 
     try {
-      const { error } = await signUpWithEmailPassword({
+      const { data, error } = await signUpWithEmailPassword({
         email: values.email,
+        emailRedirectTo:
+          typeof window === "undefined"
+            ? undefined
+            : `${window.location.origin}${redirectPath}`,
         password: values.password,
       });
 
@@ -67,7 +78,13 @@ export function SignupForm({
         return;
       }
 
+      if (data.session) {
+        await syncCurrentUser();
+      }
+
       setSuccess(successMessage);
+      router.replace(redirectPath);
+      router.refresh();
     } catch {
       setErrors({
         form: "Unable to create an account right now. Please try again.",

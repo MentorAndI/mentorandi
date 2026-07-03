@@ -16,7 +16,7 @@ export default async function LoginPage({
 }) {
   const params = await searchParams;
   const requestedPath = Array.isArray(params.next) ? params.next[0] : params.next;
-  const redirectPath = getSafeAuthRedirectPath(requestedPath ?? null);
+  const redirectPath = getSafeAuthRedirectPath(requestedPath ?? null, "/mentor");
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 py-16 text-zinc-950">
