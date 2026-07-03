@@ -11,12 +11,13 @@ export class GoalRepository {
     });
   }
 
-  async findActiveGoalsForUser(userId: string) {
+  async findActiveGoalsForUser(userId: string, limit?: number) {
     return this.prisma.goal.findMany({
       orderBy: [
         { targetDate: { sort: "asc", nulls: "last" } },
         { createdAt: "desc" },
       ],
+      ...(limit !== undefined ? { take: limit } : {}),
       where: {
         status: GoalStatus.ACTIVE,
         userId,

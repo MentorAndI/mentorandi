@@ -15,6 +15,7 @@ export async function GET() {
 
     return NextResponse.json(
       {
+        activeGoals: overview.activeGoals,
         conversation: overview.session.conversation,
         conversations: overview.conversations,
         mentor: overview.session.mentor,

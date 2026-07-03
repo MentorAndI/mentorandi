@@ -15,6 +15,17 @@ export class GoalServiceError extends Error {
 export class GoalService {
   constructor(private readonly repository = new GoalRepository()) {}
 
+  async listActiveGoalsForUserId(
+    userId: string,
+    limit?: number,
+  ): Promise<GoalDto[]> {
+    await this.ensureUserById(userId);
+
+    const goals = await this.repository.findActiveGoalsForUser(userId, limit);
+
+    return goals.map(toGoalDto);
+  }
+
   async createUniqueActiveGoalForUserId(
     userId: string,
     input: CreateGoalInput,

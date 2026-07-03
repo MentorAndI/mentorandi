@@ -6,6 +6,11 @@ import type {
   ConversationDto,
   ConversationSummaryDto,
 } from "@/services/conversation/conversation.types";
+import {
+  GoalService,
+  GoalServiceError,
+} from "@/services/goal/goal.service";
+import type { GoalDto } from "@/services/goal/goal.types";
 import { UserService } from "@/services/user/user.service";
 import type { UserDto } from "@/services/user/user.types";
 
@@ -24,6 +29,7 @@ export interface MentorSessionDto {
 }
 
 export interface MentorSessionOverviewDto {
+  activeGoals: GoalDto[];
   conversations: ConversationSummaryDto[];
   session: MentorSessionDto;
 }
@@ -41,11 +47,13 @@ export class MentorSessionServiceError extends Error {
 const marcusSlug = "marcus";
 const marcusRole = "Strategic Mentor";
 const marcusTagline = "Focused thinking. Better decisions. Long-term growth.";
+const activeGoalLimit = 5;
 
 export class MentorSessionService {
   constructor(
     private readonly userService = new UserService(),
     private readonly conversationService = new ConversationService(),
+    private readonly goalService = new GoalService(),
   ) {}
 
   async getMarcusSessionForUser(user: UserDto): Promise<MentorSessionDto> {
@@ -78,9 +86,13 @@ export class MentorSessionService {
   async getResolvedMarcusSessionOverview(): Promise<MentorSessionOverviewDto> {
     const user = await this.userService.resolveCurrentUser();
     const session = await this.getMarcusSessionForUser(user);
-    const conversations = await this.listMarcusConversationsForUser(user);
+    const [activeGoals, conversations] = await Promise.all([
+      this.listActiveGoalsForUser(user),
+      this.listMarcusConversationsForUser(user),
+    ]);
 
     return {
+      activeGoals,
       conversations,
       session,
     };
@@ -168,6 +180,26 @@ export class MentorSessionService {
       );
     } catch (error) {
       if (error instanceof ConversationServiceError) {
+        throw new MentorSessionServiceError(
+          error.message,
+          error.statusCode,
+        );
+      }
+
+      throw error;
+    }
+  }
+
+  private async listActiveGoalsForUser(
+    user: UserDto,
+  ): Promise<GoalDto[]> {
+    try {
+      return this.goalService.listActiveGoalsForUserId(
+        user.id,
+        activeGoalLimit,
+      );
+    } catch (error) {
+      if (error instanceof GoalServiceError) {
         throw new MentorSessionServiceError(
           error.message,
           error.statusCode,

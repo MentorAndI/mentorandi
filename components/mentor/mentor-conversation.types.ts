@@ -15,6 +15,16 @@ export interface MentorMemory {
   title: string;
 }
 
+export interface MentorGoal {
+  createdAt: string;
+  description: string | null;
+  id: string;
+  status: string;
+  targetDate: string | null;
+  title: string;
+  updatedAt: string;
+}
+
 export interface MentorConversationSummary {
   createdAt: string;
   id: string;
@@ -30,6 +40,7 @@ export interface MentorSeedData {
 }
 
 export interface MentorSession {
+  activeGoals: MentorGoal[];
   conversation: {
     id: string;
   };

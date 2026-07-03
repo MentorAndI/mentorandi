@@ -4,6 +4,7 @@ import { type FormEvent, useEffect, useState } from "react";
 
 import { MentorConversationHistory } from "@/components/mentor/MentorConversationHistory";
 import { MentorConversationList } from "@/components/mentor/MentorConversationList";
+import { MentorGoalPanel } from "@/components/mentor/MentorGoalPanel";
 import { MentorHeader } from "@/components/mentor/MentorHeader";
 import { MentorMessageForm } from "@/components/mentor/MentorMessageForm";
 import { MentorMemoryPanel } from "@/components/mentor/MentorMemoryPanel";
@@ -11,6 +12,7 @@ import type {
   MentorApiError,
   MentorConversationMessage,
   MentorConversationSummary,
+  MentorGoal,
   MentorMemory,
   MentorSession,
 } from "@/components/mentor/mentor-conversation.types";
@@ -51,6 +53,7 @@ export function MentorConversationClient() {
   const [isSending, setIsSending] = useState(false);
   const [isStartingNewConversation, setIsStartingNewConversation] =
     useState(false);
+  const [goals, setGoals] = useState<MentorGoal[]>([]);
   const [memories, setMemories] = useState<MentorMemory[]>([]);
   const [messages, setMessages] = useState<MentorConversationMessage[]>([]);
   const [message, setMessage] = useState("");
@@ -78,6 +81,7 @@ export function MentorConversationClient() {
   async function refreshMentorSessionList() {
     const session = await fetchMentorSession();
 
+    setGoals(session.activeGoals);
     setMentor(session.mentor);
     setRecentConversations(session.conversations);
 
@@ -141,6 +145,7 @@ export function MentorConversationClient() {
 
         if (isActive) {
           setConversationId(nextConversationId);
+          setGoals(session.activeGoals);
           setRecentConversations(session.conversations);
           setMentor(session.mentor);
 
@@ -325,6 +330,13 @@ export function MentorConversationClient() {
             conversations={recentConversations}
             isLoading={isLoadingSession || isStartingNewConversation}
             onSelectConversation={handleSelectConversation}
+          />
+        </Card>
+
+        <Card className="p-5 sm:p-6" variant="bordered">
+          <MentorGoalPanel
+            goals={goals}
+            isLoading={isLoadingSession || isSending}
           />
         </Card>
 
