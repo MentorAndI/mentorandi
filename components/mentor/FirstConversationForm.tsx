@@ -56,13 +56,15 @@ export function FirstConversationForm({
           return;
         }
 
-        setErrorMessage(formatFirstConversationError(responseBody));
+        setErrorMessage(
+          formatFirstConversationError(response.status, responseBody),
+        );
         return;
       }
 
       router.push("/mentor");
     } catch {
-      setErrorMessage("Unable to start the conversation. Please try again.");
+      setErrorMessage("We had trouble starting the conversation. Try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -101,17 +103,20 @@ export function FirstConversationForm({
   );
 }
 
-function formatFirstConversationError(responseBody: {
-  error?: string;
-  errors?: Record<string, string>;
-}) {
-  if (responseBody.error) {
-    return responseBody.error;
-  }
-
+function formatFirstConversationError(
+  status: number,
+  responseBody: {
+    error?: string;
+    errors?: Record<string, string>;
+  },
+) {
   if (responseBody.errors) {
     return Object.values(responseBody.errors).join(" ");
   }
 
-  return "Unable to start the conversation. Please try again.";
+  if (status === 401) {
+    return "Please log in before continuing.";
+  }
+
+  return "We had trouble starting the conversation. Try again.";
 }

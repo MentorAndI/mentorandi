@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { createSafeErrorResponse } from "@/lib/api/safe-error-response";
 import {
   MessageService,
   MessageServiceError,
@@ -51,23 +52,28 @@ export async function GET(_request: Request, context: MessageRouteContext) {
     return NextResponse.json({ messages }, { status: 200 });
   } catch (error) {
     if (error instanceof MessageServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/conversations/messages:get:message",
+        error,
+        fallbackMessage: "Unable to load messages.",
+        statusCode: error.statusCode,
+      });
     }
 
     if (error instanceof UserServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/conversations/messages:get:user",
+        error,
+        fallbackMessage: "Unable to load messages.",
+        statusCode: error.statusCode,
+      });
     }
 
-    return NextResponse.json(
-      { error: "Unable to load messages." },
-      { status: 500 },
-    );
+    return createSafeErrorResponse({
+      context: "api/conversations/messages:get:unexpected",
+      error,
+      fallbackMessage: "Unable to load messages.",
+    });
   }
 }
 
@@ -103,22 +109,27 @@ export async function POST(request: Request, context: MessageRouteContext) {
     return NextResponse.json({ message }, { status: 201 });
   } catch (error) {
     if (error instanceof MessageServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/conversations/messages:post:message",
+        error,
+        fallbackMessage: "Unable to create message.",
+        statusCode: error.statusCode,
+      });
     }
 
     if (error instanceof UserServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/conversations/messages:post:user",
+        error,
+        fallbackMessage: "Unable to create message.",
+        statusCode: error.statusCode,
+      });
     }
 
-    return NextResponse.json(
-      { error: "Unable to create message." },
-      { status: 500 },
-    );
+    return createSafeErrorResponse({
+      context: "api/conversations/messages:post:unexpected",
+      error,
+      fallbackMessage: "Unable to create message.",
+    });
   }
 }

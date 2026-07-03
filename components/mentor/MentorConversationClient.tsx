@@ -211,7 +211,7 @@ export function MentorConversationClient() {
         | MentorApiError;
 
       if (!response.ok) {
-        setErrorMessage(formatErrorResponse(responseBody as MentorApiError));
+        setErrorMessage("Marcus had trouble responding. Try again.");
         return;
       }
 
@@ -227,7 +227,7 @@ export function MentorConversationClient() {
         refreshMentorSessionList(),
       ]);
     } catch {
-      setErrorMessage("Unable to send your message.");
+      setErrorMessage("Marcus had trouble responding. Try again.");
     } finally {
       setIsSending(false);
     }

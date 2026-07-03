@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { createSafeErrorResponse } from "@/lib/api/safe-error-response";
 import {
   ConversationService,
   ConversationServiceError,
@@ -28,16 +29,19 @@ export async function GET() {
     return NextResponse.json({ conversations }, { status: 200 });
   } catch (error) {
     if (error instanceof UserServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/conversations:get:user",
+        error,
+        fallbackMessage: "Unable to load conversations.",
+        statusCode: error.statusCode,
+      });
     }
 
-    return NextResponse.json(
-      { error: "Unable to load conversations." },
-      { status: 500 },
-    );
+    return createSafeErrorResponse({
+      context: "api/conversations:get:unexpected",
+      error,
+      fallbackMessage: "Unable to load conversations.",
+    });
   }
 }
 
@@ -63,22 +67,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ conversation }, { status: 201 });
   } catch (error) {
     if (error instanceof ConversationServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/conversations:post:conversation",
+        error,
+        fallbackMessage: "Unable to create conversation.",
+        statusCode: error.statusCode,
+      });
     }
 
     if (error instanceof UserServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/conversations:post:user",
+        error,
+        fallbackMessage: "Unable to create conversation.",
+        statusCode: error.statusCode,
+      });
     }
 
-    return NextResponse.json(
-      { error: "Unable to create conversation." },
-      { status: 500 },
-    );
+    return createSafeErrorResponse({
+      context: "api/conversations:post:unexpected",
+      error,
+      fallbackMessage: "Unable to create conversation.",
+    });
   }
 }

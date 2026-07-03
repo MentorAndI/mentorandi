@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { createSafeErrorResponse } from "@/lib/api/safe-error-response";
 import {
   MentorSessionService,
   MentorSessionServiceError,
@@ -19,22 +20,27 @@ export async function POST() {
     );
   } catch (error) {
     if (error instanceof MentorSessionServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/mentor-session/new:session",
+        error,
+        fallbackMessage: "Unable to start a new conversation.",
+        statusCode: error.statusCode,
+      });
     }
 
     if (error instanceof UserServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/mentor-session/new:user",
+        error,
+        fallbackMessage: "Unable to start a new conversation.",
+        statusCode: error.statusCode,
+      });
     }
 
-    return NextResponse.json(
-      { error: "Unable to start a new conversation." },
-      { status: 500 },
-    );
+    return createSafeErrorResponse({
+      context: "api/mentor-session/new:unexpected",
+      error,
+      fallbackMessage: "Unable to start a new conversation.",
+    });
   }
 }

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { createSafeErrorResponse } from "@/lib/api/safe-error-response";
 import {
   MentorSessionService,
   MentorSessionServiceError,
@@ -24,22 +25,27 @@ export async function GET() {
     );
   } catch (error) {
     if (error instanceof MentorSessionServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/mentor/session:session",
+        error,
+        fallbackMessage: "Unable to load mentor session.",
+        statusCode: error.statusCode,
+      });
     }
 
     if (error instanceof UserServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/mentor/session:user",
+        error,
+        fallbackMessage: "Unable to load mentor session.",
+        statusCode: error.statusCode,
+      });
     }
 
-    return NextResponse.json(
-      { error: "Unable to load mentor session." },
-      { status: 500 },
-    );
+    return createSafeErrorResponse({
+      context: "api/mentor/session:unexpected",
+      error,
+      fallbackMessage: "Unable to load mentor session.",
+    });
   }
 }

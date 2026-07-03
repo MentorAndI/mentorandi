@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { createSafeErrorResponse } from "@/lib/api/safe-error-response";
 import { ConversationServiceError } from "@/services/conversation/conversation.service";
 import {
   MentorSessionService,
@@ -56,37 +57,46 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     if (error instanceof ConversationServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/first-conversation:conversation",
+        error,
+        fallbackMessage: "Unable to start the mentor conversation.",
+        statusCode: error.statusCode,
+      });
     }
 
     if (error instanceof MentorSessionServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/first-conversation:session",
+        error,
+        fallbackMessage: "Unable to start the mentor conversation.",
+        statusCode: error.statusCode,
+      });
     }
 
     if (error instanceof UserServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/first-conversation:user",
+        error,
+        fallbackMessage: "Unable to start the mentor conversation.",
+        statusCode: error.statusCode,
+      });
     }
 
     if (error instanceof MentorResponsePipelineServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/first-conversation:pipeline",
+        error,
+        fallbackMessage: "Unable to start the mentor conversation.",
+        statusCode: error.statusCode,
+      });
     }
 
-    return NextResponse.json(
-      { error: "Unable to start the mentor conversation." },
-      { status: 500 },
-    );
+    return createSafeErrorResponse({
+      context: "api/first-conversation:unexpected",
+      error,
+      fallbackMessage: "Unable to start the mentor conversation.",
+    });
   }
 }
 

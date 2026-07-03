@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { createSafeErrorResponse } from "@/lib/api/safe-error-response";
 import {
   MentorSessionService,
   MentorSessionServiceError,
@@ -62,30 +63,37 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     if (error instanceof MentorSessionServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/mentor/respond:session",
+        error,
+        fallbackMessage: "Unable to send your message.",
+        statusCode: error.statusCode,
+      });
     }
 
     if (error instanceof UserServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/mentor/respond:user",
+        error,
+        fallbackMessage: "Unable to send your message.",
+        statusCode: error.statusCode,
+      });
     }
 
     if (error instanceof MentorResponsePipelineServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/mentor/respond:pipeline",
+        error,
+        fallbackMessage: "Unable to send your message.",
+        statusCode: error.statusCode,
+      });
     }
 
-    return NextResponse.json(
-      { error: "Unable to send your message." },
-      { status: 500 },
-    );
+    return createSafeErrorResponse({
+      context: "api/mentor/respond:unexpected",
+      error,
+      fallbackMessage: "Unable to send your message.",
+    });
   }
 }
 

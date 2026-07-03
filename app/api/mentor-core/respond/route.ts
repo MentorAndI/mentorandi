@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { createSafeErrorResponse } from "@/lib/api/safe-error-response";
 import {
   MentorResponsePipelineService,
   MentorResponsePipelineServiceError,
@@ -51,22 +52,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ response }, { status: 200 });
   } catch (error) {
     if (error instanceof UserServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/mentor-core/respond:user",
+        error,
+        fallbackMessage: "Unable to run mentor response pipeline.",
+        statusCode: error.statusCode,
+      });
     }
 
     if (error instanceof MentorResponsePipelineServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/mentor-core/respond:pipeline",
+        error,
+        fallbackMessage: "Unable to run mentor response pipeline.",
+        statusCode: error.statusCode,
+      });
     }
 
-    return NextResponse.json(
-      { error: "Unable to run mentor response pipeline." },
-      { status: 500 },
-    );
+    return createSafeErrorResponse({
+      context: "api/mentor-core/respond:unexpected",
+      error,
+      fallbackMessage: "Unable to run mentor response pipeline.",
+    });
   }
 }
