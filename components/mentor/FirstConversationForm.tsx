@@ -51,6 +51,11 @@ export function FirstConversationForm({
       };
 
       if (!response.ok) {
+        if (response.status === 401) {
+          router.push(`/login?next=${encodeURIComponent("/start")}`);
+          return;
+        }
+
         setErrorMessage(formatFirstConversationError(responseBody));
         return;
       }
