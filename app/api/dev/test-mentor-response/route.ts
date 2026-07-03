@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 
 import {
+  createProductionDevRouteResponse,
+  isProductionEnvironment,
+} from "@/lib/api/dev-route-guard";
+import {
   ConversationService,
   ConversationServiceError,
 } from "@/services/conversation/conversation.service";
@@ -49,11 +53,8 @@ function getDevMentorResponseAuthContext(): MentorResponsePipelineAuthContext {
 }
 
 export async function POST(request: Request) {
-  if (process.env.NODE_ENV === "production") {
-    return NextResponse.json(
-      { error: "This development test endpoint is disabled in production." },
-      { status: 403 },
-    );
+  if (isProductionEnvironment()) {
+    return createProductionDevRouteResponse();
   }
 
   const body = await request.json().catch(() => null);

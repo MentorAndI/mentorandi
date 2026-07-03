@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { createSafeErrorResponse } from "@/lib/api/safe-error-response";
 import {
   ContextBuilderService,
   ContextBuilderServiceError,
@@ -54,22 +55,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ context }, { status: 200 });
   } catch (error) {
     if (error instanceof UserServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/mentor-core/context:user",
+        error,
+        fallbackMessage: "Unable to build mentor context.",
+        statusCode: error.statusCode,
+      });
     }
 
     if (error instanceof ContextBuilderServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/mentor-core/context:context-builder",
+        error,
+        fallbackMessage: "Unable to build mentor context.",
+        statusCode: error.statusCode,
+      });
     }
 
-    return NextResponse.json(
-      { error: "Unable to build mentor context." },
-      { status: 500 },
-    );
+    return createSafeErrorResponse({
+      context: "api/mentor-core/context:unexpected",
+      error,
+      fallbackMessage: "Unable to build mentor context.",
+    });
   }
 }

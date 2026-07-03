@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { createSafeErrorResponse } from "@/lib/api/safe-error-response";
 import {
   UserService,
   UserServiceError,
@@ -15,15 +16,18 @@ export async function GET() {
     return NextResponse.json({ user }, { status: 200 });
   } catch (error) {
     if (error instanceof UserServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/me:user",
+        error,
+        fallbackMessage: "Unable to resolve current user.",
+        statusCode: error.statusCode,
+      });
     }
 
-    return NextResponse.json(
-      { error: "Unable to resolve current user." },
-      { status: 500 },
-    );
+    return createSafeErrorResponse({
+      context: "api/me:unexpected",
+      error,
+      fallbackMessage: "Unable to resolve current user.",
+    });
   }
 }

@@ -99,6 +99,12 @@ export class LlmService {
       return this.providerSelection.resolveProvider(requestedProvider);
     } catch (error) {
       if (error instanceof LlmProviderSelectionServiceError) {
+        logProviderError(
+          requestedProvider ?? "unknown",
+          error,
+          "configuration_error",
+        );
+
         throw new LlmServiceError(
           "LLM provider is not configured correctly.",
           500,
@@ -132,16 +138,12 @@ function getSafeProviderErrorMessage(errorState: LlmProviderErrorState) {
 }
 
 function logProviderError(
-  provider: LlmProviderName,
+  provider: LlmProviderName | "unknown",
   error: unknown,
   errorState: LlmProviderErrorState,
 ) {
-  if (process.env.NODE_ENV === "production") {
-    return;
-  }
-
   console.error("[llm] Provider error", {
-    error,
+    error: error instanceof Error ? error.message : "Unknown provider error.",
     errorState,
     provider,
   });

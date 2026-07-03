@@ -11,3 +11,4 @@
 7. Improve visual design.
 8. Add basic logging/error handling.
 9. Expand provider diagnostics and logging after real provider testing.
+10. Add a pre-deployment checklist for production environment variables and auth configuration.

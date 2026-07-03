@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
 
+import {
+  createProductionDevRouteResponse,
+  isProductionEnvironment,
+} from "@/lib/api/dev-route-guard";
 import { getPrismaClient } from "@/lib/prisma";
 import { UserService } from "@/services/user/user.service";
 
@@ -8,11 +12,8 @@ export const dynamic = "force-dynamic";
 const marcusSlug = "marcus";
 
 export async function GET() {
-  if (process.env.NODE_ENV === "production") {
-    return NextResponse.json(
-      { error: "This development seed data endpoint is disabled in production." },
-      { status: 403 },
-    );
+  if (isProductionEnvironment()) {
+    return createProductionDevRouteResponse();
   }
 
   try {

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { createSafeErrorResponse } from "@/lib/api/safe-error-response";
 import {
   getMemoryAuthContext,
   MemoryService,
@@ -34,17 +35,29 @@ export async function GET(request: Request) {
 
     return NextResponse.json({ understandings }, { status: 200 });
   } catch (error) {
-    if (error instanceof UserServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+    if (error instanceof MemoryServiceError) {
+      return createSafeErrorResponse({
+        context: "api/memories:get:memory",
+        error,
+        fallbackMessage: "Unable to load memories.",
+        statusCode: error.statusCode,
+      });
     }
 
-    return NextResponse.json(
-      { error: "Unable to load memories." },
-      { status: 500 },
-    );
+    if (error instanceof UserServiceError) {
+      return createSafeErrorResponse({
+        context: "api/memories:get:user",
+        error,
+        fallbackMessage: "Unable to load memories.",
+        statusCode: error.statusCode,
+      });
+    }
+
+    return createSafeErrorResponse({
+      context: "api/memories:get:unexpected",
+      error,
+      fallbackMessage: "Unable to load memories.",
+    });
   }
 }
 
@@ -69,22 +82,27 @@ export async function POST(request: Request) {
     return NextResponse.json({ understanding }, { status: 201 });
   } catch (error) {
     if (error instanceof MemoryServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/memories:post:memory",
+        error,
+        fallbackMessage: "Unable to create memory.",
+        statusCode: error.statusCode,
+      });
     }
 
     if (error instanceof UserServiceError) {
-      return NextResponse.json(
-        { error: error.message },
-        { status: error.statusCode },
-      );
+      return createSafeErrorResponse({
+        context: "api/memories:post:user",
+        error,
+        fallbackMessage: "Unable to create memory.",
+        statusCode: error.statusCode,
+      });
     }
 
-    return NextResponse.json(
-      { error: "Unable to create memory." },
-      { status: 500 },
-    );
+    return createSafeErrorResponse({
+      context: "api/memories:post:unexpected",
+      error,
+      fallbackMessage: "Unable to create memory.",
+    });
   }
 }

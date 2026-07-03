@@ -22,23 +22,33 @@ export class LlmProviderSelectionService {
   resolveProvider(
     requestedProvider?: LlmProviderName,
   ): ConfiguredLlmProviderName {
-    if (requestedProvider) {
-      return validateConfiguredProvider(requestedProvider);
-    }
-
     const configuredProvider = process.env.LLM_PROVIDER?.trim().toLowerCase();
 
-    if (configuredProvider) {
-      return validateConfiguredProvider(configuredProvider);
-    }
-
     if (process.env.NODE_ENV === "production") {
+      if (configuredProvider) {
+        return validateProviderConfiguration(
+          validateConfiguredProvider(configuredProvider),
+        );
+      }
+
       throw new LlmProviderSelectionServiceError(
         "LLM_PROVIDER must be configured in production.",
       );
     }
 
-    return "mock";
+    if (requestedProvider) {
+      return validateProviderConfiguration(
+        validateConfiguredProvider(requestedProvider),
+      );
+    }
+
+    if (configuredProvider) {
+      return validateProviderConfiguration(
+        validateConfiguredProvider(configuredProvider),
+      );
+    }
+
+    return validateProviderConfiguration("mock");
   }
 }
 
@@ -50,4 +60,28 @@ function validateConfiguredProvider(provider: string): ConfiguredLlmProviderName
   throw new LlmProviderSelectionServiceError(
     "LLM_PROVIDER must be anthropic, mock or openai.",
   );
+}
+
+function validateProviderConfiguration(
+  provider: ConfiguredLlmProviderName,
+): ConfiguredLlmProviderName {
+  if (provider === "openai") {
+    assertEnvironmentValue("OPENAI_API_KEY");
+    assertEnvironmentValue("OPENAI_MODEL");
+  }
+
+  if (provider === "anthropic") {
+    assertEnvironmentValue("ANTHROPIC_API_KEY");
+    assertEnvironmentValue("ANTHROPIC_MODEL");
+  }
+
+  return provider;
+}
+
+function assertEnvironmentValue(name: string) {
+  if (!process.env[name]?.trim()) {
+    throw new LlmProviderSelectionServiceError(
+      `Missing LLM provider configuration: ${name} is required.`,
+    );
+  }
 }

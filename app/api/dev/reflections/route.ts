@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 
 import {
+  createProductionDevRouteResponse,
+  isProductionEnvironment,
+} from "@/lib/api/dev-route-guard";
+import {
   ReflectionService,
   ReflectionServiceError,
 } from "@/services/reflection/reflection.service";
@@ -16,14 +20,8 @@ const uuidPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 export async function GET(request: NextRequest) {
-  if (process.env.NODE_ENV === "production") {
-    return NextResponse.json(
-      {
-        error:
-          "This development reflections endpoint is disabled in production.",
-      },
-      { status: 403 },
-    );
+  if (isProductionEnvironment()) {
+    return createProductionDevRouteResponse();
   }
 
   const userId = request.nextUrl.searchParams.get("userId")?.trim();

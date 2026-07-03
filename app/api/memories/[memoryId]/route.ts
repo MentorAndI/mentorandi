@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { createSafeErrorResponse } from "@/lib/api/safe-error-response";
 import {
   getMemoryAuthContext,
   MemoryService,
@@ -104,18 +105,26 @@ export async function DELETE(_request: Request, context: MemoryRouteContext) {
 
 function handleMemoryRouteError(error: unknown, fallbackMessage: string) {
   if (error instanceof MemoryServiceError) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: error.statusCode },
-    );
+    return createSafeErrorResponse({
+      context: "api/memories/[memoryId]:memory",
+      error,
+      fallbackMessage,
+      statusCode: error.statusCode,
+    });
   }
 
   if (error instanceof UserServiceError) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: error.statusCode },
-    );
+    return createSafeErrorResponse({
+      context: "api/memories/[memoryId]:user",
+      error,
+      fallbackMessage,
+      statusCode: error.statusCode,
+    });
   }
 
-  return NextResponse.json({ error: fallbackMessage }, { status: 500 });
+  return createSafeErrorResponse({
+    context: "api/memories/[memoryId]:unexpected",
+    error,
+    fallbackMessage,
+  });
 }
