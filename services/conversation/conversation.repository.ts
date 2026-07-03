@@ -30,6 +30,15 @@ export class ConversationRepository {
     });
   }
 
+  async findActiveMentorBySlug(slug: string) {
+    return this.prisma.mentor.findFirst({
+      where: {
+        active: true,
+        slug,
+      },
+    });
+  }
+
   async findConversationsByUserId(userId: string) {
     return this.prisma.conversation.findMany({
       include: {
@@ -63,6 +72,31 @@ export class ConversationRepository {
       },
       where: {
         id: conversationId,
+        userId,
+      },
+    });
+  }
+
+  async findLatestConversationForUserAndMentor(
+    userId: string,
+    mentorId: string,
+  ) {
+    return this.prisma.conversation.findFirst({
+      include: {
+        mentor: {
+          select: {
+            description: true,
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+      where: {
+        mentorId,
         userId,
       },
     });

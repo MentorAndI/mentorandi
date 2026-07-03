@@ -4,7 +4,7 @@ import { ConversationServiceError } from "@/services/conversation/conversation.s
 import {
   MentorSessionService,
   MentorSessionServiceError,
-} from "@/services/mentor/mentor-session.service";
+} from "@/services/mentor-session/mentor-session.service";
 import {
   MentorResponsePipelineService,
   MentorResponsePipelineServiceError,
