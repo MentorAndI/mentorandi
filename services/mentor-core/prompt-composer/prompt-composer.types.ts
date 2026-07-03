@@ -52,11 +52,14 @@ export interface PromptReflectionContextItem {
 export interface PromptPackage {
   constraints: string[];
   conversationContext: PromptConversationContextItem[];
+  conversationRules: string[];
   developerInstructions: string[];
   environmentContext: PromptEnvironmentContext;
   goalContext: PromptGoalContextItem[];
+  mentorIdentity: string[];
   memoryContext: PromptMemoryContextItem[];
   reflectionContext: PromptReflectionContextItem[];
+  responseInstructions: string[];
   systemPrompt: string;
   userPrompt: string;
 }

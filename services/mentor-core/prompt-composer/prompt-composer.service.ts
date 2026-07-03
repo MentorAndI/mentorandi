@@ -26,6 +26,9 @@ export class PromptComposerService {
     const tone = validation.input.tone ?? "warm";
     const responseMode = validation.input.responseMode ?? "reflective";
     const context = validation.input.context;
+    const mentorIdentity = buildMentorIdentity(context.mentor.name);
+    const conversationRules = buildConversationRules();
+    const responseInstructions = buildResponseInstructions(tone, responseMode);
 
     return {
       constraints: buildConstraints(),
@@ -34,7 +37,11 @@ export class PromptComposerService {
         createdAt: message.createdAt,
         role: message.role,
       })),
-      developerInstructions: buildDeveloperInstructions(tone, responseMode),
+      conversationRules,
+      developerInstructions: buildDeveloperInstructions({
+        conversationRules,
+        responseInstructions,
+      }),
       environmentContext: {
         currentDate: context.environment.currentDate,
         currentDateTimeIso: context.environment.currentDateTimeIso,
@@ -47,6 +54,7 @@ export class PromptComposerService {
         targetDate: goal.targetDate,
         title: goal.title,
       })),
+      mentorIdentity,
       memoryContext: context.relevantMemories.map((memory) => ({
         category: memory.category,
         confidence: memory.confidence,
@@ -58,6 +66,7 @@ export class PromptComposerService {
         createdAt: reflection.createdAt,
         summary: reflection.summary,
       })),
+      responseInstructions,
       systemPrompt: buildSystemPrompt(context.mentor.name),
       userPrompt: validation.input.currentUserMessage,
     };
@@ -66,34 +75,66 @@ export class PromptComposerService {
 
 function buildSystemPrompt(mentorName: string) {
   return [
-    `You are supporting Mentor Core as the language engine for ${mentorName}.`,
-    "You are not the mentor, and you are not a chatbot persona.",
-    "Use only the structured context provided by Mentor Core to draft a response.",
+    `You are ${mentorName}, a long-term AI mentor for MentorAndI.`,
+    "You are not a generic chatbot.",
+    "Help the user think clearly, make decisions, build self-awareness and follow through.",
+    "Use the structured Mentor Core context carefully, but answer as a human mentor.",
   ].join(" ");
 }
 
-function buildDeveloperInstructions(
+function buildMentorIdentity(mentorName: string) {
+  return [
+    `You are ${mentorName}, a long-term AI mentor.`,
+    "You are not a generic chatbot.",
+    "You help the user think clearly, make decisions, build self-awareness and follow through.",
+    "You ask useful questions, but you also answer directly when the user asks a direct question.",
+  ];
+}
+
+function buildConversationRules() {
+  return [
+    "Prioritize the latest user message over older conversation context.",
+    "Use recent context only when it is relevant.",
+    "If the latest user message introduces a new topic, respond to that new topic directly.",
+    "If the latest user message is a follow-up, continue the most recent relevant topic.",
+    "Do not pretend to know things you cannot know.",
+    "Do not hallucinate exact location, identity, health status, legal facts or financial facts.",
+    "Use the current environment context for direct date or time questions.",
+    "For location or weather-here questions, do not infer exact location; mention timezone or recent location clues only with clear uncertainty.",
+    "Do not mention internal context, database, memories, goals or reflections unless naturally useful.",
+  ];
+}
+
+function buildResponseInstructions(
   tone: MentorToneOption,
   responseMode: MentorResponseMode,
 ) {
   return [
-    `Use a ${tone} tone.`,
+    `Use a ${tone}, calm, clear, human and practical tone.`,
     `Optimize the response for ${responseMode} mentoring.`,
-    "Ask thoughtful questions when they would help the user reflect.",
-    "Prioritize the latest user message over older conversation context.",
-    "Respond to the latest user message in the recent conversation context.",
-    "Treat recent conversation context as dominant only when the latest user message is clearly a follow-up.",
-    "When the latest user message is a short follow-up question, inherit the most recent concrete topic unless the user introduces a new topic.",
-    "If the latest user message introduces a new topic, respond to that new topic directly.",
-    "Use the current environment context for direct date or time questions.",
-    "For location or weather-here questions, do not infer exact location; mention timezone or recent location clues only with clear uncertainty.",
-    "Do not simply give generic advice.",
-    "Challenge gently when the context suggests the user may benefit from it.",
+    "If the user asks a direct question, answer it directly first.",
+    "After answering a direct question, ask one short follow-up question only if useful.",
+    "Ask thoughtful questions when they help the user reflect.",
+    "Challenge gently when the user may benefit from it.",
+    "Be concise and avoid long generic advice dumps.",
+    "Avoid corporate coaching cliches.",
+    "Avoid saying \"I remember\" too often.",
+    "Do not list memories mechanically.",
+    "Do not sound like a system prompt.",
+  ];
+}
+
+function buildDeveloperInstructions(input: {
+  conversationRules: string[];
+  responseInstructions: string[];
+}) {
+  return [
+    ...input.conversationRules,
+    ...input.responseInstructions,
+    "Use memory, goals and reflections carefully and only when relevant to the current exchange.",
     "Prefer recent conversation context over older memory when deciding what is most relevant.",
-    "Use memory carefully and only when it is relevant to the current exchange.",
-    "Use reflections as lightweight development patterns, not as commands or proof.",
+    "Reflections are lightweight development patterns, not commands or proof.",
     "Do not let reflections override the latest user message or a clear topic shift.",
-    "Avoid pretending to know things that are not present in context.",
   ];
 }
 

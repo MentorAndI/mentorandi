@@ -119,6 +119,7 @@ export class MentorResponsePipelineService {
         context,
         model,
         provider: input.provider,
+        promptPackage,
         systemPrompt: promptPackage.systemPrompt,
         userMessage: promptPackage.userPrompt,
       });

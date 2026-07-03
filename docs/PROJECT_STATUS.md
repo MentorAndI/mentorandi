@@ -9,7 +9,9 @@ MentorAndI
 - Local alpha.
 - Next.js app running locally.
 - Supabase, PostgreSQL and Prisma are connected.
-- Mentor Core foundation is working with a mock provider for local testing.
+- Mentor Core foundation is working with centralized LLM provider selection.
+- Mock mode is available for deterministic local testing.
+- OpenAI provider mode is the intended path for real mentor response quality.
 
 ## Current User Flows
 
@@ -36,8 +38,8 @@ MentorAndI
 - Prompt Composer.
 - Response Pipeline.
 - LLM provider adapter.
-- Mock provider.
-- OpenAI provider foundation.
+- Mock provider for deterministic development testing.
+- OpenAI provider mode using the structured Mentor Core prompt contract.
 
 ## Important Behavior Rules
 
@@ -49,11 +51,15 @@ MentorAndI
 - Conversations are user-scoped.
 - Development fallback user is allowed only outside production.
 - Raw IDs are not exposed in user-facing UI.
+- `LLM_PROVIDER=mock` is safe for deterministic local testing.
+- `LLM_PROVIDER=openai` runs Marcus through the OpenAI provider using structured Mentor Core context.
+- Mock should not be treated as the source of real mentor quality.
 
 ## Known Limitations
 
-- OpenAI provider exists, but billing/quota is not working yet.
-- Mock provider is currently primary for local testing.
+- OpenAI provider mode exists, but billing/quota may still need verification in the active environment.
+- Mock provider is deterministic and useful for local testing, but it is not representative of final mentor quality.
+- Anthropic/Claude is not implemented yet, but can be added later through the existing provider abstraction.
 - Memory, goal and reflection extraction is rule-based.
 - UI is functional but not final design.
 - Deployment is not done.
@@ -72,3 +78,5 @@ MentorAndI
 - Memory dedupe works.
 - Goals appear in mentor UI.
 - Reflections influence later context without overriding topic shifts.
+- Mock diagnostics show selected provider, provider used and safe provider error state.
+- OpenAI mode should be tested when API key, model and billing/quota are available.
