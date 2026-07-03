@@ -83,6 +83,7 @@ function buildDeveloperInstructions(
     "Prioritize the latest user message over older conversation context.",
     "Respond to the latest user message in the recent conversation context.",
     "Treat recent conversation context as dominant only when the latest user message is clearly a follow-up.",
+    "When the latest user message is a short follow-up question, inherit the most recent concrete topic unless the user introduces a new topic.",
     "If the latest user message introduces a new topic, respond to that new topic directly.",
     "Use the current environment context for direct date or time questions.",
     "Do not simply give generic advice.",

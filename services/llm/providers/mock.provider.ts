@@ -63,11 +63,13 @@ type CurrentMessageKind =
   | "decision"
   | "direct-question"
   | "follow-up"
+  | "goal-follow-up"
   | "intention"
   | "project-focus"
   | "project-update"
   | "reflection"
   | "time-date-question"
+  | "travel-follow-up"
   | "travel-location"
   | "update";
 
@@ -89,6 +91,7 @@ function buildCurrentMessageResponse({
     currentMessage,
     conversationState.previousMentorMessage,
     projectDesignContext,
+    recentMessages,
   );
 
   if (messageKind === "time-date-question") {
@@ -98,6 +101,8 @@ function buildCurrentMessageResponse({
   const shouldUseStoredContext =
     messageKind !== "follow-up" &&
     messageKind !== "direct-question" &&
+    messageKind !== "goal-follow-up" &&
+    messageKind !== "travel-follow-up" &&
     messageKind !== "travel-location" &&
     !wasSimilarContextRecentlyUsed(recentMessages, relevantGoal, relevantMemory);
   const responseParts = [
@@ -115,6 +120,7 @@ function buildCurrentMessageResponse({
       conversationState.previousUserMessage,
       projectDesignContext,
       currentMessage,
+      recentMessages,
     ),
   ].filter(Boolean);
 
@@ -129,6 +135,7 @@ function classifyCurrentMessage(
   message: string,
   previousMentorMessage?: MentorContextMessage,
   projectDesignContext?: ProjectDesignContext,
+  recentMessages: MentorContextMessage[] = [],
 ): CurrentMessageKind {
   const normalizedMessage = normalizeForMatching(message);
 
@@ -138,6 +145,29 @@ function classifyCurrentMessage(
 
   if (isTimeDateQuestion(normalizedMessage)) {
     return "time-date-question";
+  }
+
+  if (isShortFollowUpQuestion(normalizedMessage)) {
+    const recentTopic = findMostRecentConcreteTopic(
+      recentMessages,
+      normalizedMessage,
+    );
+
+    if (recentTopic === "travel-location") {
+      return "travel-follow-up";
+    }
+
+    if (recentTopic === "project-design") {
+      return "project-focus";
+    }
+
+    if (recentTopic === "goal-focus") {
+      return "goal-follow-up";
+    }
+
+    if (previousMentorMessage) {
+      return "follow-up";
+    }
   }
 
   if (
@@ -202,6 +232,8 @@ function buildCurrentMessageAcknowledgement(
       return previousMentorMessage
         ? "Yes, let's stay with that thread."
         : "Yes, let's keep going.";
+    case "goal-follow-up":
+      return "Yes, stay with that.";
     case "intention":
       return "Good. Naming that clearly gives us something concrete to work with.";
     case "project-focus":
@@ -211,6 +243,8 @@ function buildCurrentMessageAcknowledgement(
     case "reflection":
       return "I hear you.";
     case "time-date-question":
+      return "";
+    case "travel-follow-up":
       return "";
     case "travel-location":
       return "Good question.";
@@ -241,9 +275,14 @@ function buildNextStepQuestion(
   previousUserMessage?: MentorContextMessage,
   projectDesignContext?: ProjectDesignContext,
   currentMessage?: string,
+  recentMessages: MentorContextMessage[] = [],
 ) {
   if (kind === "travel-location") {
     return buildTravelLocationGuidance(currentMessage ?? "");
+  }
+
+  if (kind === "travel-follow-up") {
+    return buildTravelFollowUpGuidance(recentMessages);
   }
 
   if (kind === "direct-question") {
@@ -288,6 +327,10 @@ function buildNextStepQuestion(
 
   if (kind === "intention") {
     return "What is one small step that would make this real today?";
+  }
+
+  if (kind === "goal-follow-up") {
+    return "Start with one small focus step: choose the next task, set a short timer, and write down the thought that keeps pulling you away.";
   }
 
   if (kind === "update") {
@@ -338,6 +381,64 @@ function isDirectQuestion(normalizedMessage: string) {
   );
 }
 
+type ConcreteTopic = "goal-focus" | "project-design" | "travel-location";
+
+function isShortFollowUpQuestion(normalizedMessage: string) {
+  const wordCount = normalizedMessage.split(" ").filter(Boolean).length;
+
+  if (wordCount > 8) {
+    return false;
+  }
+
+  return /^(what should i focus on next|what next|next|what about next|what should i do next|where should i start|where do i start|what is the next step|what s the next step|next step|what should we do next)$/.test(
+    normalizedMessage,
+  );
+}
+
+function findMostRecentConcreteTopic(
+  recentMessages: MentorContextMessage[],
+  normalizedCurrentMessage: string,
+): ConcreteTopic | null {
+  const priorMessages = getPriorMessages(
+    recentMessages,
+    normalizedCurrentMessage,
+  );
+
+  for (const message of [...priorMessages].reverse()) {
+    const normalizedContent = normalizeForMatching(message.content);
+
+    if (hasTravelLocationSignal(normalizedContent)) {
+      return "travel-location";
+    }
+
+    if (hasProjectDesignSignal(normalizedContent)) {
+      return "project-design";
+    }
+
+    if (hasFocusGoalSignal(normalizedContent)) {
+      return "goal-focus";
+    }
+  }
+
+  return null;
+}
+
+function getPriorMessages(
+  recentMessages: MentorContextMessage[],
+  normalizedCurrentMessage: string,
+) {
+  const lastMessage = recentMessages[recentMessages.length - 1];
+
+  if (
+    lastMessage?.role === "USER" &&
+    normalizeForMatching(lastMessage.content) === normalizedCurrentMessage
+  ) {
+    return recentMessages.slice(0, -1);
+  }
+
+  return recentMessages;
+}
+
 interface ProjectDesignContext {
   hasContext: boolean;
   mentionsMentorAndI: boolean;
@@ -384,6 +485,12 @@ function hasProjectDesignSignal(normalizedText: string) {
   );
 }
 
+function hasFocusGoalSignal(normalizedText: string) {
+  return /\b(focus|focused|overthinking|overthink|confidence|confident|accountable|accountability)\b/.test(
+    normalizedText,
+  );
+}
+
 function hasTravelLocationSignal(normalizedText: string) {
   return /\b(where|places|visit|city|country|cyprus|paphos|restaurant|beach|museum|trip|travel|harbour|harbor|old town)\b/.test(
     normalizedText,
@@ -419,6 +526,38 @@ function buildTravelLocationGuidance(currentMessage: string) {
   }
 
   return "Start with the kind of experience you want: calm, historic, social or restorative. Which one would make today feel better?";
+}
+
+function buildTravelFollowUpGuidance(recentMessages: MentorContextMessage[]) {
+  const recentTravelText = findMostRecentTopicText(
+    recentMessages,
+    hasTravelLocationSignal,
+  );
+
+  if (/\bpaphos\b/.test(recentTravelText)) {
+    return "Start with the harbour and archaeological park if you want the classic Paphos experience. If you want something calmer, choose the old town or a beach walk first.";
+  }
+
+  if (/\bcyprus\b/.test(recentTravelText)) {
+    return "Start with one place for history, one for the sea and one slower walk. That gives the day shape without turning it into a checklist.";
+  }
+
+  return "Start with the place that best matches the day you want: calm, historic, social or restorative. Pick that first, then build around it.";
+}
+
+function findMostRecentTopicText(
+  recentMessages: MentorContextMessage[],
+  matchesTopic: (normalizedText: string) => boolean,
+) {
+  for (const message of [...recentMessages].reverse()) {
+    const normalizedContent = normalizeForMatching(message.content);
+
+    if (matchesTopic(normalizedContent)) {
+      return normalizedContent;
+    }
+  }
+
+  return "";
 }
 
 function getConversationState(recentMessages: MentorContextMessage[]) {
