@@ -8,7 +8,7 @@ import type {
   RecommendedMentorFocus,
 } from "@/services/mentor-core/context-builder/context-builder.types";
 
-const recentMessageLimit = 16;
+const recentMessageLimit = 12;
 const relevantMemoryLimit = 10;
 const minimumMemoryConfidence = 0.6;
 const minimumMemoryImportance = 3;
@@ -97,7 +97,6 @@ export class ContextBuilderService {
       recentMessages: recentMessages.map((message) => ({
         content: message.content,
         createdAt: message.createdAt.toISOString(),
-        id: message.id,
         role: message.role,
       })),
       recentReflections: recentReflections.map((reflection) => ({

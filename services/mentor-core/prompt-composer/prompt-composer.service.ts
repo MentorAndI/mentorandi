@@ -31,6 +31,7 @@ export class PromptComposerService {
       constraints: buildConstraints(),
       conversationContext: context.recentMessages.map((message) => ({
         content: message.content,
+        createdAt: message.createdAt,
         role: message.role,
       })),
       developerInstructions: buildDeveloperInstructions(tone, responseMode),
@@ -69,8 +70,11 @@ function buildDeveloperInstructions(
     `Use a ${tone} tone.`,
     `Optimize the response for ${responseMode} mentoring.`,
     "Ask thoughtful questions when they would help the user reflect.",
+    "Respond to the latest user message in the recent conversation context.",
+    "Treat short follow-ups as continuations of the immediate conversation.",
     "Do not simply give generic advice.",
     "Challenge gently when the context suggests the user may benefit from it.",
+    "Prefer recent conversation context over older memory when deciding what is most relevant.",
     "Use memory carefully and only when it is relevant to the current exchange.",
     "Avoid pretending to know things that are not present in context.",
   ];

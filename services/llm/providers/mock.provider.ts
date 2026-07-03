@@ -6,6 +6,7 @@ import type {
 import type {
   MentorContextGoal,
   MentorContextMemory,
+  MentorContextMessage,
 } from "@/services/mentor-core/context-builder/context-builder.types";
 
 const defaultMockModel = "mock-deterministic-v1";
@@ -33,6 +34,7 @@ export class MockLlmProvider implements LlmProvider {
         currentMessage: request.userMessage,
         focus,
         mentorName,
+        recentMessages: request.context.recentMessages,
         relevantGoal,
         relevantMemory,
       }),
@@ -48,6 +50,7 @@ interface CurrentMessageResponseInput {
   currentMessage: string;
   focus: string;
   mentorName: string;
+  recentMessages: MentorContextMessage[];
   relevantGoal?: MentorContextGoal;
   relevantMemory?: MentorContextMemory;
 }
@@ -55,22 +58,49 @@ interface CurrentMessageResponseInput {
 type CurrentMessageKind =
   | "challenge"
   | "decision"
+  | "follow-up"
   | "intention"
+  | "project-focus"
   | "project-update"
-  | "reflection";
+  | "reflection"
+  | "update";
 
 function buildCurrentMessageResponse({
   currentMessage,
   focus,
   mentorName,
+  recentMessages,
   relevantGoal,
   relevantMemory,
 }: CurrentMessageResponseInput) {
-  const messageKind = classifyCurrentMessage(currentMessage);
+  const conversationState = getConversationState(recentMessages);
+  const projectDesignContext = getProjectDesignContext(
+    currentMessage,
+    recentMessages,
+  );
+  const messageKind = classifyCurrentMessage(
+    currentMessage,
+    conversationState.previousMentorMessage,
+    projectDesignContext,
+  );
+  const shouldUseStoredContext =
+    messageKind !== "follow-up" &&
+    !wasSimilarContextRecentlyUsed(recentMessages, relevantGoal, relevantMemory);
   const responseParts = [
-    buildCurrentMessageAcknowledgement(messageKind),
-    buildRelevantContextLine(relevantGoal, relevantMemory),
-    buildNextStepQuestion(messageKind, relevantGoal, relevantMemory),
+    buildCurrentMessageAcknowledgement(
+      messageKind,
+      conversationState.previousMentorMessage,
+    ),
+    shouldUseStoredContext
+      ? buildRelevantContextLine(relevantGoal, relevantMemory)
+      : "",
+    buildNextStepQuestion(
+      messageKind,
+      shouldUseStoredContext ? relevantGoal : undefined,
+      shouldUseStoredContext ? relevantMemory : undefined,
+      conversationState.previousUserMessage,
+      projectDesignContext,
+    ),
   ].filter(Boolean);
 
   if (responseParts.length > 0) {
@@ -80,17 +110,25 @@ function buildCurrentMessageResponse({
   return `I'm here with you. ${mentorName} is focused on ${focus || "helping you find the next clear step"}. What would be useful to look at first?`;
 }
 
-function classifyCurrentMessage(message: string): CurrentMessageKind {
+function classifyCurrentMessage(
+  message: string,
+  previousMentorMessage?: MentorContextMessage,
+  projectDesignContext?: ProjectDesignContext,
+): CurrentMessageKind {
   const normalizedMessage = normalizeForMatching(message);
 
   if (
-    /\b(mentorandi|mentor and i|project|design|prototype|product)\b/.test(
-      normalizedMessage,
-    ) &&
-    /\b(finishing|working|building|designing|creating|developing|shipping|launched|launching|revising|improving)\b/.test(
-      normalizedMessage,
-    )
+    projectDesignContext?.hasContext &&
+    isProjectDesignFocusQuestion(normalizedMessage)
   ) {
+    return "project-focus";
+  }
+
+  if (previousMentorMessage && isFollowUpMessage(normalizedMessage)) {
+    return "follow-up";
+  }
+
+  if (isProjectDesignUpdate(normalizedMessage)) {
     return "project-update";
   }
 
@@ -110,21 +148,40 @@ function classifyCurrentMessage(message: string): CurrentMessageKind {
     return "intention";
   }
 
+  if (
+    /\b(i|we)\s+(just\s+)?(finished|completed|did|made|started|sent|met|talked|tried|worked|changed|updated|decided)\b/.test(
+      normalizedMessage,
+    )
+  ) {
+    return "update";
+  }
+
   return "reflection";
 }
 
-function buildCurrentMessageAcknowledgement(kind: CurrentMessageKind) {
+function buildCurrentMessageAcknowledgement(
+  kind: CurrentMessageKind,
+  previousMentorMessage?: MentorContextMessage,
+) {
   switch (kind) {
     case "challenge":
       return "That sounds like something worth slowing down around.";
     case "decision":
       return "That sounds like a decision that deserves a clear frame.";
+    case "follow-up":
+      return previousMentorMessage
+        ? "Yes, let's stay with that thread."
+        : "Yes, let's keep going.";
     case "intention":
       return "Good. Naming that clearly gives us something concrete to work with.";
+    case "project-focus":
+      return "Stay with the design.";
     case "project-update":
-      return "That sounds like progress.";
+      return "Good. For the design, focus on one thing first.";
     case "reflection":
       return "I hear you.";
+    case "update":
+      return "That is a useful update.";
   }
 }
 
@@ -147,13 +204,27 @@ function buildNextStepQuestion(
   kind: CurrentMessageKind,
   relevantGoal?: MentorContextGoal,
   relevantMemory?: MentorContextMemory,
+  previousUserMessage?: MentorContextMessage,
+  projectDesignContext?: ProjectDesignContext,
 ) {
+  if (kind === "project-focus") {
+    if (projectDesignContext?.mentionsMentorAndI) {
+      return "The next thing to focus on is whether MentorAndI feels like a personal mentor before it tries to explain features.";
+    }
+
+    return "The next thing to focus on is whether the page makes the user feel understood before it tries to explain features.";
+  }
+
   if (kind === "project-update") {
     if (relevantGoal || relevantMemory) {
       return "What is the one thing this next pass still needs to communicate more clearly?";
     }
 
-    return "Before you move on, take a moment to ask: does it make the work feel more human, clear and personal?";
+    if (projectDesignContext?.mentionsMentorAndI) {
+      return "Does it make MentorAndI feel like a personal mentor rather than another AI tool?";
+    }
+
+    return "Does it make the product feel human, clear and personal?";
   }
 
   if (kind === "challenge") {
@@ -164,11 +235,123 @@ function buildNextStepQuestion(
     return "What would make this choice feel clearer rather than just more urgent?";
   }
 
+  if (kind === "follow-up") {
+    if (previousUserMessage) {
+      return "What part of that feels most important to clarify next?";
+    }
+
+    return "What would help you move one step further with it?";
+  }
+
   if (kind === "intention") {
     return "What is one small step that would make this real today?";
   }
 
+  if (kind === "update") {
+    return "What changed after taking that step?";
+  }
+
   return "What feels like the most useful place to begin?";
+}
+
+interface ProjectDesignContext {
+  hasContext: boolean;
+  mentionsMentorAndI: boolean;
+}
+
+function getProjectDesignContext(
+  currentMessage: string,
+  recentMessages: MentorContextMessage[],
+): ProjectDesignContext {
+  const currentText = normalizeForMatching(currentMessage);
+  const recentUserText = recentMessages
+    .filter((message) => message.role === "USER")
+    .slice(-4)
+    .map((message) => message.content)
+    .join(" ");
+  const combinedText = normalizeForMatching(`${currentMessage} ${recentUserText}`);
+
+  return {
+    hasContext:
+      hasProjectDesignSignal(currentText) || hasProjectDesignSignal(combinedText),
+    mentionsMentorAndI: /\bmentorandi\b/.test(combinedText),
+  };
+}
+
+function isProjectDesignFocusQuestion(normalizedMessage: string) {
+  return (
+    /\b(what|where|which|how)\b/.test(normalizedMessage) &&
+    /\b(should|next|focus|prioritize|improve|work on)\b/.test(normalizedMessage)
+  );
+}
+
+function isProjectDesignUpdate(normalizedMessage: string) {
+  return (
+    hasProjectDesignSignal(normalizedMessage) &&
+    /\b(finishing|working|building|designing|creating|developing|shipping|launched|launching|revising|improving|focus|focused|updating|making)\b/.test(
+      normalizedMessage,
+    )
+  );
+}
+
+function hasProjectDesignSignal(normalizedText: string) {
+  return /\b(mentorandi|project|design|website|product|ui|ux|user experience|interface|page|prototype)\b/.test(
+    normalizedText,
+  );
+}
+
+function getConversationState(recentMessages: MentorContextMessage[]) {
+  const priorMessages = recentMessages.slice(0, -1);
+  const previousMentorMessage = [...priorMessages]
+    .reverse()
+    .find((message) => message.role === "MENTOR");
+  const previousUserMessage = [...priorMessages]
+    .reverse()
+    .find((message) => message.role === "USER");
+
+  return {
+    previousMentorMessage,
+    previousUserMessage,
+  };
+}
+
+function isFollowUpMessage(normalizedMessage: string) {
+  const wordCount = normalizedMessage.split(" ").filter(Boolean).length;
+
+  if (wordCount <= 5) {
+    return /\b(yes|yeah|okay|ok|that|this|it|why|how|what|more)\b/.test(
+      normalizedMessage,
+    );
+  }
+
+  return /\b(what about|how about|can you explain|tell me more|go deeper|why is that|what do you mean|and then|next step)\b/.test(
+    normalizedMessage,
+  );
+}
+
+function wasSimilarContextRecentlyUsed(
+  recentMessages: MentorContextMessage[],
+  relevantGoal?: MentorContextGoal,
+  relevantMemory?: MentorContextMemory,
+) {
+  const lastMentorMessage = [...recentMessages]
+    .reverse()
+    .find((message) => message.role === "MENTOR");
+
+  if (!lastMentorMessage) {
+    return false;
+  }
+
+  const lastMentorTerms = getSignalTerms(lastMentorMessage.content);
+  const contextTerms = getSignalTerms(
+    `${relevantGoal?.title ?? ""} ${relevantMemory?.title ?? ""} ${relevantMemory?.content ?? ""}`,
+  );
+
+  if (contextTerms.size === 0) {
+    return false;
+  }
+
+  return Array.from(contextTerms).some((term) => lastMentorTerms.has(term));
 }
 
 function formatSubtleMemoryLine(memory: MentorContextMemory) {

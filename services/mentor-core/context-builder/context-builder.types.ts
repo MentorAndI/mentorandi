@@ -38,7 +38,6 @@ export interface MentorContextConversation {
 export interface MentorContextMessage {
   content: string;
   createdAt: string;
-  id: string;
   role: MessageRole;
 }
 

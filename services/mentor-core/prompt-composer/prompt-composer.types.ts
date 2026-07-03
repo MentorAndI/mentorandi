@@ -33,6 +33,7 @@ export interface PromptGoalContextItem {
 
 export interface PromptConversationContextItem {
   content: string;
+  createdAt: string;
   role: string;
 }
 
