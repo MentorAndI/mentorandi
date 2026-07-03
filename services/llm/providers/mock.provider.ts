@@ -5,6 +5,7 @@ import type {
 } from "@/services/llm/llm.types";
 import type {
   MentorContextGoal,
+  MentorContextEnvironment,
   MentorContextMemory,
   MentorContextMessage,
 } from "@/services/mentor-core/context-builder/context-builder.types";
@@ -32,6 +33,7 @@ export class MockLlmProvider implements LlmProvider {
     return {
       content: buildCurrentMessageResponse({
         currentMessage: request.userMessage,
+        environment: request.context.environment,
         focus,
         mentorName,
         recentMessages: request.context.recentMessages,
@@ -48,6 +50,7 @@ export class MockLlmProvider implements LlmProvider {
 
 interface CurrentMessageResponseInput {
   currentMessage: string;
+  environment: MentorContextEnvironment;
   focus: string;
   mentorName: string;
   recentMessages: MentorContextMessage[];
@@ -58,16 +61,19 @@ interface CurrentMessageResponseInput {
 type CurrentMessageKind =
   | "challenge"
   | "decision"
+  | "direct-question"
   | "follow-up"
   | "intention"
   | "project-focus"
   | "project-update"
   | "reflection"
+  | "time-date-question"
   | "travel-location"
   | "update";
 
 function buildCurrentMessageResponse({
   currentMessage,
+  environment,
   focus,
   mentorName,
   recentMessages,
@@ -84,8 +90,14 @@ function buildCurrentMessageResponse({
     conversationState.previousMentorMessage,
     projectDesignContext,
   );
+
+  if (messageKind === "time-date-question") {
+    return buildTimeDateAnswer(currentMessage, environment);
+  }
+
   const shouldUseStoredContext =
     messageKind !== "follow-up" &&
+    messageKind !== "direct-question" &&
     messageKind !== "travel-location" &&
     !wasSimilarContextRecentlyUsed(recentMessages, relevantGoal, relevantMemory);
   const responseParts = [
@@ -122,6 +134,10 @@ function classifyCurrentMessage(
 
   if (hasTravelLocationSignal(normalizedMessage)) {
     return "travel-location";
+  }
+
+  if (isTimeDateQuestion(normalizedMessage)) {
+    return "time-date-question";
   }
 
   if (
@@ -164,6 +180,10 @@ function classifyCurrentMessage(
     return "update";
   }
 
+  if (isDirectQuestion(normalizedMessage)) {
+    return "direct-question";
+  }
+
   return "reflection";
 }
 
@@ -176,6 +196,8 @@ function buildCurrentMessageAcknowledgement(
       return "That sounds like something worth slowing down around.";
     case "decision":
       return "That sounds like a decision that deserves a clear frame.";
+    case "direct-question":
+      return "Good question.";
     case "follow-up":
       return previousMentorMessage
         ? "Yes, let's stay with that thread."
@@ -188,6 +210,8 @@ function buildCurrentMessageAcknowledgement(
       return "Good. For the design, focus on one thing first.";
     case "reflection":
       return "I hear you.";
+    case "time-date-question":
+      return "";
     case "travel-location":
       return "Good question.";
     case "update":
@@ -220,6 +244,10 @@ function buildNextStepQuestion(
 ) {
   if (kind === "travel-location") {
     return buildTravelLocationGuidance(currentMessage ?? "");
+  }
+
+  if (kind === "direct-question") {
+    return "I may need more context to answer that well, but let's start with the practical version: what outcome are you looking for?";
   }
 
   if (kind === "project-focus") {
@@ -267,6 +295,47 @@ function buildNextStepQuestion(
   }
 
   return "What feels like the most useful place to begin?";
+}
+
+function buildTimeDateAnswer(
+  currentMessage: string,
+  environment: MentorContextEnvironment,
+) {
+  const normalizedMessage = normalizeForMatching(currentMessage);
+
+  if (/\b(what day|day is it|today)\b/.test(normalizedMessage)) {
+    const weekday = formatWeekday(environment.currentDateTimeIso);
+
+    return `${weekday ? `Today is ${weekday}, ` : "Today is "}${environment.currentDate}. It is currently ${environment.currentTime} in ${environment.timezone}. If you want, I can also help you plan what to do next.`;
+  }
+
+  if (/\b(date|today s date|todays date)\b/.test(normalizedMessage)) {
+    return `Today's date is ${environment.currentDate}. It is currently ${environment.currentTime} in ${environment.timezone}. If you want, I can also help you plan what to do next.`;
+  }
+
+  return `It is currently ${environment.currentTime} on ${environment.currentDate} in ${environment.timezone}. If you want, I can also help you plan what to do next.`;
+}
+
+function formatWeekday(currentDateTimeIso: string) {
+  const date = new Date(currentDateTimeIso);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return date.toLocaleDateString("en-US", { weekday: "long" });
+}
+
+function isTimeDateQuestion(normalizedMessage: string) {
+  return /\b(what time is it|time is it|what date is it|what day is it|day is it today|today s date|todays date)\b/.test(
+    normalizedMessage,
+  );
+}
+
+function isDirectQuestion(normalizedMessage: string) {
+  return /^(what|where|when|how|why|who|which|can|could|should|would|is|are|do|does|did)\b/.test(
+    normalizedMessage,
+  );
 }
 
 interface ProjectDesignContext {

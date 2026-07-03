@@ -8,6 +8,7 @@ import type {
   BuildMentorContextAuthContext,
   BuildMentorContextInput,
   MentorContextMemory,
+  MentorContextEnvironment,
   MentorResponseContext,
   RecommendedMentorFocus,
 } from "@/services/mentor-core/context-builder/context-builder.types";
@@ -87,6 +88,7 @@ export class ContextBuilderService {
       targetDate: goal.targetDate?.toISOString() ?? null,
       title: goal.title,
     }));
+    const environment = buildEnvironmentContext();
 
     return {
       conversation: {
@@ -95,6 +97,7 @@ export class ContextBuilderService {
         updatedAt: conversation.updatedAt.toISOString(),
       },
       currentUserMessage: input.currentMessage ?? null,
+      environment,
       goals: contextGoals,
       memories: contextMemories,
       mentor: {
@@ -144,6 +147,37 @@ export class ContextBuilderService {
     }
 
     return error;
+  }
+}
+
+function buildEnvironmentContext(): MentorContextEnvironment {
+  const now = new Date();
+
+  return {
+    currentDate: formatDate(now),
+    currentDateTimeIso: now.toISOString(),
+    currentTime: formatTime(now),
+    timezone: getServerTimezoneLabel(),
+  };
+}
+
+function formatDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function formatTime(date: Date) {
+  return date.toTimeString().slice(0, 8);
+}
+
+function getServerTimezoneLabel() {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone || "server local time";
+  } catch {
+    return "server local time";
   }
 }
 

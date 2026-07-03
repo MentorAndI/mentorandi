@@ -35,6 +35,13 @@ export interface MentorContextConversation {
   updatedAt: string;
 }
 
+export interface MentorContextEnvironment {
+  currentDate: string;
+  currentDateTimeIso: string;
+  currentTime: string;
+  timezone: string;
+}
+
 export interface MentorContextMessage {
   content: string;
   createdAt: string;
@@ -74,6 +81,7 @@ export interface RecommendedMentorFocus {
 export interface MentorResponseContext {
   conversation: MentorContextConversation;
   currentUserMessage: string | null;
+  environment: MentorContextEnvironment;
   goals: MentorContextGoal[];
   memories: MentorContextMemory[];
   mentor: MentorContextMentor;

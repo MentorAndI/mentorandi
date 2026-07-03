@@ -37,6 +37,13 @@ export interface PromptConversationContextItem {
   role: string;
 }
 
+export interface PromptEnvironmentContext {
+  currentDate: string;
+  currentDateTimeIso: string;
+  currentTime: string;
+  timezone: string;
+}
+
 export interface PromptReflectionContextItem {
   createdAt: string;
   summary: string;
@@ -46,6 +53,7 @@ export interface PromptPackage {
   constraints: string[];
   conversationContext: PromptConversationContextItem[];
   developerInstructions: string[];
+  environmentContext: PromptEnvironmentContext;
   goalContext: PromptGoalContextItem[];
   memoryContext: PromptMemoryContextItem[];
   reflectionContext: PromptReflectionContextItem[];

@@ -35,6 +35,12 @@ export class PromptComposerService {
         role: message.role,
       })),
       developerInstructions: buildDeveloperInstructions(tone, responseMode),
+      environmentContext: {
+        currentDate: context.environment.currentDate,
+        currentDateTimeIso: context.environment.currentDateTimeIso,
+        currentTime: context.environment.currentTime,
+        timezone: context.environment.timezone,
+      },
       goalContext: context.userGoals.map((goal) => ({
         description: goal.description,
         status: goal.status,
@@ -78,6 +84,7 @@ function buildDeveloperInstructions(
     "Respond to the latest user message in the recent conversation context.",
     "Treat recent conversation context as dominant only when the latest user message is clearly a follow-up.",
     "If the latest user message introduces a new topic, respond to that new topic directly.",
+    "Use the current environment context for direct date or time questions.",
     "Do not simply give generic advice.",
     "Challenge gently when the context suggests the user may benefit from it.",
     "Prefer recent conversation context over older memory when deciding what is most relevant.",
