@@ -13,7 +13,10 @@ export function validateLlmCompletionRequest(
 ): LlmValidationResult<LlmCompletionRequest> {
   const errors: Record<string, string> = {};
 
-  if (!supportedProviders.includes(request.provider)) {
+  if (
+    request.provider !== undefined &&
+    !supportedProviders.includes(request.provider)
+  ) {
     errors.provider = "Provider must be mock, openai, or anthropic.";
   }
 

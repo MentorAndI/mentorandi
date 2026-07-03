@@ -5,7 +5,7 @@ export type LlmProviderName = "mock" | "openai" | "anthropic";
 export interface LlmCompletionRequest {
   context: MentorResponseContext;
   model?: string;
-  provider: LlmProviderName;
+  provider?: LlmProviderName;
   systemPrompt: string;
   temperature?: number;
   userMessage: string;
@@ -17,6 +17,7 @@ export interface LlmCompletionResponse {
   metadata: {
     model: string;
     provider: LlmProviderName;
+    selectedProvider?: LlmProviderName;
   };
   raw?: unknown;
 }

@@ -114,7 +114,13 @@ export async function POST(request: Request) {
 
     if (error instanceof MentorResponsePipelineServiceError) {
       return NextResponse.json(
-        { error: error.message },
+        {
+          error: error.message,
+          diagnostics: buildMentorCoreErrorDiagnostics(
+            validation.input.provider,
+            error,
+          ),
+        },
         { status: error.statusCode },
       );
     }
@@ -143,13 +149,42 @@ function buildMentorCoreDiagnostics(response: MentorResponsePipelineResult) {
         }
       : null,
     currentUserMessage: response.userMessage.content,
+    providerErrorState: null,
     provider: response.provider,
+    providerUsed: response.provider,
+    selectedProvider: response.selectedProvider,
     skippedDuplicateGoals:
       response.skippedDuplicateGoals.map(toGoalDiagnostic),
     skippedDuplicateMemories:
       response.skippedDuplicateMemories.map(toMemoryDiagnostic),
     updatedGoals: response.updatedGoals.map(toGoalDiagnostic),
     updatedMemories: response.updatedMemories.map(toMemoryDiagnostic),
+  };
+}
+
+function buildMentorCoreErrorDiagnostics(
+  selectedProvider: string | undefined,
+  error: MentorResponsePipelineServiceError,
+) {
+  return {
+    contextCounts: {
+      activeGoals: 0,
+      memories: 0,
+      recentMessages: 0,
+      reflections: 0,
+    },
+    createdGoals: [],
+    createdMemories: [],
+    createdReflection: null,
+    currentUserMessage: "",
+    provider: error.selectedProvider ?? selectedProvider ?? "unknown",
+    providerErrorState: error.providerErrorState ?? "pipeline_error",
+    providerUsed: null,
+    selectedProvider: error.selectedProvider ?? selectedProvider ?? "unknown",
+    skippedDuplicateGoals: [],
+    skippedDuplicateMemories: [],
+    updatedGoals: [],
+    updatedMemories: [],
   };
 }
 

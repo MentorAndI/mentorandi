@@ -45,7 +45,6 @@ export async function POST(request: Request) {
       {
         conversationId: session.conversation.id,
         message: validation.input.message,
-        provider: "mock",
         userId: session.userId,
       },
       {

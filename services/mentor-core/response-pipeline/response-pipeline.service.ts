@@ -4,7 +4,10 @@ import {
   GoalServiceError,
 } from "@/services/goal/goal.service";
 import type { CreateGoalInput } from "@/services/goal/goal.types";
-import { LlmService } from "@/services/llm/llm.service";
+import {
+  LlmService,
+  LlmServiceError,
+} from "@/services/llm/llm.service";
 import {
   MemoryService,
   MemoryServiceError,
@@ -50,7 +53,6 @@ import {
   UserServiceError,
 } from "@/services/user/user.service";
 
-const mockProviderModel = "mock-deterministic-v1";
 const minimumMemoryConfidence = 0.6;
 const minimumMemoryImportance = 3;
 
@@ -58,6 +60,8 @@ export class MentorResponsePipelineServiceError extends Error {
   constructor(
     message: string,
     public readonly statusCode: number,
+    public readonly selectedProvider?: string,
+    public readonly providerErrorState?: string,
   ) {
     super(message);
     this.name = "MentorResponsePipelineServiceError";
@@ -109,15 +113,12 @@ export class MentorResponsePipelineService {
         context,
         currentUserMessage: input.message,
       });
-      const provider = input.provider ?? "mock";
-      const model =
-        input.model?.trim() ||
-        (provider === "mock" ? mockProviderModel : undefined);
+      const model = input.model?.trim() || undefined;
 
       const llmResponse = await this.llmService.complete({
         context,
         model,
-        provider,
+        provider: input.provider,
         systemPrompt: promptPackage.systemPrompt,
         userMessage: promptPackage.userPrompt,
       });
@@ -146,6 +147,9 @@ export class MentorResponsePipelineService {
         model: llmResponse.metadata.model,
         promptPackage,
         provider: llmResponse.metadata.provider,
+        selectedProvider:
+          llmResponse.metadata.selectedProvider ??
+          llmResponse.metadata.provider,
         skippedDuplicateGoals: goalStorageResult.skippedDuplicateGoals,
         skippedDuplicateMemories:
           memoryStorageResult.skippedDuplicateMemories,
@@ -203,6 +207,15 @@ export class MentorResponsePipelineService {
 
       if (error instanceof ReflectionEngineServiceError) {
         throw new MentorResponsePipelineServiceError(error.message, 400);
+      }
+
+      if (error instanceof LlmServiceError) {
+        throw new MentorResponsePipelineServiceError(
+          error.message,
+          error.statusCode,
+          error.selectedProvider,
+          error.providerErrorState,
+        );
       }
 
       if (error instanceof UserServiceError) {

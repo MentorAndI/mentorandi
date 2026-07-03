@@ -75,6 +75,9 @@ interface MentorCoreDiagnostics {
   createdReflection: MentorCoreReflectionDiagnostic | null;
   currentUserMessage: string;
   provider: string;
+  providerErrorState: string | null;
+  providerUsed: string | null;
+  selectedProvider: string;
   skippedDuplicateGoals: MentorCoreGoalDiagnostic[];
   skippedDuplicateMemories: MentorCoreMemoryDiagnostic[];
   updatedGoals: MentorCoreGoalDiagnostic[];
@@ -118,6 +121,7 @@ interface MentorTestSeedDataResponse {
 }
 
 interface MentorTestErrorResponse {
+  diagnostics?: MentorCoreDiagnostics;
   error?: string;
   errors?: Record<string, string>;
 }
@@ -138,6 +142,8 @@ export function MentorTestClient() {
   const [historyErrorMessage, setHistoryErrorMessage] = useState("");
   const [cleanupMessage, setCleanupMessage] = useState("");
   const [cleanupErrorMessage, setCleanupErrorMessage] = useState("");
+  const [diagnostics, setDiagnostics] =
+    useState<MentorCoreDiagnostics | null>(null);
   const [isLoadingMemories, setIsLoadingMemories] = useState(false);
   const [isLoadingReflections, setIsLoadingReflections] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
@@ -310,6 +316,7 @@ export function MentorTestClient() {
     event.preventDefault();
 
     setErrorMessage("");
+    setDiagnostics(null);
     setIsSubmitting(true);
     setResult(null);
 
@@ -338,6 +345,9 @@ export function MentorTestClient() {
         | MentorTestErrorResponse;
 
       if (!response.ok) {
+        setDiagnostics(
+          (responseBody as MentorTestErrorResponse).diagnostics ?? null,
+        );
         setErrorMessage(
           formatErrorResponse(responseBody as MentorTestErrorResponse),
         );
@@ -347,6 +357,7 @@ export function MentorTestClient() {
       const mentorTestResponse = responseBody as MentorTestResponse;
       const conversationId = mentorTestResponse.conversation.id;
 
+      setDiagnostics(mentorTestResponse.diagnostics ?? null);
       setResult(mentorTestResponse);
       setFormState((currentState) => ({
         ...currentState,
@@ -732,7 +743,10 @@ export function MentorTestClient() {
             </p>
           </div>
 
-          <MentorCoreDiagnosticsPanel result={result} />
+          <MentorCoreDiagnosticsPanel
+            diagnostics={diagnostics}
+            result={result}
+          />
         </Card>
       </div>
     </div>
@@ -920,26 +934,20 @@ function StoredMemory({ memory }: StoredMemoryProps) {
 }
 
 interface MentorCoreDiagnosticsPanelProps {
+  diagnostics: MentorCoreDiagnostics | null;
   result: MentorTestResponse | null;
 }
 
 function MentorCoreDiagnosticsPanel({
+  diagnostics,
   result,
 }: MentorCoreDiagnosticsPanelProps) {
-  if (!result) {
+  const latestDiagnostics = diagnostics ?? result?.diagnostics ?? null;
+
+  if (!latestDiagnostics) {
     return (
       <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 text-sm text-zinc-500">
         Send a test message to see diagnostics.
-      </p>
-    );
-  }
-
-  const diagnostics = result.diagnostics;
-
-  if (!diagnostics) {
-    return (
-      <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 text-sm text-zinc-500">
-        No diagnostics were returned for the latest response.
       </p>
     );
   }
@@ -948,59 +956,71 @@ function MentorCoreDiagnosticsPanel({
     <div className="space-y-5">
       <div className="grid gap-3 sm:grid-cols-2">
         <DiagnosticStat
+          label="Selected provider"
+          value={latestDiagnostics.selectedProvider}
+        />
+        <DiagnosticStat
           label="Provider used"
-          value={diagnostics.provider || result.provider}
+          value={latestDiagnostics.providerUsed ?? "None"}
+        />
+        <DiagnosticStat
+          label="Provider error state"
+          value={latestDiagnostics.providerErrorState ?? "None"}
         />
         <DiagnosticStat
           label="Current user message"
-          value={diagnostics.currentUserMessage || result.userMessage.content}
+          value={
+            latestDiagnostics.currentUserMessage ||
+            result?.userMessage.content ||
+            "None"
+          }
         />
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <DiagnosticStat
           label="Memories in context"
-          value={String(diagnostics.contextCounts.memories)}
+          value={String(latestDiagnostics.contextCounts.memories)}
         />
         <DiagnosticStat
           label="Active goals in context"
-          value={String(diagnostics.contextCounts.activeGoals)}
+          value={String(latestDiagnostics.contextCounts.activeGoals)}
         />
         <DiagnosticStat
           label="Reflections in context"
-          value={String(diagnostics.contextCounts.reflections)}
+          value={String(latestDiagnostics.contextCounts.reflections)}
         />
         <DiagnosticStat
           label="Recent messages in context"
-          value={String(diagnostics.contextCounts.recentMessages)}
+          value={String(latestDiagnostics.contextCounts.recentMessages)}
         />
       </div>
 
       <DiagnosticMemoryList
-        items={diagnostics.createdMemories}
+        items={latestDiagnostics.createdMemories}
         title="Created memories"
       />
       <DiagnosticMemoryList
-        items={diagnostics.skippedDuplicateMemories}
+        items={latestDiagnostics.skippedDuplicateMemories}
         title="Skipped duplicate memories"
       />
       <DiagnosticMemoryList
-        items={diagnostics.updatedMemories}
+        items={latestDiagnostics.updatedMemories}
         title="Updated memories"
       />
       <DiagnosticGoalList
-        items={diagnostics.createdGoals}
+        items={latestDiagnostics.createdGoals}
         title="Created goals"
       />
       <DiagnosticGoalList
-        items={diagnostics.updatedGoals}
+        items={latestDiagnostics.updatedGoals}
         title="Updated goals"
       />
       <DiagnosticGoalList
-        items={diagnostics.skippedDuplicateGoals}
+        items={latestDiagnostics.skippedDuplicateGoals}
         title="Skipped duplicate goals"
       />
-      <DiagnosticReflection reflection={diagnostics.createdReflection} />
+      <DiagnosticReflection reflection={latestDiagnostics.createdReflection} />
     </div>
   );
 }
