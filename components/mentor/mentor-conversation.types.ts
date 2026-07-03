@@ -15,6 +15,14 @@ export interface MentorMemory {
   title: string;
 }
 
+export interface MentorConversationSummary {
+  createdAt: string;
+  id: string;
+  latestMessageAt: string | null;
+  latestMessagePreview: string | null;
+  updatedAt: string;
+}
+
 export interface MentorSeedData {
   conversationId: string | null;
   mentorId: string;
@@ -25,6 +33,7 @@ export interface MentorSession {
   conversation: {
     id: string;
   };
+  conversations: MentorConversationSummary[];
   mentor: {
     name: string;
     role: string;

@@ -2,7 +2,10 @@ import {
   ConversationService,
   ConversationServiceError,
 } from "@/services/conversation/conversation.service";
-import type { ConversationDto } from "@/services/conversation/conversation.types";
+import type {
+  ConversationDto,
+  ConversationSummaryDto,
+} from "@/services/conversation/conversation.types";
 import { UserService } from "@/services/user/user.service";
 import type { UserDto } from "@/services/user/user.types";
 
@@ -18,6 +21,11 @@ export interface MentorSessionDto {
   };
   mentorId: string;
   userId: string;
+}
+
+export interface MentorSessionOverviewDto {
+  conversations: ConversationSummaryDto[];
+  session: MentorSessionDto;
 }
 
 export class MentorSessionServiceError extends Error {
@@ -67,6 +75,56 @@ export class MentorSessionService {
     return this.getMarcusSessionForUser(user);
   }
 
+  async getResolvedMarcusSessionOverview(): Promise<MentorSessionOverviewDto> {
+    const user = await this.userService.resolveCurrentUser();
+    const session = await this.getMarcusSessionForUser(user);
+    const conversations = await this.listMarcusConversationsForUser(user);
+
+    return {
+      conversations,
+      session,
+    };
+  }
+
+  async getResolvedMarcusSessionForConversation(
+    conversationId: string,
+  ): Promise<MentorSessionDto> {
+    const user = await this.userService.resolveCurrentUser();
+
+    return this.getMarcusSessionForConversation(user, conversationId);
+  }
+
+  async getMarcusSessionForConversation(
+    user: UserDto,
+    conversationId: string,
+  ): Promise<MentorSessionDto> {
+    try {
+      const conversation =
+        await this.conversationService.getConversationForUserId(
+          user.id,
+          conversationId,
+        );
+
+      if (conversation.mentor.slug !== marcusSlug) {
+        throw new MentorSessionServiceError(
+          "Conversation was not found.",
+          404,
+        );
+      }
+
+      return toMentorSessionDto(user, conversation);
+    } catch (error) {
+      if (error instanceof ConversationServiceError) {
+        throw new MentorSessionServiceError(
+          error.message,
+          error.statusCode,
+        );
+      }
+
+      throw error;
+    }
+  }
+
   async createNewMarcusSession(): Promise<MentorSessionDto> {
     const user = await this.userService.resolveCurrentUser();
 
@@ -98,6 +156,26 @@ export class MentorSessionService {
     const user = await this.userService.getDevelopmentUser();
 
     return this.getMarcusSessionForUser(user);
+  }
+
+  private async listMarcusConversationsForUser(
+    user: UserDto,
+  ): Promise<ConversationSummaryDto[]> {
+    try {
+      return this.conversationService.getRecentConversationsForUserAndMentorSlug(
+        user.id,
+        marcusSlug,
+      );
+    } catch (error) {
+      if (error instanceof ConversationServiceError) {
+        throw new MentorSessionServiceError(
+          error.message,
+          error.statusCode,
+        );
+      }
+
+      throw error;
+    }
   }
 }
 

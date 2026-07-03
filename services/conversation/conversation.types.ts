@@ -20,6 +20,11 @@ export interface ConversationDto {
   updatedAt: string;
 }
 
+export interface ConversationSummaryDto extends ConversationDto {
+  latestMessageAt: string | null;
+  latestMessagePreview: string | null;
+}
+
 export interface ConversationValidationResult<TInput> {
   errors: Record<string, string>;
   input?: TInput;

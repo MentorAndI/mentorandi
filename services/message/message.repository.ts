@@ -34,12 +34,25 @@ export class MessageRepository {
   }
 
   async createMessage(conversationId: string, input: CreateMessageInput) {
-    return this.prisma.message.create({
-      data: {
-        content: input.content,
-        conversationId,
-        role: input.role,
-      },
-    });
+    const now = new Date();
+    const [message] = await this.prisma.$transaction([
+      this.prisma.message.create({
+        data: {
+          content: input.content,
+          conversationId,
+          role: input.role,
+        },
+      }),
+      this.prisma.conversation.update({
+        data: {
+          updatedAt: now,
+        },
+        where: {
+          id: conversationId,
+        },
+      }),
+    ]);
+
+    return message;
   }
 }

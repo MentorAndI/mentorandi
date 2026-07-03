@@ -3,12 +3,14 @@
 import { type FormEvent, useEffect, useState } from "react";
 
 import { MentorConversationHistory } from "@/components/mentor/MentorConversationHistory";
+import { MentorConversationList } from "@/components/mentor/MentorConversationList";
 import { MentorHeader } from "@/components/mentor/MentorHeader";
 import { MentorMessageForm } from "@/components/mentor/MentorMessageForm";
 import { MentorMemoryPanel } from "@/components/mentor/MentorMemoryPanel";
 import type {
   MentorApiError,
   MentorConversationMessage,
+  MentorConversationSummary,
   MentorMemory,
   MentorSession,
 } from "@/components/mentor/mentor-conversation.types";
@@ -54,6 +56,33 @@ export function MentorConversationClient() {
   const [message, setMessage] = useState("");
   const [messageError, setMessageError] = useState("");
   const [mentor, setMentor] = useState(defaultMentor);
+  const [recentConversations, setRecentConversations] = useState<
+    MentorConversationSummary[]
+  >([]);
+
+  async function fetchMentorSession(signal?: AbortSignal) {
+    const response = await fetch("/api/mentor/session", {
+      signal,
+    });
+    const responseBody = (await response.json()) as
+      | MentorSession
+      | MentorApiError;
+
+    if (!response.ok) {
+      throw new Error(formatErrorResponse(responseBody as MentorApiError));
+    }
+
+    return responseBody as MentorSession;
+  }
+
+  async function refreshMentorSessionList() {
+    const session = await fetchMentorSession();
+
+    setMentor(session.mentor);
+    setRecentConversations(session.conversations);
+
+    return session;
+  }
 
   async function loadConversationHistory(nextConversationId: string) {
     setIsLoadingHistory(true);
@@ -107,25 +136,12 @@ export function MentorConversationClient() {
 
     async function loadMentorSession() {
       try {
-        const response = await fetch("/api/mentor/session", {
-          signal: controller.signal,
-        });
-        const responseBody = (await response.json()) as
-          | MentorSession
-          | MentorApiError;
-
-        if (!response.ok) {
-          if (isActive) {
-            setErrorMessage(formatErrorResponse(responseBody as MentorApiError));
-          }
-          return;
-        }
-
-        const session = responseBody as MentorSession;
+        const session = await fetchMentorSession(controller.signal);
         const nextConversationId = session.conversation.id;
 
         if (isActive) {
           setConversationId(nextConversationId);
+          setRecentConversations(session.conversations);
           setMentor(session.mentor);
 
           await Promise.all([
@@ -139,7 +155,11 @@ export function MentorConversationClient() {
         }
 
         if (isActive) {
-          setErrorMessage("Unable to load your mentor conversation.");
+          setErrorMessage(
+            error instanceof Error
+              ? error.message
+              : "Unable to load your mentor conversation.",
+          );
         }
       } finally {
         if (isActive) {
@@ -173,6 +193,7 @@ export function MentorConversationClient() {
     try {
       const response = await fetch("/api/mentor/respond", {
         body: JSON.stringify({
+          conversationId,
           message: trimmedMessage,
         }),
         headers: {
@@ -198,6 +219,7 @@ export function MentorConversationClient() {
       await Promise.all([
         loadConversationHistory(nextConversationId),
         loadMemories(),
+        refreshMentorSessionList(),
       ]);
     } catch {
       setErrorMessage("Unable to send your message.");
@@ -232,12 +254,26 @@ export function MentorConversationClient() {
       setMessage("");
       setMessages([]);
 
-      await loadMemories();
+      await Promise.all([loadMemories(), refreshMentorSessionList()]);
     } catch {
       setErrorMessage("Unable to start a new conversation.");
     } finally {
       setIsStartingNewConversation(false);
     }
+  }
+
+  async function handleSelectConversation(nextConversationId: string) {
+    if (nextConversationId === conversationId) {
+      return;
+    }
+
+    setErrorMessage("");
+    setMessageError("");
+    setConversationId(nextConversationId);
+    setMessage("");
+    setMessages([]);
+
+    await loadConversationHistory(nextConversationId);
   }
 
   return (
@@ -282,12 +318,23 @@ export function MentorConversationClient() {
         />
       </Card>
 
-      <Card className="self-start p-5 sm:p-6" variant="bordered">
-        <MentorMemoryPanel
-          isLoading={isLoadingMemories}
-          memories={memories}
-        />
-      </Card>
+      <div className="space-y-4 self-start">
+        <Card className="p-5 sm:p-6" variant="bordered">
+          <MentorConversationList
+            activeConversationId={conversationId}
+            conversations={recentConversations}
+            isLoading={isLoadingSession || isStartingNewConversation}
+            onSelectConversation={handleSelectConversation}
+          />
+        </Card>
+
+        <Card className="p-5 sm:p-6" variant="bordered">
+          <MentorMemoryPanel
+            isLoading={isLoadingMemories}
+            memories={memories}
+          />
+        </Card>
+      </div>
     </div>
   );
 }

@@ -11,12 +11,13 @@ export const dynamic = "force-dynamic";
 export async function GET() {
   try {
     const service = new MentorSessionService();
-    const session = await service.getResolvedMarcusSession();
+    const overview = await service.getResolvedMarcusSessionOverview();
 
     return NextResponse.json(
       {
-        conversation: session.conversation,
-        mentor: session.mentor,
+        conversation: overview.session.conversation,
+        conversations: overview.conversations,
+        mentor: overview.session.mentor,
       },
       { status: 200 },
     );

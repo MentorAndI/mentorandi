@@ -2,6 +2,7 @@ import { ConversationRepository } from "@/services/conversation/conversation.rep
 import type {
   AuthenticatedConversationUser,
   ConversationDto,
+  ConversationSummaryDto,
   CreateConversationInput,
 } from "@/services/conversation/conversation.types";
 
@@ -162,6 +163,27 @@ export class ConversationService {
     return toConversationDto(conversation);
   }
 
+  async getRecentConversationsForUserAndMentorSlug(
+    userId: string,
+    mentorSlug: string,
+    limit = 8,
+  ): Promise<ConversationSummaryDto[]> {
+    const user = await this.repository.findUserById(userId);
+
+    if (!user) {
+      throw new ConversationServiceError("User was not found.", 404);
+    }
+
+    const conversations =
+      await this.repository.findConversationsForUserAndMentorSlug(
+        user.id,
+        mentorSlug,
+        limit,
+      );
+
+    return conversations.map(toConversationSummaryDto);
+  }
+
   private async ensureUser(authUserId: string) {
     const existingUser =
       await this.repository.findUserByAuthUserId(authUserId);
@@ -191,4 +213,41 @@ function toConversationDto(conversation: {
     mentor: conversation.mentor,
     updatedAt: conversation.updatedAt.toISOString(),
   };
+}
+
+function toConversationSummaryDto(conversation: {
+  createdAt: Date;
+  id: string;
+  mentor: {
+    description: string;
+    id: string;
+    name: string;
+    slug: string;
+  };
+  messages: Array<{
+    content: string;
+    createdAt: Date;
+  }>;
+  updatedAt: Date;
+}): ConversationSummaryDto {
+  const latestMessage = conversation.messages[0] ?? null;
+
+  return {
+    ...toConversationDto(conversation),
+    latestMessageAt: latestMessage?.createdAt.toISOString() ?? null,
+    latestMessagePreview: latestMessage
+      ? formatConversationPreview(latestMessage.content)
+      : null,
+  };
+}
+
+function formatConversationPreview(content: string) {
+  const normalizedContent = content.replace(/\s+/g, " ").trim();
+  const maxPreviewLength = 90;
+
+  if (normalizedContent.length <= maxPreviewLength) {
+    return normalizedContent;
+  }
+
+  return `${normalizedContent.slice(0, maxPreviewLength - 3).trim()}...`;
 }

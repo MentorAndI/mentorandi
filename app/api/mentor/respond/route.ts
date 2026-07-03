@@ -13,9 +13,12 @@ import { UserServiceError } from "@/services/user/user.service";
 export const dynamic = "force-dynamic";
 
 interface MentorRespondInput {
+  conversationId?: string;
   message: string;
 }
 
+const uuidPattern =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const maxMessageLength = 10000;
 
 export async function POST(request: Request) {
@@ -31,7 +34,11 @@ export async function POST(request: Request) {
 
   try {
     const sessionService = new MentorSessionService();
-    const session = await sessionService.getResolvedMarcusSession();
+    const session = validation.input.conversationId
+      ? await sessionService.getResolvedMarcusSessionForConversation(
+          validation.input.conversationId,
+        )
+      : await sessionService.getResolvedMarcusSession();
     const pipeline = new MentorResponsePipelineService();
     const response = await pipeline.run(
       {
@@ -102,11 +109,19 @@ function validateMentorRespondInput(
     "message" in body && typeof body.message === "string"
       ? body.message.trim()
       : "";
+  const conversationId =
+    "conversationId" in body && typeof body.conversationId === "string"
+      ? body.conversationId.trim()
+      : "";
 
   if (!message) {
     errors.message = "Message is required.";
   } else if (message.length > maxMessageLength) {
     errors.message = `Message must be ${maxMessageLength} characters or fewer.`;
+  }
+
+  if (conversationId && !uuidPattern.test(conversationId)) {
+    errors.conversationId = "Conversation ID must be a valid UUID.";
   }
 
   if (Object.keys(errors).length > 0) {
@@ -119,6 +134,7 @@ function validateMentorRespondInput(
   return {
     errors,
     input: {
+      conversationId: conversationId || undefined,
       message,
     },
     isValid: true,
