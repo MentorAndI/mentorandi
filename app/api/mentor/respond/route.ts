@@ -8,7 +8,7 @@ import {
   MentorResponsePipelineService,
   MentorResponsePipelineServiceError,
 } from "@/services/mentor-core/response-pipeline/response-pipeline.service";
-import type { MentorResponsePipelineAuthContext } from "@/services/mentor-core/response-pipeline/response-pipeline.types";
+import { UserServiceError } from "@/services/user/user.service";
 
 export const dynamic = "force-dynamic";
 
@@ -18,20 +18,7 @@ interface MentorRespondInput {
 
 const maxMessageLength = 10000;
 
-function getMentorResponseAuthContext(): MentorResponsePipelineAuthContext {
-  return {
-    authUserId: null,
-  };
-}
-
 export async function POST(request: Request) {
-  if (process.env.NODE_ENV === "production") {
-    return NextResponse.json(
-      { error: "Mentor response requires authenticated user resolution." },
-      { status: 401 },
-    );
-  }
-
   const body = await request.json().catch(() => null);
   const validation = validateMentorRespondInput(body);
 
@@ -44,7 +31,7 @@ export async function POST(request: Request) {
 
   try {
     const sessionService = new MentorSessionService();
-    const session = await sessionService.getDevelopmentMarcusSession();
+    const session = await sessionService.getResolvedMarcusSession();
     const pipeline = new MentorResponsePipelineService();
     const response = await pipeline.run(
       {
@@ -53,7 +40,9 @@ export async function POST(request: Request) {
         provider: "mock",
         userId: session.userId,
       },
-      getMentorResponseAuthContext(),
+      {
+        authUserId: session.authUserId,
+      },
     );
 
     return NextResponse.json(
@@ -66,6 +55,13 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     if (error instanceof MentorSessionServiceError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.statusCode },
+      );
+    }
+
+    if (error instanceof UserServiceError) {
       return NextResponse.json(
         { error: error.message },
         { status: error.statusCode },

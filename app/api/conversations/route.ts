@@ -1,42 +1,39 @@
 import { NextResponse } from "next/server";
 
-import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   ConversationService,
   ConversationServiceError,
 } from "@/services/conversation/conversation.service";
 import { validateCreateConversationInput } from "@/services/conversation/conversation.validators";
+import {
+  UserService,
+  UserServiceError,
+} from "@/services/user/user.service";
 
 export const dynamic = "force-dynamic";
 
 async function getAuthenticatedUser() {
-  const supabase = await createSupabaseServerClient();
-  const {
-    data: { user },
-    error,
-  } = await supabase.auth.getUser();
+  const user = await new UserService().resolveCurrentUser();
 
-  if (error || !user) {
-    return null;
-  }
-
-  return { authUserId: user.id };
+  return { authUserId: user.authUserId };
 }
 
 export async function GET() {
-  const authenticatedUser = await getAuthenticatedUser();
-
-  if (!authenticatedUser) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-  }
-
   try {
+    const authenticatedUser = await getAuthenticatedUser();
     const service = new ConversationService();
     const conversations =
       await service.getConversationsForUser(authenticatedUser);
 
     return NextResponse.json({ conversations }, { status: 200 });
-  } catch {
+  } catch (error) {
+    if (error instanceof UserServiceError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.statusCode },
+      );
+    }
+
     return NextResponse.json(
       { error: "Unable to load conversations." },
       { status: 500 },
@@ -45,12 +42,6 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const authenticatedUser = await getAuthenticatedUser();
-
-  if (!authenticatedUser) {
-    return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
-  }
-
   const body = await request.json().catch(() => null);
   const validation = validateCreateConversationInput(body);
 
@@ -62,6 +53,7 @@ export async function POST(request: Request) {
   }
 
   try {
+    const authenticatedUser = await getAuthenticatedUser();
     const service = new ConversationService();
     const conversation = await service.createConversation(
       authenticatedUser,
@@ -71,6 +63,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ conversation }, { status: 201 });
   } catch (error) {
     if (error instanceof ConversationServiceError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.statusCode },
+      );
+    }
+
+    if (error instanceof UserServiceError) {
       return NextResponse.json(
         { error: error.message },
         { status: error.statusCode },

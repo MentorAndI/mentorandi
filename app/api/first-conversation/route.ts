@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 
-import { getPrismaClient } from "@/lib/prisma";
+import { ConversationServiceError } from "@/services/conversation/conversation.service";
 import {
-  ConversationService,
-  ConversationServiceError,
-} from "@/services/conversation/conversation.service";
+  MentorSessionService,
+  MentorSessionServiceError,
+} from "@/services/mentor/mentor-session.service";
 import {
   MentorResponsePipelineService,
   MentorResponsePipelineServiceError,
 } from "@/services/mentor-core/response-pipeline/response-pipeline.service";
-import type { MentorResponsePipelineAuthContext } from "@/services/mentor-core/response-pipeline/response-pipeline.types";
+import { UserServiceError } from "@/services/user/user.service";
 
 export const dynamic = "force-dynamic";
 
@@ -17,30 +17,9 @@ interface FirstConversationInput {
   text: string;
 }
 
-interface SeededMentorSession {
-  conversationId: string | null;
-  mentorId: string;
-  userId: string;
-}
-
 const maxFirstConversationLength = 1200;
-const marcusSlug = "marcus";
-const testAuthUserId = "00000000-0000-0000-0000-000000000001";
-
-function getFirstConversationAuthContext(): MentorResponsePipelineAuthContext {
-  return {
-    authUserId: null,
-  };
-}
 
 export async function POST(request: Request) {
-  if (process.env.NODE_ENV === "production") {
-    return NextResponse.json(
-      { error: "First conversation requires authenticated user resolution." },
-      { status: 401 },
-    );
-  }
-
   const body = await request.json().catch(() => null);
   const validation = validateFirstConversationInput(body);
 
@@ -52,31 +31,24 @@ export async function POST(request: Request) {
   }
 
   try {
-    const seedData = await getSeededMentorSession();
-    const conversationService = new ConversationService();
-    const conversation = seedData.conversationId
-      ? await conversationService.getConversationForUserId(
-          seedData.userId,
-          seedData.conversationId,
-        )
-      : await conversationService.createConversationForUserId(seedData.userId, {
-          mentorId: seedData.mentorId,
-        });
-
+    const sessionService = new MentorSessionService();
+    const session = await sessionService.getResolvedMarcusSession();
     const pipeline = new MentorResponsePipelineService();
     const response = await pipeline.run(
       {
-        conversationId: conversation.id,
+        conversationId: session.conversation.id,
         message: validation.input.text,
         provider: "mock",
-        userId: seedData.userId,
+        userId: session.userId,
       },
-      getFirstConversationAuthContext(),
+      {
+        authUserId: session.authUserId,
+      },
     );
 
     return NextResponse.json(
       {
-        conversationId: conversation.id,
+        conversationId: session.conversation.id,
         mentorMessage: response.mentorMessage,
         userMessage: response.userMessage,
       },
@@ -84,6 +56,20 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     if (error instanceof ConversationServiceError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.statusCode },
+      );
+    }
+
+    if (error instanceof MentorSessionServiceError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.statusCode },
+      );
+    }
+
+    if (error instanceof UserServiceError) {
       return NextResponse.json(
         { error: error.message },
         { status: error.statusCode },
@@ -102,51 +88,6 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
-}
-
-async function getSeededMentorSession(): Promise<SeededMentorSession> {
-  const prisma = getPrismaClient();
-  const [user, mentor] = await Promise.all([
-    prisma.user.findUnique({
-      select: {
-        id: true,
-      },
-      where: {
-        authUserId: testAuthUserId,
-      },
-    }),
-    prisma.mentor.findUnique({
-      select: {
-        id: true,
-      },
-      where: {
-        slug: marcusSlug,
-      },
-    }),
-  ]);
-
-  if (!user || !mentor) {
-    throw new Error("Seeded development user or mentor was not found.");
-  }
-
-  const conversation = await prisma.conversation.findFirst({
-    orderBy: {
-      updatedAt: "desc",
-    },
-    select: {
-      id: true,
-    },
-    where: {
-      mentorId: mentor.id,
-      userId: user.id,
-    },
-  });
-
-  return {
-    conversationId: conversation?.id ?? null,
-    mentorId: mentor.id,
-    userId: user.id,
-  };
 }
 
 function validateFirstConversationInput(

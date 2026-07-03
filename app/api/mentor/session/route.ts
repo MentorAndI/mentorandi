@@ -4,20 +4,14 @@ import {
   MentorSessionService,
   MentorSessionServiceError,
 } from "@/services/mentor/mentor-session.service";
+import { UserServiceError } from "@/services/user/user.service";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  if (process.env.NODE_ENV === "production") {
-    return NextResponse.json(
-      { error: "Mentor session requires authenticated user resolution." },
-      { status: 401 },
-    );
-  }
-
   try {
     const service = new MentorSessionService();
-    const session = await service.getDevelopmentMarcusSession();
+    const session = await service.getResolvedMarcusSession();
 
     return NextResponse.json(
       {
@@ -28,6 +22,13 @@ export async function GET() {
     );
   } catch (error) {
     if (error instanceof MentorSessionServiceError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.statusCode },
+      );
+    }
+
+    if (error instanceof UserServiceError) {
       return NextResponse.json(
         { error: error.message },
         { status: error.statusCode },

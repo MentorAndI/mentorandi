@@ -1,5 +1,7 @@
 import { getPrismaClient } from "@/lib/prisma";
 import { ConversationService } from "@/services/conversation/conversation.service";
+import { UserService } from "@/services/user/user.service";
+import type { UserDto } from "@/services/user/user.types";
 
 export interface MentorSessionDto {
   conversation: {
@@ -13,6 +15,7 @@ export interface MentorSessionDto {
 }
 
 export interface DevelopmentMentorSession extends MentorSessionDto {
+  authUserId: string;
   mentorId: string;
   userId: string;
 }
@@ -28,36 +31,27 @@ export class MentorSessionServiceError extends Error {
 }
 
 const marcusSlug = "marcus";
-const testAuthUserId = "00000000-0000-0000-0000-000000000001";
 const marcusRole = "Strategic Mentor";
 const marcusTagline = "Focused thinking. Better decisions. Long-term growth.";
 
 export class MentorSessionService {
-  async getDevelopmentMarcusSession(): Promise<DevelopmentMentorSession> {
-    const prisma = getPrismaClient();
-    const [user, mentor] = await Promise.all([
-      prisma.user.findUnique({
-        select: {
-          id: true,
-        },
-        where: {
-          authUserId: testAuthUserId,
-        },
-      }),
-      prisma.mentor.findUnique({
-        select: {
-          id: true,
-          name: true,
-        },
-        where: {
-          slug: marcusSlug,
-        },
-      }),
-    ]);
+  constructor(private readonly userService = new UserService()) {}
 
-    if (!user || !mentor) {
+  async getMarcusSessionForUser(user: UserDto): Promise<DevelopmentMentorSession> {
+    const prisma = getPrismaClient();
+    const mentor = await prisma.mentor.findUnique({
+      select: {
+        id: true,
+        name: true,
+      },
+      where: {
+        slug: marcusSlug,
+      },
+    });
+
+    if (!mentor) {
       throw new MentorSessionServiceError(
-        "Seeded development mentor session was not found.",
+        "Marcus mentor session was not found.",
         404,
       );
     }
@@ -82,6 +76,7 @@ export class MentorSessionService {
         });
 
     return {
+      authUserId: user.authUserId,
       conversation: {
         id: conversation.id,
       },
@@ -93,5 +88,17 @@ export class MentorSessionService {
       mentorId: mentor.id,
       userId: user.id,
     };
+  }
+
+  async getResolvedMarcusSession(): Promise<DevelopmentMentorSession> {
+    const user = await this.userService.resolveCurrentUser();
+
+    return this.getMarcusSessionForUser(user);
+  }
+
+  async getDevelopmentMarcusSession(): Promise<DevelopmentMentorSession> {
+    const user = await this.userService.getDevelopmentUser();
+
+    return this.getMarcusSessionForUser(user);
   }
 }

@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 
 import { getPrismaClient } from "@/lib/prisma";
+import { UserService } from "@/services/user/user.service";
 
 export const dynamic = "force-dynamic";
 
-const testAuthUserId = "00000000-0000-0000-0000-000000000001";
 const marcusSlug = "marcus";
 
 export async function GET() {
@@ -17,27 +17,18 @@ export async function GET() {
 
   try {
     const prisma = getPrismaClient();
+    const user = await new UserService().getDevelopmentUser();
 
-    const [user, mentor] = await Promise.all([
-      prisma.user.findUnique({
-        select: {
-          id: true,
-        },
-        where: {
-          authUserId: testAuthUserId,
-        },
-      }),
-      prisma.mentor.findUnique({
-        select: {
-          id: true,
-        },
-        where: {
-          slug: marcusSlug,
-        },
-      }),
-    ]);
+    const mentor = await prisma.mentor.findUnique({
+      select: {
+        id: true,
+      },
+      where: {
+        slug: marcusSlug,
+      },
+    });
 
-    if (!user || !mentor) {
+    if (!mentor) {
       return NextResponse.json(
         { error: "Seeded development user or mentor was not found." },
         { status: 404 },

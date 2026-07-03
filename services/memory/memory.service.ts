@@ -6,8 +6,7 @@ import type {
   MentorUnderstandingDto,
   UpdateMemoryInput,
 } from "@/services/memory/memory.types";
-
-const developmentAuthUserId = "00000000-0000-0000-0000-000000000001";
+import { UserService } from "@/services/user/user.service";
 
 export class MemoryServiceError extends Error {
   constructor(
@@ -185,9 +184,11 @@ export class MemoryService {
   }
 }
 
-export function getMemoryAuthContext(): MemoryAuthContext {
+export async function getMemoryAuthContext(): Promise<MemoryAuthContext> {
+  const user = await new UserService().resolveCurrentUser();
+
   return {
-    authUserId: developmentAuthUserId,
+    authUserId: user.authUserId,
   };
 }
 

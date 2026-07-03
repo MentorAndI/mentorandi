@@ -5,6 +5,7 @@ import {
   MemoryService,
   MemoryServiceError,
 } from "@/services/memory/memory.service";
+import { UserServiceError } from "@/services/user/user.service";
 import {
   validateMemoryId,
   validateUpdateMemoryInput,
@@ -32,7 +33,7 @@ export async function GET(_request: Request, context: MemoryRouteContext) {
   try {
     const service = new MemoryService();
     const understanding = await service.getMentorUnderstanding(
-      getMemoryAuthContext(),
+      await getMemoryAuthContext(),
       memoryIdValidation.input.memoryId,
     );
 
@@ -66,7 +67,7 @@ export async function PATCH(request: Request, context: MemoryRouteContext) {
   try {
     const service = new MemoryService();
     const understanding = await service.updateMentorUnderstanding(
-      getMemoryAuthContext(),
+      await getMemoryAuthContext(),
       memoryIdValidation.input.memoryId,
       updateValidation.input,
     );
@@ -91,7 +92,7 @@ export async function DELETE(_request: Request, context: MemoryRouteContext) {
   try {
     const service = new MemoryService();
     await service.deleteMentorUnderstanding(
-      getMemoryAuthContext(),
+      await getMemoryAuthContext(),
       memoryIdValidation.input.memoryId,
     );
 
@@ -103,6 +104,13 @@ export async function DELETE(_request: Request, context: MemoryRouteContext) {
 
 function handleMemoryRouteError(error: unknown, fallbackMessage: string) {
   if (error instanceof MemoryServiceError) {
+    return NextResponse.json(
+      { error: error.message },
+      { status: error.statusCode },
+    );
+  }
+
+  if (error instanceof UserServiceError) {
     return NextResponse.json(
       { error: error.message },
       { status: error.statusCode },
