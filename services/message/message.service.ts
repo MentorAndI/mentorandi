@@ -22,8 +22,7 @@ export class MessageService {
     conversationId: string,
     authContext: MessageAuthContext,
   ): Promise<MessageDto[]> {
-    await this.ensureConversationExists(conversationId);
-    this.assertCanAccessConversation(authContext);
+    await this.ensureCanAccessConversation(conversationId, authContext);
 
     const messages =
       await this.repository.findMessagesByConversationId(conversationId);
@@ -36,12 +35,31 @@ export class MessageService {
     input: CreateMessageInput,
     authContext: MessageAuthContext,
   ): Promise<MessageDto> {
-    await this.ensureConversationExists(conversationId);
-    this.assertCanAccessConversation(authContext);
+    await this.ensureCanAccessConversation(conversationId, authContext);
 
     const message = await this.repository.createMessage(conversationId, input);
 
     return toMessageDto(message);
+  }
+
+  private async ensureCanAccessConversation(
+    conversationId: string,
+    authContext: MessageAuthContext,
+  ) {
+    if (!authContext.authUserId) {
+      return this.ensureConversationExists(conversationId);
+    }
+
+    const conversation = await this.repository.findConversationForAuthUser(
+      conversationId,
+      authContext.authUserId,
+    );
+
+    if (!conversation) {
+      throw new MessageServiceError("Conversation was not found.", 404);
+    }
+
+    return conversation;
   }
 
   private async ensureConversationExists(conversationId: string) {
@@ -53,10 +71,6 @@ export class MessageService {
     }
 
     return conversation;
-  }
-
-  private assertCanAccessConversation(authContext: MessageAuthContext) {
-    void authContext;
   }
 }
 

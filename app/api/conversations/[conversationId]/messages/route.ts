@@ -9,6 +9,10 @@ import {
   validateConversationId,
   validateCreateMessageInput,
 } from "@/services/message/message.validators";
+import {
+  UserService,
+  UserServiceError,
+} from "@/services/user/user.service";
 
 export const dynamic = "force-dynamic";
 
@@ -18,9 +22,11 @@ interface MessageRouteContext {
   }>;
 }
 
-function getMessageAuthContext(): MessageAuthContext {
+async function getMessageAuthContext(): Promise<MessageAuthContext> {
+  const user = await new UserService().resolveCurrentUser();
+
   return {
-    authUserId: null,
+    authUserId: user.authUserId,
   };
 }
 
@@ -39,12 +45,19 @@ export async function GET(_request: Request, context: MessageRouteContext) {
     const service = new MessageService();
     const messages = await service.getMessagesForConversation(
       conversationIdValidation.input.conversationId,
-      getMessageAuthContext(),
+      await getMessageAuthContext(),
     );
 
     return NextResponse.json({ messages }, { status: 200 });
   } catch (error) {
     if (error instanceof MessageServiceError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.statusCode },
+      );
+    }
+
+    if (error instanceof UserServiceError) {
       return NextResponse.json(
         { error: error.message },
         { status: error.statusCode },
@@ -84,12 +97,19 @@ export async function POST(request: Request, context: MessageRouteContext) {
     const message = await service.createMessage(
       conversationIdValidation.input.conversationId,
       messageValidation.input,
-      getMessageAuthContext(),
+      await getMessageAuthContext(),
     );
 
     return NextResponse.json({ message }, { status: 201 });
   } catch (error) {
     if (error instanceof MessageServiceError) {
+      return NextResponse.json(
+        { error: error.message },
+        { status: error.statusCode },
+      );
+    }
+
+    if (error instanceof UserServiceError) {
       return NextResponse.json(
         { error: error.message },
         { status: error.statusCode },

@@ -24,6 +24,10 @@ import type {
   MentorResponsePipelineInput,
   MentorResponsePipelineResult,
 } from "@/services/mentor-core/response-pipeline/response-pipeline.types";
+import {
+  UserService,
+  UserServiceError,
+} from "@/services/user/user.service";
 
 const mockProviderModel = "mock-deterministic-v1";
 const minimumMemoryConfidence = 0.6;
@@ -47,6 +51,7 @@ export class MentorResponsePipelineService {
     private readonly messageService = new MessageService(),
     private readonly memoryExtractor = new MemoryExtractorService(),
     private readonly memoryService = new MemoryService(),
+    private readonly userService = new UserService(),
   ) {}
 
   async run(
@@ -54,6 +59,8 @@ export class MentorResponsePipelineService {
     authContext: MentorResponsePipelineAuthContext,
   ): Promise<MentorResponsePipelineResult> {
     try {
+      await this.assertCanRunForUser(input.userId, authContext);
+
       const userMessage = await this.messageService.createMessage(
         input.conversationId,
         {
@@ -110,6 +117,10 @@ export class MentorResponsePipelineService {
         userMessage,
       };
     } catch (error) {
+      if (error instanceof MentorResponsePipelineServiceError) {
+        throw error;
+      }
+
       if (error instanceof ContextBuilderServiceError) {
         throw new MentorResponsePipelineServiceError(
           error.message,
@@ -133,6 +144,13 @@ export class MentorResponsePipelineService {
 
       if (error instanceof MemoryExtractorServiceError) {
         throw new MentorResponsePipelineServiceError(error.message, 400);
+      }
+
+      if (error instanceof UserServiceError) {
+        throw new MentorResponsePipelineServiceError(
+          error.message,
+          error.statusCode,
+        );
       }
 
       if (error instanceof Error) {
@@ -170,6 +188,27 @@ export class MentorResponsePipelineService {
     }
 
     return storedMemories;
+  }
+
+  private async assertCanRunForUser(
+    userId: string,
+    authContext: MentorResponsePipelineAuthContext,
+  ) {
+    if (!authContext.authUserId) {
+      return;
+    }
+
+    const user = await this.userService.getUserByAuthUserId(
+      authContext.authUserId,
+    );
+
+    if (!user) {
+      throw new MentorResponsePipelineServiceError("Unauthorized.", 401);
+    }
+
+    if (user.id !== userId) {
+      throw new MentorResponsePipelineServiceError("Forbidden.", 403);
+    }
   }
 }
 

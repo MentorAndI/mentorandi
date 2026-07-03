@@ -35,13 +35,13 @@ export class ContextBuilderService {
     input: BuildMentorContextInput,
     authContext: BuildMentorContextAuthContext,
   ): Promise<MentorResponseContext> {
-    this.assertCanBuildContextForUser(input.userId, authContext);
-
     const user = await this.repository.findUserById(input.userId);
 
     if (!user) {
       throw new ContextBuilderServiceError("User was not found.", 404);
     }
+
+    this.assertCanBuildContextForUser(user.authUserId, authContext);
 
     const conversation = await this.repository.findConversationForUser(
       input.conversationId,
@@ -120,10 +120,12 @@ export class ContextBuilderService {
   }
 
   private assertCanBuildContextForUser(
-    _userId: string,
+    userAuthUserId: string,
     authContext: BuildMentorContextAuthContext,
   ) {
-    void authContext;
+    if (authContext.authUserId && authContext.authUserId !== userAuthUserId) {
+      throw new ContextBuilderServiceError("Forbidden.", 403);
+    }
   }
 }
 

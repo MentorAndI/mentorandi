@@ -10,6 +10,20 @@ export class MessageRepository {
     });
   }
 
+  async findConversationForAuthUser(
+    conversationId: string,
+    authUserId: string,
+  ) {
+    return this.prisma.conversation.findFirst({
+      where: {
+        id: conversationId,
+        user: {
+          authUserId,
+        },
+      },
+    });
+  }
+
   async findMessagesByConversationId(conversationId: string) {
     return this.prisma.message.findMany({
       orderBy: {
