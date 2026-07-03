@@ -86,6 +86,7 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         conversation,
+        createdGoals: response.createdGoals,
         extractedMemories: response.extractedMemories,
         mentorMessage: response.mentorMessage,
         model: response.model,

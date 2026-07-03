@@ -1,4 +1,9 @@
 import { MessageRole } from "@/lib/generated/prisma/client";
+import {
+  GoalService,
+  GoalServiceError,
+} from "@/services/goal/goal.service";
+import type { CreateGoalInput } from "@/services/goal/goal.types";
 import { LlmService } from "@/services/llm/llm.service";
 import {
   MemoryService,
@@ -13,6 +18,11 @@ import {
   ContextBuilderService,
   ContextBuilderServiceError,
 } from "@/services/mentor-core/context-builder/context-builder.service";
+import {
+  GoalExtractorService,
+  GoalExtractorServiceError,
+} from "@/services/mentor-core/goal-extractor/goal-extractor.service";
+import type { GoalCandidate } from "@/services/mentor-core/goal-extractor/goal-extractor.types";
 import {
   MemoryExtractorService,
   MemoryExtractorServiceError,
@@ -49,6 +59,8 @@ export class MentorResponsePipelineService {
     private readonly promptComposer = new PromptComposerService(),
     private readonly llmService = new LlmService(),
     private readonly messageService = new MessageService(),
+    private readonly goalExtractor = new GoalExtractorService(),
+    private readonly goalService = new GoalService(),
     private readonly memoryExtractor = new MemoryExtractorService(),
     private readonly memoryService = new MemoryService(),
     private readonly userService = new UserService(),
@@ -69,6 +81,7 @@ export class MentorResponsePipelineService {
         },
         authContext,
       );
+      const createdGoals = await this.extractAndStoreGoals(input);
 
       const context = await this.contextBuilder.buildMentorContext(
         {
@@ -109,6 +122,7 @@ export class MentorResponsePipelineService {
       return {
         contextUsed: context,
         createdAt: new Date().toISOString(),
+        createdGoals,
         extractedMemories,
         mentorMessage,
         model: llmResponse.metadata.model,
@@ -133,6 +147,17 @@ export class MentorResponsePipelineService {
           error.message,
           error.statusCode,
         );
+      }
+
+      if (error instanceof GoalServiceError) {
+        throw new MentorResponsePipelineServiceError(
+          error.message,
+          error.statusCode,
+        );
+      }
+
+      if (error instanceof GoalExtractorServiceError) {
+        throw new MentorResponsePipelineServiceError(error.message, 400);
       }
 
       if (error instanceof MemoryServiceError) {
@@ -162,6 +187,28 @@ export class MentorResponsePipelineService {
         500,
       );
     }
+  }
+
+  private async extractAndStoreGoals(input: MentorResponsePipelineInput) {
+    const extractionResult = this.goalExtractor.extract({
+      conversationId: input.conversationId,
+      userId: input.userId,
+      userMessage: input.message,
+    });
+    const createdGoals = [];
+
+    for (const candidate of extractionResult.goalCandidates) {
+      const createdGoal = await this.goalService.createUniqueActiveGoalForUserId(
+        input.userId,
+        toCreateGoalInput(candidate),
+      );
+
+      if (createdGoal) {
+        createdGoals.push(createdGoal);
+      }
+    }
+
+    return createdGoals;
   }
 
   private async extractAndStoreMemories(input: MentorResponsePipelineInput) {
@@ -210,6 +257,14 @@ export class MentorResponsePipelineService {
       throw new MentorResponsePipelineServiceError("Forbidden.", 403);
     }
   }
+}
+
+function toCreateGoalInput(candidate: GoalCandidate): CreateGoalInput {
+  return {
+    description: candidate.description,
+    status: candidate.status,
+    title: candidate.title,
+  };
 }
 
 function isUsefulMemoryCandidate(candidate: MemoryCandidate) {
