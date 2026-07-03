@@ -8,7 +8,10 @@ import {
   MentorResponsePipelineService,
   MentorResponsePipelineServiceError,
 } from "@/services/mentor-core/response-pipeline/response-pipeline.service";
-import type { MentorResponsePipelineAuthContext } from "@/services/mentor-core/response-pipeline/response-pipeline.types";
+import type {
+  MentorResponsePipelineAuthContext,
+  MentorResponsePipelineResult,
+} from "@/services/mentor-core/response-pipeline/response-pipeline.types";
 
 export const dynamic = "force-dynamic";
 
@@ -96,6 +99,7 @@ export async function POST(request: Request) {
         skippedDuplicateMemories: response.skippedDuplicateMemories,
         updatedGoals: response.updatedGoals,
         updatedMemories: response.updatedMemories,
+        diagnostics: buildMentorCoreDiagnostics(response),
         userMessage: response.userMessage,
       },
       { status: 200 },
@@ -120,6 +124,53 @@ export async function POST(request: Request) {
       { status: 500 },
     );
   }
+}
+
+function buildMentorCoreDiagnostics(response: MentorResponsePipelineResult) {
+  return {
+    contextCounts: {
+      activeGoals: response.contextUsed.userGoals.length,
+      memories: response.contextUsed.relevantMemories.length,
+      recentMessages: response.contextUsed.recentMessages.length,
+      reflections: response.contextUsed.recentReflections.length,
+    },
+    createdGoals: response.createdGoals.map(toGoalDiagnostic),
+    createdMemories: response.extractedMemories.map(toMemoryDiagnostic),
+    createdReflection: response.createdReflection
+      ? {
+          createdAt: response.createdReflection.createdAt,
+          summary: response.createdReflection.summary,
+        }
+      : null,
+    currentUserMessage: response.userMessage.content,
+    provider: response.provider,
+    skippedDuplicateGoals:
+      response.skippedDuplicateGoals.map(toGoalDiagnostic),
+    skippedDuplicateMemories:
+      response.skippedDuplicateMemories.map(toMemoryDiagnostic),
+    updatedGoals: response.updatedGoals.map(toGoalDiagnostic),
+    updatedMemories: response.updatedMemories.map(toMemoryDiagnostic),
+  };
+}
+
+function toGoalDiagnostic(goal: MentorResponsePipelineResult["createdGoals"][number]) {
+  return {
+    description: goal.description,
+    status: goal.status,
+    title: goal.title,
+  };
+}
+
+function toMemoryDiagnostic(
+  memory: MentorResponsePipelineResult["extractedMemories"][number],
+) {
+  return {
+    category: memory.category,
+    confidence: memory.confidence,
+    content: memory.content,
+    importance: memory.importance,
+    title: memory.title,
+  };
 }
 
 function validateDevMentorResponseInput(

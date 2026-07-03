@@ -32,6 +32,7 @@ interface MentorTestConversation {
 
 interface MentorTestResponse {
   conversation: MentorTestConversation;
+  diagnostics?: MentorCoreDiagnostics;
   mentorMessage: MentorTestMessage;
   model: string;
   provider: string;
@@ -65,6 +66,45 @@ interface MentorTestCleanupResponse {
   deletedMemories: number;
   deletedMessages: number;
   deletedReflections: number;
+}
+
+interface MentorCoreDiagnostics {
+  contextCounts: MentorCoreContextCounts;
+  createdGoals: MentorCoreGoalDiagnostic[];
+  createdMemories: MentorCoreMemoryDiagnostic[];
+  createdReflection: MentorCoreReflectionDiagnostic | null;
+  currentUserMessage: string;
+  provider: string;
+  skippedDuplicateGoals: MentorCoreGoalDiagnostic[];
+  skippedDuplicateMemories: MentorCoreMemoryDiagnostic[];
+  updatedGoals: MentorCoreGoalDiagnostic[];
+  updatedMemories: MentorCoreMemoryDiagnostic[];
+}
+
+interface MentorCoreContextCounts {
+  activeGoals: number;
+  memories: number;
+  recentMessages: number;
+  reflections: number;
+}
+
+interface MentorCoreGoalDiagnostic {
+  description: string | null;
+  status: string;
+  title: string;
+}
+
+interface MentorCoreMemoryDiagnostic {
+  category: string;
+  confidence: number;
+  content: string;
+  importance: number;
+  title: string;
+}
+
+interface MentorCoreReflectionDiagnostic {
+  createdAt: string;
+  summary: string;
 }
 
 interface MentorTestMessagesResponse {
@@ -677,6 +717,23 @@ export function MentorTestClient() {
             </p>
           )}
         </Card>
+
+        <Card
+          aria-live="polite"
+          className="space-y-5 self-start"
+          variant="bordered"
+        >
+          <div>
+            <h2 className="text-lg font-semibold text-zinc-950">
+              Mentor Core Diagnostics
+            </h2>
+            <p className="mt-1 text-sm text-zinc-500">
+              Latest development-only pipeline summary.
+            </p>
+          </div>
+
+          <MentorCoreDiagnosticsPanel result={result} />
+        </Card>
       </div>
     </div>
   );
@@ -859,6 +916,224 @@ function StoredMemory({ memory }: StoredMemoryProps) {
       </div>
       <p className="text-sm leading-6 text-zinc-700">{memory.content}</p>
     </article>
+  );
+}
+
+interface MentorCoreDiagnosticsPanelProps {
+  result: MentorTestResponse | null;
+}
+
+function MentorCoreDiagnosticsPanel({
+  result,
+}: MentorCoreDiagnosticsPanelProps) {
+  if (!result) {
+    return (
+      <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 text-sm text-zinc-500">
+        Send a test message to see diagnostics.
+      </p>
+    );
+  }
+
+  const diagnostics = result.diagnostics;
+
+  if (!diagnostics) {
+    return (
+      <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 text-sm text-zinc-500">
+        No diagnostics were returned for the latest response.
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-5">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <DiagnosticStat
+          label="Provider used"
+          value={diagnostics.provider || result.provider}
+        />
+        <DiagnosticStat
+          label="Current user message"
+          value={diagnostics.currentUserMessage || result.userMessage.content}
+        />
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <DiagnosticStat
+          label="Memories in context"
+          value={String(diagnostics.contextCounts.memories)}
+        />
+        <DiagnosticStat
+          label="Active goals in context"
+          value={String(diagnostics.contextCounts.activeGoals)}
+        />
+        <DiagnosticStat
+          label="Reflections in context"
+          value={String(diagnostics.contextCounts.reflections)}
+        />
+        <DiagnosticStat
+          label="Recent messages in context"
+          value={String(diagnostics.contextCounts.recentMessages)}
+        />
+      </div>
+
+      <DiagnosticMemoryList
+        items={diagnostics.createdMemories}
+        title="Created memories"
+      />
+      <DiagnosticMemoryList
+        items={diagnostics.skippedDuplicateMemories}
+        title="Skipped duplicate memories"
+      />
+      <DiagnosticMemoryList
+        items={diagnostics.updatedMemories}
+        title="Updated memories"
+      />
+      <DiagnosticGoalList
+        items={diagnostics.createdGoals}
+        title="Created goals"
+      />
+      <DiagnosticGoalList
+        items={diagnostics.updatedGoals}
+        title="Updated goals"
+      />
+      <DiagnosticGoalList
+        items={diagnostics.skippedDuplicateGoals}
+        title="Skipped duplicate goals"
+      />
+      <DiagnosticReflection reflection={diagnostics.createdReflection} />
+    </div>
+  );
+}
+
+interface DiagnosticStatProps {
+  label: string;
+  value: string;
+}
+
+function DiagnosticStat({ label, value }: DiagnosticStatProps) {
+  return (
+    <div className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-3">
+      <p className="text-xs font-medium uppercase text-zinc-500">{label}</p>
+      <p className="mt-1 break-words text-sm leading-6 text-zinc-800">
+        {value || "None"}
+      </p>
+    </div>
+  );
+}
+
+interface DiagnosticMemoryListProps {
+  items: MentorCoreMemoryDiagnostic[];
+  title: string;
+}
+
+function DiagnosticMemoryList({
+  items,
+  title,
+}: DiagnosticMemoryListProps) {
+  return (
+    <section className="space-y-2">
+      <h3 className="text-sm font-semibold text-zinc-950">{title}</h3>
+      {items.length === 0 ? (
+        <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm text-zinc-500">
+          None.
+        </p>
+      ) : (
+        <div className="space-y-2">
+          {items.map((item) => (
+            <article
+              className="space-y-1 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-3"
+              key={`${title}-${item.category}-${item.title}-${item.content}`}
+            >
+              <p className="text-xs font-semibold uppercase text-zinc-500">
+                {item.category}
+              </p>
+              <h4 className="text-sm font-medium leading-6 text-zinc-950">
+                {item.title}
+              </h4>
+              <p className="text-sm leading-6 text-zinc-700">
+                {item.content}
+              </p>
+              <p className="text-xs text-zinc-500">
+                importance {item.importance} / confidence{" "}
+                {formatConfidence(item.confidence)}
+              </p>
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+interface DiagnosticGoalListProps {
+  items: MentorCoreGoalDiagnostic[];
+  title: string;
+}
+
+function DiagnosticGoalList({ items, title }: DiagnosticGoalListProps) {
+  return (
+    <section className="space-y-2">
+      <h3 className="text-sm font-semibold text-zinc-950">{title}</h3>
+      {items.length === 0 ? (
+        <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm text-zinc-500">
+          None.
+        </p>
+      ) : (
+        <div className="space-y-2">
+          {items.map((item) => (
+            <article
+              className="space-y-1 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-3"
+              key={`${title}-${item.status}-${item.title}`}
+            >
+              <div className="flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between">
+                <h4 className="text-sm font-medium leading-6 text-zinc-950">
+                  {item.title}
+                </h4>
+                <p className="text-xs font-semibold uppercase text-zinc-500">
+                  {item.status}
+                </p>
+              </div>
+              {item.description ? (
+                <p className="text-sm leading-6 text-zinc-700">
+                  {item.description}
+                </p>
+              ) : null}
+            </article>
+          ))}
+        </div>
+      )}
+    </section>
+  );
+}
+
+interface DiagnosticReflectionProps {
+  reflection: MentorCoreReflectionDiagnostic | null;
+}
+
+function DiagnosticReflection({ reflection }: DiagnosticReflectionProps) {
+  return (
+    <section className="space-y-2">
+      <h3 className="text-sm font-semibold text-zinc-950">
+        Created reflection
+      </h3>
+      {reflection ? (
+        <article className="space-y-2 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-3">
+          <time
+            className="block text-xs text-zinc-500"
+            dateTime={reflection.createdAt}
+          >
+            {formatMessageTimestamp(reflection.createdAt)}
+          </time>
+          <p className="text-sm leading-6 text-zinc-700">
+            {reflection.summary}
+          </p>
+        </article>
+      ) : (
+        <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm text-zinc-500">
+          None.
+        </p>
+      )}
+    </section>
   );
 }
 
