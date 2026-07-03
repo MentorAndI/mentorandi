@@ -1,3 +1,22 @@
+export const developmentTestMessageSearchTerms = [
+  "smoke test",
+  "test message",
+  "dev test",
+  "feature 0",
+  "feature 1",
+  "feature 2",
+  "feature 3",
+  "feature 4",
+  "feature 5",
+  "feature 6",
+  "feature 7",
+  "feature 8",
+  "feature 9",
+  "lorem ipsum",
+  "asdf",
+  "qwerty",
+];
+
 const testMessagePatterns = [
   /\bsmoke test\b/,
   /\btest message\b/,

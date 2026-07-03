@@ -60,6 +60,13 @@ interface MentorTestReflectionsResponse {
   reflections: MentorTestReflection[];
 }
 
+interface MentorTestCleanupResponse {
+  deletedGoals: number;
+  deletedMemories: number;
+  deletedMessages: number;
+  deletedReflections: number;
+}
+
 interface MentorTestMessagesResponse {
   messages: MentorTestMessage[];
 }
@@ -89,10 +96,13 @@ export function MentorTestClient() {
     useState<MentorTestFormState>(initialFormState);
   const [errorMessage, setErrorMessage] = useState("");
   const [historyErrorMessage, setHistoryErrorMessage] = useState("");
+  const [cleanupMessage, setCleanupMessage] = useState("");
+  const [cleanupErrorMessage, setCleanupErrorMessage] = useState("");
   const [isLoadingMemories, setIsLoadingMemories] = useState(false);
   const [isLoadingReflections, setIsLoadingReflections] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isLoadingSeedData, setIsLoadingSeedData] = useState(true);
+  const [isCleaningTestData, setIsCleaningTestData] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [memories, setMemories] = useState<MentorTestMemory[]>([]);
   const [memoriesErrorMessage, setMemoriesErrorMessage] = useState("");
@@ -343,6 +353,43 @@ export function MentorTestClient() {
     await loadRecentReflections(formState.userId.trim());
   }
 
+  async function handleCleanupTestData() {
+    setCleanupMessage("");
+    setCleanupErrorMessage("");
+    setIsCleaningTestData(true);
+
+    try {
+      const response = await fetch("/api/dev/cleanup-test-data", {
+        method: "POST",
+      });
+      const responseBody = (await response.json()) as
+        | MentorTestCleanupResponse
+        | MentorTestErrorResponse;
+
+      if (!response.ok) {
+        setCleanupErrorMessage(
+          formatErrorResponse(responseBody as MentorTestErrorResponse),
+        );
+        return;
+      }
+
+      const result = responseBody as MentorTestCleanupResponse;
+      setCleanupMessage(formatCleanupResult(result));
+
+      await Promise.all([
+        formState.conversationId.trim()
+          ? loadConversationHistory(formState.conversationId.trim())
+          : Promise.resolve(),
+        loadRecentReflections(formState.userId.trim()),
+        loadStoredMemories(),
+      ]);
+    } catch {
+      setCleanupErrorMessage("Unable to clean test data.");
+    } finally {
+      setIsCleaningTestData(false);
+    }
+  }
+
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
       <div className="space-y-6">
@@ -489,6 +536,38 @@ export function MentorTestClient() {
       </div>
 
       <div className="space-y-6">
+        <Card className="space-y-4 self-start" variant="bordered">
+          <div>
+            <h2 className="text-lg font-semibold text-zinc-950">
+              Development cleanup
+            </h2>
+            <p className="mt-1 text-sm text-zinc-500">
+              Remove local smoke-test messages and matching extracted data.
+            </p>
+          </div>
+
+          {cleanupErrorMessage ? (
+            <p className="text-sm text-red-600" role="alert">
+              {cleanupErrorMessage}
+            </p>
+          ) : null}
+
+          {cleanupMessage ? (
+            <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm text-zinc-600">
+              {cleanupMessage}
+            </p>
+          ) : null}
+
+          <Button
+            disabled={isCleaningTestData}
+            onClick={handleCleanupTestData}
+            type="button"
+            variant="secondary"
+          >
+            {isCleaningTestData ? "Cleaning..." : "Clean test data"}
+          </Button>
+        </Card>
+
         <Card
           aria-live="polite"
           className="space-y-5 self-start"
@@ -809,6 +888,15 @@ function formatErrorResponse(responseBody: MentorTestErrorResponse) {
   }
 
   return "Unable to send the test message.";
+}
+
+function formatCleanupResult(result: MentorTestCleanupResponse) {
+  return [
+    `${result.deletedMessages} messages`,
+    `${result.deletedMemories} memories`,
+    `${result.deletedGoals} goals`,
+    `${result.deletedReflections} reflections`,
+  ].join(", ");
 }
 
 function formatMessageTimestamp(value: string) {
