@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MentorAndI
 
-## Getting Started
+MentorAndI is a long-term AI mentor product built around memory, goals, reflections and an ongoing mentor relationship.
 
-First, run the development server:
+It is not a generic chatbot.
+
+## Current Status
+
+The project is in local alpha. The Next.js app runs locally with Supabase, PostgreSQL and Prisma connected. Mentor Core is functional with the mock provider as the primary local testing provider.
+
+## Key Routes
+
+- `/start` — first conversation experience.
+- `/mentor` — main mentor experience.
+- `/dev/mentor-test` — development pipeline test page.
+
+## Development
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Verification
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Run these after code changes:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npm run build
+```
 
-## Learn More
+Also manually check `/start`, `/mentor` and `/dev/mentor-test` when behavior changes.
 
-To learn more about Next.js, take a look at the following resources:
+## Documentation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [Engineering Guide](docs/ENGINEERING_GUIDE.md)
+- [Project Status](docs/PROJECT_STATUS.md)
+- [Next Steps](docs/NEXT_STEPS.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Backup And Recovery](docs/BACKUP_AND_RECOVERY.md)
+- [Agent Guardrails](AGENTS.md)
