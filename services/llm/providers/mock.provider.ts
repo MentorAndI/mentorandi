@@ -65,6 +65,7 @@ type CurrentMessageKind =
   | "follow-up"
   | "goal-follow-up"
   | "intention"
+  | "location-uncertainty"
   | "project-focus"
   | "project-update"
   | "reflection"
@@ -96,6 +97,14 @@ function buildCurrentMessageResponse({
 
   if (messageKind === "time-date-question") {
     return buildTimeDateAnswer(currentMessage, environment);
+  }
+
+  if (messageKind === "location-uncertainty") {
+    return buildLocationUncertaintyAnswer(
+      environment,
+      currentMessage,
+      recentMessages,
+    );
   }
 
   const shouldUseStoredContext =
@@ -138,6 +147,10 @@ function classifyCurrentMessage(
   recentMessages: MentorContextMessage[] = [],
 ): CurrentMessageKind {
   const normalizedMessage = normalizeForMatching(message);
+
+  if (isLocationUncertaintyQuestion(normalizedMessage)) {
+    return "location-uncertainty";
+  }
 
   if (hasTravelLocationSignal(normalizedMessage)) {
     return "travel-location";
@@ -236,6 +249,8 @@ function buildCurrentMessageAcknowledgement(
       return "Yes, stay with that.";
     case "intention":
       return "Good. Naming that clearly gives us something concrete to work with.";
+    case "location-uncertainty":
+      return "";
     case "project-focus":
       return "Stay with the design.";
     case "project-update":
@@ -340,6 +355,32 @@ function buildNextStepQuestion(
   return "What feels like the most useful place to begin?";
 }
 
+function buildLocationUncertaintyAnswer(
+  environment: MentorContextEnvironment,
+  currentMessage: string,
+  recentMessages: MentorContextMessage[],
+) {
+  const locationClue = findRecentLocationClue(currentMessage, recentMessages);
+  const timezoneLine =
+    environment.timezone && environment.timezone !== "server local time"
+      ? `the current environment timezone is ${environment.timezone}`
+      : "the current environment only gives me server local time";
+
+  if (locationClue === "paphos-cyprus") {
+    return `I can't know your exact location from that alone. But ${timezoneLine}, and you recently mentioned Paphos, Cyprus, so my best guess is that you're in Cyprus, possibly Paphos. Is that right?`;
+  }
+
+  if (locationClue === "cyprus") {
+    return `I can't know your exact location from that alone. But ${timezoneLine}, and Cyprus has come up recently, so Cyprus is a reasonable clue rather than something I can know for sure. Is that where you are?`;
+  }
+
+  if (locationClue === "paphos") {
+    return `I can't know your exact location from that alone. But ${timezoneLine}, and Paphos came up recently, so Paphos is a possible clue rather than a certainty. Is that right?`;
+  }
+
+  return `I can't know your exact location from that alone. ${capitalizeFirstLetter(timezoneLine)}. If you tell me the city or country, I can respond more usefully.`;
+}
+
 function buildTimeDateAnswer(
   currentMessage: string,
   environment: MentorContextEnvironment,
@@ -372,6 +413,18 @@ function formatWeekday(currentDateTimeIso: string) {
 function isTimeDateQuestion(normalizedMessage: string) {
   return /\b(what time is it|time is it|what date is it|what day is it|day is it today|today s date|todays date)\b/.test(
     normalizedMessage,
+  );
+}
+
+function isLocationUncertaintyQuestion(normalizedMessage: string) {
+  return (
+    /\b(where am i|where am i right now|where do you think i am|do you know where i am|can you tell my location|what is my location)\b/.test(
+      normalizedMessage,
+    ) ||
+    (/\b(weather|hot|cold|warm|rain|raining|sunny)\b/.test(
+      normalizedMessage,
+    ) &&
+      /\b(here|where am i|my location)\b/.test(normalizedMessage))
   );
 }
 
@@ -543,6 +596,38 @@ function buildTravelFollowUpGuidance(recentMessages: MentorContextMessage[]) {
   }
 
   return "Start with the place that best matches the day you want: calm, historic, social or restorative. Pick that first, then build around it.";
+}
+
+type LocationClue = "cyprus" | "paphos" | "paphos-cyprus";
+
+function findRecentLocationClue(
+  currentMessage: string,
+  recentMessages: MentorContextMessage[],
+): LocationClue | null {
+  const priorText = getPriorMessages(
+    recentMessages,
+    normalizeForMatching(currentMessage),
+  )
+    .slice(-8)
+    .map((message) => message.content)
+    .join(" ");
+  const normalizedText = normalizeForMatching(priorText);
+  const mentionsPaphos = /\bpaphos\b/.test(normalizedText);
+  const mentionsCyprus = /\bcyprus\b/.test(normalizedText);
+
+  if (mentionsPaphos && mentionsCyprus) {
+    return "paphos-cyprus";
+  }
+
+  if (mentionsCyprus) {
+    return "cyprus";
+  }
+
+  if (mentionsPaphos) {
+    return "paphos";
+  }
+
+  return null;
 }
 
 function findMostRecentTopicText(
@@ -719,6 +804,14 @@ function normalizeGoalContent(content: string) {
 
 function trimTrailingPunctuation(value: string) {
   return value.replace(/[.!?]+$/g, "");
+}
+
+function capitalizeFirstLetter(value: string) {
+  if (!value) {
+    return value;
+  }
+
+  return `${value.charAt(0).toUpperCase()}${value.slice(1)}`;
 }
 
 function findRelevantGoal(

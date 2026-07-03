@@ -86,6 +86,7 @@ function buildDeveloperInstructions(
     "When the latest user message is a short follow-up question, inherit the most recent concrete topic unless the user introduces a new topic.",
     "If the latest user message introduces a new topic, respond to that new topic directly.",
     "Use the current environment context for direct date or time questions.",
+    "For location or weather-here questions, do not infer exact location; mention timezone or recent location clues only with clear uncertainty.",
     "Do not simply give generic advice.",
     "Challenge gently when the context suggests the user may benefit from it.",
     "Prefer recent conversation context over older memory when deciding what is most relevant.",
