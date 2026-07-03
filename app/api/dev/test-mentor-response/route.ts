@@ -15,7 +15,7 @@ import type {
 
 export const dynamic = "force-dynamic";
 
-type DevMentorResponseProvider = "mock" | "openai";
+type DevMentorResponseProvider = "anthropic" | "mock" | "openai";
 
 interface DevMentorResponseInput {
   conversationId?: string;
@@ -36,7 +36,11 @@ const uuidPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const maxMessageLength = 10000;
 const maxModelLength = 100;
-const supportedDevProviders: DevMentorResponseProvider[] = ["mock", "openai"];
+const supportedDevProviders: DevMentorResponseProvider[] = [
+  "anthropic",
+  "mock",
+  "openai",
+];
 
 function getDevMentorResponseAuthContext(): MentorResponsePipelineAuthContext {
   return {
@@ -306,6 +310,6 @@ function validateProviderField(
   provider: string,
 ) {
   if (!supportedDevProviders.includes(provider as DevMentorResponseProvider)) {
-    errors.provider = "Provider must be mock or openai.";
+    errors.provider = "Provider must be anthropic, mock or openai.";
   }
 }

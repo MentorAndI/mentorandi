@@ -6,7 +6,7 @@ It is not a generic chatbot.
 
 ## Current Status
 
-The project is in local alpha. The Next.js app runs locally with Supabase, PostgreSQL and Prisma connected. Mentor Core is functional with the mock provider as the primary local testing provider.
+The project is in local alpha. The Next.js app runs locally with Supabase, PostgreSQL and Prisma connected. Mentor Core is functional with mock mode for deterministic testing and real provider modes for OpenAI and Anthropic/Claude.
 
 ## Key Routes
 

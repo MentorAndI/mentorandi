@@ -72,4 +72,4 @@ User-level data can inform future conversations. Conversation-level data should 
 
 Mentor Core does not call provider APIs directly.
 
-The LLM adapter chooses a provider behind a shared interface. The mock provider is primary for local testing. The OpenAI provider foundation exists for real model responses once configuration and billing are ready.
+The LLM adapter chooses a provider behind a shared interface. The mock provider is only for deterministic development testing. OpenAI and Anthropic/Claude provider modes use the structured Mentor Core prompt contract for real model responses once configuration and billing are ready.

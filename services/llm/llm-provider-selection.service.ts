@@ -2,10 +2,14 @@ import type { LlmProviderName } from "@/services/llm/llm.types";
 
 export type ConfiguredLlmProviderName = Extract<
   LlmProviderName,
-  "mock" | "openai"
+  "anthropic" | "mock" | "openai"
 >;
 
-const configuredProviders: ConfiguredLlmProviderName[] = ["mock", "openai"];
+const configuredProviders: ConfiguredLlmProviderName[] = [
+  "anthropic",
+  "mock",
+  "openai",
+];
 
 export class LlmProviderSelectionServiceError extends Error {
   constructor(message: string) {
@@ -44,6 +48,6 @@ function validateConfiguredProvider(provider: string): ConfiguredLlmProviderName
   }
 
   throw new LlmProviderSelectionServiceError(
-    "LLM_PROVIDER must be either mock or openai.",
+    "LLM_PROVIDER must be anthropic, mock or openai.",
   );
 }

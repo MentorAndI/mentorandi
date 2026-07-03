@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/Card";
 import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 
-type MentorTestProvider = "mock" | "openai";
+type MentorTestProvider = "anthropic" | "mock" | "openai";
 
 interface MentorTestFormState {
   conversationId: string;
@@ -497,32 +497,30 @@ export function MentorTestClient() {
                   className="block h-11 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/10"
                   id="mentor-test-provider"
                   onChange={(event) =>
-                    updateField(
-                      "provider",
-                      event.target.value === "openai" ? "openai" : "mock",
-                    )
+                    updateField("provider", readProviderValue(event.target.value))
                   }
                   value={formState.provider}
                 >
                   <option value="mock">mock</option>
                   <option value="openai">openai</option>
+                  <option value="anthropic">anthropic</option>
                 </select>
               </div>
 
               <Input
                 autoComplete="off"
                 hint={
-                  formState.provider === "openai"
-                    ? "Leave blank to use OPENAI_MODEL."
-                    : "Optional for local mock labeling."
+                  formState.provider === "mock"
+                    ? "Optional for local mock labeling."
+                    : "Leave blank to use the provider environment model."
                 }
                 id="mentor-test-model"
                 label="Model"
                 onChange={(event) => updateField("model", event.target.value)}
                 placeholder={
-                  formState.provider === "openai"
-                    ? "Uses OPENAI_MODEL if empty"
-                    : "mock-deterministic-v1"
+                  formState.provider === "mock"
+                    ? "mock-deterministic-v1"
+                    : "Uses configured model if empty"
                 }
                 value={formState.model}
               />
@@ -1183,6 +1181,14 @@ function formatErrorResponse(responseBody: MentorTestErrorResponse) {
   }
 
   return "Unable to send the test message.";
+}
+
+function readProviderValue(value: string): MentorTestProvider {
+  if (value === "anthropic" || value === "openai") {
+    return value;
+  }
+
+  return "mock";
 }
 
 function formatCleanupResult(result: MentorTestCleanupResponse) {

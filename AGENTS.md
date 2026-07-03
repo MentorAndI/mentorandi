@@ -43,8 +43,9 @@ It is not a generic chatbot. It is built around memory, goals, reflections and a
 - Prompt Composer.
 - Response Pipeline.
 - LLM providers.
-- Mock provider.
-- OpenAI provider foundation.
+- Mock provider for deterministic development testing.
+- OpenAI provider mode.
+- Anthropic/Claude provider mode.
 
 ## Required Verification After Code Changes
 
