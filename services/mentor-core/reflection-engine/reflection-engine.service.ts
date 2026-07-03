@@ -3,6 +3,7 @@ import type {
   ReflectionEngineResult,
 } from "@/services/mentor-core/reflection-engine/reflection-engine.types";
 import { validateBuildReflectionCandidateInput } from "@/services/mentor-core/reflection-engine/reflection-engine.validators";
+import { isDevelopmentTestMessage } from "@/services/mentor-core/test-message-detector";
 
 interface ReflectionRule {
   buildSummary: (content: string) => string;
@@ -81,6 +82,12 @@ export class ReflectionEngineService {
       throw new ReflectionEngineServiceError(
         `Invalid reflection engine input: ${Object.values(validation.errors).join(" ")}`,
       );
+    }
+
+    if (isDevelopmentTestMessage(validation.input.userMessage)) {
+      return {
+        reflectionCandidate: null,
+      };
     }
 
     const candidate = splitIntoCandidateSentences(

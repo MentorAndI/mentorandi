@@ -5,6 +5,7 @@ import type {
   GoalExtractionResult,
 } from "@/services/mentor-core/goal-extractor/goal-extractor.types";
 import { validateExtractGoalCandidatesInput } from "@/services/mentor-core/goal-extractor/goal-extractor.validators";
+import { isDevelopmentTestMessage } from "@/services/mentor-core/test-message-detector";
 
 interface GoalExtractionRule {
   pattern: RegExp;
@@ -76,6 +77,13 @@ export class GoalExtractorService {
     }
 
     const validatedInput = validation.input;
+
+    if (isDevelopmentTestMessage(validatedInput.userMessage)) {
+      return {
+        goalCandidates: [],
+      };
+    }
+
     const goalCandidates = splitIntoCandidateSentences(
       validatedInput.userMessage,
     ).flatMap((sentence) =>

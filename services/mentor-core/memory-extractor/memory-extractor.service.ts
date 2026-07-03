@@ -5,6 +5,7 @@ import type {
   MemoryExtractionResult,
 } from "@/services/mentor-core/memory-extractor/memory-extractor.types";
 import { validateExtractMemoryCandidatesInput } from "@/services/mentor-core/memory-extractor/memory-extractor.validators";
+import { isDevelopmentTestMessage } from "@/services/mentor-core/test-message-detector";
 
 interface ExtractionRule {
   category: MemoryCandidateCategory;
@@ -87,6 +88,13 @@ export class MemoryExtractorService {
     }
 
     const validatedInput = validation.input;
+
+    if (isDevelopmentTestMessage(validatedInput.userMessage)) {
+      return {
+        memoryCandidates: [],
+      };
+    }
+
     const candidates = splitIntoCandidateSentences(
       validatedInput.userMessage,
     ).flatMap((sentence) =>
