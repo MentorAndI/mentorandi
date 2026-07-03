@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useCallback, useEffect, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -47,8 +47,17 @@ interface MentorTestMemory {
   title: string;
 }
 
+interface MentorTestReflection {
+  createdAt: string;
+  summary: string;
+}
+
 interface MentorTestMemoriesResponse {
   understandings: MentorTestMemory[];
+}
+
+interface MentorTestReflectionsResponse {
+  reflections: MentorTestReflection[];
 }
 
 interface MentorTestMessagesResponse {
@@ -81,16 +90,19 @@ export function MentorTestClient() {
   const [errorMessage, setErrorMessage] = useState("");
   const [historyErrorMessage, setHistoryErrorMessage] = useState("");
   const [isLoadingMemories, setIsLoadingMemories] = useState(false);
+  const [isLoadingReflections, setIsLoadingReflections] = useState(false);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isLoadingSeedData, setIsLoadingSeedData] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [memories, setMemories] = useState<MentorTestMemory[]>([]);
   const [memoriesErrorMessage, setMemoriesErrorMessage] = useState("");
   const [messages, setMessages] = useState<MentorTestMessage[]>([]);
+  const [reflections, setReflections] = useState<MentorTestReflection[]>([]);
+  const [reflectionsErrorMessage, setReflectionsErrorMessage] = useState("");
   const [result, setResult] = useState<MentorTestResponse | null>(null);
   const [seedDataMessage, setSeedDataMessage] = useState("");
 
-  async function loadConversationHistory(conversationId: string) {
+  const loadConversationHistory = useCallback(async (conversationId: string) => {
     setHistoryErrorMessage("");
     setIsLoadingHistory(true);
 
@@ -115,9 +127,9 @@ export function MentorTestClient() {
     } finally {
       setIsLoadingHistory(false);
     }
-  }
+  }, []);
 
-  async function loadStoredMemories() {
+  const loadStoredMemories = useCallback(async () => {
     setMemoriesErrorMessage("");
     setIsLoadingMemories(true);
 
@@ -140,7 +152,38 @@ export function MentorTestClient() {
     } finally {
       setIsLoadingMemories(false);
     }
-  }
+  }, []);
+
+  const loadRecentReflections = useCallback(async (userId: string) => {
+    setReflectionsErrorMessage("");
+    setIsLoadingReflections(true);
+
+    const query = userId
+      ? `?${new URLSearchParams({ userId }).toString()}`
+      : "";
+
+    try {
+      const response = await fetch(`/api/dev/reflections${query}`);
+      const responseBody = (await response.json()) as
+        | MentorTestReflectionsResponse
+        | MentorTestErrorResponse;
+
+      if (!response.ok) {
+        setReflectionsErrorMessage(
+          formatErrorResponse(responseBody as MentorTestErrorResponse),
+        );
+        return;
+      }
+
+      setReflections(
+        (responseBody as MentorTestReflectionsResponse).reflections,
+      );
+    } catch {
+      setReflectionsErrorMessage("Unable to load recent reflections.");
+    } finally {
+      setIsLoadingReflections(false);
+    }
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -185,7 +228,10 @@ export function MentorTestClient() {
             await loadConversationHistory(conversationId);
           }
 
-          await loadStoredMemories();
+          await Promise.all([
+            loadStoredMemories(),
+            loadRecentReflections(seedData.userId),
+          ]);
         }
       } catch (error) {
         if (error instanceof DOMException && error.name === "AbortError") {
@@ -208,7 +254,7 @@ export function MentorTestClient() {
       isActive = false;
       controller.abort();
     };
-  }, []);
+  }, [loadConversationHistory, loadRecentReflections, loadStoredMemories]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -258,6 +304,7 @@ export function MentorTestClient() {
       }));
       await Promise.all([
         loadConversationHistory(conversationId),
+        loadRecentReflections(payload.userId),
         loadStoredMemories(),
       ]);
     } catch {
@@ -290,6 +337,10 @@ export function MentorTestClient() {
 
   async function handleRefreshMemories() {
     await loadStoredMemories();
+  }
+
+  async function handleRefreshReflections() {
+    await loadRecentReflections(formState.userId.trim());
   }
 
   return (
@@ -449,7 +500,7 @@ export function MentorTestClient() {
                 Stored Memories
               </h2>
               <p className="mt-1 text-sm text-zinc-500">
-                Current mentor understanding stored for the seeded user.
+                Current mentor understanding stored for the resolved user.
               </p>
             </div>
 
@@ -472,6 +523,43 @@ export function MentorTestClient() {
           <StoredMemories
             isLoading={isLoadingMemories}
             memories={memories}
+          />
+        </Card>
+
+        <Card
+          aria-live="polite"
+          className="space-y-5 self-start"
+          variant="bordered"
+        >
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-zinc-950">
+                Recent reflections
+              </h2>
+              <p className="mt-1 text-sm text-zinc-500">
+                Recent Reflection Engine summaries for the selected user.
+              </p>
+            </div>
+
+            <Button
+              disabled={isLoadingReflections}
+              onClick={handleRefreshReflections}
+              type="button"
+              variant="secondary"
+            >
+              {isLoadingReflections ? "Refreshing..." : "Refresh"}
+            </Button>
+          </div>
+
+          {reflectionsErrorMessage ? (
+            <p className="text-sm text-red-600" role="alert">
+              {reflectionsErrorMessage}
+            </p>
+          ) : null}
+
+          <RecentReflections
+            isLoading={isLoadingReflections}
+            reflections={reflections}
           />
         </Card>
 
@@ -576,6 +664,63 @@ function ConversationMessage({ message }: ConversationMessageProps) {
       </div>
       <p className="whitespace-pre-wrap text-sm leading-6 text-zinc-800">
         {message.content}
+      </p>
+    </article>
+  );
+}
+
+interface RecentReflectionsProps {
+  isLoading: boolean;
+  reflections: MentorTestReflection[];
+}
+
+function RecentReflections({
+  isLoading,
+  reflections,
+}: RecentReflectionsProps) {
+  if (isLoading && reflections.length === 0) {
+    return (
+      <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 text-sm text-zinc-500">
+        Loading recent reflections...
+      </p>
+    );
+  }
+
+  if (reflections.length === 0) {
+    return (
+      <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 text-sm text-zinc-500">
+        No reflections have been created yet.
+      </p>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {reflections.map((reflection) => (
+        <RecentReflection
+          key={`${reflection.createdAt}-${reflection.summary}`}
+          reflection={reflection}
+        />
+      ))}
+    </div>
+  );
+}
+
+interface RecentReflectionProps {
+  reflection: MentorTestReflection;
+}
+
+function RecentReflection({ reflection }: RecentReflectionProps) {
+  return (
+    <article className="space-y-2 rounded-md border border-zinc-200 bg-zinc-50 px-3 py-3">
+      <time
+        className="block text-xs text-zinc-500"
+        dateTime={reflection.createdAt}
+      >
+        {formatMessageTimestamp(reflection.createdAt)}
+      </time>
+      <p className="text-sm leading-6 text-zinc-700">
+        {reflection.summary}
       </p>
     </article>
   );
