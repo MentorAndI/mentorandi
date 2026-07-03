@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function MentorPage() {
   return (
-    <main className="min-h-screen bg-zinc-50 py-10 text-zinc-950">
+    <main className="min-h-screen bg-zinc-50 py-6 text-zinc-950 sm:py-10">
       <Container className="max-w-6xl">
         <MentorConversationClient />
       </Container>

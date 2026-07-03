@@ -29,7 +29,7 @@ export function MentorConversationHistory({
   }
 
   return (
-    <ol className="space-y-4">
+    <ol className="space-y-5" aria-label="Conversation history">
       {messages.map((message) => (
         <li key={message.id}>
           <MentorConversationEntry message={message} />
@@ -47,9 +47,9 @@ function MentorConversationEntry({ message }: MentorConversationEntryProps) {
   const isUser = message.role === "USER";
 
   return (
-    <article className="border-b border-zinc-100 pb-4 last:border-b-0 last:pb-0">
-      <div className="mb-2 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm font-medium text-zinc-950">
+    <article className="rounded-lg border border-zinc-200 bg-white px-4 py-4">
+      <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-sm font-semibold text-zinc-950">
           {isUser ? "You" : "Marcus"}
         </p>
         <time className="text-xs text-zinc-500" dateTime={message.createdAt}>

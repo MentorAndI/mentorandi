@@ -9,12 +9,16 @@ export function MentorMemoryPanel({
   isLoading,
   memories,
 }: MentorMemoryPanelProps) {
+  const visibleMemories = memories.slice(0, 5);
+
   return (
     <aside className="space-y-4">
       <div>
-        <h2 className="text-lg font-semibold text-zinc-950">Memory</h2>
+        <h2 className="text-lg font-semibold text-zinc-950">
+          What Marcus is learning
+        </h2>
         <p className="mt-1 text-sm leading-6 text-zinc-500">
-          What Marcus is beginning to understand.
+          Subtle notes that help the conversation become more personal over time.
         </p>
       </div>
 
@@ -26,13 +30,13 @@ export function MentorMemoryPanel({
 
       {!isLoading && memories.length === 0 ? (
         <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 text-sm leading-6 text-zinc-500">
-          Memories will appear here as the mentoring relationship develops.
+          Marcus will begin to notice goals, values and patterns as you talk.
         </p>
       ) : null}
 
-      {memories.length > 0 ? (
+      {visibleMemories.length > 0 ? (
         <div className="space-y-3">
-          {memories.slice(0, 6).map((memory) => (
+          {visibleMemories.map((memory) => (
             <MemoryItem key={memory.id} memory={memory} />
           ))}
         </div>
@@ -47,14 +51,25 @@ interface MemoryItemProps {
 
 function MemoryItem({ memory }: MemoryItemProps) {
   return (
-    <article className="rounded-md border border-zinc-200 bg-white px-3 py-3">
-      <p className="text-xs font-semibold uppercase text-zinc-500">
-        {memory.category}
+    <article className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-3">
+      <p className="text-sm leading-6 text-zinc-700">
+        {formatMemoryForUser(memory.content)}
       </p>
-      <h3 className="mt-1 text-sm font-medium leading-6 text-zinc-950">
-        {memory.title}
-      </h3>
-      <p className="mt-2 text-sm leading-6 text-zinc-600">{memory.content}</p>
     </article>
   );
+}
+
+function formatMemoryForUser(content: string) {
+  const normalizedContent = content.replace(/[.!?]+$/g, "").trim();
+
+  return normalizedContent
+    .replace(/^user\s+wants\s+/i, "You want ")
+    .replace(/^user\s+needs\s+/i, "You need ")
+    .replace(/^user\s+is\s+trying\s+to\s+/i, "You are trying to ")
+    .replace(/^user\s+values\s+/i, "You value ")
+    .replace(/^user\s+prefers\s+/i, "You prefer ")
+    .replace(/^user\s+likes\s+/i, "You like ")
+    .replace(/^user\s+doesn't\s+like\s+/i, "You do not like ")
+    .replace(/^user\s+struggles\s+with\s+/i, "You have been struggling with ")
+    .replace(/^user\s+struggles\s+/i, "You have been struggling with ");
 }

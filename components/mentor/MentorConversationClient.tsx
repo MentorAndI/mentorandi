@@ -1,18 +1,18 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useEffect, useState } from "react";
 
 import { MentorConversationHistory } from "@/components/mentor/MentorConversationHistory";
+import { MentorHeader } from "@/components/mentor/MentorHeader";
+import { MentorMessageForm } from "@/components/mentor/MentorMessageForm";
 import { MentorMemoryPanel } from "@/components/mentor/MentorMemoryPanel";
 import type {
   MentorApiError,
   MentorConversationMessage,
   MentorMemory,
-  MentorSeedData,
+  MentorSession,
 } from "@/components/mentor/mentor-conversation.types";
-import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
-import { Textarea } from "@/components/ui/Textarea";
 
 interface MentorMessagesResponse {
   messages: MentorConversationMessage[];
@@ -30,6 +30,12 @@ interface MentorResponsePayload {
   userMessage: MentorConversationMessage;
 }
 
+const defaultMentor = {
+  name: "Marcus",
+  role: "Strategic Mentor",
+  tagline: "Focused thinking. Better decisions. Long-term growth.",
+};
+
 export function MentorConversationClient() {
   const [conversationId, setConversationId] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
@@ -39,9 +45,9 @@ export function MentorConversationClient() {
   const [isSending, setIsSending] = useState(false);
   const [memories, setMemories] = useState<MentorMemory[]>([]);
   const [messages, setMessages] = useState<MentorConversationMessage[]>([]);
-  const [mentorId, setMentorId] = useState("");
   const [message, setMessage] = useState("");
-  const [userId, setUserId] = useState("");
+  const [messageError, setMessageError] = useState("");
+  const [mentor, setMentor] = useState(defaultMentor);
 
   async function loadConversationHistory(nextConversationId: string) {
     setIsLoadingHistory(true);
@@ -93,13 +99,13 @@ export function MentorConversationClient() {
     const controller = new AbortController();
     let isActive = true;
 
-    async function loadSeededSession() {
+    async function loadMentorSession() {
       try {
-        const response = await fetch("/api/dev/seed-data", {
+        const response = await fetch("/api/mentor/session", {
           signal: controller.signal,
         });
         const responseBody = (await response.json()) as
-          | MentorSeedData
+          | MentorSession
           | MentorApiError;
 
         if (!response.ok) {
@@ -109,18 +115,15 @@ export function MentorConversationClient() {
           return;
         }
 
-        const seedData = responseBody as MentorSeedData;
-        const nextConversationId = seedData.conversationId ?? "";
+        const session = responseBody as MentorSession;
+        const nextConversationId = session.conversation.id;
 
         if (isActive) {
           setConversationId(nextConversationId);
-          setMentorId(seedData.mentorId);
-          setUserId(seedData.userId);
+          setMentor(session.mentor);
 
           await Promise.all([
-            nextConversationId
-              ? loadConversationHistory(nextConversationId)
-              : Promise.resolve(),
+            loadConversationHistory(nextConversationId),
             loadMemories(),
           ]);
         }
@@ -139,7 +142,7 @@ export function MentorConversationClient() {
       }
     }
 
-    void loadSeededSession();
+    void loadMentorSession();
 
     return () => {
       isActive = false;
@@ -153,20 +156,18 @@ export function MentorConversationClient() {
     const trimmedMessage = message.trim();
 
     if (!trimmedMessage) {
+      setMessageError("Write a message before sending.");
       return;
     }
 
     setErrorMessage("");
+    setMessageError("");
     setIsSending(true);
 
     try {
-      const response = await fetch("/api/dev/test-mentor-response", {
+      const response = await fetch("/api/mentor/respond", {
         body: JSON.stringify({
-          mentorId,
           message: trimmedMessage,
-          provider: "mock",
-          userId,
-          ...(conversationId ? { conversationId } : {}),
         }),
         headers: {
           "Content-Type": "application/json",
@@ -200,17 +201,13 @@ export function MentorConversationClient() {
   }
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-      <Card className="space-y-6" variant="bordered">
-        <div className="border-b border-zinc-100 pb-5">
-          <p className="text-sm font-medium text-zinc-500">Marcus</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
-            What would be useful to think through today?
-          </h1>
-          <p className="mt-3 max-w-2xl text-base leading-7 text-zinc-600">
-            This is a calm space for reflection, decisions and accountability.
-          </p>
-        </div>
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_300px]">
+      <Card className="space-y-7 p-5 sm:p-7" variant="bordered">
+        <MentorHeader
+          name={mentor.name}
+          role={mentor.role}
+          tagline={mentor.tagline}
+        />
 
         {errorMessage ? (
           <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
@@ -223,30 +220,23 @@ export function MentorConversationClient() {
           messages={messages}
         />
 
-        <form className="space-y-3 border-t border-zinc-100 pt-5" onSubmit={handleSubmit}>
-          <Textarea
-            id="mentor-message"
-            label="Message"
-            onChange={(event) => setMessage(event.target.value)}
-            placeholder="Tell Marcus what is on your mind."
-            rows={5}
-            value={message}
-          />
+        <MentorMessageForm
+          disabled={isLoadingSession || !conversationId}
+          error={messageError}
+          isSending={isSending}
+          message={message}
+          onMessageChange={(nextMessage) => {
+            setMessage(nextMessage);
 
-          <div className="flex justify-end">
-            <Button
-              disabled={
-                isSending || isLoadingSession || !message.trim() || !userId || !mentorId
-              }
-              type="submit"
-            >
-              {isSending ? "Sending..." : "Send to Marcus"}
-            </Button>
-          </div>
-        </form>
+            if (messageError) {
+              setMessageError("");
+            }
+          }}
+          onSubmit={handleSubmit}
+        />
       </Card>
 
-      <Card className="self-start" variant="bordered">
+      <Card className="self-start p-5 sm:p-6" variant="bordered">
         <MentorMemoryPanel
           isLoading={isLoadingMemories}
           memories={memories}

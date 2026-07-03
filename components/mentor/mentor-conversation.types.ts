@@ -21,6 +21,17 @@ export interface MentorSeedData {
   userId: string;
 }
 
+export interface MentorSession {
+  conversation: {
+    id: string;
+  };
+  mentor: {
+    name: string;
+    role: string;
+    tagline: string;
+  };
+}
+
 export interface MentorApiError {
   error?: string;
   errors?: Record<string, string>;
