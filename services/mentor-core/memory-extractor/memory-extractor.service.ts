@@ -145,6 +145,8 @@ function normalizeExtractedContent(sentence: string, pattern: RegExp) {
   const extractedContent = match?.[1] ?? sentence;
 
   return trimTrailingPunctuation(extractedContent)
+    .replace(/^to\s+/i, "")
+    .replace(/^help\s+(with\s+)?/i, "")
     .replace(/\s+/g, " ")
     .trim();
 }

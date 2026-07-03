@@ -28,6 +28,8 @@ export interface MentorResponsePipelineResult {
   model: string;
   promptPackage: PromptPackage;
   provider: LlmProviderName;
+  skippedDuplicateMemories: MentorUnderstandingDto[];
+  updatedMemories: MentorUnderstandingDto[];
   userMessage: MessageDto;
 }
 

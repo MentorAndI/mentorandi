@@ -9,7 +9,10 @@ import {
   MemoryService,
   MemoryServiceError,
 } from "@/services/memory/memory.service";
-import type { CreateMemoryInput } from "@/services/memory/memory.types";
+import type {
+  CreateMemoryInput,
+  MentorUnderstandingDto,
+} from "@/services/memory/memory.types";
 import {
   MessageService,
   MessageServiceError,
@@ -127,7 +130,7 @@ export class MentorResponsePipelineService {
         },
         authContext,
       );
-      const extractedMemories = await this.extractAndStoreMemories(input);
+      const memoryStorageResult = await this.extractAndStoreMemories(input);
       const createdReflection = await this.createReflectionForMoment(
         input,
         mentorMessage.content,
@@ -138,11 +141,14 @@ export class MentorResponsePipelineService {
         createdAt: new Date().toISOString(),
         createdReflection,
         createdGoals,
-        extractedMemories,
+        extractedMemories: memoryStorageResult.createdMemories,
         mentorMessage,
         model: llmResponse.metadata.model,
         promptPackage,
         provider: llmResponse.metadata.provider,
+        skippedDuplicateMemories:
+          memoryStorageResult.skippedDuplicateMemories,
+        updatedMemories: memoryStorageResult.updatedMemories,
         userMessage,
       };
     } catch (error) {
@@ -246,21 +252,31 @@ export class MentorResponsePipelineService {
     const usefulCandidates = extractionResult.memoryCandidates.filter(
       isUsefulMemoryCandidate,
     );
-    const storedMemories = [];
+    const createdMemories: MentorUnderstandingDto[] = [];
+    const skippedDuplicateMemories: MentorUnderstandingDto[] = [];
+    const updatedMemories: MentorUnderstandingDto[] = [];
 
     for (const candidate of usefulCandidates) {
-      const storedMemory =
+      const result =
         await this.memoryService.createUniqueMentorUnderstandingForUserId(
           input.userId,
           toCreateMemoryInput(candidate),
         );
 
-      if (storedMemory) {
-        storedMemories.push(storedMemory);
+      if (result.status === "created") {
+        createdMemories.push(result.memory);
+      } else if (result.status === "updated") {
+        updatedMemories.push(result.memory);
+      } else {
+        skippedDuplicateMemories.push(result.memory);
       }
     }
 
-    return storedMemories;
+    return {
+      createdMemories,
+      skippedDuplicateMemories,
+      updatedMemories,
+    };
   }
 
   private async createReflectionForMoment(

@@ -36,6 +36,16 @@ export interface MentorUnderstandingDto {
   updatedAt: string;
 }
 
+export type MemoryDedupeStatus =
+  | "created"
+  | "skipped_duplicate"
+  | "updated";
+
+export interface MemoryDedupeResult {
+  memory: MentorUnderstandingDto;
+  status: MemoryDedupeStatus;
+}
+
 export interface MemoryValidationResult<TInput> {
   errors: Record<string, string>;
   input?: TInput;

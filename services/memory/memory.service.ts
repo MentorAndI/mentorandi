@@ -2,6 +2,7 @@ import { MemoryRepository } from "@/services/memory/memory.repository";
 import type {
   CreateMemoryInput,
   MemoryAuthContext,
+  MemoryDedupeResult,
   MemoryFilters,
   MentorUnderstandingDto,
   UpdateMemoryInput,
@@ -55,23 +56,18 @@ export class MemoryService {
     input: CreateMemoryInput,
   ): Promise<MentorUnderstandingDto> {
     const user = await this.ensureUser(authContext);
+    const result = await this.createUniqueMentorUnderstandingForUserId(
+      user.id,
+      input,
+    );
 
-    if (input.sourceConversationId) {
-      await this.ensureSourceConversationBelongsToUser(
-        input.sourceConversationId,
-        user.id,
-      );
-    }
-
-    const memory = await this.repository.createMemoryForUser(user.id, input);
-
-    return toMentorUnderstandingDto(memory);
+    return result.memory;
   }
 
   async createUniqueMentorUnderstandingForUserId(
     userId: string,
     input: CreateMemoryInput,
-  ): Promise<MentorUnderstandingDto | null> {
+  ): Promise<MemoryDedupeResult> {
     await this.ensureUserById(userId);
 
     if (input.sourceConversationId) {
@@ -81,20 +77,43 @@ export class MemoryService {
       );
     }
 
-    const existingMemory =
-      await this.repository.findMemoryForUserByTitleAndCategory(
-        userId,
-        input.title,
-        input.category,
-      );
+    const existingMemories = await this.repository.findMemoriesForUser(
+      userId,
+      {},
+    );
+    const duplicateMemory = findDuplicateMemory(input, existingMemories);
 
-    if (existingMemory) {
-      return null;
+    if (duplicateMemory) {
+      if (shouldUpdateDuplicateMemory(input, duplicateMemory)) {
+        const updatedMemoryInput = buildDuplicateMemoryUpdate(
+          input,
+          duplicateMemory,
+        );
+        const updatedMemories = await this.repository.updateMemoryForUser(
+          duplicateMemory.id,
+          userId,
+          updatedMemoryInput,
+        );
+        const updatedMemory = updatedMemories[0] ?? duplicateMemory;
+
+        return {
+          memory: toMentorUnderstandingDto(updatedMemory),
+          status: "updated",
+        };
+      }
+
+      return {
+        memory: toMentorUnderstandingDto(duplicateMemory),
+        status: "skipped_duplicate",
+      };
     }
 
     const memory = await this.repository.createMemoryForUser(userId, input);
 
-    return toMentorUnderstandingDto(memory);
+    return {
+      memory: toMentorUnderstandingDto(memory),
+      status: "created",
+    };
   }
 
   async getMentorUnderstanding(
@@ -191,6 +210,194 @@ export async function getMemoryAuthContext(): Promise<MemoryAuthContext> {
     authUserId: user.authUserId,
   };
 }
+
+type MemoryRecord = {
+  category: string;
+  confidence: number;
+  content: string;
+  createdAt: Date;
+  id: string;
+  importance: number;
+  sourceConversationId: string | null;
+  title: string;
+  updatedAt: Date;
+};
+
+function findDuplicateMemory(
+  input: CreateMemoryInput,
+  existingMemories: MemoryRecord[],
+) {
+  return existingMemories.find(
+    (memory) =>
+      areComparableMemoryCategories(input.category, memory.category) &&
+      areSimilarMemoryContents(input.content, memory.content),
+  );
+}
+
+function areComparableMemoryCategories(
+  newCategory: string,
+  existingCategory: string,
+) {
+  if (newCategory === existingCategory) {
+    return true;
+  }
+
+  const goalLikeCategories = new Set(["CHALLENGE", "GENERAL", "GOAL"]);
+
+  return (
+    goalLikeCategories.has(newCategory) &&
+    goalLikeCategories.has(existingCategory)
+  );
+}
+
+function areSimilarMemoryContents(firstContent: string, secondContent: string) {
+  const first = normalizeMemoryForComparison(firstContent);
+  const second = normalizeMemoryForComparison(secondContent);
+
+  if (!first || !second) {
+    return false;
+  }
+
+  if (first === second) {
+    return true;
+  }
+
+  if (
+    first.length >= 12 &&
+    second.length >= 12 &&
+    (first.includes(second) || second.includes(first))
+  ) {
+    return true;
+  }
+
+  const firstTokens = toMemoryTokenSet(first);
+  const secondTokens = toMemoryTokenSet(second);
+
+  if (firstTokens.size === 0 || secondTokens.size === 0) {
+    return false;
+  }
+
+  const sharedTokenCount = Array.from(firstTokens).filter((token) =>
+    secondTokens.has(token),
+  ).length;
+  const smallerSetSize = Math.min(firstTokens.size, secondTokens.size);
+  const unionSetSize = new Set([...firstTokens, ...secondTokens]).size;
+  const sharedHighSignalToken = Array.from(firstTokens).some(
+    (token) => secondTokens.has(token) && highSignalMemoryTokens.has(token),
+  );
+
+  if (
+    sharedTokenCount === smallerSetSize &&
+    smallerSetSize <= 2 &&
+    sharedHighSignalToken
+  ) {
+    return true;
+  }
+
+  return (
+    sharedTokenCount / smallerSetSize >= 0.9 &&
+    sharedTokenCount / unionSetSize >= 0.6
+  );
+}
+
+function shouldUpdateDuplicateMemory(
+  input: CreateMemoryInput,
+  existingMemory: MemoryRecord,
+) {
+  return (
+    scoreMemorySpecificity(input) >
+    scoreMemorySpecificity(existingMemory) + 1
+  );
+}
+
+function buildDuplicateMemoryUpdate(
+  input: CreateMemoryInput,
+  existingMemory: MemoryRecord,
+): UpdateMemoryInput {
+  const inputScore = scoreMemorySpecificity(input);
+  const existingScore = scoreMemorySpecificity(existingMemory);
+  const shouldUseInputText = inputScore > existingScore;
+
+  return {
+    category:
+      existingMemory.category === "GENERAL"
+        ? input.category
+        : existingMemory.category,
+    confidence: Math.max(existingMemory.confidence, input.confidence),
+    content: shouldUseInputText ? input.content : existingMemory.content,
+    importance: Math.max(existingMemory.importance, input.importance),
+    title: shouldUseInputText ? input.title : existingMemory.title,
+  };
+}
+
+function scoreMemorySpecificity(memory: {
+  confidence: number;
+  content: string;
+  importance: number;
+}) {
+  const normalizedContent = normalizeMemoryForComparison(memory.content);
+  const tokenCount = toMemoryTokenSet(normalizedContent).size;
+  const lengthScore = Math.min(memory.content.length / 40, 4);
+
+  return tokenCount + lengthScore + memory.importance + memory.confidence;
+}
+
+function normalizeMemoryForComparison(content: string) {
+  return content
+    .toLowerCase()
+    .replace(/mentor\s+and\s+i/g, "mentorandi")
+    .replace(/\bstop\s+overthinking\b/g, "reduce overthinking")
+    .replace(/\bstop\s+worrying\b/g, "reduce worrying")
+    .replace(/\bstop\s+procrastinating\b/g, "reduce procrastination")
+    .replace(/\bbecoming\b/g, "become")
+    .replace(/\breducing\b/g, "reduce")
+    .replace(/\bfocused\b/g, "focus")
+    .replace(/\buser\s+(wants|needs|values|prefers|likes)\s+(to\s+)?/g, "")
+    .replace(/\buser\s+is\s+trying\s+to\s+/g, "")
+    .replace(/\buser\s+is\s+working\s+on\s+/g, "")
+    .replace(/\buser\s+needs\s+help\s+(with\s+)?/g, "")
+    .replace(/\bhelp\s+(with\s+)?/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function toMemoryTokenSet(normalizedContent: string) {
+  return new Set(
+    normalizedContent
+      .split(" ")
+      .map((token) => token.trim())
+      .filter((token) => token && !memoryComparisonStopWords.has(token)),
+  );
+}
+
+const memoryComparisonStopWords = new Set([
+  "a",
+  "about",
+  "an",
+  "and",
+  "be",
+  "become",
+  "get",
+  "i",
+  "is",
+  "more",
+  "my",
+  "on",
+  "the",
+  "to",
+  "user",
+  "with",
+]);
+
+const highSignalMemoryTokens = new Set([
+  "accountable",
+  "confidence",
+  "feedback",
+  "focus",
+  "mentorandi",
+  "overthinking",
+]);
 
 // A memory is the mentor's developing understanding of the user, not a raw fact log.
 function toMentorUnderstandingDto(memory: {

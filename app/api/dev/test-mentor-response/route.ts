@@ -92,6 +92,8 @@ export async function POST(request: Request) {
         mentorMessage: response.mentorMessage,
         model: response.model,
         provider: response.provider,
+        skippedDuplicateMemories: response.skippedDuplicateMemories,
+        updatedMemories: response.updatedMemories,
         userMessage: response.userMessage,
       },
       { status: 200 },
