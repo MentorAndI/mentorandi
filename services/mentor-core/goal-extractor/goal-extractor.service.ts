@@ -39,6 +39,11 @@ const extractionRules: GoalExtractionRule[] = [
     trustAsOngoingGoal: true,
   },
   {
+    pattern: /\bi need help(?:\s+with)?\s+(.+)/i,
+    titleMode: "help-with",
+    trustAsOngoingGoal: true,
+  },
+  {
     pattern: /\bi want to\s+(.+)/i,
     titleMode: "direct",
     trustAsOngoingGoal: false,
@@ -183,10 +188,11 @@ function buildGoalTitle(
   const normalizedContent = trimTrailingPunctuation(content)
     .replace(/\s+/g, " ")
     .trim();
+  const helpContent = normalizedContent.replace(/^becoming\b/i, "become");
   const titleContent =
-    titleMode === "help-with"
-      ? `Get help with ${normalizedContent}`
-      : normalizedContent;
+    titleMode === "help-with" && !/^(become|reduce|stop)\b/i.test(helpContent)
+      ? `Get help with ${helpContent}`
+      : helpContent;
 
   return capitalizeFirstLetter(titleContent);
 }

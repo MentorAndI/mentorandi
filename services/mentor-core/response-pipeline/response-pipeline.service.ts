@@ -94,7 +94,7 @@ export class MentorResponsePipelineService {
         },
         authContext,
       );
-      const createdGoals = await this.extractAndStoreGoals(input);
+      const goalStorageResult = await this.extractAndStoreGoals(input);
 
       const context = await this.contextBuilder.buildMentorContext(
         {
@@ -140,14 +140,16 @@ export class MentorResponsePipelineService {
         contextUsed: context,
         createdAt: new Date().toISOString(),
         createdReflection,
-        createdGoals,
+        createdGoals: goalStorageResult.createdGoals,
         extractedMemories: memoryStorageResult.createdMemories,
         mentorMessage,
         model: llmResponse.metadata.model,
         promptPackage,
         provider: llmResponse.metadata.provider,
+        skippedDuplicateGoals: goalStorageResult.skippedDuplicateGoals,
         skippedDuplicateMemories:
           memoryStorageResult.skippedDuplicateMemories,
+        updatedGoals: goalStorageResult.updatedGoals,
         updatedMemories: memoryStorageResult.updatedMemories,
         userMessage,
       };
@@ -228,19 +230,29 @@ export class MentorResponsePipelineService {
       userMessage: input.message,
     });
     const createdGoals = [];
+    const skippedDuplicateGoals = [];
+    const updatedGoals = [];
 
     for (const candidate of extractionResult.goalCandidates) {
-      const createdGoal = await this.goalService.createUniqueActiveGoalForUserId(
+      const result = await this.goalService.createUniqueActiveGoalForUserId(
         input.userId,
         toCreateGoalInput(candidate),
       );
 
-      if (createdGoal) {
-        createdGoals.push(createdGoal);
+      if (result.status === "created") {
+        createdGoals.push(result.goal);
+      } else if (result.status === "updated") {
+        updatedGoals.push(result.goal);
+      } else {
+        skippedDuplicateGoals.push(result.goal);
       }
     }
 
-    return createdGoals;
+    return {
+      createdGoals,
+      skippedDuplicateGoals,
+      updatedGoals,
+    };
   }
 
   private async extractAndStoreMemories(input: MentorResponsePipelineInput) {

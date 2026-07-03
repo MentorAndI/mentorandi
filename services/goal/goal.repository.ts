@@ -1,6 +1,9 @@
 import { GoalStatus } from "@/lib/generated/prisma/client";
 import { getPrismaClient } from "@/lib/prisma";
-import type { CreateGoalInput } from "@/services/goal/goal.types";
+import type {
+  CreateGoalInput,
+  UpdateGoalInput,
+} from "@/services/goal/goal.types";
 
 export class GoalRepository {
   private readonly prisma = getPrismaClient();
@@ -32,6 +35,21 @@ export class GoalRepository {
         status: input.status ?? GoalStatus.ACTIVE,
         targetDate: input.targetDate ?? null,
         title: input.title,
+        userId,
+      },
+    });
+  }
+
+  async updateActiveGoalForUser(
+    goalId: string,
+    userId: string,
+    input: UpdateGoalInput,
+  ) {
+    return this.prisma.goal.updateManyAndReturn({
+      data: input,
+      where: {
+        id: goalId,
+        status: GoalStatus.ACTIVE,
         userId,
       },
     });
