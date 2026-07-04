@@ -29,6 +29,8 @@ Claude mode requires `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`.
 
 Mentor Core prepares the structured context. The real provider produces Marcus' natural response.
 
+Before using a real provider for alpha users, test it from `/dev/mentor-test` with the development-only Real provider test. Mock remains a deterministic local fallback only.
+
 ## Pre-Deployment Checklist
 
 Run these before deploying:

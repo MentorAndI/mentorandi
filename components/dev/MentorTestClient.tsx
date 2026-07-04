@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/Input";
 import { Textarea } from "@/components/ui/Textarea";
 
 type MentorTestProvider = "anthropic" | "mock" | "openai";
+type RealProviderTestProvider = "anthropic" | "openai";
 
 interface MentorTestFormState {
   conversationId: string;
@@ -126,6 +127,20 @@ interface MentorTestErrorResponse {
   errors?: Record<string, string>;
 }
 
+interface RealProviderTestResult {
+  errorState?: string;
+  model: string | null;
+  provider: RealProviderTestProvider;
+  responseText?: string;
+  safeErrorMessage?: string;
+  success: boolean;
+}
+
+interface RealProviderTestState {
+  message: string;
+  provider: RealProviderTestProvider;
+}
+
 const initialFormState: MentorTestFormState = {
   conversationId: "",
   mentorId: "",
@@ -133,6 +148,11 @@ const initialFormState: MentorTestFormState = {
   model: "",
   provider: "mock",
   userId: "",
+};
+
+const initialRealProviderTestState: RealProviderTestState = {
+  message: "Reply with a short provider connectivity confirmation.",
+  provider: "openai",
 };
 
 export function MentorTestClient() {
@@ -155,8 +175,15 @@ export function MentorTestClient() {
   const [messages, setMessages] = useState<MentorTestMessage[]>([]);
   const [reflections, setReflections] = useState<MentorTestReflection[]>([]);
   const [reflectionsErrorMessage, setReflectionsErrorMessage] = useState("");
+  const [realProviderTest, setRealProviderTest] =
+    useState<RealProviderTestState>(initialRealProviderTestState);
+  const [realProviderTestErrorMessage, setRealProviderTestErrorMessage] =
+    useState("");
+  const [realProviderTestResult, setRealProviderTestResult] =
+    useState<RealProviderTestResult | null>(null);
   const [result, setResult] = useState<MentorTestResponse | null>(null);
   const [seedDataMessage, setSeedDataMessage] = useState("");
+  const [isTestingRealProvider, setIsTestingRealProvider] = useState(false);
 
   const loadConversationHistory = useCallback(async (conversationId: string) => {
     setHistoryErrorMessage("");
@@ -441,6 +468,61 @@ export function MentorTestClient() {
     }
   }
 
+  async function handleRealProviderTest(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const message = realProviderTest.message.trim();
+
+    setRealProviderTestErrorMessage("");
+    setRealProviderTestResult(null);
+
+    if (!message) {
+      setRealProviderTestErrorMessage("Write a short test message first.");
+      return;
+    }
+
+    setIsTestingRealProvider(true);
+
+    try {
+      const response = await fetch("/api/dev/test-llm-provider", {
+        body: JSON.stringify({
+          message,
+          provider: realProviderTest.provider,
+        }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+        method: "POST",
+      });
+      const responseBody = (await response.json()) as
+        | RealProviderTestResult
+        | MentorTestErrorResponse;
+
+      if (!response.ok) {
+        setRealProviderTestErrorMessage(
+          formatErrorResponse(responseBody as MentorTestErrorResponse),
+        );
+        return;
+      }
+
+      setRealProviderTestResult(responseBody as RealProviderTestResult);
+    } catch {
+      setRealProviderTestErrorMessage("Unable to test the provider.");
+    } finally {
+      setIsTestingRealProvider(false);
+    }
+  }
+
+  function updateRealProviderTestField<K extends keyof RealProviderTestState>(
+    field: K,
+    value: RealProviderTestState[K],
+  ) {
+    setRealProviderTest((currentState) => ({
+      ...currentState,
+      [field]: value,
+    }));
+  }
+
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(320px,420px)]">
       <div className="space-y-6">
@@ -585,6 +667,68 @@ export function MentorTestClient() {
       </div>
 
       <div className="space-y-6">
+        <Card className="space-y-5 self-start" variant="bordered">
+          <div>
+            <h2 className="text-lg font-semibold text-zinc-950">
+              Real provider test
+            </h2>
+            <p className="mt-1 text-sm leading-6 text-zinc-500">
+              Test OpenAI or Anthropic connectivity without running the mentor
+              pipeline.
+            </p>
+          </div>
+
+          <form className="space-y-4" onSubmit={handleRealProviderTest}>
+            <div className="space-y-2">
+              <label
+                className="block text-sm font-medium text-zinc-900"
+                htmlFor="real-provider-test-provider"
+              >
+                Provider
+              </label>
+              <select
+                className="block h-11 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950 focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/10"
+                id="real-provider-test-provider"
+                onChange={(event) =>
+                  updateRealProviderTestField(
+                    "provider",
+                    readRealProviderTestValue(event.target.value),
+                  )
+                }
+                value={realProviderTest.provider}
+              >
+                <option value="openai">openai</option>
+                <option value="anthropic">anthropic</option>
+              </select>
+            </div>
+
+            <Input
+              autoComplete="off"
+              id="real-provider-test-message"
+              label="Test message"
+              maxLength={500}
+              onChange={(event) =>
+                updateRealProviderTestField("message", event.target.value)
+              }
+              placeholder="Short provider test message"
+              required
+              value={realProviderTest.message}
+            />
+
+            {realProviderTestErrorMessage ? (
+              <p className="text-sm text-red-600" role="alert">
+                {realProviderTestErrorMessage}
+              </p>
+            ) : null}
+
+            <Button disabled={isTestingRealProvider} type="submit">
+              {isTestingRealProvider ? "Testing..." : "Test provider"}
+            </Button>
+          </form>
+
+          <RealProviderTestResultPanel result={realProviderTestResult} />
+        </Card>
+
         <Card className="space-y-4 self-start" variant="bordered">
           <div>
             <h2 className="text-lg font-semibold text-zinc-950">
@@ -1160,6 +1304,59 @@ interface ResultFieldProps {
   value: string;
 }
 
+interface RealProviderTestResultPanelProps {
+  result: RealProviderTestResult | null;
+}
+
+function RealProviderTestResultPanel({
+  result,
+}: RealProviderTestResultPanelProps) {
+  if (!result) {
+    return (
+      <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm text-zinc-500">
+        No real provider test has been run yet.
+      </p>
+    );
+  }
+
+  return (
+    <div
+      className={`space-y-3 rounded-md border px-3 py-3 ${
+        result.success
+          ? "border-emerald-200 bg-emerald-50"
+          : "border-red-200 bg-red-50"
+      }`}
+    >
+      <p
+        className={`text-sm font-semibold ${
+          result.success ? "text-emerald-800" : "text-red-700"
+        }`}
+      >
+        {result.success ? "Provider test succeeded." : "Provider test failed."}
+      </p>
+      <ResultField label="Provider" value={result.provider} />
+      <ResultField label="Model" value={result.model ?? "None"} />
+      {result.success ? (
+        <ResultField
+          label="Response"
+          value={result.responseText ?? "No response text returned."}
+        />
+      ) : (
+        <>
+          <ResultField
+            label="Error state"
+            value={result.errorState ?? "provider_request_failed"}
+          />
+          <ResultField
+            label="Safe error"
+            value={result.safeErrorMessage ?? "Provider test failed."}
+          />
+        </>
+      )}
+    </div>
+  );
+}
+
 function ResultField({ label, value }: ResultFieldProps) {
   return (
     <div className="space-y-1">
@@ -1189,6 +1386,10 @@ function readProviderValue(value: string): MentorTestProvider {
   }
 
   return "mock";
+}
+
+function readRealProviderTestValue(value: string): RealProviderTestProvider {
+  return value === "anthropic" ? "anthropic" : "openai";
 }
 
 function formatCleanupResult(result: MentorTestCleanupResponse) {
