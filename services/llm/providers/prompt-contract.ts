@@ -28,6 +28,16 @@ export function buildProviderDeveloperInput(request: LlmCompletionRequest) {
       promptPackage.reflectionContext,
     ),
     formatPromptJsonSection(
+      "Relevant Mentor Methods",
+      promptPackage.mentorMethodContext,
+    ),
+    formatPromptSection("Mentor method guidance", [
+      "Use these methods only when relevant.",
+      "Do not mention method IDs.",
+      "Do not sound formulaic.",
+      "Adapt the method to the user's situation.",
+    ]),
+    formatPromptJsonSection(
       "Recent messages",
       promptPackage.conversationContext,
     ),

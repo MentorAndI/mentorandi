@@ -159,6 +159,7 @@ function buildMentorCoreDiagnostics(response: MentorResponsePipelineResult) {
       goals: response.contextUsed.diagnostics.goals,
       maxOutputTokens: response.contextUsed.diagnostics.maxOutputTokens,
       memories: response.contextUsed.diagnostics.memories,
+      methods: response.contextUsed.diagnostics.methods,
       recentMessages: response.contextUsed.diagnostics.recentMessages,
       reflections: response.contextUsed.diagnostics.reflections,
       wasTrimmed: response.contextUsed.diagnostics.wasTrimmed,
@@ -179,6 +180,11 @@ function buildMentorCoreDiagnostics(response: MentorResponsePipelineResult) {
     providerErrorState: null,
     provider: response.provider,
     providerUsed: response.provider,
+    matchedMethods: {
+      count: response.contextUsed.relevantMethods.length,
+      domains: response.contextUsed.relevantMethods.map((method) => method.domain),
+      titles: response.contextUsed.relevantMethods.map((method) => method.title),
+    },
     selectedProvider: response.selectedProvider,
     skippedDuplicateGoals:
       response.skippedDuplicateGoals.map(toGoalDiagnostic),
@@ -217,6 +223,11 @@ function buildMentorCoreErrorDiagnostics(
         included: 0,
         limit: 0,
       },
+      methods: {
+        available: 0,
+        included: 0,
+        limit: 2,
+      },
       recentMessages: {
         available: 0,
         included: 0,
@@ -247,6 +258,11 @@ function buildMentorCoreErrorDiagnostics(
     provider: error.selectedProvider ?? selectedProvider ?? "unknown",
     providerErrorState: error.providerErrorState ?? "pipeline_error",
     providerUsed: null,
+    matchedMethods: {
+      count: 0,
+      domains: [],
+      titles: [],
+    },
     selectedProvider: error.selectedProvider ?? selectedProvider ?? "unknown",
     skippedDuplicateGoals: [],
     skippedDuplicateMemories: [],

@@ -1,6 +1,7 @@
 import { ContextBuilderRepository } from "@/services/mentor-core/context-builder/context-builder.repository";
 import { getLlmCostControls } from "@/services/llm/llm-cost-controls";
 import { MemoryService } from "@/services/memory/memory.service";
+import { MentorMethodService } from "@/services/mentor-methods/method-service";
 import {
   ReflectionService,
   ReflectionServiceError,
@@ -10,6 +11,7 @@ import type {
   BuildMentorContextInput,
   MentorContextEnvironment,
   MentorContextGoal,
+  MentorContextMethod,
   MentorContextMemory,
   MentorContextMessage,
   MentorContextReflection,
@@ -35,6 +37,7 @@ export class ContextBuilderService {
     private readonly repository = new ContextBuilderRepository(),
     private readonly memoryService = new MemoryService(),
     private readonly reflectionService = new ReflectionService(),
+    private readonly methodService = new MentorMethodService(),
   ) {}
 
   async buildMentorContext(
@@ -89,10 +92,17 @@ export class ContextBuilderService {
       id: reflection.id,
       summary: reflection.summary,
     }));
+    const relevantMethods = this.methodService.findRelevantMethods({
+      currentMessage: input.currentMessage,
+      limit: 2,
+      recentContext: contextMessages.map((message) => message.content),
+    });
+    const contextMethods = relevantMethods.map(toContextMethod);
     const controls = getLlmCostControls();
     const budgetResult = trimContextToBudget(
       {
         currentMessage: input.currentMessage ?? null,
+        relevantMethods: contextMethods,
         recentMessages: contextMessages,
         recentReflections: contextReflections,
         relevantMemories: contextMemories,
@@ -134,6 +144,11 @@ export class ContextBuilderService {
           included: contextMemories.length,
           limit: controls.memoriesLimit,
         },
+        methods: {
+          available: contextMethods.length,
+          included: contextMethods.length,
+          limit: 2,
+        },
         recentMessages: {
           available: recentMessages.available,
           included: contextMessages.length,
@@ -161,9 +176,11 @@ export class ContextBuilderService {
       recommendedMentorFocus: buildRecommendedMentorFocus({
         activeGoalCount: contextGoals.length,
         currentMessage: input.currentMessage,
+        relevantMethodCount: contextMethods.length,
         relevantMemoryCount: contextMemories.length,
         recentReflectionCount: contextReflections.length,
       }),
+      relevantMethods: contextMethods,
       relevantMemories: contextMemories,
       user: {
         authUserId: user.authUserId,
@@ -307,8 +324,22 @@ function toContextMemory(memory: {
   };
 }
 
+function toContextMethod(method: MentorContextMethod): MentorContextMethod {
+  return {
+    domain: method.domain,
+    exampleQuestion: method.exampleQuestion,
+    id: method.id,
+    mentorInstruction: method.mentorInstruction,
+    shortDescription: method.shortDescription,
+    tags: method.tags,
+    title: method.title,
+    whenToUse: method.whenToUse,
+  };
+}
+
 interface ContextBudgetState {
   currentMessage: string | null;
+  relevantMethods: MentorContextMethod[];
   recentMessages: MentorContextMessage[];
   recentReflections: MentorContextReflection[];
   relevantMemories: MentorContextMemory[];
@@ -325,6 +356,7 @@ function trimContextToBudget(
 ): ContextBudgetResult {
   const result: ContextBudgetResult = {
     currentMessage: input.currentMessage,
+    relevantMethods: [...input.relevantMethods],
     recentMessages: [...input.recentMessages],
     recentReflections: [...input.recentReflections],
     relevantMemories: [...input.relevantMemories],
@@ -359,6 +391,14 @@ function estimateContextTokens(input: ContextBudgetState) {
       estimateTextTokens(`${message.role} ${message.createdAt} ${message.content}`),
     0,
   );
+  const methodTokens = input.relevantMethods.reduce(
+    (total, method) =>
+      total +
+      estimateTextTokens(
+        `${method.domain} ${method.title} ${method.shortDescription} ${method.whenToUse} ${method.mentorInstruction}`,
+      ),
+    0,
+  );
   const memoryTokens = input.relevantMemories.reduce(
     (total, memory) =>
       total +
@@ -377,6 +417,7 @@ function estimateContextTokens(input: ContextBudgetState) {
 
   return (
     currentMessageTokens +
+    methodTokens +
     recentMessageTokens +
     memoryTokens +
     goalTokens +
@@ -392,6 +433,7 @@ function estimateTextTokens(text: string) {
 function buildRecommendedMentorFocus(input: {
   activeGoalCount: number;
   currentMessage?: string;
+  relevantMethodCount: number;
   relevantMemoryCount: number;
   recentReflectionCount: number;
 }): RecommendedMentorFocus {
@@ -403,6 +445,10 @@ function buildRecommendedMentorFocus(input: {
 
   if (input.relevantMemoryCount > 0) {
     priorities.push("use-established-understanding-of-user");
+  }
+
+  if (input.relevantMethodCount > 0) {
+    priorities.push("apply-relevant-mentor-methods-without-being-formulaic");
   }
 
   if (input.activeGoalCount > 0) {

@@ -77,6 +77,7 @@ interface MentorCoreDiagnostics {
   createdReflection: MentorCoreReflectionDiagnostic | null;
   currentUserMessage: string;
   llmUsage: MentorCoreLlmUsageDiagnostic;
+  matchedMethods: MentorCoreMatchedMethodsDiagnostic;
   provider: string;
   providerErrorState: string | null;
   providerUsed: string | null;
@@ -92,6 +93,12 @@ interface MentorCoreContextCounts {
   memories: number;
   recentMessages: number;
   reflections: number;
+}
+
+interface MentorCoreMatchedMethodsDiagnostic {
+  count: number;
+  domains: string[];
+  titles: string[];
 }
 
 interface MentorCoreCostEstimateDiagnostic {
@@ -111,6 +118,7 @@ interface MentorCoreContextTrimmingDiagnostic {
   goals: MentorCoreContextSourceDiagnostic;
   maxOutputTokens: number | null;
   memories: MentorCoreContextSourceDiagnostic;
+  methods: MentorCoreContextSourceDiagnostic;
   recentMessages: MentorCoreContextSourceDiagnostic;
   reflections: MentorCoreContextSourceDiagnostic;
   wasTrimmed: boolean;
@@ -1173,6 +1181,10 @@ function MentorCoreDiagnosticsPanel({
         diagnostics={latestDiagnostics.contextTrimming}
       />
 
+      <MentorMethodDiagnosticsPanel
+        matchedMethods={latestDiagnostics.matchedMethods}
+      />
+
       <div className="grid gap-3 sm:grid-cols-2">
         <DiagnosticStat
           label="Memories in context"
@@ -1218,6 +1230,36 @@ function MentorCoreDiagnosticsPanel({
       />
       <DiagnosticReflection reflection={latestDiagnostics.createdReflection} />
     </div>
+  );
+}
+
+interface MentorMethodDiagnosticsPanelProps {
+  matchedMethods: MentorCoreMatchedMethodsDiagnostic;
+}
+
+function MentorMethodDiagnosticsPanel({
+  matchedMethods,
+}: MentorMethodDiagnosticsPanelProps) {
+  return (
+    <section className="space-y-3">
+      <h3 className="text-sm font-semibold text-zinc-950">
+        Mentor Method Matches
+      </h3>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <DiagnosticStat
+          label="Matched method count"
+          value={String(matchedMethods.count)}
+        />
+        <DiagnosticStat
+          label="Matched method domains"
+          value={formatListDiagnosticValue(matchedMethods.domains)}
+        />
+      </div>
+      <DiagnosticStringList
+        items={matchedMethods.titles}
+        title="Matched method titles"
+      />
+    </section>
   );
 }
 
@@ -1307,6 +1349,10 @@ function ContextTrimmingDiagnosticsPanel({
           label="Memories"
           source={diagnostics.memories}
         />
+        <ContextSourceDiagnosticStat
+          label="Methods"
+          source={diagnostics.methods}
+        />
         <ContextSourceDiagnosticStat label="Goals" source={diagnostics.goals} />
         <ContextSourceDiagnosticStat
           label="Reflections"
@@ -1347,6 +1393,35 @@ function DiagnosticStat({ label, value }: DiagnosticStatProps) {
         {value || "None"}
       </p>
     </div>
+  );
+}
+
+interface DiagnosticStringListProps {
+  items: string[];
+  title: string;
+}
+
+function DiagnosticStringList({ items, title }: DiagnosticStringListProps) {
+  return (
+    <section className="space-y-2">
+      <h3 className="text-sm font-semibold text-zinc-950">{title}</h3>
+      {items.length === 0 ? (
+        <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm text-zinc-500">
+          None.
+        </p>
+      ) : (
+        <div className="space-y-2">
+          {items.map((item) => (
+            <p
+              className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-3 text-sm leading-6 text-zinc-800"
+              key={`${title}-${item}`}
+            >
+              {item}
+            </p>
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
 
@@ -1588,6 +1663,10 @@ function formatCleanupResult(result: MentorTestCleanupResponse) {
 
 function formatNullableNumber(value: number | null) {
   return value === null ? "Not available" : value.toLocaleString();
+}
+
+function formatListDiagnosticValue(items: string[]) {
+  return items.length === 0 ? "None" : Array.from(new Set(items)).join(", ");
 }
 
 function formatCostEstimate(costEstimate: MentorCoreCostEstimateDiagnostic) {

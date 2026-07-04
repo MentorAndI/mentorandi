@@ -259,6 +259,11 @@ function buildProviderTestContext(message: string): MentorResponseContext {
         included: 0,
         limit: controls.memoriesLimit,
       },
+      methods: {
+        available: 0,
+        included: 0,
+        limit: 2,
+      },
       recentMessages: {
         available: 0,
         included: 0,
@@ -294,6 +299,7 @@ function buildProviderTestContext(message: string): MentorResponseContext {
       priorities: ["Verify provider connectivity."],
       summary: "Development-only provider connectivity test.",
     },
+    relevantMethods: [],
     relevantMemories: [],
     user: {
       authUserId: "provider-test-auth-user",

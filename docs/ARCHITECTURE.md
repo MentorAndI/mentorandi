@@ -33,6 +33,7 @@ Current service areas include:
 - Reflections.
 - Mentor sessions.
 - Mentor Core modules.
+- Mentor Method Library.
 - LLM provider orchestration.
 
 ## Repositories
@@ -67,6 +68,12 @@ Conversation-level data:
 - Messages.
 
 User-level data can inform future conversations. Conversation-level data should remain scoped to the selected conversation.
+
+User memory is personal to one user. It captures that user's understandings, goals, reflections and conversation history, and it must not become shared product knowledge.
+
+The Mentor Method Library is reusable product knowledge. It contains concise, curated mentor techniques that can be matched into context when the current user message and recent conversation make them relevant. The context builder includes only a small number of relevant methods, not the whole library.
+
+Future aggregate learning may suggest improvements to the method library, but shared methods should remain curated and admin-approved. Personal user data should not be stored or reused as cross-user knowledge.
 
 ## LLM Provider Abstraction
 

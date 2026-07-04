@@ -73,6 +73,17 @@ export interface MentorContextReflection {
   summary: string;
 }
 
+export interface MentorContextMethod {
+  domain: string;
+  exampleQuestion: string;
+  id: string;
+  mentorInstruction: string;
+  shortDescription: string;
+  tags: string[];
+  title: string;
+  whenToUse: string;
+}
+
 export interface RecommendedMentorFocus {
   priorities: string[];
   summary: string;
@@ -89,6 +100,7 @@ export interface MentorContextDiagnostics {
   goals: MentorContextSourceDiagnostics;
   maxOutputTokens: number;
   memories: MentorContextSourceDiagnostics;
+  methods: MentorContextSourceDiagnostics;
   recentMessages: MentorContextSourceDiagnostics;
   reflections: MentorContextSourceDiagnostics;
   wasTrimmed: boolean;
@@ -105,6 +117,7 @@ export interface MentorResponseContext {
   recentMessages: MentorContextMessage[];
   recentReflections: MentorContextReflection[];
   recommendedMentorFocus: RecommendedMentorFocus;
+  relevantMethods: MentorContextMethod[];
   relevantMemories: MentorContextMemory[];
   user: MentorContextUserIdentity;
   userGoals: MentorContextGoal[];

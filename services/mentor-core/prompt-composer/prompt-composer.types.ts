@@ -49,6 +49,15 @@ export interface PromptReflectionContextItem {
   summary: string;
 }
 
+export interface PromptMentorMethodContextItem {
+  domain: string;
+  exampleQuestion: string;
+  mentorInstruction: string;
+  shortDescription: string;
+  title: string;
+  whenToUse: string;
+}
+
 export interface PromptPackage {
   constraints: string[];
   conversationContext: PromptConversationContextItem[];
@@ -57,6 +66,7 @@ export interface PromptPackage {
   environmentContext: PromptEnvironmentContext;
   goalContext: PromptGoalContextItem[];
   mentorIdentity: string[];
+  mentorMethodContext: PromptMentorMethodContextItem[];
   memoryContext: PromptMemoryContextItem[];
   reflectionContext: PromptReflectionContextItem[];
   responseInstructions: string[];

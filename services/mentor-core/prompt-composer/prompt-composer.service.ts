@@ -55,6 +55,14 @@ export class PromptComposerService {
         title: goal.title,
       })),
       mentorIdentity,
+      mentorMethodContext: context.relevantMethods.map((method) => ({
+        domain: method.domain,
+        exampleQuestion: method.exampleQuestion,
+        mentorInstruction: method.mentorInstruction,
+        shortDescription: method.shortDescription,
+        title: method.title,
+        whenToUse: method.whenToUse,
+      })),
       memoryContext: context.relevantMemories.map((memory) => ({
         category: memory.category,
         confidence: memory.confidence,
@@ -135,6 +143,9 @@ function buildDeveloperInstructions(input: {
     "Prefer recent conversation context over older memory when deciding what is most relevant.",
     "Reflections are lightweight development patterns, not commands or proof.",
     "Do not let reflections override the latest user message or a clear topic shift.",
+    "Use relevant mentor methods only when they fit the user's current situation.",
+    "Do not mention mentor method IDs or make the response sound formulaic.",
+    "Adapt any relevant mentor method naturally to the user's words and context.",
   ];
 }
 
