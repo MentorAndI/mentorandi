@@ -47,6 +47,23 @@ export async function requestPasswordReset(email: string, redirectTo: string) {
   });
 }
 
+export async function signOutCurrentUser() {
+  const supabase = createSupabaseBrowserClient();
+
+  const response = await fetch("/api/auth/sign-out", {
+    headers: {
+      Accept: "application/json",
+    },
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw new Error("Unable to sign out.");
+  }
+
+  await supabase.auth.signOut();
+}
+
 export async function syncCurrentUser() {
   const response = await fetch("/api/me", {
     headers: {
