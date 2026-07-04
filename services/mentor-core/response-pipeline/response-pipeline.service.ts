@@ -144,6 +144,22 @@ export class MentorResponsePipelineService {
         createdReflection,
         createdGoals: goalStorageResult.createdGoals,
         extractedMemories: memoryStorageResult.createdMemories,
+        llmUsage: {
+          ...(llmResponse.metadata.inputTokens !== undefined
+            ? { inputTokens: llmResponse.metadata.inputTokens }
+            : {}),
+          ...(llmResponse.metadata.latencyMs !== undefined
+            ? { latencyMs: llmResponse.metadata.latencyMs }
+            : {}),
+          model: llmResponse.metadata.model,
+          ...(llmResponse.metadata.outputTokens !== undefined
+            ? { outputTokens: llmResponse.metadata.outputTokens }
+            : {}),
+          provider: llmResponse.metadata.provider,
+          ...(llmResponse.metadata.totalTokens !== undefined
+            ? { totalTokens: llmResponse.metadata.totalTokens }
+            : {}),
+        },
         mentorMessage,
         model: llmResponse.metadata.model,
         promptPackage,

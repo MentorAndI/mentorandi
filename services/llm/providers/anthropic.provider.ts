@@ -20,6 +20,10 @@ interface AnthropicMessagesApiResponse {
     message?: string;
   } | null;
   model?: unknown;
+  usage?: {
+    input_tokens?: unknown;
+    output_tokens?: unknown;
+  } | null;
 }
 
 export class AnthropicLlmProvider implements LlmProvider {
@@ -30,6 +34,7 @@ export class AnthropicLlmProvider implements LlmProvider {
   ): Promise<LlmCompletionResponse> {
     const config = getAnthropicConfig();
     const model = request.model?.trim() || config.model;
+    const startedAt = Date.now();
 
     const response = await fetch(anthropicMessagesUrl, {
       body: JSON.stringify({
@@ -58,6 +63,7 @@ export class AnthropicLlmProvider implements LlmProvider {
       },
       method: "POST",
     });
+    const latencyMs = Date.now() - startedAt;
 
     const responseBody = (await response.json().catch(() => null)) as
       | AnthropicMessagesApiResponse
@@ -83,6 +89,8 @@ export class AnthropicLlmProvider implements LlmProvider {
       content,
       createdAt: new Date().toISOString(),
       metadata: {
+        ...readAnthropicUsage(responseBody),
+        latencyMs,
         model: readAnthropicModel(responseBody, model),
         provider: this.name,
       },
@@ -157,6 +165,27 @@ function readAnthropicModel(
   return typeof response.model === "string" && response.model.trim()
     ? response.model
     : fallback;
+}
+
+function readAnthropicUsage(response: AnthropicMessagesApiResponse) {
+  const inputTokens = readNumber(response.usage?.input_tokens);
+  const outputTokens = readNumber(response.usage?.output_tokens);
+  const totalTokens =
+    inputTokens !== undefined && outputTokens !== undefined
+      ? inputTokens + outputTokens
+      : undefined;
+
+  return {
+    ...(inputTokens !== undefined ? { inputTokens } : {}),
+    ...(outputTokens !== undefined ? { outputTokens } : {}),
+    ...(totalTokens !== undefined ? { totalTokens } : {}),
+  };
+}
+
+function readNumber(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value)
+    ? value
+    : undefined;
 }
 
 function readAnthropicErrorMessage(

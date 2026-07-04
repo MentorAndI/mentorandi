@@ -68,10 +68,14 @@ export async function POST(request: Request) {
 
     return NextResponse.json(
       {
+        inputTokens: response.metadata.inputTokens ?? null,
+        latencyMs: response.metadata.latencyMs ?? null,
         model: response.metadata.model,
+        outputTokens: response.metadata.outputTokens ?? null,
         provider: validation.input.provider,
         responseText: response.content,
         success: true,
+        totalTokens: response.metadata.totalTokens ?? null,
       },
       { status: 200 },
     );

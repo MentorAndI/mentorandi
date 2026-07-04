@@ -154,6 +154,15 @@ function buildMentorCoreDiagnostics(response: MentorResponsePipelineResult) {
         }
       : null,
     currentUserMessage: response.userMessage.content,
+    llmUsage: {
+      costEstimate: estimateLlmCost(response.llmUsage),
+      inputTokens: response.llmUsage.inputTokens ?? null,
+      latencyMs: response.llmUsage.latencyMs ?? null,
+      model: response.llmUsage.model,
+      outputTokens: response.llmUsage.outputTokens ?? null,
+      provider: response.llmUsage.provider,
+      totalTokens: response.llmUsage.totalTokens ?? null,
+    },
     providerErrorState: null,
     provider: response.provider,
     providerUsed: response.provider,
@@ -182,6 +191,19 @@ function buildMentorCoreErrorDiagnostics(
     createdMemories: [],
     createdReflection: null,
     currentUserMessage: "",
+    llmUsage: {
+      costEstimate: {
+        estimatedCostUsd: null,
+        isConfigured: false,
+        message: "Cost estimate not configured",
+      },
+      inputTokens: null,
+      latencyMs: null,
+      model: "unknown",
+      outputTokens: null,
+      provider: error.selectedProvider ?? selectedProvider ?? "unknown",
+      totalTokens: null,
+    },
     provider: error.selectedProvider ?? selectedProvider ?? "unknown",
     providerErrorState: error.providerErrorState ?? "pipeline_error",
     providerUsed: null,
@@ -191,6 +213,56 @@ function buildMentorCoreErrorDiagnostics(
     updatedGoals: [],
     updatedMemories: [],
   };
+}
+
+function estimateLlmCost(
+  usage: MentorResponsePipelineResult["llmUsage"],
+) {
+  const inputCostPer1m = readOptionalCost("LLM_INPUT_COST_PER_1M");
+  const outputCostPer1m = readOptionalCost("LLM_OUTPUT_COST_PER_1M");
+
+  if (inputCostPer1m === null || outputCostPer1m === null) {
+    return {
+      estimatedCostUsd: null,
+      isConfigured: false,
+      message: "Cost estimate not configured",
+    };
+  }
+
+  if (
+    usage.inputTokens === undefined ||
+    usage.outputTokens === undefined
+  ) {
+    return {
+      estimatedCostUsd: null,
+      isConfigured: true,
+      message: "Token usage not available",
+    };
+  }
+
+  const estimatedCostUsd =
+    (usage.inputTokens / 1_000_000) * inputCostPer1m +
+    (usage.outputTokens / 1_000_000) * outputCostPer1m;
+
+  return {
+    estimatedCostUsd,
+    isConfigured: true,
+    message: null,
+  };
+}
+
+function readOptionalCost(name: string) {
+  const value = process.env[name]?.trim();
+
+  if (!value) {
+    return null;
+  }
+
+  const parsedValue = Number(value);
+
+  return Number.isFinite(parsedValue) && parsedValue >= 0
+    ? parsedValue
+    : null;
 }
 
 function toGoalDiagnostic(goal: MentorResponsePipelineResult["createdGoals"][number]) {

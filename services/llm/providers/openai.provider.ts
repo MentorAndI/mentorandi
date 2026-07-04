@@ -25,6 +25,13 @@ interface OpenAiResponsesApiResponse {
   model?: unknown;
   output?: unknown;
   output_text?: unknown;
+  usage?: {
+    completion_tokens?: unknown;
+    input_tokens?: unknown;
+    output_tokens?: unknown;
+    prompt_tokens?: unknown;
+    total_tokens?: unknown;
+  } | null;
 }
 
 export class OpenAiLlmProvider implements LlmProvider {
@@ -35,6 +42,7 @@ export class OpenAiLlmProvider implements LlmProvider {
   ): Promise<LlmCompletionResponse> {
     const config = getOpenAiConfig();
     const model = request.model?.trim() || config.model;
+    const startedAt = Date.now();
 
     const response = await fetch(openAiResponsesUrl, {
       body: JSON.stringify({
@@ -71,6 +79,7 @@ export class OpenAiLlmProvider implements LlmProvider {
       },
       method: "POST",
     });
+    const latencyMs = Date.now() - startedAt;
 
     const responseBody = (await response.json().catch(() => null)) as
       | OpenAiResponsesApiResponse
@@ -96,6 +105,8 @@ export class OpenAiLlmProvider implements LlmProvider {
       content,
       createdAt: readOpenAiCreatedAt(responseBody),
       metadata: {
+        ...readOpenAiUsage(responseBody),
+        latencyMs,
         model: readOpenAiModel(responseBody, model),
         provider: this.name,
       },
@@ -184,6 +195,32 @@ function readOpenAiCreatedAt(response: OpenAiResponsesApiResponse) {
   return typeof response.created_at === "number"
     ? new Date(response.created_at * 1000).toISOString()
     : new Date().toISOString();
+}
+
+function readOpenAiUsage(response: OpenAiResponsesApiResponse) {
+  const inputTokens =
+    readNumber(response.usage?.input_tokens) ??
+    readNumber(response.usage?.prompt_tokens);
+  const outputTokens =
+    readNumber(response.usage?.output_tokens) ??
+    readNumber(response.usage?.completion_tokens);
+  const totalTokens =
+    readNumber(response.usage?.total_tokens) ??
+    (inputTokens !== undefined && outputTokens !== undefined
+      ? inputTokens + outputTokens
+      : undefined);
+
+  return {
+    ...(inputTokens !== undefined ? { inputTokens } : {}),
+    ...(outputTokens !== undefined ? { outputTokens } : {}),
+    ...(totalTokens !== undefined ? { totalTokens } : {}),
+  };
+}
+
+function readNumber(value: unknown) {
+  return typeof value === "number" && Number.isFinite(value)
+    ? value
+    : undefined;
 }
 
 function readOpenAiErrorMessage(

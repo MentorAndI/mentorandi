@@ -4,7 +4,7 @@
 
 1. Improve goal dedupe and goal updates.
 2. Add reflection UI or internal dev visibility.
-3. Test real provider connectivity before alpha; production alpha must use OpenAI or Anthropic, OpenAI quota/billing must work, and Claude requires `ANTHROPIC_API_KEY` plus `ANTHROPIC_MODEL`.
+3. Test real provider connectivity and usage diagnostics before alpha; production alpha must use OpenAI or Anthropic, OpenAI quota/billing must work, and Claude requires `ANTHROPIC_API_KEY` plus `ANTHROPIC_MODEL`.
 4. Use the deployment health check to verify alpha environment readiness.
 5. Expand account/privacy controls with Supabase auth deletion and compliance workflows.
 6. Deploy alpha on the selected VPS or hosting platform.

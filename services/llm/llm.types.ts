@@ -17,9 +17,13 @@ export interface LlmCompletionResponse {
   content: string;
   createdAt?: string;
   metadata: {
+    inputTokens?: number;
+    latencyMs?: number;
     model: string;
+    outputTokens?: number;
     provider: LlmProviderName;
     selectedProvider?: LlmProviderName;
+    totalTokens?: number;
   };
   raw?: unknown;
 }

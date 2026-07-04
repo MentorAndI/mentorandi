@@ -18,12 +18,22 @@ export interface MentorResponsePipelineAuthContext {
   authUserId: string | null;
 }
 
+export interface MentorResponsePipelineLlmUsage {
+  inputTokens?: number;
+  latencyMs?: number;
+  model: string;
+  outputTokens?: number;
+  provider: LlmProviderName;
+  totalTokens?: number;
+}
+
 export interface MentorResponsePipelineResult {
   contextUsed: MentorResponseContext;
   createdAt: string;
   createdReflection: ReflectionDto | null;
   createdGoals: GoalDto[];
   extractedMemories: MentorUnderstandingDto[];
+  llmUsage: MentorResponsePipelineLlmUsage;
   mentorMessage: MessageDto;
   model: string;
   promptPackage: PromptPackage;

@@ -75,6 +75,7 @@ interface MentorCoreDiagnostics {
   createdMemories: MentorCoreMemoryDiagnostic[];
   createdReflection: MentorCoreReflectionDiagnostic | null;
   currentUserMessage: string;
+  llmUsage: MentorCoreLlmUsageDiagnostic;
   provider: string;
   providerErrorState: string | null;
   providerUsed: string | null;
@@ -90,6 +91,22 @@ interface MentorCoreContextCounts {
   memories: number;
   recentMessages: number;
   reflections: number;
+}
+
+interface MentorCoreCostEstimateDiagnostic {
+  estimatedCostUsd: number | null;
+  isConfigured: boolean;
+  message: string | null;
+}
+
+interface MentorCoreLlmUsageDiagnostic {
+  costEstimate: MentorCoreCostEstimateDiagnostic;
+  inputTokens: number | null;
+  latencyMs: number | null;
+  model: string;
+  outputTokens: number | null;
+  provider: string;
+  totalTokens: number | null;
 }
 
 interface MentorCoreGoalDiagnostic {
@@ -129,11 +146,15 @@ interface MentorTestErrorResponse {
 
 interface RealProviderTestResult {
   errorState?: string;
+  inputTokens?: number | null;
+  latencyMs?: number | null;
   model: string | null;
+  outputTokens?: number | null;
   provider: RealProviderTestProvider;
   responseText?: string;
   safeErrorMessage?: string;
   success: boolean;
+  totalTokens?: number | null;
 }
 
 interface RealProviderTestState {
@@ -1119,6 +1140,8 @@ function MentorCoreDiagnosticsPanel({
         />
       </div>
 
+      <LlmUsageDiagnosticsPanel usage={latestDiagnostics.llmUsage} />
+
       <div className="grid gap-3 sm:grid-cols-2">
         <DiagnosticStat
           label="Memories in context"
@@ -1164,6 +1187,44 @@ function MentorCoreDiagnosticsPanel({
       />
       <DiagnosticReflection reflection={latestDiagnostics.createdReflection} />
     </div>
+  );
+}
+
+interface LlmUsageDiagnosticsPanelProps {
+  usage: MentorCoreLlmUsageDiagnostic;
+}
+
+function LlmUsageDiagnosticsPanel({ usage }: LlmUsageDiagnosticsPanelProps) {
+  return (
+    <section className="space-y-3">
+      <h3 className="text-sm font-semibold text-zinc-950">LLM Usage</h3>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <DiagnosticStat label="Provider" value={usage.provider} />
+        <DiagnosticStat label="Model" value={usage.model} />
+        <DiagnosticStat
+          label="Latency"
+          value={
+            usage.latencyMs === null ? "Not available" : `${usage.latencyMs} ms`
+          }
+        />
+        <DiagnosticStat
+          label="Input tokens"
+          value={formatNullableNumber(usage.inputTokens)}
+        />
+        <DiagnosticStat
+          label="Output tokens"
+          value={formatNullableNumber(usage.outputTokens)}
+        />
+        <DiagnosticStat
+          label="Total tokens"
+          value={formatNullableNumber(usage.totalTokens)}
+        />
+        <DiagnosticStat
+          label="Estimated cost"
+          value={formatCostEstimate(usage.costEstimate)}
+        />
+      </div>
+    </section>
   );
 }
 
@@ -1337,10 +1398,28 @@ function RealProviderTestResultPanel({
       <ResultField label="Provider" value={result.provider} />
       <ResultField label="Model" value={result.model ?? "None"} />
       {result.success ? (
-        <ResultField
-          label="Response"
-          value={result.responseText ?? "No response text returned."}
-        />
+        <>
+          <ResultField
+            label="Latency"
+            value={
+              result.latencyMs === undefined || result.latencyMs === null
+                ? "Not available"
+                : `${result.latencyMs} ms`
+            }
+          />
+          <ResultField
+            label="Tokens"
+            value={[
+              `input ${formatNullableNumber(result.inputTokens ?? null)}`,
+              `output ${formatNullableNumber(result.outputTokens ?? null)}`,
+              `total ${formatNullableNumber(result.totalTokens ?? null)}`,
+            ].join(" / ")}
+          />
+          <ResultField
+            label="Response"
+            value={result.responseText ?? "No response text returned."}
+          />
+        </>
       ) : (
         <>
           <ResultField
@@ -1399,6 +1478,22 @@ function formatCleanupResult(result: MentorTestCleanupResponse) {
     `${result.deletedGoals} goals`,
     `${result.deletedReflections} reflections`,
   ].join(", ");
+}
+
+function formatNullableNumber(value: number | null) {
+  return value === null ? "Not available" : value.toLocaleString();
+}
+
+function formatCostEstimate(costEstimate: MentorCoreCostEstimateDiagnostic) {
+  if (!costEstimate.isConfigured) {
+    return "Cost estimate not configured";
+  }
+
+  if (costEstimate.estimatedCostUsd === null) {
+    return costEstimate.message ?? "Not available";
+  }
+
+  return `$${costEstimate.estimatedCostUsd.toFixed(6)}`;
 }
 
 function formatMessageTimestamp(value: string) {

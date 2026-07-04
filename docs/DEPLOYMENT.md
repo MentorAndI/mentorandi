@@ -9,6 +9,8 @@ DATABASE_URL=
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 LLM_PROVIDER=
+LLM_INPUT_COST_PER_1M=
+LLM_OUTPUT_COST_PER_1M=
 OPENAI_API_KEY=
 OPENAI_MODEL=
 ANTHROPIC_API_KEY=
@@ -30,6 +32,8 @@ Claude mode requires `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`.
 Mentor Core prepares the structured context. The real provider produces Marcus' natural response.
 
 Before using a real provider for alpha users, test it from `/dev/mentor-test` with the development-only Real provider test. OpenAI requires working billing, quota and model access. Claude requires `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`.
+
+Real provider usage should be monitored before alpha. Optional `LLM_INPUT_COST_PER_1M` and `LLM_OUTPUT_COST_PER_1M` values can be configured manually from current provider pricing pages so development diagnostics can estimate cost. Do not hardcode pricing into business logic.
 
 ## Pre-Deployment Checklist
 
