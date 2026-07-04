@@ -155,6 +155,9 @@ export class MentorResponsePipelineService {
             ? { maxOutputTokens: llmResponse.metadata.maxOutputTokens }
             : {}),
           model: llmResponse.metadata.model,
+          ...(llmResponse.metadata.modelRouting !== undefined
+            ? { modelRouting: llmResponse.metadata.modelRouting }
+            : {}),
           ...(llmResponse.metadata.outputTokens !== undefined
             ? { outputTokens: llmResponse.metadata.outputTokens }
             : {}),

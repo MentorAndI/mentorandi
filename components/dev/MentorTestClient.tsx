@@ -122,9 +122,18 @@ interface MentorCoreLlmUsageDiagnostic {
   latencyMs: number | null;
   maxOutputTokens: number | null;
   model: string;
+  modelRouting: MentorCoreModelRoutingDiagnostic | null;
   outputTokens: number | null;
   provider: string;
   totalTokens: number | null;
+}
+
+interface MentorCoreModelRoutingDiagnostic {
+  model?: string;
+  reason: string;
+  route: string;
+  signals: string[];
+  wasExplicitModel: boolean;
 }
 
 interface MentorCoreGoalDiagnostic {
@@ -1224,6 +1233,14 @@ function LlmUsageDiagnosticsPanel({ usage }: LlmUsageDiagnosticsPanelProps) {
         <DiagnosticStat label="Provider" value={usage.provider} />
         <DiagnosticStat label="Model" value={usage.model} />
         <DiagnosticStat
+          label="Model route"
+          value={formatModelRoute(usage.modelRouting)}
+        />
+        <DiagnosticStat
+          label="Model routing reason"
+          value={usage.modelRouting?.reason ?? "Not available"}
+        />
+        <DiagnosticStat
           label="Latency"
           value={
             usage.latencyMs === null ? "Not available" : `${usage.latencyMs} ms`
@@ -1583,6 +1600,16 @@ function formatCostEstimate(costEstimate: MentorCoreCostEstimateDiagnostic) {
   }
 
   return `$${costEstimate.estimatedCostUsd.toFixed(6)}`;
+}
+
+function formatModelRoute(routing: MentorCoreModelRoutingDiagnostic | null) {
+  if (!routing) {
+    return "Not available";
+  }
+
+  return routing.wasExplicitModel
+    ? `${routing.route} (${routing.signals.join(", ")})`
+    : routing.route;
 }
 
 function formatMessageTimestamp(value: string) {

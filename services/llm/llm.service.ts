@@ -6,6 +6,7 @@ import {
 import { MockLlmProvider } from "@/services/llm/providers/mock.provider";
 import { OpenAiLlmProvider } from "@/services/llm/providers/openai.provider";
 import { getLlmCostControls } from "@/services/llm/llm-cost-controls";
+import { resolveLlmModelRoute } from "@/services/llm/llm-model-router";
 import type { LlmProvider } from "@/services/llm/providers/provider.interface";
 import type {
   LlmCompletionRequest,
@@ -58,6 +59,11 @@ export class LlmService {
 
     const selectedProvider = this.resolveProvider(validation.input.provider);
     const provider = this.providers[selectedProvider];
+    const modelRouting = resolveLlmModelRoute({
+      context: validation.input.context,
+      provider: selectedProvider,
+      requestedModel: validation.input.model,
+    });
 
     if (!provider) {
       throw new LlmServiceError(
@@ -71,6 +77,7 @@ export class LlmService {
     try {
       const response = await provider.complete({
         ...validation.input,
+        ...(modelRouting.model ? { model: modelRouting.model } : {}),
         provider: selectedProvider,
       });
 
@@ -78,6 +85,7 @@ export class LlmService {
         ...response,
         metadata: {
           maxOutputTokens: getLlmCostControls().maxOutputTokens,
+          modelRouting,
           ...response.metadata,
           selectedProvider,
         },

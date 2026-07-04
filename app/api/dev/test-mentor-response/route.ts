@@ -171,6 +171,7 @@ function buildMentorCoreDiagnostics(response: MentorResponsePipelineResult) {
         response.llmUsage.maxOutputTokens ??
         response.contextUsed.diagnostics.maxOutputTokens,
       model: response.llmUsage.model,
+      modelRouting: response.llmUsage.modelRouting ?? null,
       outputTokens: response.llmUsage.outputTokens ?? null,
       provider: response.llmUsage.provider,
       totalTokens: response.llmUsage.totalTokens ?? null,
@@ -238,6 +239,7 @@ function buildMentorCoreErrorDiagnostics(
       latencyMs: null,
       maxOutputTokens: null,
       model: "unknown",
+      modelRouting: null,
       outputTokens: null,
       provider: error.selectedProvider ?? selectedProvider ?? "unknown",
       totalTokens: null,

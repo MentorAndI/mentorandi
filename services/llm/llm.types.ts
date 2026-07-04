@@ -3,6 +3,21 @@ import type { PromptPackage } from "@/services/mentor-core/prompt-composer/promp
 
 export type LlmProviderName = "mock" | "openai" | "anthropic";
 
+export type LlmModelRouteName =
+  | "cheap"
+  | "deep"
+  | "default"
+  | "explicit"
+  | "mock";
+
+export interface LlmModelRoutingDecision {
+  model?: string;
+  reason: string;
+  route: LlmModelRouteName;
+  signals: string[];
+  wasExplicitModel: boolean;
+}
+
 export interface LlmCompletionRequest {
   context: MentorResponseContext;
   model?: string;
@@ -21,6 +36,7 @@ export interface LlmCompletionResponse {
     latencyMs?: number;
     maxOutputTokens?: number;
     model: string;
+    modelRouting?: LlmModelRoutingDecision;
     outputTokens?: number;
     provider: LlmProviderName;
     selectedProvider?: LlmProviderName;

@@ -1,4 +1,7 @@
-import type { LlmProviderName } from "@/services/llm/llm.types";
+import type {
+  LlmModelRoutingDecision,
+  LlmProviderName,
+} from "@/services/llm/llm.types";
 import type { GoalDto } from "@/services/goal/goal.types";
 import type { MentorUnderstandingDto } from "@/services/memory/memory.types";
 import type { MessageDto } from "@/services/message/message.types";
@@ -23,6 +26,7 @@ export interface MentorResponsePipelineLlmUsage {
   latencyMs?: number;
   maxOutputTokens?: number;
   model: string;
+  modelRouting?: LlmModelRoutingDecision;
   outputTokens?: number;
   provider: LlmProviderName;
   totalTokens?: number;

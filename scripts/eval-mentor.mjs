@@ -178,6 +178,10 @@ async function runScenario({
         inputTokens: readNullableNumber(usage?.inputTokens),
         latencyMs: readNullableNumber(usage?.latencyMs),
         model: sanitizeText(usage?.model ?? body?.model ?? "unknown"),
+        modelRoute: sanitizeText(usage?.modelRouting?.route ?? "unknown"),
+        modelRoutingReason: sanitizeText(
+          usage?.modelRouting?.reason ?? "Not available",
+        ),
         outputTokens: readNullableNumber(usage?.outputTokens),
         provider,
         providerUsed: sanitizeText(
@@ -198,6 +202,10 @@ async function runScenario({
       inputTokens: readNullableNumber(usage?.inputTokens),
       latencyMs: readNullableNumber(usage?.latencyMs),
       model: sanitizeText(usage?.model ?? body?.model ?? "unknown"),
+      modelRoute: sanitizeText(usage?.modelRouting?.route ?? "unknown"),
+      modelRoutingReason: sanitizeText(
+        usage?.modelRouting?.reason ?? "Not available",
+      ),
       outputTokens: readNullableNumber(usage?.outputTokens),
       provider,
       providerUsed: sanitizeText(
@@ -216,6 +224,8 @@ async function runScenario({
       inputTokens: null,
       latencyMs: null,
       model: model ?? "unknown",
+      modelRoute: "unknown",
+      modelRoutingReason: "Request failed before model routing diagnostics were returned.",
       outputTokens: null,
       provider,
       providerUsed: provider,
@@ -238,7 +248,7 @@ function printScenarioResult(result) {
       : `$${result.estimatedCost.toFixed(6)}`;
 
   console.log(
-    `${status} ${result.scenario} | ${result.providerUsed} | ${result.model} | ${latency} | ${tokens} | ${cost}`,
+    `${status} ${result.scenario} | ${result.providerUsed} | ${result.model} | ${result.modelRoute} | ${latency} | ${tokens} | ${cost}`,
   );
 
   if (result.success) {
