@@ -7,8 +7,8 @@
 3. Fix real provider billing/keys and test OpenAI or Anthropic responses in real provider mode.
 4. Use the deployment health check to verify alpha environment readiness.
 5. Expand account/privacy controls with Supabase auth deletion and compliance workflows.
-6. Deploy alpha.
+6. Deploy alpha on the selected VPS or hosting platform.
 7. Polish the mentor UI and account settings experience.
 8. Add basic logging/error handling.
 9. Expand provider diagnostics and logging after real provider testing.
-10. Add deployment hosting configuration and run the environment validator in CI.
+10. Run the VPS smoke test after deployment and add it to CI/CD.

@@ -10,6 +10,7 @@
     "prelint": "prisma generate",
     "lint": "eslint",
     "check:env": "node scripts/check-env.mjs",
+    "smoke:prod": "node scripts/production-smoke-test.mjs",
     "prisma": "prisma",
     "db:seed": "prisma generate && jiti prisma/seed.ts"
   },

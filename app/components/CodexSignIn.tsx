@@ -29,7 +29,7 @@ export default function CodexSignIn() {
 
       setStatus("success");
       setMessage(`Signed in as ${result.email}.`);
-    } catch (error) {
+    } catch {
       setStatus("idle");
       setMessage("Unable to sign in. Please try again.");
     }

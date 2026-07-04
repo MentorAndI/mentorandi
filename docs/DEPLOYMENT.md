@@ -41,6 +41,8 @@ npm run build
 
 Confirm production secrets are set in the deployment environment, not committed to the repository.
 
+For VPS deployment with PM2, see `docs/VPS_DEPLOYMENT.md`.
+
 ## Post-Deployment Check
 
 After deployment, open:
@@ -59,3 +61,15 @@ Expected healthy values:
 - `llmProvider` set to the configured provider name
 
 If `status` is `degraded`, inspect server logs and deployment environment variables.
+
+You can also run:
+
+```bash
+npm run smoke:prod
+```
+
+For a deployed domain:
+
+```bash
+APP_URL=https://mentorandi.com npm run smoke:prod
+```
