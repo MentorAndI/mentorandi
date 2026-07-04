@@ -15,6 +15,7 @@ const providerSpecificVariables = {
 
 const missingVariables = [...requiredVariables];
 const provider = process.env.LLM_PROVIDER?.trim().toLowerCase();
+const isProduction = process.env.NODE_ENV === "production";
 const errors = [];
 const warnings = [];
 
@@ -37,7 +38,11 @@ if (provider) {
     }
   }
 
-  if (provider === "mock") {
+  if (provider === "mock" && isProduction) {
+    errors.push(
+      "LLM_PROVIDER=mock is not allowed for production alpha. Use openai or anthropic.",
+    );
+  } else if (provider === "mock") {
     warnings.push(
       "LLM_PROVIDER=mock is intended for development and deterministic testing, not real production users.",
     );

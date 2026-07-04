@@ -22,14 +22,14 @@ Production should use a real provider:
 - `LLM_PROVIDER=openai`
 - `LLM_PROVIDER=anthropic`
 
-`LLM_PROVIDER=mock` is for deterministic development and testing only.
+`LLM_PROVIDER=mock` is for deterministic development and testing only. It is not allowed for production alpha or real users.
 
 OpenAI mode requires working OpenAI billing/quota plus `OPENAI_API_KEY` and `OPENAI_MODEL`.
 Claude mode requires `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`.
 
 Mentor Core prepares the structured context. The real provider produces Marcus' natural response.
 
-Before using a real provider for alpha users, test it from `/dev/mentor-test` with the development-only Real provider test. Mock remains a deterministic local fallback only.
+Before using a real provider for alpha users, test it from `/dev/mentor-test` with the development-only Real provider test. OpenAI requires working billing, quota and model access. Claude requires `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`.
 
 ## Pre-Deployment Checklist
 

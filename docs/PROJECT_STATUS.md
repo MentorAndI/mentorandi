@@ -55,10 +55,10 @@ MentorAndI
 - Development fallback user is blocked in production; missing authenticated users must receive `401`.
 - `/api/dev/*` routes and `/dev/mentor-test` are development-only and blocked in production.
 - Raw IDs are not exposed in user-facing UI.
-- `LLM_PROVIDER=mock` is safe for deterministic local testing.
+- `LLM_PROVIDER=mock` is safe for deterministic local testing only and is not allowed for production alpha.
 - `LLM_PROVIDER=openai` runs Marcus through the OpenAI provider using structured Mentor Core context.
 - `LLM_PROVIDER=anthropic` runs Marcus through the Anthropic/Claude provider using structured Mentor Core context.
-- Production requires explicit LLM provider configuration.
+- Production alpha requires explicit real LLM provider configuration with `openai` or `anthropic`.
 - Real provider modes require their API key and model environment variables.
 - Mentor Core prepares context; the selected real LLM provider produces the natural-language answer.
 - Mock should not be treated as the source of real mentor quality.

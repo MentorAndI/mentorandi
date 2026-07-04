@@ -14,6 +14,7 @@ interface HealthCheckResponse {
   database: DatabaseStatus;
   environment: "development" | "production";
   llmProvider: HealthLlmProvider;
+  messages?: string[];
   status: HealthStatus;
   timestamp: string;
 }
@@ -26,6 +27,7 @@ export async function GET() {
   const database = await checkDatabase();
   const auth = checkAuthConfiguration();
   const llmProvider = checkLlmProviderConfiguration();
+  const messages = buildHealthMessages(llmProvider);
   const status =
     database === "connected" &&
     auth === "configured" &&
@@ -39,6 +41,7 @@ export async function GET() {
     database,
     environment: getEnvironmentLabel(),
     llmProvider: llmProvider.name,
+    ...(messages.length > 0 ? { messages } : {}),
     status,
     timestamp: new Date().toISOString(),
   };
@@ -109,10 +112,35 @@ function checkLlmProviderConfiguration(): {
     };
   }
 
+  if (provider === "mock" && process.env.NODE_ENV === "production") {
+    return {
+      isConfigured: false,
+      name: provider,
+    };
+  }
+
   return {
     isConfigured: true,
     name: provider,
   };
+}
+
+function buildHealthMessages(llmProvider: {
+  isConfigured: boolean;
+  name: HealthLlmProvider;
+}) {
+  const messages: string[] = [];
+
+  if (
+    process.env.NODE_ENV === "production" &&
+    llmProvider.name === "mock"
+  ) {
+    messages.push(
+      "Production alpha requires a real LLM provider: openai or anthropic.",
+    );
+  }
+
+  return messages;
 }
 
 function getEnvironmentLabel(): HealthCheckResponse["environment"] {

@@ -39,7 +39,7 @@ Production should use a real provider for real users:
 - `LLM_PROVIDER=openai`
 - `LLM_PROVIDER=anthropic`
 
-`LLM_PROVIDER=mock` is only for development and deterministic testing.
+`LLM_PROVIDER=mock` is only for development and deterministic testing. It is not allowed for production alpha or real users.
 
 Use a production-safe Supabase `DATABASE_URL`. OpenAI and Claude keys must live in deployment secrets, not in source control.
 
