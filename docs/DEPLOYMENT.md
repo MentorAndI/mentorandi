@@ -65,11 +65,13 @@ If `status` is `degraded`, inspect server logs and deployment environment variab
 You can also run:
 
 ```bash
+npm run smoke:alpha
 npm run smoke:prod
 ```
 
 For a deployed domain:
 
 ```bash
+APP_URL=https://mentorandi.com npm run smoke:alpha
 APP_URL=https://mentorandi.com npm run smoke:prod
 ```

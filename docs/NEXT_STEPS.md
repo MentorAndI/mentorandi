@@ -11,4 +11,4 @@
 7. Polish the mentor UI and account settings experience.
 8. Add basic logging/error handling.
 9. Expand provider diagnostics and logging after real provider testing.
-10. Run the VPS smoke test after deployment and add it to CI/CD.
+10. Run alpha and VPS smoke tests after deployment and add them to CI/CD.
