@@ -78,9 +78,26 @@ export interface RecommendedMentorFocus {
   summary: string;
 }
 
+export interface MentorContextSourceDiagnostics {
+  available: number;
+  included: number;
+  limit: number;
+}
+
+export interface MentorContextDiagnostics {
+  contextBudgetTokens: number;
+  goals: MentorContextSourceDiagnostics;
+  maxOutputTokens: number;
+  memories: MentorContextSourceDiagnostics;
+  recentMessages: MentorContextSourceDiagnostics;
+  reflections: MentorContextSourceDiagnostics;
+  wasTrimmed: boolean;
+}
+
 export interface MentorResponseContext {
   conversation: MentorContextConversation;
   currentUserMessage: string | null;
+  diagnostics: MentorContextDiagnostics;
   environment: MentorContextEnvironment;
   goals: MentorContextGoal[];
   memories: MentorContextMemory[];

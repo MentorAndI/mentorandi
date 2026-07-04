@@ -11,6 +11,12 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 LLM_PROVIDER=
 LLM_INPUT_COST_PER_1M=
 LLM_OUTPUT_COST_PER_1M=
+LLM_MAX_OUTPUT_TOKENS=
+LLM_CONTEXT_BUDGET_TOKENS=
+LLM_RECENT_MESSAGES_LIMIT=
+LLM_MEMORIES_LIMIT=
+LLM_GOALS_LIMIT=
+LLM_REFLECTIONS_LIMIT=
 OPENAI_API_KEY=
 OPENAI_MODEL=
 ANTHROPIC_API_KEY=
@@ -34,6 +40,8 @@ Mentor Core prepares the structured context. The real provider produces Marcus' 
 Before using a real provider for alpha users, test it from `/dev/mentor-test` with the development-only Real provider test. OpenAI requires working billing, quota and model access. Claude requires `ANTHROPIC_API_KEY` and `ANTHROPIC_MODEL`.
 
 Real provider usage should be monitored before alpha. Optional `LLM_INPUT_COST_PER_1M` and `LLM_OUTPUT_COST_PER_1M` values can be configured manually from current provider pricing pages so development diagnostics can estimate cost. Do not hardcode pricing into business logic.
+
+LLM cost controls are required before alpha. If unset, MentorAndI uses conservative defaults: `LLM_MAX_OUTPUT_TOKENS=500`, `LLM_CONTEXT_BUDGET_TOKENS=6000`, `LLM_RECENT_MESSAGES_LIMIT=8`, `LLM_MEMORIES_LIMIT=5`, `LLM_GOALS_LIMIT=3` and `LLM_REFLECTIONS_LIMIT=5`. Sonnet-class models may be treated as premium/deep mode; cheaper models can be introduced later for normal daily use.
 
 ## Pre-Deployment Checklist
 

@@ -151,6 +151,9 @@ export class MentorResponsePipelineService {
           ...(llmResponse.metadata.latencyMs !== undefined
             ? { latencyMs: llmResponse.metadata.latencyMs }
             : {}),
+          ...(llmResponse.metadata.maxOutputTokens !== undefined
+            ? { maxOutputTokens: llmResponse.metadata.maxOutputTokens }
+            : {}),
           model: llmResponse.metadata.model,
           ...(llmResponse.metadata.outputTokens !== undefined
             ? { outputTokens: llmResponse.metadata.outputTokens }

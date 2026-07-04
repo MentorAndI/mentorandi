@@ -3,11 +3,11 @@ import type {
   LlmCompletionRequest,
   LlmCompletionResponse,
 } from "@/services/llm/llm.types";
+import { getLlmCostControls } from "@/services/llm/llm-cost-controls";
 import { buildProviderDeveloperInput } from "@/services/llm/providers/prompt-contract";
 
 const anthropicMessagesUrl = "https://api.anthropic.com/v1/messages";
 const anthropicVersion = "2023-06-01";
-const defaultMaxTokens = 800;
 
 interface AnthropicContentBlock {
   text?: unknown;
@@ -33,12 +33,13 @@ export class AnthropicLlmProvider implements LlmProvider {
     request: LlmCompletionRequest,
   ): Promise<LlmCompletionResponse> {
     const config = getAnthropicConfig();
+    const controls = getLlmCostControls();
     const model = request.model?.trim() || config.model;
     const startedAt = Date.now();
 
     const response = await fetch(anthropicMessagesUrl, {
       body: JSON.stringify({
-        max_tokens: defaultMaxTokens,
+        max_tokens: controls.maxOutputTokens,
         messages: [
           {
             content: [
@@ -91,6 +92,7 @@ export class AnthropicLlmProvider implements LlmProvider {
       metadata: {
         ...readAnthropicUsage(responseBody),
         latencyMs,
+        maxOutputTokens: controls.maxOutputTokens,
         model: readAnthropicModel(responseBody, model),
         provider: this.name,
       },

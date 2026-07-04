@@ -3,6 +3,7 @@ import type {
   LlmCompletionRequest,
   LlmCompletionResponse,
 } from "@/services/llm/llm.types";
+import { getLlmCostControls } from "@/services/llm/llm-cost-controls";
 import { buildProviderDeveloperInput } from "@/services/llm/providers/prompt-contract";
 
 const openAiResponsesUrl = "https://api.openai.com/v1/responses";
@@ -41,6 +42,7 @@ export class OpenAiLlmProvider implements LlmProvider {
     request: LlmCompletionRequest,
   ): Promise<LlmCompletionResponse> {
     const config = getOpenAiConfig();
+    const controls = getLlmCostControls();
     const model = request.model?.trim() || config.model;
     const startedAt = Date.now();
 
@@ -67,6 +69,7 @@ export class OpenAiLlmProvider implements LlmProvider {
           },
         ],
         instructions: request.systemPrompt,
+        max_output_tokens: controls.maxOutputTokens,
         model,
         store: false,
         ...(request.temperature !== undefined
@@ -107,6 +110,7 @@ export class OpenAiLlmProvider implements LlmProvider {
       metadata: {
         ...readOpenAiUsage(responseBody),
         latencyMs,
+        maxOutputTokens: controls.maxOutputTokens,
         model: readOpenAiModel(responseBody, model),
         provider: this.name,
       },

@@ -4,6 +4,7 @@ import {
   createProductionDevRouteResponse,
   isProductionEnvironment,
 } from "@/lib/api/dev-route-guard";
+import { getLlmCostControls } from "@/services/llm/llm-cost-controls";
 import { LlmService, LlmServiceError } from "@/services/llm/llm.service";
 import type { LlmProviderName } from "@/services/llm/llm.types";
 import type { MentorResponseContext } from "@/services/mentor-core/context-builder/context-builder.types";
@@ -236,6 +237,7 @@ function readConfiguredModel(provider: RealProviderName) {
 function buildProviderTestContext(message: string): MentorResponseContext {
   const now = new Date();
   const currentDateTimeIso = now.toISOString();
+  const controls = getLlmCostControls();
 
   return {
     conversation: {
@@ -244,6 +246,31 @@ function buildProviderTestContext(message: string): MentorResponseContext {
       updatedAt: currentDateTimeIso,
     },
     currentUserMessage: message,
+    diagnostics: {
+      contextBudgetTokens: controls.contextBudgetTokens,
+      goals: {
+        available: 0,
+        included: 0,
+        limit: controls.goalsLimit,
+      },
+      maxOutputTokens: controls.maxOutputTokens,
+      memories: {
+        available: 0,
+        included: 0,
+        limit: controls.memoriesLimit,
+      },
+      recentMessages: {
+        available: 0,
+        included: 0,
+        limit: controls.recentMessagesLimit,
+      },
+      reflections: {
+        available: 0,
+        included: 0,
+        limit: controls.reflectionsLimit,
+      },
+      wasTrimmed: false,
+    },
     environment: {
       currentDate: currentDateTimeIso.slice(0, 10),
       currentDateTimeIso,

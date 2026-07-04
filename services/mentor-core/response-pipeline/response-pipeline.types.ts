@@ -21,6 +21,7 @@ export interface MentorResponsePipelineAuthContext {
 export interface MentorResponsePipelineLlmUsage {
   inputTokens?: number;
   latencyMs?: number;
+  maxOutputTokens?: number;
   model: string;
   outputTokens?: number;
   provider: LlmProviderName;

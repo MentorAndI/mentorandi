@@ -154,10 +154,22 @@ function buildMentorCoreDiagnostics(response: MentorResponsePipelineResult) {
         }
       : null,
     currentUserMessage: response.userMessage.content,
+    contextTrimming: {
+      contextBudgetTokens: response.contextUsed.diagnostics.contextBudgetTokens,
+      goals: response.contextUsed.diagnostics.goals,
+      maxOutputTokens: response.contextUsed.diagnostics.maxOutputTokens,
+      memories: response.contextUsed.diagnostics.memories,
+      recentMessages: response.contextUsed.diagnostics.recentMessages,
+      reflections: response.contextUsed.diagnostics.reflections,
+      wasTrimmed: response.contextUsed.diagnostics.wasTrimmed,
+    },
     llmUsage: {
       costEstimate: estimateLlmCost(response.llmUsage),
       inputTokens: response.llmUsage.inputTokens ?? null,
       latencyMs: response.llmUsage.latencyMs ?? null,
+      maxOutputTokens:
+        response.llmUsage.maxOutputTokens ??
+        response.contextUsed.diagnostics.maxOutputTokens,
       model: response.llmUsage.model,
       outputTokens: response.llmUsage.outputTokens ?? null,
       provider: response.llmUsage.provider,
@@ -191,6 +203,31 @@ function buildMentorCoreErrorDiagnostics(
     createdMemories: [],
     createdReflection: null,
     currentUserMessage: "",
+    contextTrimming: {
+      contextBudgetTokens: null,
+      goals: {
+        available: 0,
+        included: 0,
+        limit: 0,
+      },
+      maxOutputTokens: null,
+      memories: {
+        available: 0,
+        included: 0,
+        limit: 0,
+      },
+      recentMessages: {
+        available: 0,
+        included: 0,
+        limit: 0,
+      },
+      reflections: {
+        available: 0,
+        included: 0,
+        limit: 0,
+      },
+      wasTrimmed: false,
+    },
     llmUsage: {
       costEstimate: {
         estimatedCostUsd: null,
@@ -199,6 +236,7 @@ function buildMentorCoreErrorDiagnostics(
       },
       inputTokens: null,
       latencyMs: null,
+      maxOutputTokens: null,
       model: "unknown",
       outputTokens: null,
       provider: error.selectedProvider ?? selectedProvider ?? "unknown",

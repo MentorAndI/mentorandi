@@ -34,6 +34,12 @@ export class ContextBuilderRepository {
     return messages.reverse();
   }
 
+  async countMessagesForConversation(conversationId: string) {
+    return this.prisma.message.count({
+      where: { conversationId },
+    });
+  }
+
   async findActiveGoals(userId: string, limit: number) {
     return this.prisma.goal.findMany({
       orderBy: [
@@ -48,4 +54,12 @@ export class ContextBuilderRepository {
     });
   }
 
+  async countActiveGoals(userId: string) {
+    return this.prisma.goal.count({
+      where: {
+        status: GoalStatus.ACTIVE,
+        userId,
+      },
+    });
+  }
 }

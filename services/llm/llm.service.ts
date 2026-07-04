@@ -5,6 +5,7 @@ import {
 } from "@/services/llm/llm-provider-selection.service";
 import { MockLlmProvider } from "@/services/llm/providers/mock.provider";
 import { OpenAiLlmProvider } from "@/services/llm/providers/openai.provider";
+import { getLlmCostControls } from "@/services/llm/llm-cost-controls";
 import type { LlmProvider } from "@/services/llm/providers/provider.interface";
 import type {
   LlmCompletionRequest,
@@ -76,6 +77,7 @@ export class LlmService {
       return {
         ...response,
         metadata: {
+          maxOutputTokens: getLlmCostControls().maxOutputTokens,
           ...response.metadata,
           selectedProvider,
         },

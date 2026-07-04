@@ -1,4 +1,5 @@
 import { ContextBuilderRepository } from "@/services/mentor-core/context-builder/context-builder.repository";
+import { getLlmCostControls } from "@/services/llm/llm-cost-controls";
 import { MemoryService } from "@/services/memory/memory.service";
 import {
   ReflectionService,
@@ -7,18 +8,17 @@ import {
 import type {
   BuildMentorContextAuthContext,
   BuildMentorContextInput,
-  MentorContextMemory,
   MentorContextEnvironment,
+  MentorContextGoal,
+  MentorContextMemory,
+  MentorContextMessage,
+  MentorContextReflection,
   MentorResponseContext,
   RecommendedMentorFocus,
 } from "@/services/mentor-core/context-builder/context-builder.types";
 
-const recentMessageLimit = 12;
-const relevantMemoryLimit = 10;
 const minimumMemoryConfidence = 0.6;
 const minimumMemoryImportance = 3;
-const activeGoalLimit = 5;
-const recentReflectionLimit = 5;
 
 export class ContextBuilderServiceError extends Error {
   constructor(
@@ -61,34 +61,58 @@ export class ContextBuilderService {
       );
     }
 
-    const [recentMessages, relevantMemories, activeGoals, recentReflections] =
-      await Promise.all([
-        this.repository.findRecentMessages(conversation.id, recentMessageLimit),
-        this.memoryService.listRelevantMentorUnderstandingsForUserId(
-          user.id,
-          {
-            minimumConfidence: minimumMemoryConfidence,
-            minimumImportance: minimumMemoryImportance,
-          },
-          relevantMemoryLimit,
-        ),
-        this.repository.findActiveGoals(user.id, activeGoalLimit),
-        this.reflectionService.listRecentReflectionsForUserId(
-          user.id,
-          recentReflectionLimit,
-        ),
-      ]).catch((error: unknown) => {
-        throw this.toContextBuilderError(error);
-      });
-    const contextMemories = relevantMemories.map(toContextMemory);
-    const contextGoals = activeGoals.map((goal) => ({
+    const contextSources = await this.loadContextSources(
+      user.id,
+      conversation.id,
+    );
+    const {
+      activeGoals,
+      recentMessages,
+      recentReflections,
+      relevantMemories,
+    } = contextSources;
+    let contextMessages = recentMessages.items.map((message) => ({
+      content: message.content,
+      createdAt: message.createdAt.toISOString(),
+      role: message.role,
+    }));
+    let contextMemories = relevantMemories.items.map(toContextMemory);
+    let contextGoals = activeGoals.items.map((goal) => ({
       description: goal.description,
       id: goal.id,
       status: goal.status,
       targetDate: goal.targetDate?.toISOString() ?? null,
       title: goal.title,
     }));
+    let contextReflections = recentReflections.items.map((reflection) => ({
+      createdAt: reflection.createdAt,
+      id: reflection.id,
+      summary: reflection.summary,
+    }));
+    const controls = getLlmCostControls();
+    const budgetResult = trimContextToBudget(
+      {
+        currentMessage: input.currentMessage ?? null,
+        recentMessages: contextMessages,
+        recentReflections: contextReflections,
+        relevantMemories: contextMemories,
+        userGoals: contextGoals,
+      },
+      controls.contextBudgetTokens,
+    );
+
+    contextMessages = budgetResult.recentMessages;
+    contextMemories = budgetResult.relevantMemories;
+    contextGoals = budgetResult.userGoals;
+    contextReflections = budgetResult.recentReflections;
+
     const environment = buildEnvironmentContext();
+    const contextWasTrimmed =
+      budgetResult.wasTrimmed ||
+      recentMessages.available > contextMessages.length ||
+      relevantMemories.available > contextMemories.length ||
+      activeGoals.available > contextGoals.length ||
+      recentReflections.available > contextReflections.length;
 
     return {
       conversation: {
@@ -97,6 +121,31 @@ export class ContextBuilderService {
         updatedAt: conversation.updatedAt.toISOString(),
       },
       currentUserMessage: input.currentMessage ?? null,
+      diagnostics: {
+        contextBudgetTokens: controls.contextBudgetTokens,
+        goals: {
+          available: activeGoals.available,
+          included: contextGoals.length,
+          limit: controls.goalsLimit,
+        },
+        maxOutputTokens: controls.maxOutputTokens,
+        memories: {
+          available: relevantMemories.available,
+          included: contextMemories.length,
+          limit: controls.memoriesLimit,
+        },
+        recentMessages: {
+          available: recentMessages.available,
+          included: contextMessages.length,
+          limit: controls.recentMessagesLimit,
+        },
+        reflections: {
+          available: recentReflections.available,
+          included: contextReflections.length,
+          limit: controls.reflectionsLimit,
+        },
+        wasTrimmed: contextWasTrimmed,
+      },
       environment,
       goals: contextGoals,
       memories: contextMemories,
@@ -107,21 +156,13 @@ export class ContextBuilderService {
         name: conversation.mentor.name,
         slug: conversation.mentor.slug,
       },
-      recentMessages: recentMessages.map((message) => ({
-        content: message.content,
-        createdAt: message.createdAt.toISOString(),
-        role: message.role,
-      })),
-      recentReflections: recentReflections.map((reflection) => ({
-        createdAt: reflection.createdAt,
-        id: reflection.id,
-        summary: reflection.summary,
-      })),
+      recentMessages: contextMessages,
+      recentReflections: contextReflections,
       recommendedMentorFocus: buildRecommendedMentorFocus({
-        activeGoalCount: activeGoals.length,
+        activeGoalCount: contextGoals.length,
         currentMessage: input.currentMessage,
-        relevantMemoryCount: relevantMemories.length,
-        recentReflectionCount: recentReflections.length,
+        relevantMemoryCount: contextMemories.length,
+        recentReflectionCount: contextReflections.length,
       }),
       relevantMemories: contextMemories,
       user: {
@@ -129,6 +170,69 @@ export class ContextBuilderService {
         id: user.id,
       },
       userGoals: contextGoals,
+    };
+  }
+
+  private async loadContextSources(userId: string, conversationId: string) {
+    const controls = getLlmCostControls();
+    const memoryFilters = {
+      minimumConfidence: minimumMemoryConfidence,
+      minimumImportance: minimumMemoryImportance,
+    };
+
+    const [
+      recentMessageItems,
+      relevantMemoryItems,
+      activeGoalItems,
+      recentReflectionItems,
+      recentMessageAvailableCount,
+      relevantMemoryAvailableCount,
+      activeGoalAvailableCount,
+      recentReflectionAvailableCount,
+    ] =
+      await Promise.all([
+        this.repository.findRecentMessages(
+          conversationId,
+          controls.recentMessagesLimit,
+        ),
+        this.memoryService.listRelevantMentorUnderstandingsForUserId(
+          userId,
+          memoryFilters,
+          controls.memoriesLimit,
+        ),
+        this.repository.findActiveGoals(userId, controls.goalsLimit),
+        this.reflectionService.listRecentReflectionsForUserId(
+          userId,
+          controls.reflectionsLimit,
+        ),
+        this.repository.countMessagesForConversation(conversationId),
+        this.memoryService.countRelevantMentorUnderstandingsForUserId(
+          userId,
+          memoryFilters,
+        ),
+        this.repository.countActiveGoals(userId),
+        this.reflectionService.countReflectionsForUserId(userId),
+      ]).catch((error: unknown) => {
+        throw this.toContextBuilderError(error);
+      });
+
+    return {
+      activeGoals: {
+        available: activeGoalAvailableCount,
+        items: activeGoalItems,
+      },
+      recentMessages: {
+        available: recentMessageAvailableCount,
+        items: recentMessageItems,
+      },
+      recentReflections: {
+        available: recentReflectionAvailableCount,
+        items: recentReflectionItems,
+      },
+      relevantMemories: {
+        available: relevantMemoryAvailableCount,
+        items: relevantMemoryItems,
+      },
     };
   }
 
@@ -201,6 +305,87 @@ function toContextMemory(memory: {
     title: memory.title,
     updatedAt: memory.updatedAt,
   };
+}
+
+interface ContextBudgetState {
+  currentMessage: string | null;
+  recentMessages: MentorContextMessage[];
+  recentReflections: MentorContextReflection[];
+  relevantMemories: MentorContextMemory[];
+  userGoals: MentorContextGoal[];
+}
+
+interface ContextBudgetResult extends ContextBudgetState {
+  wasTrimmed: boolean;
+}
+
+function trimContextToBudget(
+  input: ContextBudgetState,
+  contextBudgetTokens: number,
+): ContextBudgetResult {
+  const result: ContextBudgetResult = {
+    currentMessage: input.currentMessage,
+    recentMessages: [...input.recentMessages],
+    recentReflections: [...input.recentReflections],
+    relevantMemories: [...input.relevantMemories],
+    userGoals: [...input.userGoals],
+    wasTrimmed: false,
+  };
+
+  while (estimateContextTokens(result) > contextBudgetTokens) {
+    if (result.recentReflections.length > 0) {
+      result.recentReflections.pop();
+    } else if (result.relevantMemories.length > 0) {
+      result.relevantMemories.pop();
+    } else if (result.recentMessages.length > 0) {
+      result.recentMessages.shift();
+    } else if (result.userGoals.length > 0) {
+      result.userGoals.pop();
+    } else {
+      break;
+    }
+
+    result.wasTrimmed = true;
+  }
+
+  return result;
+}
+
+function estimateContextTokens(input: ContextBudgetState) {
+  const currentMessageTokens = estimateTextTokens(input.currentMessage ?? "");
+  const recentMessageTokens = input.recentMessages.reduce(
+    (total, message) =>
+      total +
+      estimateTextTokens(`${message.role} ${message.createdAt} ${message.content}`),
+    0,
+  );
+  const memoryTokens = input.relevantMemories.reduce(
+    (total, memory) =>
+      total +
+      estimateTextTokens(`${memory.category} ${memory.title} ${memory.content}`),
+    0,
+  );
+  const goalTokens = input.userGoals.reduce(
+    (total, goal) =>
+      total + estimateTextTokens(`${goal.title} ${goal.description ?? ""}`),
+    0,
+  );
+  const reflectionTokens = input.recentReflections.reduce(
+    (total, reflection) => total + estimateTextTokens(reflection.summary),
+    0,
+  );
+
+  return (
+    currentMessageTokens +
+    recentMessageTokens +
+    memoryTokens +
+    goalTokens +
+    reflectionTokens
+  );
+}
+
+function estimateTextTokens(text: string) {
+  return Math.ceil(text.length / 4);
 }
 
 // The Context Builder returns structured context, not a prompt.

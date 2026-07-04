@@ -31,4 +31,10 @@ export class ReflectionRepository {
       where: { userId },
     });
   }
+
+  async countReflectionsForUser(userId: string) {
+    return this.prisma.reflection.count({
+      where: { userId },
+    });
+  }
 }

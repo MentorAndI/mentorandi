@@ -32,6 +32,12 @@ export class ReflectionService {
     return reflections.map(toReflectionDto);
   }
 
+  async countReflectionsForUserId(userId: string): Promise<number> {
+    await this.ensureUserById(userId);
+
+    return this.repository.countReflectionsForUser(userId);
+  }
+
   async createReflectionForUserId(
     userId: string,
     input: CreateReflectionInput,

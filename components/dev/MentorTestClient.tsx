@@ -71,6 +71,7 @@ interface MentorTestCleanupResponse {
 
 interface MentorCoreDiagnostics {
   contextCounts: MentorCoreContextCounts;
+  contextTrimming: MentorCoreContextTrimmingDiagnostic;
   createdGoals: MentorCoreGoalDiagnostic[];
   createdMemories: MentorCoreMemoryDiagnostic[];
   createdReflection: MentorCoreReflectionDiagnostic | null;
@@ -99,10 +100,27 @@ interface MentorCoreCostEstimateDiagnostic {
   message: string | null;
 }
 
+interface MentorCoreContextSourceDiagnostic {
+  available: number;
+  included: number;
+  limit: number;
+}
+
+interface MentorCoreContextTrimmingDiagnostic {
+  contextBudgetTokens: number | null;
+  goals: MentorCoreContextSourceDiagnostic;
+  maxOutputTokens: number | null;
+  memories: MentorCoreContextSourceDiagnostic;
+  recentMessages: MentorCoreContextSourceDiagnostic;
+  reflections: MentorCoreContextSourceDiagnostic;
+  wasTrimmed: boolean;
+}
+
 interface MentorCoreLlmUsageDiagnostic {
   costEstimate: MentorCoreCostEstimateDiagnostic;
   inputTokens: number | null;
   latencyMs: number | null;
+  maxOutputTokens: number | null;
   model: string;
   outputTokens: number | null;
   provider: string;
@@ -1142,6 +1160,10 @@ function MentorCoreDiagnosticsPanel({
 
       <LlmUsageDiagnosticsPanel usage={latestDiagnostics.llmUsage} />
 
+      <ContextTrimmingDiagnosticsPanel
+        diagnostics={latestDiagnostics.contextTrimming}
+      />
+
       <div className="grid gap-3 sm:grid-cols-2">
         <DiagnosticStat
           label="Memories in context"
@@ -1208,6 +1230,10 @@ function LlmUsageDiagnosticsPanel({ usage }: LlmUsageDiagnosticsPanelProps) {
           }
         />
         <DiagnosticStat
+          label="Max output tokens"
+          value={formatNullableNumber(usage.maxOutputTokens)}
+        />
+        <DiagnosticStat
           label="Input tokens"
           value={formatNullableNumber(usage.inputTokens)}
         />
@@ -1225,6 +1251,69 @@ function LlmUsageDiagnosticsPanel({ usage }: LlmUsageDiagnosticsPanelProps) {
         />
       </div>
     </section>
+  );
+}
+
+interface ContextTrimmingDiagnosticsPanelProps {
+  diagnostics: MentorCoreContextTrimmingDiagnostic;
+}
+
+function ContextTrimmingDiagnosticsPanel({
+  diagnostics,
+}: ContextTrimmingDiagnosticsPanelProps) {
+  return (
+    <section className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-sm font-semibold text-zinc-950">
+          Context Controls
+        </h3>
+        {diagnostics.wasTrimmed ? (
+          <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800">
+            Context was trimmed
+          </span>
+        ) : null}
+      </div>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <DiagnosticStat
+          label="Context budget"
+          value={formatNullableNumber(diagnostics.contextBudgetTokens)}
+        />
+        <DiagnosticStat
+          label="Max output tokens"
+          value={formatNullableNumber(diagnostics.maxOutputTokens)}
+        />
+        <ContextSourceDiagnosticStat
+          label="Recent messages"
+          source={diagnostics.recentMessages}
+        />
+        <ContextSourceDiagnosticStat
+          label="Memories"
+          source={diagnostics.memories}
+        />
+        <ContextSourceDiagnosticStat label="Goals" source={diagnostics.goals} />
+        <ContextSourceDiagnosticStat
+          label="Reflections"
+          source={diagnostics.reflections}
+        />
+      </div>
+    </section>
+  );
+}
+
+interface ContextSourceDiagnosticStatProps {
+  label: string;
+  source: MentorCoreContextSourceDiagnostic;
+}
+
+function ContextSourceDiagnosticStat({
+  label,
+  source,
+}: ContextSourceDiagnosticStatProps) {
+  return (
+    <DiagnosticStat
+      label={label}
+      value={`${source.included} included / ${source.available} available (limit ${source.limit})`}
+    />
   );
 }
 

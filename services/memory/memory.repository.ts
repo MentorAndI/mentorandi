@@ -63,6 +63,21 @@ export class MemoryRepository {
     });
   }
 
+  async countMemoriesForUser(userId: string, filters: MemoryFilters) {
+    return this.prisma.memory.count({
+      where: {
+        userId,
+        ...(filters.category ? { category: filters.category } : {}),
+        ...(filters.minimumImportance !== undefined
+          ? { importance: { gte: filters.minimumImportance } }
+          : {}),
+        ...(filters.minimumConfidence !== undefined
+          ? { confidence: { gte: filters.minimumConfidence } }
+          : {}),
+      },
+    });
+  }
+
   async findMemoryForUser(memoryId: string, userId: string) {
     return this.prisma.memory.findFirst({
       where: {
