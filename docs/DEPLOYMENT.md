@@ -35,6 +35,7 @@ Run these before deploying:
 
 ```bash
 npm run lint
+npm run check:env
 npm run build
 ```
 

@@ -11,4 +11,4 @@
 7. Polish the mentor UI and account settings experience.
 8. Add basic logging/error handling.
 9. Expand provider diagnostics and logging after real provider testing.
-10. Add a pre-deployment checklist for production environment variables and auth configuration.
+10. Add deployment hosting configuration and run the environment validator in CI.

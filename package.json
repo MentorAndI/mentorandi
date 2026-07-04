@@ -9,6 +9,7 @@
     "start": "next start",
     "prelint": "prisma generate",
     "lint": "eslint",
+    "check:env": "node scripts/check-env.mjs",
     "prisma": "prisma",
     "db:seed": "prisma generate && jiti prisma/seed.ts"
   },
