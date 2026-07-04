@@ -12,6 +12,7 @@
 
 # testing
 /coverage
+reports/*.json
 
 # next.js
 /.next/

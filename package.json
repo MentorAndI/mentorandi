@@ -10,6 +10,7 @@
     "prelint": "prisma generate",
     "lint": "eslint",
     "check:env": "node scripts/check-env.mjs",
+    "eval:mentor": "node scripts/eval-mentor.mjs",
     "smoke:alpha": "node scripts/alpha-smoke-test.mjs",
     "smoke:prod": "node scripts/production-smoke-test.mjs",
     "prisma": "prisma",

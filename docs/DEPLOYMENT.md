@@ -75,9 +75,16 @@ npm run smoke:alpha
 npm run smoke:prod
 ```
 
+Before alpha, run the local mentor evaluation runner against a development or staging app to compare tone, latency, token usage and estimated cost through the existing app API:
+
+```bash
+npm run eval:mentor
+```
+
 For a deployed domain:
 
 ```bash
 APP_URL=https://mentorandi.com npm run smoke:alpha
 APP_URL=https://mentorandi.com npm run smoke:prod
+APP_URL=https://staging.mentorandi.com EVAL_LLM_PROVIDERS=openai,anthropic npm run eval:mentor
 ```
