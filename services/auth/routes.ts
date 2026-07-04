@@ -11,9 +11,12 @@ export function isProtectedAuthRoute(pathname: string) {
   );
 }
 
-export function isDevelopmentMentorRouteBypass(pathname: string) {
+export function isDevelopmentProtectedRouteBypass(pathname: string) {
   return (
     process.env.NODE_ENV !== "production" &&
-    (pathname === "/mentor" || pathname.startsWith("/mentor/"))
+    (pathname === "/mentor" ||
+      pathname.startsWith("/mentor/") ||
+      pathname === "/settings" ||
+      pathname.startsWith("/settings/"))
   );
 }

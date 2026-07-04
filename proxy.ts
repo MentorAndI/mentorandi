@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { getSupabasePublicConfig } from "@/lib/supabase/config";
 import {
-  isDevelopmentMentorRouteBypass,
+  isDevelopmentProtectedRouteBypass,
   isProtectedAuthRoute,
 } from "@/services/auth/routes";
 
@@ -39,10 +39,10 @@ export async function proxy(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  // Local-only bypass so the seeded /mentor experience can be tested before auth is wired in.
+  // Local-only bypass so seeded mentor/account flows can be tested before auth is wired in.
   const shouldRequireAuth =
     isProtectedAuthRoute(request.nextUrl.pathname) &&
-    !isDevelopmentMentorRouteBypass(request.nextUrl.pathname);
+    !isDevelopmentProtectedRouteBypass(request.nextUrl.pathname);
 
   if (!user && shouldRequireAuth) {
     const redirectUrl = request.nextUrl.clone();

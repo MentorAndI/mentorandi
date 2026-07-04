@@ -34,6 +34,7 @@ MentorAndI
 - Active goals in UI.
 - Reflection engine.
 - Reflection-aware context.
+- Basic account data export and mentor data deletion controls.
 - Context Builder.
 - Prompt Composer.
 - Response Pipeline.
@@ -70,7 +71,7 @@ MentorAndI
 - UI is functional but not final design.
 - Deployment is not done.
 - Payment is not done.
-- Privacy, data export and account deletion controls are not done.
+- Privacy controls are basic v1 only; Supabase auth user deletion and full compliance workflows are not done.
 
 ## Current Test Checklist
 
@@ -86,3 +87,4 @@ MentorAndI
 - Reflections influence later context without overriding topic shifts.
 - Mock diagnostics show selected provider, provider used and safe provider error state.
 - OpenAI and Anthropic modes should be tested when API keys, models, billing and quota are available.
+- `/settings` account data export and mentor data deletion work for the resolved user only.
