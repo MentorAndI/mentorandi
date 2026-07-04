@@ -31,6 +31,7 @@ export function AccountDataControls() {
   const [exportMessage, setExportMessage] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
+  const trimmedConfirmation = confirmation.trim();
 
   async function handleExport() {
     setErrorMessage("");
@@ -62,11 +63,19 @@ export function AccountDataControls() {
 
     setDeleteMessage("");
     setErrorMessage("");
+
+    if (trimmedConfirmation !== accountDataDeleteConfirmation) {
+      setErrorMessage(
+        `Type ${accountDataDeleteConfirmation} to confirm deletion.`,
+      );
+      return;
+    }
+
     setIsDeleting(true);
 
     try {
       const response = await fetch("/api/account/delete-data", {
-        body: JSON.stringify({ confirmation }),
+        body: JSON.stringify({ confirmation: trimmedConfirmation }),
         headers: {
           "Content-Type": "application/json",
         },
@@ -100,7 +109,8 @@ export function AccountDataControls() {
             Export my data
           </h2>
           <p className="text-sm leading-6 text-zinc-600">
-            Download your MentorAndI conversations and mentor data as JSON.
+            Download a JSON copy of your conversations, messages, memories,
+            goals and reflections.
           </p>
         </div>
 
@@ -127,7 +137,7 @@ export function AccountDataControls() {
           </h2>
           <p className="text-sm leading-6 text-zinc-600">
             This removes your conversations, messages, memories, goals and
-            reflections.
+            reflections. Your account sign-in is not deleted.
           </p>
         </div>
 
@@ -135,11 +145,14 @@ export function AccountDataControls() {
           <Input
             autoComplete="off"
             id="delete-mentor-data-confirmation"
-            label="Confirmation"
+            label={`Type ${accountDataDeleteConfirmation} to confirm`}
             onChange={(event) => setConfirmation(event.target.value)}
             placeholder={accountDataDeleteConfirmation}
             value={confirmation}
           />
+          <p className="text-sm leading-6 text-zinc-500">
+            This action only runs after the confirmation text matches exactly.
+          </p>
 
           {deleteMessage ? (
             <p className="text-sm text-zinc-600" role="status">
@@ -147,7 +160,11 @@ export function AccountDataControls() {
             </p>
           ) : null}
 
-          <Button disabled={isDeleting} type="submit" variant="destructive">
+          <Button
+            disabled={isDeleting || !trimmedConfirmation}
+            type="submit"
+            variant="destructive"
+          >
             {isDeleting ? "Deleting..." : "Delete my mentor data"}
           </Button>
         </form>

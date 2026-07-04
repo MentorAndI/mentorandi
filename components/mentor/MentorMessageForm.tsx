@@ -23,7 +23,11 @@ export function MentorMessageForm({
   onSubmit,
 }: MentorMessageFormProps) {
   return (
-    <form className="space-y-4 border-t border-zinc-200 pt-5" onSubmit={onSubmit}>
+    <form
+      aria-busy={isSending}
+      className="space-y-4 border-t border-zinc-200 pt-5"
+      onSubmit={onSubmit}
+    >
       <Textarea
         error={error}
         id="mentor-message"
@@ -35,7 +39,14 @@ export function MentorMessageForm({
         value={message}
       />
 
-      <div className="flex justify-end">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        {isSending ? (
+          <p className="text-sm text-zinc-500" role="status">
+            Marcus is taking a moment with this.
+          </p>
+        ) : (
+          <span aria-hidden="true" />
+        )}
         <Button
           className="min-w-32"
           disabled={disabled || isSending || !message.trim()}

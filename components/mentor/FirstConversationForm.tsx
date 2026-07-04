@@ -71,9 +71,14 @@ export function FirstConversationForm({
   }
 
   return (
-    <form className="mt-10 space-y-5" onSubmit={handleSubmit}>
+    <form
+      aria-busy={isSubmitting}
+      className="mt-10 space-y-5"
+      onSubmit={handleSubmit}
+    >
       <Textarea
         error={errorMessage}
+        hint="A few honest sentences are enough. You can keep it simple."
         id={textareaId}
         label="What brought you here today?"
         maxLength={characterLimit}
@@ -89,7 +94,14 @@ export function FirstConversationForm({
         value={reflection}
       />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <CharacterCounter current={reflection.length} max={characterLimit} />
+        <div className="space-y-2">
+          <CharacterCounter current={reflection.length} max={characterLimit} />
+          {isSubmitting ? (
+            <p className="text-sm text-zinc-500" role="status">
+              Starting your conversation with Marcus...
+            </p>
+          ) : null}
+        </div>
         <Button
           aria-describedby={errorMessage ? errorId : undefined}
           className="sm:min-w-36"

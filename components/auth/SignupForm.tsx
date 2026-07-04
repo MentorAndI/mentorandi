@@ -97,7 +97,12 @@ export function SignupForm({
   }
 
   return (
-    <form className="space-y-5" noValidate onSubmit={handleSubmit}>
+    <form
+      aria-busy={isSubmitting}
+      className="space-y-5"
+      noValidate
+      onSubmit={handleSubmit}
+    >
       {errors.form ? (
         <AuthStatusMessage id="signup-form-error" variant="error">
           {errors.form}

@@ -23,14 +23,18 @@ export function MentorMemoryPanel({
       </div>
 
       {isLoading && memories.length === 0 ? (
-        <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 text-sm text-zinc-500">
+        <p
+          aria-live="polite"
+          className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 text-sm text-zinc-500"
+          role="status"
+        >
           Loading memories...
         </p>
       ) : null}
 
       {!isLoading && memories.length === 0 ? (
         <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 text-sm leading-6 text-zinc-500">
-          Marcus will begin to notice goals, values and patterns as you talk.
+          Marcus will learn what matters to you over time.
         </p>
       ) : null}
 

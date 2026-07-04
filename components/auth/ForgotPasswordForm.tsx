@@ -62,7 +62,12 @@ export function ForgotPasswordForm({
   }
 
   return (
-    <form className="space-y-5" noValidate onSubmit={handleSubmit}>
+    <form
+      aria-busy={isSubmitting}
+      className="space-y-5"
+      noValidate
+      onSubmit={handleSubmit}
+    >
       {errors.form ? (
         <AuthStatusMessage id="forgot-password-form-error" variant="error">
           {errors.form}

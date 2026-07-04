@@ -22,14 +22,18 @@ export function MentorGoalPanel({ goals, isLoading }: MentorGoalPanelProps) {
       </div>
 
       {isLoading && activeGoals.length === 0 ? (
-        <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 text-sm text-zinc-500">
+        <p
+          aria-live="polite"
+          className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 text-sm text-zinc-500"
+          role="status"
+        >
           Loading goals...
         </p>
       ) : null}
 
       {!isLoading && activeGoals.length === 0 ? (
         <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 text-sm leading-6 text-zinc-500">
-          Clear goals will appear here when you name what you want to work
+          Goals will appear here when you tell Marcus what you want to work
           toward.
         </p>
       ) : null}

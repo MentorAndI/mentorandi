@@ -11,7 +11,11 @@ export function MentorConversationHistory({
 }: MentorConversationHistoryProps) {
   if (isLoading && messages.length === 0) {
     return (
-      <p className="rounded-md border border-zinc-200 bg-zinc-50 px-4 py-6 text-sm text-zinc-500">
+      <p
+        aria-live="polite"
+        className="rounded-md border border-zinc-200 bg-zinc-50 px-4 py-6 text-sm text-zinc-500"
+        role="status"
+      >
         Loading your conversation with Marcus...
       </p>
     );
@@ -21,8 +25,7 @@ export function MentorConversationHistory({
     return (
       <div className="rounded-md border border-zinc-200 bg-zinc-50 px-4 py-6">
         <p className="text-sm leading-6 text-zinc-600">
-          This is a quiet place to think clearly. Share what is on your mind,
-          and Marcus will help you find a useful next step.
+          Start by telling Marcus what you want help thinking through.
         </p>
       </div>
     );
