@@ -10,5 +10,16 @@ export function getSafeAuthRedirectPath(
     return fallbackPath;
   }
 
+  const pathOnly = requestedPath.split(/[?#]/)[0] ?? requestedPath;
+
+  if (
+    pathOnly === "/login" ||
+    pathOnly === "/signup" ||
+    pathOnly === "/forgot-password" ||
+    pathOnly.startsWith("/api/")
+  ) {
+    return fallbackPath;
+  }
+
   return requestedPath;
 }

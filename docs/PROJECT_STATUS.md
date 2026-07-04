@@ -63,6 +63,16 @@ MentorAndI
 - Mentor Core prepares context; the selected real LLM provider produces the natural-language answer.
 - Mock should not be treated as the source of real mentor quality.
 
+## Alpha Auth Behavior
+
+- `/login`, `/signup` and `/forgot-password` are public auth pages.
+- Successful login redirects to `/mentor`.
+- Successful signup redirects to `/start`.
+- Sign out clears the Supabase session and sends the user to `/login`.
+- In development, `/mentor` and `/settings` may use the seeded fallback user when no Supabase session exists.
+- In production, unauthenticated users are redirected from `/mentor` and `/settings` to `/login`.
+- Auth form errors use safe user-facing messages and must not expose provider internals or stack traces.
+
 ## Known Limitations
 
 - OpenAI and Anthropic provider modes exist, but API keys, billing and quota may still need verification in the active environment.

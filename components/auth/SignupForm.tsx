@@ -74,7 +74,9 @@ export function SignupForm({
       });
 
       if (error) {
-        setErrors({ form: error.message });
+        setErrors({
+          form: "Unable to create an account with those details. Please check your information and try again.",
+        });
         return;
       }
 

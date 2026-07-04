@@ -45,7 +45,9 @@ export function ForgotPasswordForm({
       const { error } = await requestPasswordReset(email, redirectTo);
 
       if (error) {
-        setErrors({ form: error.message });
+        setErrors({
+          form: "Unable to send a reset link right now. Please try again.",
+        });
         return;
       }
 

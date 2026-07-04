@@ -54,7 +54,9 @@ export function LoginForm({ redirectPath = "/" }: LoginFormProps) {
       const { error } = await signInWithEmailPassword(credentials);
 
       if (error) {
-        setErrors({ form: error.message });
+        setErrors({
+          form: "Unable to sign in with those details. Please check your email and password.",
+        });
         return;
       }
 
