@@ -138,10 +138,12 @@ interface MentorCoreLlmUsageDiagnostic {
 
 interface MentorCoreModelRoutingDiagnostic {
   model?: string;
+  provider?: string;
   reason: string;
   route: string;
   signals: string[];
   wasExplicitModel: boolean;
+  wasExplicitProvider: boolean;
 }
 
 interface MentorCoreGoalDiagnostic {
@@ -1277,6 +1279,14 @@ function LlmUsageDiagnosticsPanel({ usage }: LlmUsageDiagnosticsPanelProps) {
         <DiagnosticStat
           label="Model route"
           value={formatModelRoute(usage.modelRouting)}
+        />
+        <DiagnosticStat
+          label="Routed provider"
+          value={usage.modelRouting?.provider ?? usage.provider}
+        />
+        <DiagnosticStat
+          label="Routed model"
+          value={usage.modelRouting?.model ?? usage.model}
         />
         <DiagnosticStat
           label="Model routing reason"

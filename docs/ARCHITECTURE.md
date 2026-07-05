@@ -80,3 +80,7 @@ Future aggregate learning may suggest improvements to the method library, but sh
 Mentor Core does not call provider APIs directly.
 
 The LLM adapter chooses a provider behind a shared interface. The mock provider is only for deterministic development testing. OpenAI and Anthropic/Claude provider modes use the structured Mentor Core prompt contract for real model responses once configuration and billing are ready.
+
+Model routing is both cost-control and quality-control. Normal daily chat, direct factual questions, simple productivity questions and lightweight ADHD technique requests should use the configured cheap/default route. Higher-value mentor moments such as emotionally complex reflection, repeated stuck patterns, identity or life-direction questions, difficult relationship or personal decisions and complex overthinking loops should use the configured deep route.
+
+The routed configuration can choose a provider and model per route with `LLM_CHEAP_PROVIDER`/`LLM_CHEAP_MODEL`, `LLM_DEFAULT_PROVIDER`/`LLM_DEFAULT_MODEL` and `LLM_DEEP_PROVIDER`/`LLM_DEEP_MODEL`. `LLM_PROVIDER` remains supported as the simple fallback/default provider when route-specific provider configuration is missing.

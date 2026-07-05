@@ -21,13 +21,22 @@ export class LlmProviderSelectionServiceError extends Error {
 export class LlmProviderSelectionService {
   resolveProvider(
     requestedProvider?: LlmProviderName,
+    requestedModel?: string,
   ): ConfiguredLlmProviderName {
     const configuredProvider = process.env.LLM_PROVIDER?.trim().toLowerCase();
+
+    if (requestedProvider) {
+      return validateProviderConfiguration(
+        validateConfiguredProvider(requestedProvider),
+        requestedModel,
+      );
+    }
 
     if (process.env.NODE_ENV === "production") {
       if (configuredProvider) {
         return validateProviderConfiguration(
           validateConfiguredProvider(configuredProvider),
+          requestedModel,
         );
       }
 
@@ -36,15 +45,10 @@ export class LlmProviderSelectionService {
       );
     }
 
-    if (requestedProvider) {
-      return validateProviderConfiguration(
-        validateConfiguredProvider(requestedProvider),
-      );
-    }
-
     if (configuredProvider) {
       return validateProviderConfiguration(
         validateConfiguredProvider(configuredProvider),
+        requestedModel,
       );
     }
 
@@ -64,18 +68,27 @@ function validateConfiguredProvider(provider: string): ConfiguredLlmProviderName
 
 function validateProviderConfiguration(
   provider: ConfiguredLlmProviderName,
+  requestedModel?: string,
 ): ConfiguredLlmProviderName {
   if (provider === "openai") {
     assertEnvironmentValue("OPENAI_API_KEY");
-    assertEnvironmentValue("OPENAI_MODEL");
+    assertModelConfiguration("OPENAI_MODEL", requestedModel);
   }
 
   if (provider === "anthropic") {
     assertEnvironmentValue("ANTHROPIC_API_KEY");
-    assertEnvironmentValue("ANTHROPIC_MODEL");
+    assertModelConfiguration("ANTHROPIC_MODEL", requestedModel);
   }
 
   return provider;
+}
+
+function assertModelConfiguration(name: string, requestedModel?: string) {
+  if (requestedModel?.trim()) {
+    return;
+  }
+
+  assertEnvironmentValue(name);
 }
 
 function assertEnvironmentValue(name: string) {

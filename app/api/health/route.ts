@@ -6,7 +6,7 @@ import type { LlmProviderName } from "@/services/llm/llm.types";
 type HealthStatus = "ok" | "degraded";
 type DatabaseStatus = "connected" | "error";
 type AuthStatus = "configured" | "missing";
-type HealthLlmProvider = LlmProviderName | "invalid" | "missing";
+type HealthLlmProvider = LlmProviderName | "invalid" | "missing" | "routed";
 
 interface HealthCheckResponse {
   app: "MentorAndI";
@@ -79,10 +79,7 @@ function checkLlmProviderConfiguration(): {
   const configuredProvider = process.env.LLM_PROVIDER?.trim().toLowerCase();
 
   if (!configuredProvider) {
-    return {
-      isConfigured: false,
-      name: "missing",
-    };
+    return checkRoutedLlmProviderConfiguration();
   }
 
   if (!supportedProviders.includes(configuredProvider as LlmProviderName)) {
@@ -122,6 +119,55 @@ function checkLlmProviderConfiguration(): {
   return {
     isConfigured: true,
     name: provider,
+  };
+}
+
+function checkRoutedLlmProviderConfiguration(): {
+  isConfigured: boolean;
+  name: HealthLlmProvider;
+} {
+  const routeConfigs = [
+    {
+      model: process.env.LLM_DEFAULT_MODEL?.trim(),
+      provider: process.env.LLM_DEFAULT_PROVIDER?.trim().toLowerCase(),
+    },
+    {
+      model: process.env.LLM_CHEAP_MODEL?.trim(),
+      provider: process.env.LLM_CHEAP_PROVIDER?.trim().toLowerCase(),
+    },
+    {
+      model: process.env.LLM_DEEP_MODEL?.trim(),
+      provider: process.env.LLM_DEEP_PROVIDER?.trim().toLowerCase(),
+    },
+  ].filter((config) => config.provider || config.model);
+
+  if (routeConfigs.length === 0) {
+    return {
+      isConfigured: false,
+      name: "missing",
+    };
+  }
+
+  const isConfigured = routeConfigs.every((config) => {
+    if (
+      config.provider !== "openai" &&
+      config.provider !== "anthropic"
+    ) {
+      return false;
+    }
+
+    if (!config.model) {
+      return false;
+    }
+
+    return config.provider === "openai"
+      ? Boolean(process.env.OPENAI_API_KEY?.trim())
+      : Boolean(process.env.ANTHROPIC_API_KEY?.trim());
+  });
+
+  return {
+    isConfigured,
+    name: isConfigured ? "routed" : "invalid",
   };
 }
 

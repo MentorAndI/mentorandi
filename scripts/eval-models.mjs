@@ -35,11 +35,12 @@ const providerConfigs = [
 const appUrl = normalizeAppUrl(process.env.APP_URL || defaultAppUrl);
 const endpointUrl = new URL(endpointPath, appUrl).toString();
 const modelCases = collectModelCases();
+const shouldRunAutomaticRouting = hasRoutingProviderConfiguration();
 
-if (modelCases.length === 0) {
+if (modelCases.length === 0 && !shouldRunAutomaticRouting) {
   console.log("No real-provider models configured for evaluation.");
   console.log(
-    "Set an API key and at least one model env var, then run npm run eval:models again.",
+    "Set an API key plus model env vars or routing provider env vars, then run npm run eval:models again.",
   );
   process.exitCode = 1;
 } else {
@@ -49,11 +50,30 @@ if (modelCases.length === 0) {
   console.log(`Model comparison endpoint: ${endpointUrl}`);
   console.log(`Scenarios: ${scenarios.length}`);
   console.log(`Model cases: ${modelCases.length}`);
+  console.log(
+    `Automatic routing: ${shouldRunAutomaticRouting ? "enabled" : "not configured"}`,
+  );
   console.log("");
 
   for (const modelCase of modelCases) {
     for (const scenario of scenarios) {
       const result = await runScenario(modelCase, scenario);
+      results.push(result);
+      printResult(result);
+    }
+  }
+
+  if (shouldRunAutomaticRouting) {
+    for (const scenario of scenarios) {
+      const result = await runScenario(
+        {
+          mode: "automatic-routing",
+          model: null,
+          modelEnv: null,
+          provider: null,
+        },
+        scenario,
+      );
       results.push(result);
       printResult(result);
     }
@@ -95,6 +115,7 @@ function collectModelCases() {
 
       return [
         {
+          mode: "explicit-model",
           model,
           modelEnv,
           provider: config.provider,
@@ -111,8 +132,8 @@ async function runScenario(modelCase, scenario) {
     const response = await fetch(endpointUrl, {
       body: JSON.stringify({
         message: scenario,
-        model: modelCase.model,
-        provider: modelCase.provider,
+        ...(modelCase.model ? { model: modelCase.model } : {}),
+        ...(modelCase.provider ? { provider: modelCase.provider } : {}),
       }),
       headers: {
         "Content-Type": "application/json",
@@ -152,13 +173,29 @@ async function runScenario(modelCase, scenario) {
       inputTokens: readNullableNumber(responseBody.inputTokens),
       latencyMs: readNullableNumber(responseBody.latencyMs),
       model:
-        typeof responseBody.model === "string"
-          ? responseBody.model
-          : modelCase.model,
+        typeof responseBody.routedModel === "string"
+          ? responseBody.routedModel
+          : typeof responseBody.model === "string"
+            ? responseBody.model
+            : modelCase.model,
+      mode: modelCase.mode,
       modelEnv: modelCase.modelEnv,
       outputTokens: readNullableNumber(responseBody.outputTokens),
-      provider: modelCase.provider,
+      provider:
+        typeof responseBody.routedProvider === "string"
+          ? responseBody.routedProvider
+          : typeof responseBody.provider === "string"
+            ? responseBody.provider
+            : modelCase.provider,
       responsePreview: buildPreview(responseBody.responseText),
+      routeReason:
+        typeof responseBody.routeReason === "string"
+          ? responseBody.routeReason
+          : readModelRoutingText(responseBody.modelRouting, "reason"),
+      routeType:
+        typeof responseBody.routeType === "string"
+          ? responseBody.routeType
+          : readModelRoutingText(responseBody.modelRouting, "route"),
       safeErrorMessage: readSafeErrorMessage(responseBody, null),
       scenario,
       success: responseBody.success === true,
@@ -187,10 +224,13 @@ function buildFailureResult(input) {
     inputTokens: null,
     latencyMs: null,
     model: input.modelCase.model,
+    mode: input.modelCase.mode,
     modelEnv: input.modelCase.modelEnv,
     outputTokens: null,
     provider: input.modelCase.provider,
     responsePreview: "",
+    routeReason: null,
+    routeType: null,
     safeErrorMessage: input.safeErrorMessage,
     scenario: input.scenario,
     success: false,
@@ -202,8 +242,12 @@ function buildFailureResult(input) {
 function printResult(result) {
   const status = result.success ? "success" : "failure";
 
-  console.log(`[${status}] ${result.provider} / ${result.model}`);
+  console.log(
+    `[${status}] ${result.provider ?? "unknown-provider"} / ${result.model ?? "unknown-model"} (${result.mode})`,
+  );
   console.log(`  scenario: ${result.scenario}`);
+  console.log(`  route: ${result.routeType ?? "n/a"}`);
+  console.log(`  route reason: ${result.routeReason ?? "n/a"}`);
   console.log(`  latencyMs: ${formatNullable(result.latencyMs)}`);
   console.log(
     `  tokens: input ${formatNullable(result.inputTokens)} / output ${formatNullable(result.outputTokens)} / total ${formatNullable(result.totalTokens)}`,
@@ -231,6 +275,14 @@ function readCostEstimate(value) {
     isConfigured: value.isConfigured === true,
     message: typeof value.message === "string" ? value.message : null,
   };
+}
+
+function readModelRoutingText(value, key) {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  return typeof value[key] === "string" ? value[key] : null;
 }
 
 function formatCostEstimate(costEstimate) {
@@ -291,6 +343,15 @@ function formatNullable(value) {
 
 function readEnv(name) {
   return process.env[name]?.trim() || "";
+}
+
+function hasRoutingProviderConfiguration() {
+  return Boolean(
+    readEnv("LLM_CHEAP_PROVIDER") ||
+      readEnv("LLM_DEFAULT_PROVIDER") ||
+      readEnv("LLM_DEEP_PROVIDER") ||
+      readEnv("LLM_PROVIDER"),
+  );
 }
 
 function normalizeAppUrl(value) {

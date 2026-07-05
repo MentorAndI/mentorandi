@@ -12,10 +12,12 @@ export type LlmModelRouteName =
 
 export interface LlmModelRoutingDecision {
   model?: string;
+  provider?: LlmProviderName;
   reason: string;
   route: LlmModelRouteName;
   signals: string[];
   wasExplicitModel: boolean;
+  wasExplicitProvider: boolean;
 }
 
 export interface LlmCompletionRequest {

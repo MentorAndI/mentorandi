@@ -14,3 +14,4 @@
 10. Run alpha and VPS smoke tests after deployment and add them to CI/CD.
 11. Evaluate cheaper daily-use models while keeping Sonnet-class models available for premium/deeper mentoring moments.
 12. Compare Claude Sonnet, Claude Haiku and OpenAI mini-class models before alpha, choose the default model based on quality and cost, and use stronger models only when routing requires it.
+13. Configure cheap/default routing for normal daily chat and deep routing for higher-value mentor moments; keep mock provider usage limited to development and deterministic tests.

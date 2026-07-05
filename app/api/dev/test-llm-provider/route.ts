@@ -14,7 +14,7 @@ type RealProviderName = Extract<LlmProviderName, "anthropic" | "openai">;
 interface TestLlmProviderInput {
   message: string;
   model?: string;
-  provider: RealProviderName;
+  provider?: RealProviderName;
 }
 
 interface TestLlmProviderValidationResult {
@@ -47,16 +47,18 @@ export async function POST(request: Request) {
     );
   }
 
-  const configError = readProviderConfigurationError(
-    validation.input.provider,
-    validation.input.model,
-  );
-
-  if (configError) {
-    return NextResponse.json(
-      buildFailureResponse(validation.input.provider, configError),
-      { status: 200 },
+  if (validation.input.provider) {
+    const configError = readProviderConfigurationError(
+      validation.input.provider,
+      validation.input.model,
     );
+
+    if (configError) {
+      return NextResponse.json(
+        buildFailureResponse(validation.input.provider, configError),
+        { status: 200 },
+      );
+    }
   }
 
   try {
@@ -78,8 +80,17 @@ export async function POST(request: Request) {
         inputTokens: response.metadata.inputTokens ?? null,
         latencyMs: response.metadata.latencyMs ?? null,
         model: response.metadata.model,
+        modelRouting: response.metadata.modelRouting ?? null,
         outputTokens: response.metadata.outputTokens ?? null,
-        provider: validation.input.provider,
+        provider: response.metadata.provider,
+        routedModel:
+          response.metadata.modelRouting?.model ?? response.metadata.model,
+        routedProvider:
+          response.metadata.modelRouting?.provider ??
+          response.metadata.selectedProvider ??
+          response.metadata.provider,
+        routeReason: response.metadata.modelRouting?.reason ?? null,
+        routeType: response.metadata.modelRouting?.route ?? null,
         responseText: response.content,
         success: true,
         totalTokens: response.metadata.totalTokens ?? null,
@@ -98,7 +109,7 @@ export async function POST(request: Request) {
           model:
             validation.input.model ??
             readConfiguredModel(validation.input.provider),
-          provider: validation.input.provider,
+          provider: error.selectedProvider ?? validation.input.provider ?? null,
           safeErrorMessage: getSafeProviderTestErrorMessage(
             validation.input.provider,
             error.providerErrorState,
@@ -118,7 +129,7 @@ export async function POST(request: Request) {
         errorState: "provider_request_failed",
         model:
           validation.input.model ?? readConfiguredModel(validation.input.provider),
-        provider: validation.input.provider,
+        provider: validation.input.provider ?? null,
         safeErrorMessage: getSafeProviderTestErrorMessage(
           validation.input.provider,
           "provider_request_failed",
@@ -155,7 +166,7 @@ function validateTestLlmProviderInput(
       ? body.model.trim()
       : undefined;
 
-  if (!realProviders.includes(provider as RealProviderName)) {
+  if (provider && !realProviders.includes(provider as RealProviderName)) {
     errors.provider = "Provider must be openai or anthropic.";
   }
 
@@ -176,7 +187,7 @@ function validateTestLlmProviderInput(
         ? {
             message,
             ...(model ? { model } : {}),
-            provider: provider as RealProviderName,
+            ...(provider ? { provider: provider as RealProviderName } : {}),
           }
         : undefined,
     isValid: Object.keys(errors).length === 0,
@@ -239,13 +250,21 @@ function buildFailureResponse(
 }
 
 function getSafeProviderTestErrorMessage(
-  provider: RealProviderName,
+  provider: RealProviderName | undefined,
   errorState?: string,
 ) {
   if (errorState === "configuration_error") {
+    if (!provider) {
+      return "LLM provider is not configured.";
+    }
+
     return provider === "anthropic"
       ? "Anthropic provider is not configured."
       : "OpenAI provider is not configured.";
+  }
+
+  if (!provider) {
+    return "LLM provider failed. Check routing configuration or model access.";
   }
 
   return provider === "anthropic"
@@ -253,7 +272,11 @@ function getSafeProviderTestErrorMessage(
     : "OpenAI provider failed. Check billing, quota or model access.";
 }
 
-function readConfiguredModel(provider: RealProviderName) {
+function readConfiguredModel(provider?: RealProviderName) {
+  if (!provider) {
+    return null;
+  }
+
   return provider === "anthropic"
     ? process.env.ANTHROPIC_MODEL?.trim() || null
     : process.env.OPENAI_MODEL?.trim() || null;

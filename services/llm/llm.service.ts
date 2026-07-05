@@ -57,13 +57,20 @@ export class LlmService {
       );
     }
 
-    const selectedProvider = this.resolveProvider(validation.input.provider);
-    const provider = this.providers[selectedProvider];
     const modelRouting = resolveLlmModelRoute({
       context: validation.input.context,
-      provider: selectedProvider,
+      requestedProvider: validation.input.provider,
       requestedModel: validation.input.model,
     });
+    const selectedProvider = this.resolveProvider(
+      modelRouting.provider ?? validation.input.provider,
+      modelRouting.model ?? validation.input.model,
+    );
+    const provider = this.providers[selectedProvider];
+    const resolvedModelRouting = {
+      ...modelRouting,
+      provider: selectedProvider,
+    };
 
     if (!provider) {
       throw new LlmServiceError(
@@ -77,7 +84,7 @@ export class LlmService {
     try {
       const response = await provider.complete({
         ...validation.input,
-        ...(modelRouting.model ? { model: modelRouting.model } : {}),
+        ...(resolvedModelRouting.model ? { model: resolvedModelRouting.model } : {}),
         provider: selectedProvider,
       });
 
@@ -85,7 +92,7 @@ export class LlmService {
         ...response,
         metadata: {
           maxOutputTokens: getLlmCostControls().maxOutputTokens,
-          modelRouting,
+          modelRouting: resolvedModelRouting,
           ...response.metadata,
           selectedProvider,
         },
@@ -104,9 +111,15 @@ export class LlmService {
     }
   }
 
-  private resolveProvider(requestedProvider?: LlmProviderName) {
+  private resolveProvider(
+    requestedProvider?: LlmProviderName,
+    requestedModel?: string,
+  ) {
     try {
-      return this.providerSelection.resolveProvider(requestedProvider);
+      return this.providerSelection.resolveProvider(
+        requestedProvider,
+        requestedModel,
+      );
     } catch (error) {
       if (error instanceof LlmProviderSelectionServiceError) {
         logProviderError(
