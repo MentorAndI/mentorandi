@@ -53,9 +53,7 @@ export class AnthropicLlmProvider implements LlmProvider {
         ],
         model,
         system: buildAnthropicSystemPrompt(request),
-        ...(request.temperature !== undefined
-          ? { temperature: request.temperature }
-          : {}),
+        ...buildAnthropicSamplingParameters(request, model),
       }),
       headers: {
         "anthropic-version": anthropicVersion,
@@ -99,6 +97,23 @@ export class AnthropicLlmProvider implements LlmProvider {
       raw: responseBody,
     };
   }
+}
+
+function buildAnthropicSamplingParameters(
+  request: LlmCompletionRequest,
+  model: string,
+) {
+  if (isSonnet5Model(model)) {
+    return {};
+  }
+
+  return request.temperature !== undefined
+    ? { temperature: request.temperature }
+    : {};
+}
+
+function isSonnet5Model(model: string) {
+  return model.toLowerCase().includes("sonnet-5");
 }
 
 function buildAnthropicSystemPrompt(request: LlmCompletionRequest) {
