@@ -79,6 +79,8 @@ The Mentor Expertise Library is reusable product knowledge for domain-specific m
 
 The Mentor Source Library contains curated knowledge cards and URLs for trusted frameworks or educational resources. It is not live browsing, scraping or web research. Source cards are matched into context only when relevant, and the prompt tells the model not to cite URLs unless the user asks for sources.
 
+Reusable knowledge improves mentor quality, but it is budgeted to control prompt size and cost. `MENTOR_METHODS_LIMIT`, `MENTOR_EXPERTISE_LIMIT` and `MENTOR_SOURCES_LIMIT` control how many matched methods, expertise profiles and source cards can enter context. Not all matched knowledge is sent to the LLM, and the current user message remains the highest-priority context.
+
 Future aggregate learning may suggest improvements to the method, expertise and source libraries, but shared knowledge should remain curated and admin-approved. Personal user data should not be stored or reused as cross-user knowledge.
 
 Mentor tone is calibrated in the prompt composer. Marcus should challenge with tact: direct but not accusatory, practical without productivity-coach cliches, and observant without sounding clinical. Repeated user goals or concerns should be treated as signal to make the topic more concrete, not as a failure to answer correctly.

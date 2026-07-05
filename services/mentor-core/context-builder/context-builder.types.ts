@@ -141,6 +141,7 @@ export interface MentorContextDiagnostics {
   recentMessages: MentorContextSourceDiagnostics;
   reflections: MentorContextSourceDiagnostics;
   sources: MentorContextSourceDiagnostics;
+  reusableKnowledgeWasTrimmed: boolean;
   wasTrimmed: boolean;
 }
 

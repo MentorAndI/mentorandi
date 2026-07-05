@@ -1,19 +1,25 @@
 export interface LlmCostControls {
   contextBudgetTokens: number;
+  expertiseLimit: number;
   goalsLimit: number;
   maxOutputTokens: number;
   memoriesLimit: number;
+  methodsLimit: number;
   recentMessagesLimit: number;
   reflectionsLimit: number;
+  sourcesLimit: number;
 }
 
 const defaultCostControls: LlmCostControls = {
   contextBudgetTokens: 6000,
+  expertiseLimit: 1,
   goalsLimit: 3,
   maxOutputTokens: 500,
   memoriesLimit: 5,
+  methodsLimit: 2,
   recentMessagesLimit: 8,
   reflectionsLimit: 5,
+  sourcesLimit: 2,
 };
 
 export function getLlmCostControls(): LlmCostControls {
@@ -21,6 +27,10 @@ export function getLlmCostControls(): LlmCostControls {
     contextBudgetTokens: readPositiveInteger(
       "LLM_CONTEXT_BUDGET_TOKENS",
       defaultCostControls.contextBudgetTokens,
+    ),
+    expertiseLimit: readPositiveInteger(
+      "MENTOR_EXPERTISE_LIMIT",
+      defaultCostControls.expertiseLimit,
     ),
     goalsLimit: readPositiveInteger(
       "LLM_GOALS_LIMIT",
@@ -34,6 +44,10 @@ export function getLlmCostControls(): LlmCostControls {
       "LLM_MEMORIES_LIMIT",
       defaultCostControls.memoriesLimit,
     ),
+    methodsLimit: readPositiveInteger(
+      "MENTOR_METHODS_LIMIT",
+      defaultCostControls.methodsLimit,
+    ),
     recentMessagesLimit: readPositiveInteger(
       "LLM_RECENT_MESSAGES_LIMIT",
       defaultCostControls.recentMessagesLimit,
@@ -41,6 +55,10 @@ export function getLlmCostControls(): LlmCostControls {
     reflectionsLimit: readPositiveInteger(
       "LLM_REFLECTIONS_LIMIT",
       defaultCostControls.reflectionsLimit,
+    ),
+    sourcesLimit: readPositiveInteger(
+      "MENTOR_SOURCES_LIMIT",
+      defaultCostControls.sourcesLimit,
     ),
   };
 }

@@ -98,15 +98,17 @@ export class ContextBuilderService {
       id: reflection.id,
       summary: reflection.summary,
     }));
+    const controls = getLlmCostControls();
     const relevantMethods = this.methodService.findRelevantMethods({
       currentMessage: input.currentMessage,
-      limit: 2,
+      limit: controls.methodsLimit,
       recentContext: contextMessages.map((message) => message.content),
     });
     const contextMethods = relevantMethods.map(toContextMethod);
+    const methodsAvailable = contextMethods.length;
     const relevantExpertise = this.expertiseService.findRelevantExpertise({
       currentMessage: input.currentMessage,
-      limit: 2,
+      limit: controls.expertiseLimit,
       matchedMethodTitles: contextMethods.map((method) => method.title),
       recentContext: contextMessages.map((message) => message.content),
     });
@@ -114,7 +116,7 @@ export class ContextBuilderService {
     const expertiseAvailable = contextExpertise.length;
     const relevantSourceCards = this.sourceService.findRelevantSourceCards({
       currentMessage: input.currentMessage,
-      limit: 2,
+      limit: controls.sourcesLimit,
       matchedExpertiseTitles: contextExpertise.map(
         (expertise) => expertise.title,
       ),
@@ -123,7 +125,6 @@ export class ContextBuilderService {
     });
     let contextSourceCards = relevantSourceCards.map(toContextSourceCard);
     const sourceCardsAvailable = contextSourceCards.length;
-    const controls = getLlmCostControls();
     const budgetResult = trimContextToBudget(
       {
         currentMessage: input.currentMessage ?? null,
@@ -146,11 +147,14 @@ export class ContextBuilderService {
     contextSourceCards = budgetResult.relevantSourceCards;
 
     const environment = buildEnvironmentContext();
+    const reusableKnowledgeWasTrimmed =
+      methodsAvailable > contextMethods.length ||
+      expertiseAvailable > contextExpertise.length ||
+      sourceCardsAvailable > contextSourceCards.length;
     const contextWasTrimmed =
       budgetResult.wasTrimmed ||
       recentMessages.available > contextMessages.length ||
-      expertiseAvailable > contextExpertise.length ||
-      sourceCardsAvailable > contextSourceCards.length ||
+      reusableKnowledgeWasTrimmed ||
       relevantMemories.available > contextMemories.length ||
       activeGoals.available > contextGoals.length ||
       recentReflections.available > contextReflections.length;
@@ -167,7 +171,7 @@ export class ContextBuilderService {
         expertise: {
           available: expertiseAvailable,
           included: contextExpertise.length,
-          limit: 2,
+          limit: controls.expertiseLimit,
         },
         goals: {
           available: activeGoals.available,
@@ -181,9 +185,9 @@ export class ContextBuilderService {
           limit: controls.memoriesLimit,
         },
         methods: {
-          available: contextMethods.length,
+          available: methodsAvailable,
           included: contextMethods.length,
-          limit: 2,
+          limit: controls.methodsLimit,
         },
         recentMessages: {
           available: recentMessages.available,
@@ -198,8 +202,9 @@ export class ContextBuilderService {
         sources: {
           available: sourceCardsAvailable,
           included: contextSourceCards.length,
-          limit: 2,
+          limit: controls.sourcesLimit,
         },
+        reusableKnowledgeWasTrimmed,
         wasTrimmed: contextWasTrimmed,
       },
       environment,
@@ -488,7 +493,7 @@ function estimateContextTokens(input: ContextBudgetState) {
     (total, method) =>
       total +
       estimateTextTokens(
-        `${method.domain} ${method.title} ${method.shortDescription} ${method.whenToUse} ${method.mentorInstruction}`,
+        `${method.domain} ${method.title} ${method.shortDescription} ${method.mentorInstruction} ${method.exampleQuestion}`,
       ),
     0,
   );
@@ -500,22 +505,9 @@ function estimateContextTokens(input: ContextBudgetState) {
           expertise.mentorDomain,
           expertise.title,
           expertise.description,
-          expertise.coreSkills.join(" "),
-          expertise.commonUserProblems.join(" "),
-          expertise.relevantMethods.join(" "),
+          expertise.coreSkills.slice(0, 3).join(" "),
           expertise.recommendedTone,
-          expertise.riskNotes.join(" "),
-          expertise.sourceNotes
-            .map((sourceNote) =>
-              [
-                sourceNote.title,
-                sourceNote.sourceType,
-                sourceNote.summary,
-                sourceNote.tags.join(" "),
-                sourceNote.reliabilityNote,
-              ].join(" "),
-            )
-            .join(" "),
+          expertise.riskNotes.slice(0, 2).join(" "),
         ].join(" "),
       ),
     0,
@@ -529,9 +521,8 @@ function estimateContextTokens(input: ContextBudgetState) {
           sourceCard.title,
           sourceCard.sourceType,
           sourceCard.summary,
-          sourceCard.tags.join(" "),
-          sourceCard.keyPrinciples.join(" "),
-          sourceCard.whenRelevant,
+          sourceCard.tags.slice(0, 4).join(" "),
+          sourceCard.keyPrinciples.slice(0, 3).join(" "),
           sourceCard.reliabilityNote,
         ].join(" "),
       ),

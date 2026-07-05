@@ -55,42 +55,25 @@ export interface PromptMentorMethodContextItem {
   mentorInstruction: string;
   shortDescription: string;
   title: string;
-  whenToUse: string;
-}
-
-export interface PromptMentorExpertiseSourceNote {
-  lastReviewed: string;
-  reliabilityNote: string;
-  sourceType: string;
-  summary: string;
-  tags: string[];
-  title: string;
-  url: string;
 }
 
 export interface PromptMentorExpertiseContextItem {
-  commonUserProblems: string[];
   coreSkills: string[];
   description: string;
   mentorDomain: string;
   recommendedTone: string;
-  relevantMethods: string[];
   riskNotes: string[];
-  sourceNotes: PromptMentorExpertiseSourceNote[];
   title: string;
 }
 
 export interface PromptMentorSourceContextItem {
   domain: string;
   keyPrinciples: string[];
-  lastReviewed: string;
   reliabilityNote: string;
   sourceType: string;
   summary: string;
   tags: string[];
   title: string;
-  url: string;
-  whenRelevant: string;
 }
 
 export interface PromptPackage {

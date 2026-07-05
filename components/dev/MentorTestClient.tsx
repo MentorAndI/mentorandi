@@ -83,6 +83,7 @@ interface MentorCoreDiagnostics {
   provider: string;
   providerErrorState: string | null;
   providerUsed: string | null;
+  reusableKnowledge: MentorCoreReusableKnowledgeDiagnostic;
   selectedProvider: string;
   skippedDuplicateGoals: MentorCoreGoalDiagnostic[];
   skippedDuplicateMemories: MentorCoreMemoryDiagnostic[];
@@ -115,6 +116,16 @@ interface MentorCoreMatchedSourcesDiagnostic {
   titles: string[];
 }
 
+interface MentorCoreReusableKnowledgeDiagnostic {
+  expertiseAvailable: number;
+  expertiseIncluded: number;
+  methodsAvailable: number;
+  methodsIncluded: number;
+  sourcesAvailable: number;
+  sourcesIncluded: number;
+  wasTrimmed: boolean;
+}
+
 interface MentorCoreCostEstimateDiagnostic {
   estimatedCostUsd: number | null;
   isConfigured: boolean;
@@ -137,6 +148,7 @@ interface MentorCoreContextTrimmingDiagnostic {
   recentMessages: MentorCoreContextSourceDiagnostic;
   reflections: MentorCoreContextSourceDiagnostic;
   sources: MentorCoreContextSourceDiagnostic;
+  reusableKnowledgeWasTrimmed: boolean;
   wasTrimmed: boolean;
 }
 
@@ -1199,6 +1211,10 @@ function MentorCoreDiagnosticsPanel({
         diagnostics={latestDiagnostics.contextTrimming}
       />
 
+      <ReusableKnowledgeDiagnosticsPanel
+        diagnostics={latestDiagnostics.reusableKnowledge}
+      />
+
       <MentorExpertiseDiagnosticsPanel
         matchedExpertise={latestDiagnostics.matchedExpertise}
       />
@@ -1256,6 +1272,43 @@ function MentorCoreDiagnosticsPanel({
       />
       <DiagnosticReflection reflection={latestDiagnostics.createdReflection} />
     </div>
+  );
+}
+
+interface ReusableKnowledgeDiagnosticsPanelProps {
+  diagnostics: MentorCoreReusableKnowledgeDiagnostic;
+}
+
+function ReusableKnowledgeDiagnosticsPanel({
+  diagnostics,
+}: ReusableKnowledgeDiagnosticsPanelProps) {
+  return (
+    <section className="space-y-3">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h3 className="text-sm font-semibold text-zinc-950">
+          Reusable Knowledge Budget
+        </h3>
+        {diagnostics.wasTrimmed ? (
+          <span className="rounded-full border border-sky-200 bg-sky-50 px-2 py-1 text-xs font-medium text-sky-800">
+            Trimmed
+          </span>
+        ) : null}
+      </div>
+      <div className="grid gap-3 sm:grid-cols-3">
+        <DiagnosticStat
+          label="Methods"
+          value={`${diagnostics.methodsIncluded} included / ${diagnostics.methodsAvailable} available`}
+        />
+        <DiagnosticStat
+          label="Expertise"
+          value={`${diagnostics.expertiseIncluded} included / ${diagnostics.expertiseAvailable} available`}
+        />
+        <DiagnosticStat
+          label="Sources"
+          value={`${diagnostics.sourcesIncluded} included / ${diagnostics.sourcesAvailable} available`}
+        />
+      </div>
+    </section>
   );
 }
 
@@ -1423,6 +1476,11 @@ function ContextTrimmingDiagnosticsPanel({
         {diagnostics.wasTrimmed ? (
           <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-1 text-xs font-medium text-amber-800">
             Context was trimmed
+          </span>
+        ) : null}
+        {diagnostics.reusableKnowledgeWasTrimmed ? (
+          <span className="rounded-full border border-sky-200 bg-sky-50 px-2 py-1 text-xs font-medium text-sky-800">
+            Reusable knowledge was trimmed
           </span>
         ) : null}
       </div>

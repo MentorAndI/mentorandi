@@ -378,6 +378,7 @@ function buildProviderTestContext(message: string): MentorResponseContext {
         included: 0,
         limit: 2,
       },
+      reusableKnowledgeWasTrimmed: false,
       wasTrimmed: false,
     },
     environment: {

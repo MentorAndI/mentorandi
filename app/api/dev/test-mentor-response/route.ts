@@ -164,6 +164,8 @@ function buildMentorCoreDiagnostics(response: MentorResponsePipelineResult) {
       recentMessages: response.contextUsed.diagnostics.recentMessages,
       reflections: response.contextUsed.diagnostics.reflections,
       sources: response.contextUsed.diagnostics.sources,
+      reusableKnowledgeWasTrimmed:
+        response.contextUsed.diagnostics.reusableKnowledgeWasTrimmed,
       wasTrimmed: response.contextUsed.diagnostics.wasTrimmed,
     },
     llmUsage: {
@@ -182,6 +184,16 @@ function buildMentorCoreDiagnostics(response: MentorResponsePipelineResult) {
     providerErrorState: null,
     provider: response.provider,
     providerUsed: response.provider,
+    reusableKnowledge: {
+      expertiseAvailable: response.contextUsed.diagnostics.expertise.available,
+      expertiseIncluded: response.contextUsed.diagnostics.expertise.included,
+      methodsAvailable: response.contextUsed.diagnostics.methods.available,
+      methodsIncluded: response.contextUsed.diagnostics.methods.included,
+      sourcesAvailable: response.contextUsed.diagnostics.sources.available,
+      sourcesIncluded: response.contextUsed.diagnostics.sources.included,
+      wasTrimmed:
+        response.contextUsed.diagnostics.reusableKnowledgeWasTrimmed,
+    },
     matchedExpertise: {
       count: response.contextUsed.relevantExpertise.length,
       domains: response.contextUsed.relevantExpertise.map(
@@ -268,6 +280,7 @@ function buildMentorCoreErrorDiagnostics(
         included: 0,
         limit: 2,
       },
+      reusableKnowledgeWasTrimmed: false,
       wasTrimmed: false,
     },
     llmUsage: {
@@ -288,6 +301,15 @@ function buildMentorCoreErrorDiagnostics(
     provider: error.selectedProvider ?? selectedProvider ?? "unknown",
     providerErrorState: error.providerErrorState ?? "pipeline_error",
     providerUsed: null,
+    reusableKnowledge: {
+      expertiseAvailable: 0,
+      expertiseIncluded: 0,
+      methodsAvailable: 0,
+      methodsIncluded: 0,
+      sourcesAvailable: 0,
+      sourcesIncluded: 0,
+      wasTrimmed: false,
+    },
     matchedExpertise: {
       count: 0,
       domains: [],
