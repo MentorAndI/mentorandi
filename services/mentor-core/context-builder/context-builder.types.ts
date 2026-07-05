@@ -107,6 +107,19 @@ export interface MentorContextExpertise {
   title: string;
 }
 
+export interface MentorContextSourceCard {
+  domain: string;
+  keyPrinciples: string[];
+  lastReviewed: string;
+  reliabilityNote: string;
+  sourceType: string;
+  summary: string;
+  tags: string[];
+  title: string;
+  url: string;
+  whenRelevant: string;
+}
+
 export interface RecommendedMentorFocus {
   priorities: string[];
   summary: string;
@@ -127,6 +140,7 @@ export interface MentorContextDiagnostics {
   methods: MentorContextSourceDiagnostics;
   recentMessages: MentorContextSourceDiagnostics;
   reflections: MentorContextSourceDiagnostics;
+  sources: MentorContextSourceDiagnostics;
   wasTrimmed: boolean;
 }
 
@@ -144,6 +158,7 @@ export interface MentorResponseContext {
   relevantExpertise: MentorContextExpertise[];
   relevantMethods: MentorContextMethod[];
   relevantMemories: MentorContextMemory[];
+  relevantSourceCards: MentorContextSourceCard[];
   user: MentorContextUserIdentity;
   userGoals: MentorContextGoal[];
 }

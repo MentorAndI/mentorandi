@@ -163,6 +163,7 @@ function buildMentorCoreDiagnostics(response: MentorResponsePipelineResult) {
       methods: response.contextUsed.diagnostics.methods,
       recentMessages: response.contextUsed.diagnostics.recentMessages,
       reflections: response.contextUsed.diagnostics.reflections,
+      sources: response.contextUsed.diagnostics.sources,
       wasTrimmed: response.contextUsed.diagnostics.wasTrimmed,
     },
     llmUsage: {
@@ -194,6 +195,15 @@ function buildMentorCoreDiagnostics(response: MentorResponsePipelineResult) {
       count: response.contextUsed.relevantMethods.length,
       domains: response.contextUsed.relevantMethods.map((method) => method.domain),
       titles: response.contextUsed.relevantMethods.map((method) => method.title),
+    },
+    matchedSources: {
+      count: response.contextUsed.relevantSourceCards.length,
+      domains: response.contextUsed.relevantSourceCards.map(
+        (sourceCard) => sourceCard.domain,
+      ),
+      titles: response.contextUsed.relevantSourceCards.map(
+        (sourceCard) => sourceCard.title,
+      ),
     },
     selectedProvider: response.selectedProvider,
     skippedDuplicateGoals:
@@ -253,6 +263,11 @@ function buildMentorCoreErrorDiagnostics(
         included: 0,
         limit: 0,
       },
+      sources: {
+        available: 0,
+        included: 0,
+        limit: 2,
+      },
       wasTrimmed: false,
     },
     llmUsage: {
@@ -279,6 +294,11 @@ function buildMentorCoreErrorDiagnostics(
       titles: [],
     },
     matchedMethods: {
+      count: 0,
+      domains: [],
+      titles: [],
+    },
+    matchedSources: {
       count: 0,
       domains: [],
       titles: [],

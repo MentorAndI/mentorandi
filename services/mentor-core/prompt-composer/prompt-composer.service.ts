@@ -94,6 +94,18 @@ export class PromptComposerService {
         summary: reflection.summary,
       })),
       responseInstructions,
+      sourceContext: context.relevantSourceCards.map((sourceCard) => ({
+        domain: sourceCard.domain,
+        keyPrinciples: sourceCard.keyPrinciples,
+        lastReviewed: sourceCard.lastReviewed,
+        reliabilityNote: sourceCard.reliabilityNote,
+        sourceType: sourceCard.sourceType,
+        summary: sourceCard.summary,
+        tags: sourceCard.tags,
+        title: sourceCard.title,
+        url: sourceCard.url,
+        whenRelevant: sourceCard.whenRelevant,
+      })),
       systemPrompt: buildSystemPrompt(context.mentor.name),
       userPrompt: validation.input.currentUserMessage,
     };
@@ -181,6 +193,10 @@ function buildDeveloperInstructions(input: {
     "Do not mention internal expertise profile IDs.",
     "Do not cite source-note URLs unless the user asks for sources.",
     "Keep the current user message higher priority than expertise notes.",
+    "Use relevant source notes only when they fit the user's current message.",
+    "Do not pretend to have browsed the web or looked anything up.",
+    "Do not mention source-note URLs unless the user asks for sources.",
+    "Adapt source-note principles to the user's situation without reciting the notes.",
     "A good repetition response is: \"I notice focus and overthinking keep coming up. Let's make it concrete: what is one specific thing your mind is circling around today?\"",
   ];
 }

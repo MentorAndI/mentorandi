@@ -3,6 +3,7 @@ import { getLlmCostControls } from "@/services/llm/llm-cost-controls";
 import { MemoryService } from "@/services/memory/memory.service";
 import { MentorExpertiseService } from "@/services/mentor-expertise/expertise-service";
 import { MentorMethodService } from "@/services/mentor-methods/method-service";
+import { MentorSourceService } from "@/services/mentor-sources/source-service";
 import {
   ReflectionService,
   ReflectionServiceError,
@@ -17,6 +18,7 @@ import type {
   MentorContextMemory,
   MentorContextMessage,
   MentorContextReflection,
+  MentorContextSourceCard,
   MentorResponseContext,
   RecommendedMentorFocus,
 } from "@/services/mentor-core/context-builder/context-builder.types";
@@ -41,6 +43,7 @@ export class ContextBuilderService {
     private readonly reflectionService = new ReflectionService(),
     private readonly methodService = new MentorMethodService(),
     private readonly expertiseService = new MentorExpertiseService(),
+    private readonly sourceService = new MentorSourceService(),
   ) {}
 
   async buildMentorContext(
@@ -109,12 +112,24 @@ export class ContextBuilderService {
     });
     let contextExpertise = relevantExpertise.map(toContextExpertise);
     const expertiseAvailable = contextExpertise.length;
+    const relevantSourceCards = this.sourceService.findRelevantSourceCards({
+      currentMessage: input.currentMessage,
+      limit: 2,
+      matchedExpertiseTitles: contextExpertise.map(
+        (expertise) => expertise.title,
+      ),
+      matchedMethodTitles: contextMethods.map((method) => method.title),
+      recentContext: contextMessages.map((message) => message.content),
+    });
+    let contextSourceCards = relevantSourceCards.map(toContextSourceCard);
+    const sourceCardsAvailable = contextSourceCards.length;
     const controls = getLlmCostControls();
     const budgetResult = trimContextToBudget(
       {
         currentMessage: input.currentMessage ?? null,
         relevantExpertise: contextExpertise,
         relevantMethods: contextMethods,
+        relevantSourceCards: contextSourceCards,
         recentMessages: contextMessages,
         recentReflections: contextReflections,
         relevantMemories: contextMemories,
@@ -128,12 +143,14 @@ export class ContextBuilderService {
     contextGoals = budgetResult.userGoals;
     contextReflections = budgetResult.recentReflections;
     contextExpertise = budgetResult.relevantExpertise;
+    contextSourceCards = budgetResult.relevantSourceCards;
 
     const environment = buildEnvironmentContext();
     const contextWasTrimmed =
       budgetResult.wasTrimmed ||
       recentMessages.available > contextMessages.length ||
       expertiseAvailable > contextExpertise.length ||
+      sourceCardsAvailable > contextSourceCards.length ||
       relevantMemories.available > contextMemories.length ||
       activeGoals.available > contextGoals.length ||
       recentReflections.available > contextReflections.length;
@@ -178,6 +195,11 @@ export class ContextBuilderService {
           included: contextReflections.length,
           limit: controls.reflectionsLimit,
         },
+        sources: {
+          available: sourceCardsAvailable,
+          included: contextSourceCards.length,
+          limit: 2,
+        },
         wasTrimmed: contextWasTrimmed,
       },
       environment,
@@ -198,11 +220,13 @@ export class ContextBuilderService {
         relevantMethodCount: contextMethods.length,
         relevantExpertiseCount: contextExpertise.length,
         relevantMemoryCount: contextMemories.length,
+        relevantSourceCount: contextSourceCards.length,
         recentReflectionCount: contextReflections.length,
       }),
       relevantExpertise: contextExpertise,
       relevantMethods: contextMethods,
       relevantMemories: contextMemories,
+      relevantSourceCards: contextSourceCards,
       user: {
         authUserId: user.authUserId,
         id: user.id,
@@ -383,10 +407,26 @@ function toContextExpertise(
   };
 }
 
+function toContextSourceCard(sourceCard: MentorContextSourceCard): MentorContextSourceCard {
+  return {
+    domain: sourceCard.domain,
+    keyPrinciples: sourceCard.keyPrinciples,
+    lastReviewed: sourceCard.lastReviewed,
+    reliabilityNote: sourceCard.reliabilityNote,
+    sourceType: sourceCard.sourceType,
+    summary: sourceCard.summary,
+    tags: sourceCard.tags,
+    title: sourceCard.title,
+    url: sourceCard.url,
+    whenRelevant: sourceCard.whenRelevant,
+  };
+}
+
 interface ContextBudgetState {
   currentMessage: string | null;
   relevantExpertise: MentorContextExpertise[];
   relevantMethods: MentorContextMethod[];
+  relevantSourceCards: MentorContextSourceCard[];
   recentMessages: MentorContextMessage[];
   recentReflections: MentorContextReflection[];
   relevantMemories: MentorContextMemory[];
@@ -405,6 +445,7 @@ function trimContextToBudget(
     currentMessage: input.currentMessage,
     relevantExpertise: [...input.relevantExpertise],
     relevantMethods: [...input.relevantMethods],
+    relevantSourceCards: [...input.relevantSourceCards],
     recentMessages: [...input.recentMessages],
     recentReflections: [...input.recentReflections],
     relevantMemories: [...input.relevantMemories],
@@ -417,6 +458,8 @@ function trimContextToBudget(
       result.recentReflections.pop();
     } else if (result.relevantExpertise.length > 0) {
       result.relevantExpertise.pop();
+    } else if (result.relevantSourceCards.length > 0) {
+      result.relevantSourceCards.pop();
     } else if (result.relevantMemories.length > 0) {
       result.relevantMemories.pop();
     } else if (result.recentMessages.length > 0) {
@@ -477,6 +520,23 @@ function estimateContextTokens(input: ContextBudgetState) {
       ),
     0,
   );
+  const sourceTokens = input.relevantSourceCards.reduce(
+    (total, sourceCard) =>
+      total +
+      estimateTextTokens(
+        [
+          sourceCard.domain,
+          sourceCard.title,
+          sourceCard.sourceType,
+          sourceCard.summary,
+          sourceCard.tags.join(" "),
+          sourceCard.keyPrinciples.join(" "),
+          sourceCard.whenRelevant,
+          sourceCard.reliabilityNote,
+        ].join(" "),
+      ),
+    0,
+  );
   const memoryTokens = input.relevantMemories.reduce(
     (total, memory) =>
       total +
@@ -496,6 +556,7 @@ function estimateContextTokens(input: ContextBudgetState) {
   return (
     currentMessageTokens +
     expertiseTokens +
+    sourceTokens +
     methodTokens +
     recentMessageTokens +
     memoryTokens +
@@ -515,6 +576,7 @@ function buildRecommendedMentorFocus(input: {
   relevantExpertiseCount: number;
   relevantMethodCount: number;
   relevantMemoryCount: number;
+  relevantSourceCount: number;
   recentReflectionCount: number;
 }): RecommendedMentorFocus {
   const priorities: string[] = [];
@@ -533,6 +595,10 @@ function buildRecommendedMentorFocus(input: {
 
   if (input.relevantExpertiseCount > 0) {
     priorities.push("apply-relevant-domain-expertise-with-current-message-first");
+  }
+
+  if (input.relevantSourceCount > 0) {
+    priorities.push("use-curated-source-notes-without-implying-live-research");
   }
 
   if (input.activeGoalCount > 0) {

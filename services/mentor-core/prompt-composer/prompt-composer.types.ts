@@ -80,6 +80,19 @@ export interface PromptMentorExpertiseContextItem {
   title: string;
 }
 
+export interface PromptMentorSourceContextItem {
+  domain: string;
+  keyPrinciples: string[];
+  lastReviewed: string;
+  reliabilityNote: string;
+  sourceType: string;
+  summary: string;
+  tags: string[];
+  title: string;
+  url: string;
+  whenRelevant: string;
+}
+
 export interface PromptPackage {
   constraints: string[];
   conversationContext: PromptConversationContextItem[];
@@ -93,6 +106,7 @@ export interface PromptPackage {
   memoryContext: PromptMemoryContextItem[];
   reflectionContext: PromptReflectionContextItem[];
   responseInstructions: string[];
+  sourceContext: PromptMentorSourceContextItem[];
   systemPrompt: string;
   userPrompt: string;
 }

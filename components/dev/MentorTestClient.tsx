@@ -79,6 +79,7 @@ interface MentorCoreDiagnostics {
   llmUsage: MentorCoreLlmUsageDiagnostic;
   matchedExpertise: MentorCoreMatchedExpertiseDiagnostic;
   matchedMethods: MentorCoreMatchedMethodsDiagnostic;
+  matchedSources: MentorCoreMatchedSourcesDiagnostic;
   provider: string;
   providerErrorState: string | null;
   providerUsed: string | null;
@@ -108,6 +109,12 @@ interface MentorCoreMatchedExpertiseDiagnostic {
   titles: string[];
 }
 
+interface MentorCoreMatchedSourcesDiagnostic {
+  count: number;
+  domains: string[];
+  titles: string[];
+}
+
 interface MentorCoreCostEstimateDiagnostic {
   estimatedCostUsd: number | null;
   isConfigured: boolean;
@@ -129,6 +136,7 @@ interface MentorCoreContextTrimmingDiagnostic {
   methods: MentorCoreContextSourceDiagnostic;
   recentMessages: MentorCoreContextSourceDiagnostic;
   reflections: MentorCoreContextSourceDiagnostic;
+  sources: MentorCoreContextSourceDiagnostic;
   wasTrimmed: boolean;
 }
 
@@ -1195,6 +1203,10 @@ function MentorCoreDiagnosticsPanel({
         matchedExpertise={latestDiagnostics.matchedExpertise}
       />
 
+      <MentorSourceDiagnosticsPanel
+        matchedSources={latestDiagnostics.matchedSources}
+      />
+
       <MentorMethodDiagnosticsPanel
         matchedMethods={latestDiagnostics.matchedMethods}
       />
@@ -1244,6 +1256,36 @@ function MentorCoreDiagnosticsPanel({
       />
       <DiagnosticReflection reflection={latestDiagnostics.createdReflection} />
     </div>
+  );
+}
+
+interface MentorSourceDiagnosticsPanelProps {
+  matchedSources: MentorCoreMatchedSourcesDiagnostic;
+}
+
+function MentorSourceDiagnosticsPanel({
+  matchedSources,
+}: MentorSourceDiagnosticsPanelProps) {
+  return (
+    <section className="space-y-3">
+      <h3 className="text-sm font-semibold text-zinc-950">
+        Mentor Source Matches
+      </h3>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <DiagnosticStat
+          label="Matched source count"
+          value={String(matchedSources.count)}
+        />
+        <DiagnosticStat
+          label="Matched source domains"
+          value={formatListDiagnosticValue(matchedSources.domains)}
+        />
+      </div>
+      <DiagnosticStringList
+        items={matchedSources.titles}
+        title="Matched source titles"
+      />
+    </section>
   );
 }
 
@@ -1404,6 +1446,10 @@ function ContextTrimmingDiagnosticsPanel({
         <ContextSourceDiagnosticStat
           label="Expertise"
           source={diagnostics.expertise}
+        />
+        <ContextSourceDiagnosticStat
+          label="Sources"
+          source={diagnostics.sources}
         />
         <ContextSourceDiagnosticStat
           label="Methods"

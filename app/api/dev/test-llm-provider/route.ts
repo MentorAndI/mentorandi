@@ -373,6 +373,11 @@ function buildProviderTestContext(message: string): MentorResponseContext {
         included: 0,
         limit: controls.reflectionsLimit,
       },
+      sources: {
+        available: 0,
+        included: 0,
+        limit: 2,
+      },
       wasTrimmed: false,
     },
     environment: {
@@ -401,6 +406,7 @@ function buildProviderTestContext(message: string): MentorResponseContext {
     relevantExpertise: [],
     relevantMethods: [],
     relevantMemories: [],
+    relevantSourceCards: [],
     user: {
       authUserId: "provider-test-auth-user",
       id: "provider-test-user",

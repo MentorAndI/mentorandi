@@ -48,6 +48,14 @@ export function buildProviderDeveloperInput(request: LlmCompletionRequest) {
       "Adapt expertise to the current user message.",
       "Keep the current user message highest priority.",
     ]),
+    formatPromptJsonSection("Relevant Source Notes", promptPackage.sourceContext),
+    formatPromptSection("Source note guidance", [
+      "Use these source notes only when relevant.",
+      "Do not mention URLs unless the user asks for sources.",
+      "Do not pretend to have browsed the web.",
+      "Adapt the principles to the user's situation.",
+      "Keep the current user message highest priority.",
+    ]),
     formatPromptJsonSection(
       "Recent messages",
       promptPackage.conversationContext,

@@ -35,6 +35,7 @@ Current service areas include:
 - Mentor Core modules.
 - Mentor Method Library.
 - Mentor Expertise Library.
+- Mentor Source Library.
 - LLM provider orchestration.
 
 ## Repositories
@@ -76,7 +77,9 @@ The Mentor Method Library is reusable product knowledge. It contains concise, cu
 
 The Mentor Expertise Library is reusable product knowledge for domain-specific mentor skills. It contains concise expertise profiles and curated source notes for areas like life mentoring, ADHD/focus, business, relationships and productivity. Source notes are static knowledge cards, not live browsing results, and the context builder includes only a small number of relevant expertise profiles.
 
-Future aggregate learning may suggest improvements to the method and expertise libraries, but shared knowledge should remain curated and admin-approved. Personal user data should not be stored or reused as cross-user knowledge.
+The Mentor Source Library contains curated knowledge cards and URLs for trusted frameworks or educational resources. It is not live browsing, scraping or web research. Source cards are matched into context only when relevant, and the prompt tells the model not to cite URLs unless the user asks for sources.
+
+Future aggregate learning may suggest improvements to the method, expertise and source libraries, but shared knowledge should remain curated and admin-approved. Personal user data should not be stored or reused as cross-user knowledge.
 
 Mentor tone is calibrated in the prompt composer. Marcus should challenge with tact: direct but not accusatory, practical without productivity-coach cliches, and observant without sounding clinical. Repeated user goals or concerns should be treated as signal to make the topic more concrete, not as a failure to answer correctly.
 
