@@ -38,6 +38,17 @@ export function buildProviderDeveloperInput(request: LlmCompletionRequest) {
       "Adapt the method to the user's situation.",
     ]),
     formatPromptJsonSection(
+      "Relevant Mentor Expertise",
+      promptPackage.mentorExpertiseContext,
+    ),
+    formatPromptSection("Mentor expertise guidance", [
+      "Use this expertise only when relevant.",
+      "Do not mention internal profile IDs.",
+      "Do not cite URLs unless the user asks for sources.",
+      "Adapt expertise to the current user message.",
+      "Keep the current user message highest priority.",
+    ]),
+    formatPromptJsonSection(
       "Recent messages",
       promptPackage.conversationContext,
     ),

@@ -58,6 +58,28 @@ export interface PromptMentorMethodContextItem {
   whenToUse: string;
 }
 
+export interface PromptMentorExpertiseSourceNote {
+  lastReviewed: string;
+  reliabilityNote: string;
+  sourceType: string;
+  summary: string;
+  tags: string[];
+  title: string;
+  url: string;
+}
+
+export interface PromptMentorExpertiseContextItem {
+  commonUserProblems: string[];
+  coreSkills: string[];
+  description: string;
+  mentorDomain: string;
+  recommendedTone: string;
+  relevantMethods: string[];
+  riskNotes: string[];
+  sourceNotes: PromptMentorExpertiseSourceNote[];
+  title: string;
+}
+
 export interface PromptPackage {
   constraints: string[];
   conversationContext: PromptConversationContextItem[];
@@ -65,6 +87,7 @@ export interface PromptPackage {
   developerInstructions: string[];
   environmentContext: PromptEnvironmentContext;
   goalContext: PromptGoalContextItem[];
+  mentorExpertiseContext: PromptMentorExpertiseContextItem[];
   mentorIdentity: string[];
   mentorMethodContext: PromptMentorMethodContextItem[];
   memoryContext: PromptMemoryContextItem[];

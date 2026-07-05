@@ -54,6 +54,25 @@ export class PromptComposerService {
         targetDate: goal.targetDate,
         title: goal.title,
       })),
+      mentorExpertiseContext: context.relevantExpertise.map((expertise) => ({
+        commonUserProblems: expertise.commonUserProblems,
+        coreSkills: expertise.coreSkills,
+        description: expertise.description,
+        mentorDomain: expertise.mentorDomain,
+        recommendedTone: expertise.recommendedTone,
+        relevantMethods: expertise.relevantMethods,
+        riskNotes: expertise.riskNotes,
+        sourceNotes: expertise.sourceNotes.map((sourceNote) => ({
+          lastReviewed: sourceNote.lastReviewed,
+          reliabilityNote: sourceNote.reliabilityNote,
+          sourceType: sourceNote.sourceType,
+          summary: sourceNote.summary,
+          tags: sourceNote.tags,
+          title: sourceNote.title,
+          url: sourceNote.url,
+        })),
+        title: expertise.title,
+      })),
       mentorIdentity,
       mentorMethodContext: context.relevantMethods.map((method) => ({
         domain: method.domain,
@@ -158,6 +177,10 @@ function buildDeveloperInstructions(input: {
     "Use relevant mentor methods only when they fit the user's current situation.",
     "Do not mention mentor method IDs or make the response sound formulaic.",
     "Adapt any relevant mentor method naturally to the user's words and context.",
+    "Use relevant mentor expertise only when it fits the user's current message.",
+    "Do not mention internal expertise profile IDs.",
+    "Do not cite source-note URLs unless the user asks for sources.",
+    "Keep the current user message higher priority than expertise notes.",
     "A good repetition response is: \"I notice focus and overthinking keep coming up. Let's make it concrete: what is one specific thing your mind is circling around today?\"",
   ];
 }

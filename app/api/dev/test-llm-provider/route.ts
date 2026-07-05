@@ -342,6 +342,11 @@ function buildProviderTestContext(message: string): MentorResponseContext {
     currentUserMessage: message,
     diagnostics: {
       contextBudgetTokens: controls.contextBudgetTokens,
+      expertise: {
+        available: 0,
+        included: 0,
+        limit: 2,
+      },
       goals: {
         available: 0,
         included: 0,
@@ -393,6 +398,7 @@ function buildProviderTestContext(message: string): MentorResponseContext {
       priorities: ["Verify provider connectivity."],
       summary: "Development-only provider connectivity test.",
     },
+    relevantExpertise: [],
     relevantMethods: [],
     relevantMemories: [],
     user: {

@@ -156,6 +156,7 @@ function buildMentorCoreDiagnostics(response: MentorResponsePipelineResult) {
     currentUserMessage: response.userMessage.content,
     contextTrimming: {
       contextBudgetTokens: response.contextUsed.diagnostics.contextBudgetTokens,
+      expertise: response.contextUsed.diagnostics.expertise,
       goals: response.contextUsed.diagnostics.goals,
       maxOutputTokens: response.contextUsed.diagnostics.maxOutputTokens,
       memories: response.contextUsed.diagnostics.memories,
@@ -180,6 +181,15 @@ function buildMentorCoreDiagnostics(response: MentorResponsePipelineResult) {
     providerErrorState: null,
     provider: response.provider,
     providerUsed: response.provider,
+    matchedExpertise: {
+      count: response.contextUsed.relevantExpertise.length,
+      domains: response.contextUsed.relevantExpertise.map(
+        (expertise) => expertise.mentorDomain,
+      ),
+      titles: response.contextUsed.relevantExpertise.map(
+        (expertise) => expertise.title,
+      ),
+    },
     matchedMethods: {
       count: response.contextUsed.relevantMethods.length,
       domains: response.contextUsed.relevantMethods.map((method) => method.domain),
@@ -212,6 +222,11 @@ function buildMentorCoreErrorDiagnostics(
     currentUserMessage: "",
     contextTrimming: {
       contextBudgetTokens: null,
+      expertise: {
+        available: 0,
+        included: 0,
+        limit: 2,
+      },
       goals: {
         available: 0,
         included: 0,
@@ -258,6 +273,11 @@ function buildMentorCoreErrorDiagnostics(
     provider: error.selectedProvider ?? selectedProvider ?? "unknown",
     providerErrorState: error.providerErrorState ?? "pipeline_error",
     providerUsed: null,
+    matchedExpertise: {
+      count: 0,
+      domains: [],
+      titles: [],
+    },
     matchedMethods: {
       count: 0,
       domains: [],

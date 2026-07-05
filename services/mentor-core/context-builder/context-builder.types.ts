@@ -84,6 +84,29 @@ export interface MentorContextMethod {
   whenToUse: string;
 }
 
+export interface MentorContextExpertiseSourceNote {
+  lastReviewed: string;
+  reliabilityNote: string;
+  sourceType: string;
+  summary: string;
+  tags: string[];
+  title: string;
+  url: string;
+}
+
+export interface MentorContextExpertise {
+  commonUserProblems: string[];
+  coreSkills: string[];
+  description: string;
+  id: string;
+  mentorDomain: string;
+  recommendedTone: string;
+  relevantMethods: string[];
+  riskNotes: string[];
+  sourceNotes: MentorContextExpertiseSourceNote[];
+  title: string;
+}
+
 export interface RecommendedMentorFocus {
   priorities: string[];
   summary: string;
@@ -97,6 +120,7 @@ export interface MentorContextSourceDiagnostics {
 
 export interface MentorContextDiagnostics {
   contextBudgetTokens: number;
+  expertise: MentorContextSourceDiagnostics;
   goals: MentorContextSourceDiagnostics;
   maxOutputTokens: number;
   memories: MentorContextSourceDiagnostics;
@@ -117,6 +141,7 @@ export interface MentorResponseContext {
   recentMessages: MentorContextMessage[];
   recentReflections: MentorContextReflection[];
   recommendedMentorFocus: RecommendedMentorFocus;
+  relevantExpertise: MentorContextExpertise[];
   relevantMethods: MentorContextMethod[];
   relevantMemories: MentorContextMemory[];
   user: MentorContextUserIdentity;

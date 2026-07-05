@@ -34,6 +34,7 @@ Current service areas include:
 - Mentor sessions.
 - Mentor Core modules.
 - Mentor Method Library.
+- Mentor Expertise Library.
 - LLM provider orchestration.
 
 ## Repositories
@@ -73,7 +74,9 @@ User memory is personal to one user. It captures that user's understandings, goa
 
 The Mentor Method Library is reusable product knowledge. It contains concise, curated mentor techniques that can be matched into context when the current user message and recent conversation make them relevant. The context builder includes only a small number of relevant methods, not the whole library.
 
-Future aggregate learning may suggest improvements to the method library, but shared methods should remain curated and admin-approved. Personal user data should not be stored or reused as cross-user knowledge.
+The Mentor Expertise Library is reusable product knowledge for domain-specific mentor skills. It contains concise expertise profiles and curated source notes for areas like life mentoring, ADHD/focus, business, relationships and productivity. Source notes are static knowledge cards, not live browsing results, and the context builder includes only a small number of relevant expertise profiles.
+
+Future aggregate learning may suggest improvements to the method and expertise libraries, but shared knowledge should remain curated and admin-approved. Personal user data should not be stored or reused as cross-user knowledge.
 
 Mentor tone is calibrated in the prompt composer. Marcus should challenge with tact: direct but not accusatory, practical without productivity-coach cliches, and observant without sounding clinical. Repeated user goals or concerns should be treated as signal to make the topic more concrete, not as a failure to answer correctly.
 

@@ -1,6 +1,7 @@
 import { ContextBuilderRepository } from "@/services/mentor-core/context-builder/context-builder.repository";
 import { getLlmCostControls } from "@/services/llm/llm-cost-controls";
 import { MemoryService } from "@/services/memory/memory.service";
+import { MentorExpertiseService } from "@/services/mentor-expertise/expertise-service";
 import { MentorMethodService } from "@/services/mentor-methods/method-service";
 import {
   ReflectionService,
@@ -10,6 +11,7 @@ import type {
   BuildMentorContextAuthContext,
   BuildMentorContextInput,
   MentorContextEnvironment,
+  MentorContextExpertise,
   MentorContextGoal,
   MentorContextMethod,
   MentorContextMemory,
@@ -38,6 +40,7 @@ export class ContextBuilderService {
     private readonly memoryService = new MemoryService(),
     private readonly reflectionService = new ReflectionService(),
     private readonly methodService = new MentorMethodService(),
+    private readonly expertiseService = new MentorExpertiseService(),
   ) {}
 
   async buildMentorContext(
@@ -98,10 +101,19 @@ export class ContextBuilderService {
       recentContext: contextMessages.map((message) => message.content),
     });
     const contextMethods = relevantMethods.map(toContextMethod);
+    const relevantExpertise = this.expertiseService.findRelevantExpertise({
+      currentMessage: input.currentMessage,
+      limit: 2,
+      matchedMethodTitles: contextMethods.map((method) => method.title),
+      recentContext: contextMessages.map((message) => message.content),
+    });
+    let contextExpertise = relevantExpertise.map(toContextExpertise);
+    const expertiseAvailable = contextExpertise.length;
     const controls = getLlmCostControls();
     const budgetResult = trimContextToBudget(
       {
         currentMessage: input.currentMessage ?? null,
+        relevantExpertise: contextExpertise,
         relevantMethods: contextMethods,
         recentMessages: contextMessages,
         recentReflections: contextReflections,
@@ -115,11 +127,13 @@ export class ContextBuilderService {
     contextMemories = budgetResult.relevantMemories;
     contextGoals = budgetResult.userGoals;
     contextReflections = budgetResult.recentReflections;
+    contextExpertise = budgetResult.relevantExpertise;
 
     const environment = buildEnvironmentContext();
     const contextWasTrimmed =
       budgetResult.wasTrimmed ||
       recentMessages.available > contextMessages.length ||
+      expertiseAvailable > contextExpertise.length ||
       relevantMemories.available > contextMemories.length ||
       activeGoals.available > contextGoals.length ||
       recentReflections.available > contextReflections.length;
@@ -133,6 +147,11 @@ export class ContextBuilderService {
       currentUserMessage: input.currentMessage ?? null,
       diagnostics: {
         contextBudgetTokens: controls.contextBudgetTokens,
+        expertise: {
+          available: expertiseAvailable,
+          included: contextExpertise.length,
+          limit: 2,
+        },
         goals: {
           available: activeGoals.available,
           included: contextGoals.length,
@@ -177,9 +196,11 @@ export class ContextBuilderService {
         activeGoalCount: contextGoals.length,
         currentMessage: input.currentMessage,
         relevantMethodCount: contextMethods.length,
+        relevantExpertiseCount: contextExpertise.length,
         relevantMemoryCount: contextMemories.length,
         recentReflectionCount: contextReflections.length,
       }),
+      relevantExpertise: contextExpertise,
       relevantMethods: contextMethods,
       relevantMemories: contextMemories,
       user: {
@@ -337,8 +358,34 @@ function toContextMethod(method: MentorContextMethod): MentorContextMethod {
   };
 }
 
+function toContextExpertise(
+  expertise: MentorContextExpertise,
+): MentorContextExpertise {
+  return {
+    commonUserProblems: expertise.commonUserProblems,
+    coreSkills: expertise.coreSkills,
+    description: expertise.description,
+    id: expertise.id,
+    mentorDomain: expertise.mentorDomain,
+    recommendedTone: expertise.recommendedTone,
+    relevantMethods: expertise.relevantMethods,
+    riskNotes: expertise.riskNotes,
+    sourceNotes: expertise.sourceNotes.map((sourceNote) => ({
+      lastReviewed: sourceNote.lastReviewed,
+      reliabilityNote: sourceNote.reliabilityNote,
+      sourceType: sourceNote.sourceType,
+      summary: sourceNote.summary,
+      tags: sourceNote.tags,
+      title: sourceNote.title,
+      url: sourceNote.url,
+    })),
+    title: expertise.title,
+  };
+}
+
 interface ContextBudgetState {
   currentMessage: string | null;
+  relevantExpertise: MentorContextExpertise[];
   relevantMethods: MentorContextMethod[];
   recentMessages: MentorContextMessage[];
   recentReflections: MentorContextReflection[];
@@ -356,6 +403,7 @@ function trimContextToBudget(
 ): ContextBudgetResult {
   const result: ContextBudgetResult = {
     currentMessage: input.currentMessage,
+    relevantExpertise: [...input.relevantExpertise],
     relevantMethods: [...input.relevantMethods],
     recentMessages: [...input.recentMessages],
     recentReflections: [...input.recentReflections],
@@ -367,6 +415,8 @@ function trimContextToBudget(
   while (estimateContextTokens(result) > contextBudgetTokens) {
     if (result.recentReflections.length > 0) {
       result.recentReflections.pop();
+    } else if (result.relevantExpertise.length > 0) {
+      result.relevantExpertise.pop();
     } else if (result.relevantMemories.length > 0) {
       result.relevantMemories.pop();
     } else if (result.recentMessages.length > 0) {
@@ -399,6 +449,34 @@ function estimateContextTokens(input: ContextBudgetState) {
       ),
     0,
   );
+  const expertiseTokens = input.relevantExpertise.reduce(
+    (total, expertise) =>
+      total +
+      estimateTextTokens(
+        [
+          expertise.mentorDomain,
+          expertise.title,
+          expertise.description,
+          expertise.coreSkills.join(" "),
+          expertise.commonUserProblems.join(" "),
+          expertise.relevantMethods.join(" "),
+          expertise.recommendedTone,
+          expertise.riskNotes.join(" "),
+          expertise.sourceNotes
+            .map((sourceNote) =>
+              [
+                sourceNote.title,
+                sourceNote.sourceType,
+                sourceNote.summary,
+                sourceNote.tags.join(" "),
+                sourceNote.reliabilityNote,
+              ].join(" "),
+            )
+            .join(" "),
+        ].join(" "),
+      ),
+    0,
+  );
   const memoryTokens = input.relevantMemories.reduce(
     (total, memory) =>
       total +
@@ -417,6 +495,7 @@ function estimateContextTokens(input: ContextBudgetState) {
 
   return (
     currentMessageTokens +
+    expertiseTokens +
     methodTokens +
     recentMessageTokens +
     memoryTokens +
@@ -433,6 +512,7 @@ function estimateTextTokens(text: string) {
 function buildRecommendedMentorFocus(input: {
   activeGoalCount: number;
   currentMessage?: string;
+  relevantExpertiseCount: number;
   relevantMethodCount: number;
   relevantMemoryCount: number;
   recentReflectionCount: number;
@@ -449,6 +529,10 @@ function buildRecommendedMentorFocus(input: {
 
   if (input.relevantMethodCount > 0) {
     priorities.push("apply-relevant-mentor-methods-without-being-formulaic");
+  }
+
+  if (input.relevantExpertiseCount > 0) {
+    priorities.push("apply-relevant-domain-expertise-with-current-message-first");
   }
 
   if (input.activeGoalCount > 0) {

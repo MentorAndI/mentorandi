@@ -77,6 +77,7 @@ interface MentorCoreDiagnostics {
   createdReflection: MentorCoreReflectionDiagnostic | null;
   currentUserMessage: string;
   llmUsage: MentorCoreLlmUsageDiagnostic;
+  matchedExpertise: MentorCoreMatchedExpertiseDiagnostic;
   matchedMethods: MentorCoreMatchedMethodsDiagnostic;
   provider: string;
   providerErrorState: string | null;
@@ -101,6 +102,12 @@ interface MentorCoreMatchedMethodsDiagnostic {
   titles: string[];
 }
 
+interface MentorCoreMatchedExpertiseDiagnostic {
+  count: number;
+  domains: string[];
+  titles: string[];
+}
+
 interface MentorCoreCostEstimateDiagnostic {
   estimatedCostUsd: number | null;
   isConfigured: boolean;
@@ -115,6 +122,7 @@ interface MentorCoreContextSourceDiagnostic {
 
 interface MentorCoreContextTrimmingDiagnostic {
   contextBudgetTokens: number | null;
+  expertise: MentorCoreContextSourceDiagnostic;
   goals: MentorCoreContextSourceDiagnostic;
   maxOutputTokens: number | null;
   memories: MentorCoreContextSourceDiagnostic;
@@ -1183,6 +1191,10 @@ function MentorCoreDiagnosticsPanel({
         diagnostics={latestDiagnostics.contextTrimming}
       />
 
+      <MentorExpertiseDiagnosticsPanel
+        matchedExpertise={latestDiagnostics.matchedExpertise}
+      />
+
       <MentorMethodDiagnosticsPanel
         matchedMethods={latestDiagnostics.matchedMethods}
       />
@@ -1232,6 +1244,36 @@ function MentorCoreDiagnosticsPanel({
       />
       <DiagnosticReflection reflection={latestDiagnostics.createdReflection} />
     </div>
+  );
+}
+
+interface MentorExpertiseDiagnosticsPanelProps {
+  matchedExpertise: MentorCoreMatchedExpertiseDiagnostic;
+}
+
+function MentorExpertiseDiagnosticsPanel({
+  matchedExpertise,
+}: MentorExpertiseDiagnosticsPanelProps) {
+  return (
+    <section className="space-y-3">
+      <h3 className="text-sm font-semibold text-zinc-950">
+        Mentor Expertise Matches
+      </h3>
+      <div className="grid gap-3 sm:grid-cols-2">
+        <DiagnosticStat
+          label="Matched expertise count"
+          value={String(matchedExpertise.count)}
+        />
+        <DiagnosticStat
+          label="Matched expertise domains"
+          value={formatListDiagnosticValue(matchedExpertise.domains)}
+        />
+      </div>
+      <DiagnosticStringList
+        items={matchedExpertise.titles}
+        title="Matched expertise titles"
+      />
+    </section>
   );
 }
 
@@ -1358,6 +1400,10 @@ function ContextTrimmingDiagnosticsPanel({
         <ContextSourceDiagnosticStat
           label="Memories"
           source={diagnostics.memories}
+        />
+        <ContextSourceDiagnosticStat
+          label="Expertise"
+          source={diagnostics.expertise}
         />
         <ContextSourceDiagnosticStat
           label="Methods"
