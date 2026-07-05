@@ -50,12 +50,15 @@ Model routing is deterministic and optional. `LLM_CHEAP_MODEL` is used for simpl
 
 ## Pre-Deployment Checklist
 
+For the full alpha go/no-go checklist, use `docs/ALPHA_DEPLOYMENT_CHECKLIST.md`.
+
 Run these before deploying:
 
 ```bash
-npm run lint
 npm run check:env
+npm run lint
 npm run build
+git status
 ```
 
 Confirm production secrets are set in the deployment environment, not committed to the repository.

@@ -73,6 +73,9 @@ Requires:
 
 ### Feature 089 - Alpha Deployment Checklist
 
+Status:
+Checklist added. `docs/ALPHA_DEPLOYMENT_CHECKLIST.md` is the alpha deployment go/no-go checklist for Hostinger/VPS.
+
 Goal:
 Prepare final deployment checklist for Hostinger/VPS.
 

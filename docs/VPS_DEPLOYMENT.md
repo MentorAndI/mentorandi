@@ -2,6 +2,8 @@
 
 This guide prepares MentorAndI for a VPS such as Hostinger KVM. It does not replace provider-specific server hardening, firewall or backup procedures.
 
+Before inviting alpha users, complete `docs/ALPHA_DEPLOYMENT_CHECKLIST.md`.
+
 ## 1. Prepare The Server
 
 Install a current Node.js LTS runtime, Git and PM2 on the VPS.

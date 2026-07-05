@@ -6,7 +6,7 @@
 2. Improve goal dedupe and goal updates.
 3. Add reflection UI or internal dev visibility.
 4. Run `npm run eval:mentor` and `npm run eval:models` with real providers before alpha; production alpha must use OpenAI or Anthropic, OpenAI quota/billing must work, and Claude requires `ANTHROPIC_API_KEY` plus `ANTHROPIC_MODEL`.
-5. Use the deployment health check to verify alpha environment readiness.
+5. Use `docs/ALPHA_DEPLOYMENT_CHECKLIST.md` and the deployment health check to verify alpha environment readiness.
 6. Expand account/privacy controls with Supabase auth deletion and compliance workflows.
 7. Deploy alpha on the selected VPS or hosting platform.
 8. Polish the mentor UI and account settings experience.
