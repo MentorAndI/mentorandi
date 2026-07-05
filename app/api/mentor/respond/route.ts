@@ -9,6 +9,10 @@ import {
   MentorResponsePipelineService,
   MentorResponsePipelineServiceError,
 } from "@/services/mentor-core/response-pipeline/response-pipeline.service";
+import {
+  isUsageLimitReached,
+  UsageLimitService,
+} from "@/services/usage-limits/usage-limits.service";
 import { UserServiceError } from "@/services/user/user.service";
 
 export const dynamic = "force-dynamic";
@@ -40,6 +44,15 @@ export async function POST(request: Request) {
           validation.input.conversationId,
         )
       : await sessionService.getResolvedMarcusSession();
+    const usageDecision = new UsageLimitService().checkAndRecord({
+      scope: "mentor-response",
+      subjectId: session.userId,
+    });
+
+    if (isUsageLimitReached(usageDecision.status)) {
+      return createUsageLimitResponse();
+    }
+
     const pipeline = new MentorResponsePipelineService();
     const response = await pipeline.run(
       {
@@ -94,6 +107,15 @@ export async function POST(request: Request) {
       fallbackMessage: "Unable to send your message.",
     });
   }
+}
+
+function createUsageLimitResponse() {
+  return NextResponse.json(
+    {
+      error: "Usage limit reached. Please try again later.",
+    },
+    { status: 429 },
+  );
 }
 
 function validateMentorRespondInput(

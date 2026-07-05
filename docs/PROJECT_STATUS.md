@@ -11,6 +11,7 @@ MentorAndI
 - Supabase, PostgreSQL and Prisma are connected.
 - Mentor Core foundation is working with centralized LLM provider selection.
 - Aggregate Learning Suggestions v1 exists as a disabled design/service-interface foundation only; no cross-user learning is implemented.
+- Usage Limits v1 exists as an in-memory request-count foundation for mentor responses; database persistence is still future work.
 - Mock mode is available for deterministic local testing.
 - OpenAI and Claude provider modes are the intended paths for real mentor response quality.
 
@@ -64,6 +65,7 @@ MentorAndI
 - Mentor Core prepares context; the selected real LLM provider produces the natural-language answer.
 - Mock should not be treated as the source of real mentor quality.
 - Aggregate learning suggestions are not active runtime behavior. Personal user data must never become shared knowledge automatically, and reusable knowledge changes must remain curated/admin-approved.
+- Usage limits are enforced only when configured, with local development left unblocked by default. Current counts are process-local and reset on restart.
 
 ## Alpha Auth Behavior
 
@@ -84,6 +86,7 @@ MentorAndI
 - Deployment is not done.
 - Payment is not done.
 - Privacy controls are basic v1 only; Supabase auth user deletion and full compliance workflows are not done.
+- Usage limits are not yet persisted to the database.
 
 ## Current Test Checklist
 

@@ -11,6 +11,10 @@ import {
   UserService,
   UserServiceError,
 } from "@/services/user/user.service";
+import {
+  isUsageLimitReached,
+  UsageLimitService,
+} from "@/services/usage-limits/usage-limits.service";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +50,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
+    const usageDecision = new UsageLimitService().checkAndRecord({
+      scope: "mentor-core-response",
+      subjectId: userId,
+    });
+
+    if (isUsageLimitReached(usageDecision.status)) {
+      return createUsageLimitResponse();
+    }
+
     const service = new MentorResponsePipelineService();
     const response = await service.run(validation.input, authContext);
 
@@ -75,4 +88,13 @@ export async function POST(request: Request) {
       fallbackMessage: "Unable to run mentor response pipeline.",
     });
   }
+}
+
+function createUsageLimitResponse() {
+  return NextResponse.json(
+    {
+      error: "Usage limit reached. Please try again later.",
+    },
+    { status: 429 },
+  );
 }

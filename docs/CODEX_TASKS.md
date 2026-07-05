@@ -43,6 +43,9 @@ Rules:
 
 ### Feature 087 - Usage Limits v1
 
+Status:
+Foundation added. Request counts are tracked in memory and mentor response routes can enforce configured daily/monthly limits without requiring database persistence.
+
 Goal:
 Add basic usage and cost guardrails before alpha.
 

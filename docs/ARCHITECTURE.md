@@ -36,6 +36,7 @@ Current service areas include:
 - Mentor Method Library.
 - Mentor Expertise Library.
 - Mentor Source Library.
+- Usage limits.
 - LLM provider orchestration.
 
 ## Repositories
@@ -96,3 +97,9 @@ The LLM adapter chooses a provider behind a shared interface. The mock provider 
 Model routing is both cost-control and quality-control. Normal daily chat, direct factual questions, simple productivity questions and lightweight ADHD technique requests should use the configured cheap/default route. Higher-value mentor moments such as emotionally complex reflection, repeated stuck patterns, identity or life-direction questions, difficult relationship or personal decisions and complex overthinking loops should use the configured deep route.
 
 The routed configuration can choose a provider and model per route with `LLM_CHEAP_PROVIDER`/`LLM_CHEAP_MODEL`, `LLM_DEFAULT_PROVIDER`/`LLM_DEFAULT_MODEL` and `LLM_DEEP_PROVIDER`/`LLM_DEEP_MODEL`. `LLM_PROVIDER` remains supported as the simple fallback/default provider when route-specific provider configuration is missing.
+
+## Usage Limits
+
+Usage Limits v1 is an in-memory service-layer guardrail for request counts. `/api/mentor/respond` and `/api/mentor-core/respond` resolve the user first, then check usage before running the Mentor Core response pipeline. Local development records counts without blocking unless `USAGE_LIMITS_ENABLED=true`; production can enforce daily and monthly limits with `MENTOR_DAILY_REQUEST_LIMIT` and `MENTOR_MONTHLY_REQUEST_LIMIT`.
+
+This is not durable storage. Counts reset when the process restarts and are not shared across app instances. Persisted usage limits should be added later with an explicit database-backed design and Prisma schema change.
