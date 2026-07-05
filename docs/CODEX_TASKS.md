@@ -27,6 +27,9 @@ Implement only the named feature unless the user explicitly asks for more.
 
 ### Feature 086 - Aggregate Learning Suggestions v1
 
+Status:
+Foundation added. The service interface and documentation exist, but aggregate learning remains disabled and no cross-user implementation exists.
+
 Goal:
 Create a safe design foundation for detecting repeated themes across users without storing personal user data as shared knowledge.
 

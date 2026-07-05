@@ -10,6 +10,7 @@ MentorAndI
 - Next.js app running locally.
 - Supabase, PostgreSQL and Prisma are connected.
 - Mentor Core foundation is working with centralized LLM provider selection.
+- Aggregate Learning Suggestions v1 exists as a disabled design/service-interface foundation only; no cross-user learning is implemented.
 - Mock mode is available for deterministic local testing.
 - OpenAI and Claude provider modes are the intended paths for real mentor response quality.
 
@@ -62,6 +63,7 @@ MentorAndI
 - Real provider modes require their API key and model environment variables.
 - Mentor Core prepares context; the selected real LLM provider produces the natural-language answer.
 - Mock should not be treated as the source of real mentor quality.
+- Aggregate learning suggestions are not active runtime behavior. Personal user data must never become shared knowledge automatically, and reusable knowledge changes must remain curated/admin-approved.
 
 ## Alpha Auth Behavior
 

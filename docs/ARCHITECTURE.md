@@ -83,6 +83,8 @@ Reusable knowledge improves mentor quality, but it is budgeted to control prompt
 
 Future aggregate learning may suggest improvements to the method, expertise and source libraries, but shared knowledge should remain curated and admin-approved. Personal user data should not be stored or reused as cross-user knowledge.
 
+Aggregate Learning Suggestions v1 is a design foundation only. The service interface describes future privacy-preserving suggestion inputs and admin-reviewed outputs, but it does not read cross-user data, store suggestions or change Mentor Core behavior. Any future aggregate signal must already be stripped of raw messages, user identifiers, conversation identifiers and personal memories before it can be considered for a curated shared knowledge update.
+
 Mentor tone is calibrated in the prompt composer. Marcus should challenge with tact: direct but not accusatory, practical without productivity-coach cliches, and observant without sounding clinical. Repeated user goals or concerns should be treated as signal to make the topic more concrete, not as a failure to answer correctly.
 
 ## LLM Provider Abstraction
