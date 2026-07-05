@@ -32,7 +32,7 @@ export class AnthropicLlmProvider implements LlmProvider {
   async complete(
     request: LlmCompletionRequest,
   ): Promise<LlmCompletionResponse> {
-    const config = getAnthropicConfig();
+    const config = getAnthropicConfig(request.model);
     const controls = getLlmCostControls();
     const model = request.model?.trim() || config.model;
     const startedAt = Date.now();
@@ -109,7 +109,7 @@ function buildAnthropicSystemPrompt(request: LlmCompletionRequest) {
   ].join("\n");
 }
 
-function getAnthropicConfig() {
+function getAnthropicConfig(requestedModel?: string) {
   const apiKey = process.env.ANTHROPIC_API_KEY?.trim();
   const model = process.env.ANTHROPIC_MODEL?.trim();
 
@@ -119,7 +119,7 @@ function getAnthropicConfig() {
     );
   }
 
-  if (!model) {
+  if (!model && !requestedModel?.trim()) {
     throw new Error(
       "Missing Anthropic configuration: ANTHROPIC_MODEL is required.",
     );
@@ -127,7 +127,7 @@ function getAnthropicConfig() {
 
   return {
     apiKey,
-    model,
+    model: model || requestedModel?.trim() || "",
   };
 }
 

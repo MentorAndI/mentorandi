@@ -41,7 +41,7 @@ export class OpenAiLlmProvider implements LlmProvider {
   async complete(
     request: LlmCompletionRequest,
   ): Promise<LlmCompletionResponse> {
-    const config = getOpenAiConfig();
+    const config = getOpenAiConfig(request.model);
     const controls = getLlmCostControls();
     const model = request.model?.trim() || config.model;
     const startedAt = Date.now();
@@ -119,7 +119,7 @@ export class OpenAiLlmProvider implements LlmProvider {
   }
 }
 
-function getOpenAiConfig() {
+function getOpenAiConfig(requestedModel?: string) {
   const apiKey = process.env.OPENAI_API_KEY?.trim();
   const model = process.env.OPENAI_MODEL?.trim();
 
@@ -127,13 +127,13 @@ function getOpenAiConfig() {
     throw new Error("Missing OpenAI configuration: OPENAI_API_KEY is required.");
   }
 
-  if (!model) {
+  if (!model && !requestedModel?.trim()) {
     throw new Error("Missing OpenAI configuration: OPENAI_MODEL is required.");
   }
 
   return {
     apiKey,
-    model,
+    model: model || requestedModel?.trim() || "",
   };
 }
 

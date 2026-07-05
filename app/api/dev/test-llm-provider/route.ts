@@ -13,6 +13,7 @@ type RealProviderName = Extract<LlmProviderName, "anthropic" | "openai">;
 
 interface TestLlmProviderInput {
   message: string;
+  model?: string;
   provider: RealProviderName;
 }
 
@@ -23,6 +24,7 @@ interface TestLlmProviderValidationResult {
 }
 
 const maxTestMessageLength = 500;
+const maxModelLength = 100;
 const realProviders: RealProviderName[] = ["openai", "anthropic"];
 
 export const dynamic = "force-dynamic";
@@ -45,7 +47,10 @@ export async function POST(request: Request) {
     );
   }
 
-  const configError = readProviderConfigurationError(validation.input.provider);
+  const configError = readProviderConfigurationError(
+    validation.input.provider,
+    validation.input.model,
+  );
 
   if (configError) {
     return NextResponse.json(
@@ -57,6 +62,7 @@ export async function POST(request: Request) {
   try {
     const response = await new LlmService().complete({
       context: buildProviderTestContext(validation.input.message),
+      model: validation.input.model,
       provider: validation.input.provider,
       systemPrompt: [
         "You are running a MentorAndI provider connectivity test.",
@@ -77,6 +83,10 @@ export async function POST(request: Request) {
         responseText: response.content,
         success: true,
         totalTokens: response.metadata.totalTokens ?? null,
+        costEstimate: estimateProviderTestCost({
+          inputTokens: response.metadata.inputTokens,
+          outputTokens: response.metadata.outputTokens,
+        }),
       },
       { status: 200 },
     );
@@ -85,7 +95,9 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           errorState: error.providerErrorState ?? "provider_request_failed",
-          model: readConfiguredModel(validation.input.provider),
+          model:
+            validation.input.model ??
+            readConfiguredModel(validation.input.provider),
           provider: validation.input.provider,
           safeErrorMessage: getSafeProviderTestErrorMessage(
             validation.input.provider,
@@ -104,7 +116,8 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         errorState: "provider_request_failed",
-        model: readConfiguredModel(validation.input.provider),
+        model:
+          validation.input.model ?? readConfiguredModel(validation.input.provider),
         provider: validation.input.provider,
         safeErrorMessage: getSafeProviderTestErrorMessage(
           validation.input.provider,
@@ -137,6 +150,10 @@ function validateTestLlmProviderInput(
     "message" in body && typeof body.message === "string"
       ? body.message.trim()
       : "";
+  const model =
+    "model" in body && typeof body.model === "string"
+      ? body.model.trim()
+      : undefined;
 
   if (!realProviders.includes(provider as RealProviderName)) {
     errors.provider = "Provider must be openai or anthropic.";
@@ -148,12 +165,17 @@ function validateTestLlmProviderInput(
     errors.message = `Test message must be ${maxTestMessageLength} characters or fewer.`;
   }
 
+  if (model !== undefined && model.length > maxModelLength) {
+    errors.model = `Model must be ${maxModelLength} characters or fewer.`;
+  }
+
   return {
     errors,
     input:
       Object.keys(errors).length === 0
         ? {
             message,
+            ...(model ? { model } : {}),
             provider: provider as RealProviderName,
           }
         : undefined,
@@ -161,7 +183,10 @@ function validateTestLlmProviderInput(
   };
 }
 
-function readProviderConfigurationError(provider: RealProviderName) {
+function readProviderConfigurationError(
+  provider: RealProviderName,
+  requestedModel?: string,
+) {
   if (provider === "openai") {
     if (!process.env.OPENAI_API_KEY?.trim()) {
       return {
@@ -170,7 +195,7 @@ function readProviderConfigurationError(provider: RealProviderName) {
       };
     }
 
-    if (!process.env.OPENAI_MODEL?.trim()) {
+    if (!requestedModel && !process.env.OPENAI_MODEL?.trim()) {
       return {
         errorState: "configuration_error",
         safeErrorMessage: "Provider model is missing.",
@@ -186,7 +211,7 @@ function readProviderConfigurationError(provider: RealProviderName) {
       };
     }
 
-    if (!process.env.ANTHROPIC_MODEL?.trim()) {
+    if (!requestedModel && !process.env.ANTHROPIC_MODEL?.trim()) {
       return {
         errorState: "configuration_error",
         safeErrorMessage: "Provider model is missing.",
@@ -232,6 +257,52 @@ function readConfiguredModel(provider: RealProviderName) {
   return provider === "anthropic"
     ? process.env.ANTHROPIC_MODEL?.trim() || null
     : process.env.OPENAI_MODEL?.trim() || null;
+}
+
+function estimateProviderTestCost(usage: {
+  inputTokens?: number;
+  outputTokens?: number;
+}) {
+  const inputCostPer1m = readOptionalCost("LLM_INPUT_COST_PER_1M");
+  const outputCostPer1m = readOptionalCost("LLM_OUTPUT_COST_PER_1M");
+
+  if (inputCostPer1m === null || outputCostPer1m === null) {
+    return {
+      estimatedCostUsd: null,
+      isConfigured: false,
+      message: "Cost estimate not configured",
+    };
+  }
+
+  if (usage.inputTokens === undefined || usage.outputTokens === undefined) {
+    return {
+      estimatedCostUsd: null,
+      isConfigured: true,
+      message: "Token usage not available",
+    };
+  }
+
+  return {
+    estimatedCostUsd:
+      (usage.inputTokens / 1_000_000) * inputCostPer1m +
+      (usage.outputTokens / 1_000_000) * outputCostPer1m,
+    isConfigured: true,
+    message: null,
+  };
+}
+
+function readOptionalCost(name: string) {
+  const value = process.env[name]?.trim();
+
+  if (!value) {
+    return null;
+  }
+
+  const parsedValue = Number(value);
+
+  return Number.isFinite(parsedValue) && parsedValue >= 0
+    ? parsedValue
+    : null;
 }
 
 function buildProviderTestContext(message: string): MentorResponseContext {
