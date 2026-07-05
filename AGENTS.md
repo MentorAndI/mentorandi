@@ -18,6 +18,8 @@ It is not a generic chatbot. It is built around memory, goals, reflections and a
 
 ## Development Rules
 
+- For backlog-driven prompts, read `docs/CODEX_TASKS.md` after `AGENTS.md`, `docs/PROJECT_STATUS.md` and `docs/ARCHITECTURE.md`.
+- Short prompts like `Implement Feature 086 from docs/CODEX_TASKS.md` are valid; implement only the named feature and obey its rules.
 - Do not change the Prisma schema unless explicitly asked.
 - Do not add packages unless explicitly asked.
 - Do not expose raw database IDs in user-facing UI.
@@ -49,6 +51,7 @@ It is not a generic chatbot. It is built around memory, goals, reflections and a
 
 ## Required Verification After Code Changes
 
+- `npm run check:env`
 - `npm run lint`
 - `npm run build`
 - Manual check `/start`
