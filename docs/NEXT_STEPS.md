@@ -5,7 +5,7 @@
 1. Use `docs/CODEX_TASKS.md` as the source of truth for short Codex feature prompts and the upcoming Feature 086+ backlog.
 2. Improve goal dedupe and goal updates.
 3. Add reflection UI or internal dev visibility.
-4. Test real provider connectivity, usage diagnostics, model routing, cost controls, `npm run eval:mentor` and `npm run eval:models` before alpha; production alpha must use OpenAI or Anthropic, OpenAI quota/billing must work, and Claude requires `ANTHROPIC_API_KEY` plus `ANTHROPIC_MODEL`.
+4. Run `npm run eval:mentor` and `npm run eval:models` with real providers before alpha; production alpha must use OpenAI or Anthropic, OpenAI quota/billing must work, and Claude requires `ANTHROPIC_API_KEY` plus `ANTHROPIC_MODEL`.
 5. Use the deployment health check to verify alpha environment readiness.
 6. Expand account/privacy controls with Supabase auth deletion and compliance workflows.
 7. Deploy alpha on the selected VPS or hosting platform.

@@ -103,3 +103,7 @@ The routed configuration can choose a provider and model per route with `LLM_CHE
 Usage Limits v1 is an in-memory service-layer guardrail for request counts. `/api/mentor/respond` and `/api/mentor-core/respond` resolve the user first, then check usage before running the Mentor Core response pipeline. Local development records counts without blocking unless `USAGE_LIMITS_ENABLED=true`; production can enforce daily and monthly limits with `MENTOR_DAILY_REQUEST_LIMIT` and `MENTOR_MONTHLY_REQUEST_LIMIT`.
 
 This is not durable storage. Counts reset when the process restarts and are not shared across app instances. Persisted usage limits should be added later with an explicit database-backed design and Prisma schema change.
+
+## Mentor Evaluation
+
+`npm run eval:mentor` runs the full Mentor Core flow through the development test API. It requires a running app server, connected database and seeded development user, then evaluates routing, context building, prompt composition, provider behavior and reusable knowledge matching together. Reports are written to `reports/mentor-eval-latest.json`.

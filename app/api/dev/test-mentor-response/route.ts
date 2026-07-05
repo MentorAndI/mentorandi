@@ -26,7 +26,7 @@ interface DevMentorResponseInput {
   mentorId: string;
   message: string;
   model?: string;
-  provider: DevMentorResponseProvider;
+  provider?: DevMentorResponseProvider;
   userId: string;
 }
 
@@ -420,11 +420,13 @@ function validateDevMentorResponseInput(
   const conversationId = readOptionalTrimmedStringField(body, "conversationId");
   const message = readStringField(body, "message");
   const model = readOptionalTrimmedStringField(body, "model");
-  const provider = readOptionalTrimmedStringField(body, "provider") ?? "mock";
+  const provider = readOptionalTrimmedStringField(body, "provider");
 
   validateUuidField(errors, "userId", userId, "User ID");
   validateUuidField(errors, "mentorId", mentorId, "Mentor ID");
-  validateProviderField(errors, provider);
+  if (provider !== undefined) {
+    validateProviderField(errors, provider);
+  }
 
   if (conversationId !== undefined) {
     validateUuidField(
@@ -456,7 +458,7 @@ function validateDevMentorResponseInput(
       mentorId,
       message,
       model,
-      provider: provider as DevMentorResponseProvider,
+      ...(provider ? { provider: provider as DevMentorResponseProvider } : {}),
       userId,
     },
     isValid: true,

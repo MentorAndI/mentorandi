@@ -12,6 +12,7 @@ MentorAndI
 - Mentor Core foundation is working with centralized LLM provider selection.
 - Aggregate Learning Suggestions v1 exists as a disabled design/service-interface foundation only; no cross-user learning is implemented.
 - Usage Limits v1 exists as an in-memory request-count foundation for mentor responses; database persistence is still future work.
+- Full Mentor Evaluation Runner exists for dev-only Mentor Core evaluation through the seeded database-backed flow.
 - Mock mode is available for deterministic local testing.
 - OpenAI and Claude provider modes are the intended paths for real mentor response quality.
 
@@ -66,6 +67,7 @@ MentorAndI
 - Mock should not be treated as the source of real mentor quality.
 - Aggregate learning suggestions are not active runtime behavior. Personal user data must never become shared knowledge automatically, and reusable knowledge changes must remain curated/admin-approved.
 - Usage limits are enforced only when configured, with local development left unblocked by default. Current counts are process-local and reset on restart.
+- `npm run eval:mentor` requires the local app server, database connection and seeded development user because it evaluates the full Mentor Core flow.
 
 ## Alpha Auth Behavior
 

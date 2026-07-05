@@ -1,79 +1,103 @@
 import "dotenv/config";
 
 import { mkdir, writeFile } from "node:fs/promises";
+import path from "node:path";
 
-const defaultBaseUrl = "http://localhost:3000";
-const reportPath = "reports/mentor-eval-latest.json";
-const baseUrl = normalizeBaseUrl(process.env.APP_URL?.trim() || defaultBaseUrl);
-const providers = readProviders();
-const modelOverride = process.env.EVAL_LLM_MODEL?.trim();
+const defaultAppUrl = "http://localhost:3000";
+const endpointPath = "/api/dev/test-mentor-response";
+const seedEndpointPath = "/api/dev/seed-data";
+const reportPath = path.join("reports", "mentor-eval-latest.json");
+const appUrl = normalizeAppUrl(process.env.APP_URL || defaultAppUrl);
+const endpointUrl = new URL(endpointPath, appUrl).toString();
+const seedEndpointUrl = new URL(seedEndpointPath, appUrl).toString();
+const evalCases = collectEvalCases();
 
 const scenarioGroups = [
   {
+    name: "factual-routing",
     messages: [
       {
-        input: "What day is it today?",
         name: "Direct factual question",
+        text: "What day is it today?",
       },
     ],
   },
   {
+    name: "productivity-follow-up",
     messages: [
       {
-        input: "I want to become more focused and stop overthinking.",
-        name: "Goal/mentor question",
+        name: "Productivity focus",
+        text: "What should I focus on today?",
       },
       {
-        input: "What should I focus on today?",
-        name: "Follow-up",
+        name: "Concrete next step",
+        text: "I am working on the MentorAndI design today. What should I focus on next?",
       },
     ],
   },
   {
+    name: "adhd-methods",
     messages: [
       {
-        input: "The weather is hot here. Where am I?",
-        name: "Location uncertainty",
+        name: "ADHD task initiation",
+        text: "I have ADHD and I can't get started on my work.",
       },
     ],
   },
   {
+    name: "overthinking-loop",
     messages: [
       {
-        input: "I am working on the MentorAndI design today.",
-        name: "Product/project context",
+        name: "Overthinking decision loop",
+        text: "I keep overthinking the same decision.",
       },
+    ],
+  },
+  {
+    name: "relationship-expertise",
+    messages: [
       {
-        input: "What should I focus on next?",
-        name: "Product/project follow-up",
+        name: "Relationship communication",
+        text: "I keep arguing with my partner and I don't know how to communicate.",
+      },
+    ],
+  },
+  {
+    name: "business-expertise",
+    messages: [
+      {
+        name: "Business decision",
+        text: "I need to make a business decision for my startup.",
       },
     ],
   },
 ];
 
-console.log("MentorAndI Mentor Evaluation");
-console.log(`Base URL: ${baseUrl}`);
-console.log(`Providers: ${providers.join(", ")}`);
+console.log("MentorAndI Full Mentor Core Evaluation");
+console.log(`App URL: ${appUrl}`);
+console.log(`Seed endpoint: ${seedEndpointUrl}`);
+console.log(`Mentor endpoint: ${endpointUrl}`);
+console.log(`Scenario groups: ${scenarioGroups.length}`);
+console.log(`Eval cases: ${evalCases.length}`);
+console.log("");
 
 const seedData = await loadSeedData();
 const startedAt = new Date().toISOString();
 const results = [];
 
-for (const provider of providers) {
-  console.log("");
-  console.log(`Provider: ${provider}`);
+for (const evalCase of evalCases) {
+  console.log(`Case: ${formatEvalCase(evalCase)}`);
 
   for (const group of scenarioGroups) {
-    let conversationId;
+    let conversationId = null;
 
     for (const scenario of group.messages) {
       const result = await runScenario({
         conversationId,
-        input: scenario.input,
+        evalCase,
+        groupName: group.name,
         mentorId: seedData.mentorId,
-        model: modelOverride,
-        name: scenario.name,
-        provider,
+        scenario,
         userId: seedData.userId,
       });
 
@@ -85,37 +109,110 @@ for (const provider of providers) {
       printScenarioResult(result);
     }
   }
+
+  console.log("");
 }
 
 const report = {
-  app: "MentorAndI",
-  baseUrl,
-  createdAt: new Date().toISOString(),
-  providers,
+  appUrl,
+  endpointUrl,
+  evalCases,
+  generatedAt: new Date().toISOString(),
+  requires: [
+    "database connected",
+    "seeded development user",
+    "model routing",
+    "mentor method library",
+    "mentor expertise library",
+    "mentor source library",
+  ],
   results,
+  scenarioGroups,
+  seedEndpointUrl,
   startedAt,
 };
 
-await mkdir("reports", { recursive: true });
+await mkdir(path.dirname(reportPath), { recursive: true });
 await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
 
 const failures = results.filter((result) => !result.success);
 
-console.log("");
-console.log(`Report written: ${reportPath}`);
+console.log(`Wrote JSON report: ${reportPath}`);
 
 if (failures.length > 0) {
-  console.error(`${failures.length} mentor eval scenario failed.`);
+  console.error(`${failures.length} full mentor eval scenario failed.`);
   process.exit(1);
 }
 
-console.log("Mentor eval completed.");
+console.log("Full mentor eval completed.");
+
+function collectEvalCases() {
+  const cases = [
+    {
+      mode: "automatic-routing",
+      model: null,
+      provider: null,
+    },
+  ];
+
+  for (const provider of readExplicitProviders()) {
+    cases.push({
+      mode: "explicit-provider",
+      model: readModelOverride(provider),
+      provider,
+    });
+  }
+
+  return cases;
+}
+
+function readExplicitProviders() {
+  const providerSource = process.env.EVAL_MENTOR_PROVIDERS?.trim();
+
+  if (!providerSource) {
+    return [];
+  }
+
+  const supportedProviders = new Set(["anthropic", "mock", "openai"]);
+  const providers = providerSource
+    .split(",")
+    .map((provider) => provider.trim().toLowerCase())
+    .filter(Boolean);
+  const unsupportedProviders = providers.filter(
+    (provider) => !supportedProviders.has(provider),
+  );
+
+  if (unsupportedProviders.length > 0) {
+    console.error(
+      `Unsupported mentor eval provider: ${unsupportedProviders.join(", ")}. Use mock, openai or anthropic.`,
+    );
+    process.exit(1);
+  }
+
+  return [...new Set(providers)];
+}
+
+function readModelOverride(provider) {
+  const globalOverride = readEnv("EVAL_MENTOR_MODEL");
+
+  if (globalOverride) {
+    return globalOverride;
+  }
+
+  if (provider === "anthropic") {
+    return readEnv("ANTHROPIC_MODEL") || null;
+  }
+
+  if (provider === "openai") {
+    return readEnv("OPENAI_MODEL") || null;
+  }
+
+  return null;
+}
 
 async function loadSeedData() {
-  const url = new URL("/api/dev/seed-data", baseUrl);
-
   try {
-    const response = await fetch(url);
+    const response = await fetch(seedEndpointUrl);
     const body = await readJson(response);
 
     if (!response.ok) {
@@ -127,11 +224,17 @@ async function loadSeedData() {
     }
 
     return {
+      conversationId: isNonEmptyString(body?.conversationId)
+        ? body.conversationId
+        : null,
       mentorId: body.mentorId,
       userId: body.userId,
     };
   } catch (error) {
     console.error("Unable to load development seed data.");
+    console.error(
+      "Run npm run dev in one terminal and ensure the database is connected and seeded.",
+    );
     console.error(toSafeErrorMessage(error));
     process.exit(1);
   }
@@ -139,25 +242,24 @@ async function loadSeedData() {
 
 async function runScenario({
   conversationId,
-  input,
+  evalCase,
+  groupName,
   mentorId,
-  model,
-  name,
-  provider,
+  scenario,
   userId,
 }) {
-  const url = new URL("/api/dev/test-mentor-response", baseUrl);
+  const startedAt = Date.now();
   const payload = {
     mentorId,
-    message: input,
-    provider,
+    message: scenario.text,
     userId,
     ...(conversationId ? { conversationId } : {}),
-    ...(model ? { model } : {}),
+    ...(evalCase.model ? { model: evalCase.model } : {}),
+    ...(evalCase.provider ? { provider: evalCase.provider } : {}),
   };
 
   try {
-    const response = await fetch(url, {
+    const response = await fetch(endpointUrl, {
       body: JSON.stringify(payload),
       headers: {
         "Content-Type": "application/json",
@@ -167,121 +269,172 @@ async function runScenario({
     const body = await readJson(response);
     const diagnostics = body?.diagnostics;
     const usage = diagnostics?.llmUsage;
-
-    if (!response.ok) {
-      return {
-        errorState: sanitizeText(
-          diagnostics?.providerErrorState ?? readSafeError(body) ?? "request_failed",
-        ),
-        estimatedCost: readCostEstimate(usage),
-        inputMessage: input,
-        inputTokens: readNullableNumber(usage?.inputTokens),
-        latencyMs: readNullableNumber(usage?.latencyMs),
-        model: sanitizeText(usage?.model ?? body?.model ?? "unknown"),
-        modelRoute: sanitizeText(usage?.modelRouting?.route ?? "unknown"),
-        modelRoutingReason: sanitizeText(
-          usage?.modelRouting?.reason ?? "Not available",
-        ),
-        outputTokens: readNullableNumber(usage?.outputTokens),
-        provider,
-        providerUsed: sanitizeText(
-          diagnostics?.providerUsed ?? diagnostics?.provider ?? provider,
-        ),
-        responseText: "",
-        scenario: name,
-        success: false,
-        totalTokens: readNullableNumber(usage?.totalTokens),
-      };
-    }
+    const modelRouting = usage?.modelRouting;
+    const success = response.ok;
 
     return {
-      conversationId: body?.conversation?.id,
-      errorState: null,
-      estimatedCost: readCostEstimate(usage),
-      inputMessage: input,
+      conversationId: isNonEmptyString(body?.conversation?.id)
+        ? body.conversation.id
+        : conversationId,
+      costEstimate: readCostEstimate(usage?.costEstimate),
+      errorState: success
+        ? null
+        : sanitizeText(
+            diagnostics?.providerErrorState ??
+              readSafeError(body) ??
+              `http_${response.status}`,
+          ),
+      evalMode: evalCase.mode,
+      explicitModel: evalCase.model,
+      explicitProvider: evalCase.provider,
+      groupName,
+      inputMessage: scenario.text,
       inputTokens: readNullableNumber(usage?.inputTokens),
       latencyMs: readNullableNumber(usage?.latencyMs),
+      matchedExpertise: readMatchedKnowledge(diagnostics?.matchedExpertise),
+      matchedMethods: readMatchedKnowledge(diagnostics?.matchedMethods),
+      matchedSources: readMatchedKnowledge(diagnostics?.matchedSources),
       model: sanitizeText(usage?.model ?? body?.model ?? "unknown"),
-      modelRoute: sanitizeText(usage?.modelRouting?.route ?? "unknown"),
-      modelRoutingReason: sanitizeText(
-        usage?.modelRouting?.reason ?? "Not available",
-      ),
       outputTokens: readNullableNumber(usage?.outputTokens),
-      provider,
-      providerUsed: sanitizeText(
-        diagnostics?.providerUsed ?? diagnostics?.provider ?? body?.provider ?? provider,
+      provider: sanitizeText(
+        usage?.provider ??
+          diagnostics?.providerUsed ??
+          body?.provider ??
+          evalCase.provider ??
+          "unknown",
       ),
-      responseText: sanitizeText(body?.mentorMessage?.content ?? ""),
-      scenario: name,
-      success: true,
+      responsePreview: success
+        ? buildPreview(body?.mentorMessage?.content)
+        : "",
+      routeReason: sanitizeText(modelRouting?.reason ?? "Not available"),
+      routeSignals: Array.isArray(modelRouting?.signals)
+        ? modelRouting.signals.filter(isNonEmptyString).map(sanitizeText)
+        : [],
+      routeType: sanitizeText(modelRouting?.route ?? "unknown"),
+      scenarioName: scenario.name,
+      success,
       totalTokens: readNullableNumber(usage?.totalTokens),
+      wallClockMs: Date.now() - startedAt,
     };
   } catch (error) {
     return {
+      conversationId,
+      costEstimate: null,
       errorState: toSafeErrorMessage(error),
-      estimatedCost: null,
-      inputMessage: input,
+      evalMode: evalCase.mode,
+      explicitModel: evalCase.model,
+      explicitProvider: evalCase.provider,
+      groupName,
+      inputMessage: scenario.text,
       inputTokens: null,
       latencyMs: null,
-      model: model ?? "unknown",
-      modelRoute: "unknown",
-      modelRoutingReason: "Request failed before model routing diagnostics were returned.",
+      matchedExpertise: emptyMatchedKnowledge(),
+      matchedMethods: emptyMatchedKnowledge(),
+      matchedSources: emptyMatchedKnowledge(),
+      model: evalCase.model ?? "unknown",
       outputTokens: null,
-      provider,
-      providerUsed: provider,
-      responseText: "",
-      scenario: name,
+      provider: evalCase.provider ?? "unknown",
+      responsePreview: "",
+      routeReason: "Request failed before model routing diagnostics were returned.",
+      routeSignals: [],
+      routeType: "unknown",
+      scenarioName: scenario.name,
       success: false,
       totalTokens: null,
+      wallClockMs: Date.now() - startedAt,
     };
   }
 }
 
 function printScenarioResult(result) {
-  const status = result.success ? "PASS" : "FAIL";
-  const latency = result.latencyMs === null ? "latency n/a" : `${result.latencyMs}ms`;
-  const tokens =
-    result.totalTokens === null ? "tokens n/a" : `${result.totalTokens} tokens`;
-  const cost =
-    result.estimatedCost === null
-      ? "cost n/a"
-      : `$${result.estimatedCost.toFixed(6)}`;
+  const status = result.success ? "success" : "failure";
 
   console.log(
-    `${status} ${result.scenario} | ${result.providerUsed} | ${result.model} | ${result.modelRoute} | ${latency} | ${tokens} | ${cost}`,
+    `[${status}] ${result.scenarioName} | ${result.provider} / ${result.model}`,
   );
+  console.log(`  group: ${result.groupName}`);
+  console.log(`  route: ${result.routeType}`);
+  console.log(`  route reason: ${result.routeReason}`);
+  console.log(`  latencyMs: ${formatNullable(result.latencyMs)}`);
+  console.log(
+    `  tokens: input ${formatNullable(result.inputTokens)} / output ${formatNullable(result.outputTokens)} / total ${formatNullable(result.totalTokens)}`,
+  );
+  console.log(`  estimated cost: ${formatCostEstimate(result.costEstimate)}`);
+  console.log(
+    `  methods: ${formatMatchedKnowledge(result.matchedMethods)}`,
+  );
+  console.log(
+    `  expertise: ${formatMatchedKnowledge(result.matchedExpertise)}`,
+  );
+  console.log(`  sources: ${formatMatchedKnowledge(result.matchedSources)}`);
 
   if (result.success) {
-    console.log(`  Input: ${result.inputMessage}`);
-    console.log(`  Marcus: ${truncate(result.responseText, 220) || "No response text"}`);
+    console.log(`  preview: ${result.responsePreview || "No response text."}`);
   } else {
-    console.log(`  Error: ${result.errorState ?? "unknown_error"}`);
+    console.log(`  error: ${result.errorState || "Request failed safely."}`);
   }
+
+  console.log("");
 }
 
-function readProviders() {
-  const providerSource =
-    process.env.EVAL_LLM_PROVIDERS?.trim() ||
-    process.env.LLM_PROVIDER?.trim() ||
-    "mock";
-  const supportedProviders = new Set(["anthropic", "mock", "openai"]);
-  const parsedProviders = providerSource
-    .split(",")
-    .map((provider) => provider.trim().toLowerCase())
-    .filter(Boolean);
-
-  const unsupportedProviders = parsedProviders.filter(
-    (provider) => !supportedProviders.has(provider),
-  );
-
-  if (unsupportedProviders.length > 0) {
-    console.error(
-      `Unsupported eval provider: ${unsupportedProviders.join(", ")}. Use mock, openai or anthropic.`,
-    );
-    process.exit(1);
+function readMatchedKnowledge(value) {
+  if (!value || typeof value !== "object") {
+    return emptyMatchedKnowledge();
   }
 
-  return [...new Set(parsedProviders.length > 0 ? parsedProviders : ["mock"])];
+  return {
+    count: readNullableNumber(value.count) ?? 0,
+    domains: Array.isArray(value.domains)
+      ? value.domains.filter(isNonEmptyString).map(sanitizeText)
+      : [],
+    titles: Array.isArray(value.titles)
+      ? value.titles.filter(isNonEmptyString).map(sanitizeText)
+      : [],
+  };
+}
+
+function emptyMatchedKnowledge() {
+  return {
+    count: 0,
+    domains: [],
+    titles: [],
+  };
+}
+
+function formatMatchedKnowledge(value) {
+  if (value.count === 0) {
+    return "none";
+  }
+
+  return `${value.count} (${value.titles.join(", ") || value.domains.join(", ")})`;
+}
+
+function readCostEstimate(value) {
+  if (!value || typeof value !== "object") {
+    return null;
+  }
+
+  return {
+    estimatedCostUsd: readNullableNumber(value.estimatedCostUsd),
+    isConfigured: value.isConfigured === true,
+    message: isNonEmptyString(value.message) ? sanitizeText(value.message) : null,
+  };
+}
+
+function formatCostEstimate(costEstimate) {
+  if (!costEstimate) {
+    return "not available";
+  }
+
+  if (!costEstimate.isConfigured) {
+    return costEstimate.message || "not configured";
+  }
+
+  if (costEstimate.estimatedCostUsd === null) {
+    return costEstimate.message || "not available";
+  }
+
+  return `$${costEstimate.estimatedCostUsd.toFixed(6)}`;
 }
 
 async function readJson(response) {
@@ -300,32 +453,45 @@ async function readJson(response) {
 
 function readSafeError(body) {
   if (isNonEmptyString(body?.error)) {
-    return body.error;
+    return sanitizeText(body.error);
   }
 
   if (body?.errors && typeof body.errors === "object") {
     return Object.values(body.errors)
       .filter(isNonEmptyString)
+      .map(sanitizeText)
       .join(" ");
   }
 
   return null;
 }
 
-function readCostEstimate(usage) {
-  const estimatedCost = usage?.costEstimate?.estimatedCostUsd;
+function buildPreview(value) {
+  if (typeof value !== "string") {
+    return "";
+  }
 
-  return typeof estimatedCost === "number" && Number.isFinite(estimatedCost)
-    ? estimatedCost
-    : null;
+  const normalized = sanitizeText(value).replace(/\s+/g, " ").trim();
+
+  return normalized.length > 240
+    ? `${normalized.slice(0, 237).trimEnd()}...`
+    : normalized;
 }
 
 function readNullableNumber(value) {
   return typeof value === "number" && Number.isFinite(value) ? value : null;
 }
 
+function formatNullable(value) {
+  return value === null ? "n/a" : String(value);
+}
+
 function isNonEmptyString(value) {
   return typeof value === "string" && value.trim().length > 0;
+}
+
+function readEnv(name) {
+  return process.env[name]?.trim() || "";
 }
 
 function sanitizeText(value) {
@@ -336,14 +502,14 @@ function sanitizeText(value) {
 
 function redactSensitiveValues(text) {
   const sensitiveVariableNames = [
+    "ANTHROPIC_API_KEY",
     "DATABASE_URL",
     "NEXT_PUBLIC_SUPABASE_ANON_KEY",
     "OPENAI_API_KEY",
-    "ANTHROPIC_API_KEY",
   ];
 
   return sensitiveVariableNames.reduce((currentText, variableName) => {
-    const secret = process.env[variableName]?.trim();
+    const secret = readEnv(variableName);
 
     return secret ? currentText.split(secret).join("[redacted]") : currentText;
   }, text);
@@ -357,10 +523,14 @@ function toSafeErrorMessage(error) {
   return "Unknown error.";
 }
 
-function truncate(value, maxLength) {
-  return value.length > maxLength ? `${value.slice(0, maxLength - 3)}...` : value;
+function formatEvalCase(evalCase) {
+  if (evalCase.mode === "automatic-routing") {
+    return "automatic routing";
+  }
+
+  return `${evalCase.provider}${evalCase.model ? ` / ${evalCase.model}` : ""}`;
 }
 
-function normalizeBaseUrl(value) {
+function normalizeAppUrl(value) {
   return value.endsWith("/") ? value : `${value}/`;
 }

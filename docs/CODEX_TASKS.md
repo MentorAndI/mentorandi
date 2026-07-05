@@ -58,6 +58,9 @@ Rules:
 
 ### Feature 088 - Full Mentor Evaluation Runner
 
+Status:
+Runner added. `npm run eval:mentor` exercises the full Mentor Core flow through the development API and writes `reports/mentor-eval-latest.json`.
+
 Goal:
 Evaluate the full Mentor Core flow, not just raw providers.
 
