@@ -75,6 +75,8 @@ The Mentor Method Library is reusable product knowledge. It contains concise, cu
 
 Future aggregate learning may suggest improvements to the method library, but shared methods should remain curated and admin-approved. Personal user data should not be stored or reused as cross-user knowledge.
 
+Mentor tone is calibrated in the prompt composer. Marcus should challenge with tact: direct but not accusatory, practical without productivity-coach cliches, and observant without sounding clinical. Repeated user goals or concerns should be treated as signal to make the topic more concrete, not as a failure to answer correctly.
+
 ## LLM Provider Abstraction
 
 Mentor Core does not call provider APIs directly.
