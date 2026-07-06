@@ -55,7 +55,7 @@ Cost and usage guardrails:
 - Configure `MENTOR_METHODS_LIMIT`, `MENTOR_EXPERTISE_LIMIT` and `MENTOR_SOURCES_LIMIT`.
 - Configure optional `LLM_INPUT_COST_PER_1M` and `LLM_OUTPUT_COST_PER_1M` for diagnostics.
 - Decide whether `USAGE_LIMITS_ENABLED` should enforce limits.
-- Configure `MENTOR_DAILY_REQUEST_LIMIT` and `MENTOR_MONTHLY_REQUEST_LIMIT` if enforcing limits.
+- Configure `ALPHA_DAILY_MESSAGE_LIMIT`, `ALPHA_WEEKLY_MESSAGE_LIMIT`, `ALPHA_MONTHLY_MESSAGE_LIMIT` and `ALPHA_WEEKLY_DEEP_LIMIT` if overriding the defaults.
 
 ## 4. Supabase Gate
 

@@ -100,7 +100,7 @@ The routed configuration can choose a provider and model per route with `LLM_CHE
 
 ## Usage Limits
 
-Usage Limits v1 is an in-memory service-layer guardrail for request counts. `/api/mentor/respond` and `/api/mentor-core/respond` resolve the user first, then check usage before running the Mentor Core response pipeline. Local development records counts without blocking unless `USAGE_LIMITS_ENABLED=true`; production can enforce daily and monthly limits with `MENTOR_DAILY_REQUEST_LIMIT` and `MENTOR_MONTHLY_REQUEST_LIMIT`.
+Usage Limits v1 is an in-memory service-layer guardrail for alpha request counts. `/api/mentor/respond` and `/api/mentor-core/respond` resolve a real authenticated user first, check usage before running the Mentor Core response pipeline, and record usage only after a successful mentor response. Public page views, failed requests and unauthenticated submissions are not counted. Local development records counts without blocking unless `USAGE_LIMITS_ENABLED=true`; production enforces alpha defaults with `ALPHA_DAILY_MESSAGE_LIMIT`, `ALPHA_WEEKLY_MESSAGE_LIMIT`, `ALPHA_MONTHLY_MESSAGE_LIMIT` and `ALPHA_WEEKLY_DEEP_LIMIT`.
 
 This is not durable storage. Counts reset when the process restarts and are not shared across app instances. Persisted usage limits should be added later with an explicit database-backed design and Prisma schema change.
 

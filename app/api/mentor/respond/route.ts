@@ -9,10 +9,7 @@ import {
   MentorResponsePipelineService,
   MentorResponsePipelineServiceError,
 } from "@/services/mentor-core/response-pipeline/response-pipeline.service";
-import {
-  isUsageLimitReached,
-  UsageLimitService,
-} from "@/services/usage-limits/usage-limits.service";
+import { MentorUsageLimitService } from "@/services/usage-limits/mentor-usage-limits.service";
 import { UserServiceError } from "@/services/user/user.service";
 
 export const dynamic = "force-dynamic";
@@ -44,13 +41,14 @@ export async function POST(request: Request) {
           validation.input.conversationId,
         )
       : await sessionService.getResolvedMarcusSession();
-    const usageDecision = new UsageLimitService().checkAndRecord({
-      scope: "mentor-response",
-      subjectId: session.userId,
+    const usageLimitService = new MentorUsageLimitService();
+    const usageDecision = usageLimitService.checkBeforeMentorResponse({
+      authUserId: session.authUserId,
+      message: validation.input.message,
     });
 
-    if (isUsageLimitReached(usageDecision.status)) {
-      return createUsageLimitResponse();
+    if (usageDecision.message) {
+      return createUsageLimitResponse(usageDecision.message);
     }
 
     const pipeline = new MentorResponsePipelineService();
@@ -64,6 +62,10 @@ export async function POST(request: Request) {
         authUserId: session.authUserId,
       },
     );
+    usageLimitService.recordSuccessfulMentorResponse({
+      authUserId: session.authUserId,
+      modelRouting: response.llmUsage.modelRouting,
+    });
 
     return NextResponse.json(
       {
@@ -109,10 +111,10 @@ export async function POST(request: Request) {
   }
 }
 
-function createUsageLimitResponse() {
+function createUsageLimitResponse(message: string) {
   return NextResponse.json(
     {
-      error: "Usage limit reached. Please try again later.",
+      error: message,
     },
     { status: 429 },
   );

@@ -1,4 +1,6 @@
 export type UsageLimitScope =
+  | "mentor-deep-model"
+  | "mentor-message"
   | "dev-mentor-test"
   | "llm-provider-test"
   | "mentor-core-response"
@@ -8,12 +10,15 @@ export type UsageLimitStatus =
   | "allowed"
   | "daily-limit-reached"
   | "monthly-limit-reached"
-  | "tracking-only";
+  | "tracking-only"
+  | "weekly-limit-reached";
 
 export interface UsageLimitConfig {
-  dailyRequestLimit: number | null;
+  dailyMessageLimit: number | null;
   enforceLimits: boolean;
-  monthlyRequestLimit: number | null;
+  monthlyMessageLimit: number | null;
+  weeklyDeepLimit: number | null;
+  weeklyMessageLimit: number | null;
 }
 
 export interface UsageLimitCounterSnapshot {
@@ -33,4 +38,5 @@ export interface UsageLimitDecision {
   monthly: UsageLimitCounterSnapshot;
   scope: UsageLimitScope;
   status: UsageLimitStatus;
+  weekly: UsageLimitCounterSnapshot;
 }

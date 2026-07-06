@@ -11,10 +11,7 @@ import {
   UserService,
   UserServiceError,
 } from "@/services/user/user.service";
-import {
-  isUsageLimitReached,
-  UsageLimitService,
-} from "@/services/usage-limits/usage-limits.service";
+import { MentorUsageLimitService } from "@/services/usage-limits/mentor-usage-limits.service";
 
 export const dynamic = "force-dynamic";
 
@@ -45,22 +42,34 @@ export async function POST(request: Request) {
 
   try {
     const { authContext, userId } = await getMentorResponsePipelineAuthContext();
+    const authUserId = authContext.authUserId;
+
+    if (!authUserId) {
+      return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
+    }
 
     if (validation.input.userId !== userId) {
       return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
 
-    const usageDecision = new UsageLimitService().checkAndRecord({
-      scope: "mentor-core-response",
-      subjectId: userId,
+    const usageLimitService = new MentorUsageLimitService();
+    const usageDecision = usageLimitService.checkBeforeMentorResponse({
+      authUserId,
+      message: validation.input.message,
+      model: validation.input.model,
+      provider: validation.input.provider,
     });
 
-    if (isUsageLimitReached(usageDecision.status)) {
-      return createUsageLimitResponse();
+    if (usageDecision.message) {
+      return createUsageLimitResponse(usageDecision.message);
     }
 
     const service = new MentorResponsePipelineService();
     const response = await service.run(validation.input, authContext);
+    usageLimitService.recordSuccessfulMentorResponse({
+      authUserId,
+      modelRouting: response.llmUsage.modelRouting,
+    });
 
     return NextResponse.json({ response }, { status: 200 });
   } catch (error) {
@@ -90,10 +99,10 @@ export async function POST(request: Request) {
   }
 }
 
-function createUsageLimitResponse() {
+function createUsageLimitResponse(message: string) {
   return NextResponse.json(
     {
-      error: "Usage limit reached. Please try again later.",
+      error: message,
     },
     { status: 429 },
   );

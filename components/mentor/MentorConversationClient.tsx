@@ -211,7 +211,7 @@ export function MentorConversationClient() {
         | MentorApiError;
 
       if (!response.ok) {
-        setErrorMessage("Marcus had trouble responding. Try again.");
+        setErrorMessage(formatErrorResponse(responseBody as MentorApiError));
         return;
       }
 

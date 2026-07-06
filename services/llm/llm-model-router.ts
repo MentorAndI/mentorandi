@@ -16,6 +16,12 @@ interface ResolveLlmModelRouteInput {
   requestedModel?: string;
 }
 
+interface ResolveLlmModelRouteForMessageInput {
+  currentMessage: string;
+  requestedProvider?: LlmProviderName;
+  requestedModel?: string;
+}
+
 const directQuestionPattern =
   /^(what|where|when|who|which|how many|how much|is|are|can|do|does)\b/i;
 const deepReflectionPattern =
@@ -40,6 +46,18 @@ export function resolveLlmModelRoute({
   requestedProvider,
   requestedModel,
 }: ResolveLlmModelRouteInput): LlmModelRoutingDecision {
+  return resolveLlmModelRouteForMessage({
+    currentMessage: context.currentUserMessage?.trim() || "",
+    requestedModel,
+    requestedProvider,
+  });
+}
+
+export function resolveLlmModelRouteForMessage({
+  currentMessage,
+  requestedProvider,
+  requestedModel,
+}: ResolveLlmModelRouteForMessageInput): LlmModelRoutingDecision {
   const explicitModel = requestedModel?.trim();
   const explicitProvider = requestedProvider;
 
@@ -70,8 +88,7 @@ export function resolveLlmModelRoute({
     };
   }
 
-  const currentMessage = context.currentUserMessage?.trim() || "";
-  const normalizedMessage = currentMessage.toLowerCase();
+  const normalizedMessage = currentMessage.trim().toLowerCase();
   const signals = collectRoutingSignals(normalizedMessage);
   const route = chooseModelRoute(normalizedMessage, signals);
   const routeConfig = readRouteConfig(route);
