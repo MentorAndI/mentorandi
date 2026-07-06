@@ -14,7 +14,7 @@ export function Hero({
   headline = "Meet the mentor who never stops believing in you.",
   subheadline = "MentorAndI is a personal AI mentor designed to help you think clearly, make better decisions, stay accountable and continuously grow.",
   primaryCtaLabel = "Start Your Journey",
-  primaryCtaHref = "#cta",
+  primaryCtaHref = "/start",
   secondaryCtaLabel = "See How It Works",
   secondaryCtaHref = "#how-it-works",
 }: HeroProps) {

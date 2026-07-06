@@ -55,7 +55,7 @@ export function LoginForm({ redirectPath = "/" }: LoginFormProps) {
 
       if (error) {
         setErrors({
-          form: "Unable to sign in with those details. Please check your email and password.",
+          form: getLoginErrorMessage(error),
         });
         return;
       }
@@ -65,7 +65,7 @@ export function LoginForm({ redirectPath = "/" }: LoginFormProps) {
       router.refresh();
     } catch {
       setErrors({
-        form: "Unable to sign in right now. Please try again.",
+        form: "Login failed. Check your email and password.",
       });
     } finally {
       setIsSubmitting(false);
@@ -135,4 +135,18 @@ export function LoginForm({ redirectPath = "/" }: LoginFormProps) {
       </Button>
     </form>
   );
+}
+
+function getLoginErrorMessage(error: { message?: string }) {
+  const message = error.message?.toLowerCase() ?? "";
+
+  if (
+    message.includes("email not confirmed") ||
+    message.includes("confirm your email") ||
+    message.includes("email confirmation")
+  ) {
+    return "Please confirm your email before logging in.";
+  }
+
+  return "Login failed. Check your email and password.";
 }

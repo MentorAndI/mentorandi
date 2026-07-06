@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { FormEvent } from "react";
 import { useState } from "react";
@@ -28,12 +29,10 @@ interface SignupFormErrors {
 
 export interface SignupFormProps {
   redirectPath?: string;
-  successMessage?: string;
 }
 
 export function SignupForm({
   redirectPath = "/start",
-  successMessage = "Account created. Taking you to your first conversation...",
 }: SignupFormProps) {
   const router = useRouter();
   const [values, setValues] = useState<SignupFormValues>({
@@ -42,13 +41,15 @@ export function SignupForm({
     passwordConfirmation: "",
   });
   const [errors, setErrors] = useState<SignupFormErrors>({});
-  const [success, setSuccess] = useState<string | null>(null);
+  const [confirmationEmail, setConfirmationEmail] = useState<string | null>(
+    null,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setErrors({});
-    setSuccess(null);
+    setConfirmationEmail(null);
 
     const validation = validateSignupForm(
       values.email,
@@ -82,11 +83,12 @@ export function SignupForm({
 
       if (data.session) {
         await syncCurrentUser();
+        router.replace(redirectPath);
+        router.refresh();
+        return;
       }
 
-      setSuccess(successMessage);
-      router.replace(redirectPath);
-      router.refresh();
+      setConfirmationEmail(values.email.trim());
     } catch {
       setErrors({
         form: "Unable to create an account right now. Please try again.",
@@ -103,13 +105,39 @@ export function SignupForm({
       noValidate
       onSubmit={handleSubmit}
     >
+      {confirmationEmail ? (
+        <div className="space-y-5 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-900">
+          <div className="space-y-2">
+            <p className="font-medium">
+              Check your email to confirm your account before logging in.
+            </p>
+            <p>
+              We sent the confirmation email to{" "}
+              <span className="font-medium">{confirmationEmail}</span>. It may
+              take a minute to arrive.
+            </p>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <Link
+              className="inline-flex h-10 items-center justify-center rounded-md bg-zinc-950 px-4 text-sm font-medium text-white hover:bg-zinc-800"
+              href="/login"
+            >
+              Login
+            </Link>
+            <Link
+              className="inline-flex h-10 items-center justify-center rounded-md border border-emerald-300 bg-white px-4 text-sm font-medium text-emerald-950 hover:bg-emerald-100"
+              href="/"
+            >
+              Back home
+            </Link>
+          </div>
+        </div>
+      ) : null}
+
       {errors.form ? (
         <AuthStatusMessage id="signup-form-error" variant="error">
           {errors.form}
         </AuthStatusMessage>
-      ) : null}
-      {success ? (
-        <AuthStatusMessage variant="success">{success}</AuthStatusMessage>
       ) : null}
 
       <Input
@@ -159,7 +187,7 @@ export function SignupForm({
       <Button
         aria-describedby={errors.form ? "signup-form-error" : undefined}
         className="w-full"
-        disabled={isSubmitting}
+        disabled={isSubmitting || Boolean(confirmationEmail)}
         type="submit"
       >
         {isSubmitting ? "Creating account..." : "Create account"}

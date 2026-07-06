@@ -17,7 +17,9 @@ export function FirstConversationForm({
   const router = useRouter();
   const textareaId = useId();
   const errorId = `${textareaId}-error`;
+  const authPromptId = `${textareaId}-auth-prompt`;
   const [errorMessage, setErrorMessage] = useState("");
+  const [requiresAuth, setRequiresAuth] = useState(false);
   const [reflection, setReflection] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -27,6 +29,7 @@ export function FirstConversationForm({
     const trimmedReflection = reflection.trim();
 
     setErrorMessage("");
+    setRequiresAuth(false);
 
     if (!trimmedReflection) {
       setErrorMessage("Please write a few words before continuing.");
@@ -52,7 +55,10 @@ export function FirstConversationForm({
 
       if (!response.ok) {
         if (response.status === 401) {
-          router.push(`/login?next=${encodeURIComponent("/start")}`);
+          setRequiresAuth(true);
+          setErrorMessage(
+            "Create an account to save your first mentor conversation.",
+          );
           return;
         }
 
@@ -76,6 +82,14 @@ export function FirstConversationForm({
       className="mt-10 space-y-5"
       onSubmit={handleSubmit}
     >
+      <div
+        className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm leading-6 text-zinc-700"
+        id={authPromptId}
+      >
+        Create an account to save your first mentor conversation. You can write
+        your answer here first, then log in or sign up before saving it.
+      </div>
+
       <Textarea
         error={errorMessage}
         hint="A few honest sentences are enough. You can keep it simple."
@@ -87,6 +101,10 @@ export function FirstConversationForm({
 
           if (errorMessage) {
             setErrorMessage("");
+          }
+
+          if (requiresAuth) {
+            setRequiresAuth(false);
           }
         }}
         placeholder="Write whatever feels true right now."
@@ -101,9 +119,28 @@ export function FirstConversationForm({
               Starting your conversation with Marcus...
             </p>
           ) : null}
+          {requiresAuth ? (
+            <div className="flex flex-col gap-2 pt-2 sm:flex-row">
+              <Button
+                href={`/signup?next=${encodeURIComponent("/start")}`}
+                size="sm"
+              >
+                Create account
+              </Button>
+              <Button
+                href={`/login?next=${encodeURIComponent("/start")}`}
+                size="sm"
+                variant="secondary"
+              >
+                Login
+              </Button>
+            </div>
+          ) : null}
         </div>
         <Button
-          aria-describedby={errorMessage ? errorId : undefined}
+          aria-describedby={
+            errorMessage ? errorId : requiresAuth ? authPromptId : undefined
+          }
           className="sm:min-w-36"
           disabled={isSubmitting}
           type="submit"

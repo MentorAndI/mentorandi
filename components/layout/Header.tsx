@@ -38,9 +38,14 @@ export function Header({ navItems = defaultNavItems }: HeaderProps) {
             </Link>
           ))}
         </nav>
-        <Button href="#cta" variant="secondary">
-          Get Started
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button href="/login" size="sm" variant="ghost">
+            Login
+          </Button>
+          <Button href="/start" size="sm" variant="secondary">
+            Start
+          </Button>
+        </div>
       </Container>
     </header>
   );

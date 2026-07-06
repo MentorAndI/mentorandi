@@ -12,7 +12,7 @@ export function CTA({
   title = "Start with one honest conversation.",
   description = "Use MentorAndI as a focused space to think clearly, make a decision, and take the next step with more confidence.",
   ctaLabel = "Start Your Journey",
-  ctaHref = "/",
+  ctaHref = "/start",
 }: CTAProps) {
   return (
     <section id="cta" className="bg-white py-20 sm:py-24">
