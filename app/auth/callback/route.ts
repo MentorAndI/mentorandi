@@ -2,7 +2,10 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { normalizeSafeAuthNextPath } from "@/services/auth/redirects";
+import {
+  getPublicAppOrigin,
+  normalizeSafeAuthNextPath,
+} from "@/services/auth/redirects";
 import { UserService } from "@/services/user/user.service";
 
 export const dynamic = "force-dynamic";
@@ -18,11 +21,12 @@ const supportedOtpTypes = new Set<EmailOtpType>([
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
+  const publicAppOrigin = getPublicAppOrigin(requestUrl.origin);
   const nextPath = normalizeSafeAuthNextPath(
     requestUrl.searchParams.get("next"),
   );
-  const redirectUrl = new URL(nextPath, requestUrl.origin);
-  const errorUrl = new URL("/login", requestUrl.origin);
+  const redirectUrl = new URL(nextPath, publicAppOrigin);
+  const errorUrl = new URL("/login", publicAppOrigin);
 
   errorUrl.searchParams.set("error", "auth_callback_failed");
 

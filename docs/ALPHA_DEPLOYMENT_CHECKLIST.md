@@ -34,6 +34,7 @@ Use `.env.example` as the variable list. Do not copy real secrets into source co
 Required production/staging secrets:
 
 - `DATABASE_URL`
+- `APP_URL`
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
 - Real provider key for the selected route or provider:
@@ -61,6 +62,7 @@ Cost and usage guardrails:
 
 - Confirm the Supabase project is the intended staging/alpha project.
 - Confirm the `DATABASE_URL` points at the correct database.
+- Confirm `APP_URL` is the public app URL, for example `https://staging.mentorandi.com`, so auth callbacks never redirect to Docker internals.
 - Confirm Supabase Auth URL and anon key match the deployment environment.
 - Confirm Supabase Auth redirect URLs include:
   - `https://staging.mentorandi.com/auth/callback`

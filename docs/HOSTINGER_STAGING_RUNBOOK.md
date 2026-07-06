@@ -39,6 +39,7 @@ Fill `.env.staging` with staging values:
 
 ```env
 DATABASE_URL=
+APP_URL=https://staging.mentorandi.com
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 
@@ -83,6 +84,7 @@ ANTHROPIC_MODEL_DEEP=
 Important:
 
 - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are needed at Docker build time and runtime.
+- `APP_URL` must be the public staging URL so auth callback redirects use `https://staging.mentorandi.com`, not the internal Docker bind address.
 - Use a staging Supabase project/database or an explicitly approved alpha database.
 - Add `https://staging.mentorandi.com/auth/callback` to the Supabase Auth redirect URLs before testing email confirmation.
 - Keep `http://localhost:3000/auth/callback` in Supabase Auth redirect URLs for local development.

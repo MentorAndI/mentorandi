@@ -1,5 +1,14 @@
 const allowedNextPathPrefixes = ["/start", "/mentor", "/settings"] as const;
 const defaultAuthCallbackNextPath = "/start";
+const internalHostnames = new Set([
+  "0.0.0.0",
+  "::",
+  "::1",
+  "127.0.0.1",
+  "host.docker.internal",
+  "localhost",
+  "mentorandi-staging",
+]);
 
 export function getSafeAuthRedirectPath(
   requestedPath: string | null,
@@ -38,6 +47,22 @@ export function buildAuthCallbackUrl(
   return callbackUrl.toString();
 }
 
+export function getPublicAppOrigin(requestOrigin: string) {
+  const configuredOrigin = getConfiguredPublicAppOrigin();
+
+  if (configuredOrigin) {
+    return configuredOrigin;
+  }
+
+  const requestUrl = new URL(requestOrigin);
+
+  if (isInternalHostname(requestUrl.hostname)) {
+    return "http://localhost:3000";
+  }
+
+  return requestUrl.origin;
+}
+
 export function normalizeSafeAuthNextPath(nextPath: string | null | undefined) {
   if (!nextPath) {
     return defaultAuthCallbackNextPath;
@@ -64,4 +89,23 @@ function isAllowedAuthNextPath(pathname: string) {
   return allowedNextPathPrefixes.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
+}
+
+function getConfiguredPublicAppOrigin() {
+  const configuredUrl =
+    process.env.APP_URL?.trim() || process.env.NEXT_PUBLIC_APP_URL?.trim();
+
+  if (!configuredUrl) {
+    return null;
+  }
+
+  try {
+    return new URL(configuredUrl).origin;
+  } catch {
+    return null;
+  }
+}
+
+function isInternalHostname(hostname: string) {
+  return internalHostnames.has(hostname.toLowerCase());
 }

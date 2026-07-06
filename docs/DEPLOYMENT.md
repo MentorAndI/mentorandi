@@ -6,6 +6,7 @@ Use `.env.example` as the deployment template. Never commit `.env` or real secre
 
 ```env
 DATABASE_URL=
+APP_URL=
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
 LLM_PROVIDER=
@@ -64,6 +65,8 @@ LLM cost controls are required before alpha. If unset, MentorAndI uses conservat
 Model routing is deterministic and optional. `LLM_CHEAP_MODEL` is used for simple factual questions and lightweight daily chat, `LLM_DEFAULT_MODEL` is used for normal mentor messages, and `LLM_DEEP_MODEL` is used for deeper reflection, complexity or risk-sensitive messages. For Claude deployments, set `LLM_DEEP_MODEL` to a Sonnet-class model. If a route-specific model is missing, the provider falls back to its configured provider model.
 
 ## Supabase Auth Redirects
+
+Set `APP_URL` to the public browser URL for the deployment, for example `APP_URL=https://staging.mentorandi.com`. Server-side auth callbacks use `APP_URL` for success and failure redirects so Docker or proxy internals such as `0.0.0.0:3000` are never sent to the browser.
 
 Supabase Auth must allow the MentorAndI confirmation callback URL for each environment. Add these redirect URLs in the Supabase dashboard:
 
