@@ -76,7 +76,7 @@ export function SignupForm({
 
       if (error) {
         setErrors({
-          form: "Unable to create an account with those details. Please check your information and try again.",
+          form: formatSignupAuthError(error.message),
         });
         return;
       }
@@ -198,4 +198,23 @@ export function SignupForm({
       </Button>
     </form>
   );
+}
+
+function formatSignupAuthError(message?: string) {
+  const safeMessage = sanitizeAuthErrorMessage(message);
+
+  if (!safeMessage) {
+    return "Signup failed. Please check your information and try again.";
+  }
+
+  return `Signup failed: ${safeMessage}`;
+}
+
+function sanitizeAuthErrorMessage(message?: string) {
+  return (message ?? "")
+    .replace(/\b(access_token|refresh_token|token|code)=([^&\s]+)/gi, "$1=[redacted]")
+    .replace(/\beyJ[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\.[A-Za-z0-9_-]+\b/g, "[redacted]")
+    .replace(/\b[A-Za-z0-9_-]{48,}\b/g, "[redacted]")
+    .trim()
+    .slice(0, 500);
 }
