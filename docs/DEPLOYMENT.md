@@ -72,7 +72,7 @@ https://staging.mentorandi.com/auth/callback
 http://localhost:3000/auth/callback
 ```
 
-Signup confirmation emails should return to `/auth/callback?next=/start`, where the app exchanges the Supabase auth code for a session and redirects to a safe internal path.
+Signup confirmation emails should return to `/auth/callback`, where the app exchanges the Supabase auth code for a session and redirects to `/start` by default. The callback keeps safe internal `next` path support for future flows.
 
 ## Pre-Deployment Checklist
 

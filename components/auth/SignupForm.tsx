@@ -12,7 +12,6 @@ import {
   signUpWithEmailPassword,
   syncCurrentUser,
 } from "@/services/auth/client";
-import { buildAuthCallbackUrl } from "@/services/auth/redirects";
 import { validateSignupForm } from "@/services/auth/validation";
 
 interface SignupFormValues {
@@ -71,7 +70,7 @@ export function SignupForm({
         emailRedirectTo:
           typeof window === "undefined"
             ? undefined
-            : buildAuthCallbackUrl(window.location.origin, redirectPath),
+            : `${window.location.origin}/auth/callback`,
         password: values.password,
       });
 
