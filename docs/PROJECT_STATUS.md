@@ -74,7 +74,7 @@ MentorAndI
 
 - `/login`, `/signup` and `/forgot-password` are public auth pages.
 - Successful login redirects to `/mentor`.
-- Successful signup redirects to `/start`.
+- Successful signup either creates an immediate session and redirects to `/start`, or shows email confirmation instructions. Email confirmation links return through `/auth/callback` to create the session and continue to `/start`.
 - Sign out clears the Supabase session and sends the user to `/login`.
 - In development, `/mentor` and `/settings` may use the seeded fallback user when no Supabase session exists.
 - In production, unauthenticated users are redirected from `/mentor` and `/settings` to `/login`.

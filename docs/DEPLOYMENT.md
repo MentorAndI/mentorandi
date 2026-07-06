@@ -63,6 +63,17 @@ LLM cost controls are required before alpha. If unset, MentorAndI uses conservat
 
 Model routing is deterministic and optional. `LLM_CHEAP_MODEL` is used for simple factual questions and lightweight daily chat, `LLM_DEFAULT_MODEL` is used for normal mentor messages, and `LLM_DEEP_MODEL` is used for deeper reflection, complexity or risk-sensitive messages. For Claude deployments, set `LLM_DEEP_MODEL` to a Sonnet-class model. If a route-specific model is missing, the provider falls back to its configured provider model.
 
+## Supabase Auth Redirects
+
+Supabase Auth must allow the MentorAndI confirmation callback URL for each environment. Add these redirect URLs in the Supabase dashboard:
+
+```text
+https://staging.mentorandi.com/auth/callback
+http://localhost:3000/auth/callback
+```
+
+Signup confirmation emails should return to `/auth/callback?next=/start`, where the app exchanges the Supabase auth code for a session and redirects to a safe internal path.
+
 ## Pre-Deployment Checklist
 
 For the full alpha go/no-go checklist, use `docs/ALPHA_DEPLOYMENT_CHECKLIST.md`.

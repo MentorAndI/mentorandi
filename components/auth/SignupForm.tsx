@@ -12,6 +12,7 @@ import {
   signUpWithEmailPassword,
   syncCurrentUser,
 } from "@/services/auth/client";
+import { buildAuthCallbackUrl } from "@/services/auth/redirects";
 import { validateSignupForm } from "@/services/auth/validation";
 
 interface SignupFormValues {
@@ -70,7 +71,7 @@ export function SignupForm({
         emailRedirectTo:
           typeof window === "undefined"
             ? undefined
-            : `${window.location.origin}${redirectPath}`,
+            : buildAuthCallbackUrl(window.location.origin, redirectPath),
         password: values.password,
       });
 
@@ -115,6 +116,10 @@ export function SignupForm({
               We sent the confirmation email to{" "}
               <span className="font-medium">{confirmationEmail}</span>. It may
               take a minute to arrive.
+            </p>
+            <p>
+              Clicking the confirmation link will log you in and continue setup
+              in MentorAndI.
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">

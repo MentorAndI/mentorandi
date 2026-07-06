@@ -62,6 +62,9 @@ Cost and usage guardrails:
 - Confirm the Supabase project is the intended staging/alpha project.
 - Confirm the `DATABASE_URL` points at the correct database.
 - Confirm Supabase Auth URL and anon key match the deployment environment.
+- Confirm Supabase Auth redirect URLs include:
+  - `https://staging.mentorandi.com/auth/callback`
+  - `http://localhost:3000/auth/callback`
 - Confirm database backups or recovery plan are available before risky operations.
 - Do not apply Prisma schema changes unless the feature explicitly requires them and the migration has been reviewed.
 

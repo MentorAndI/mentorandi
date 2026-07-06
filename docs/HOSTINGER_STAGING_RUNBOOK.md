@@ -84,6 +84,8 @@ Important:
 
 - `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` are needed at Docker build time and runtime.
 - Use a staging Supabase project/database or an explicitly approved alpha database.
+- Add `https://staging.mentorandi.com/auth/callback` to the Supabase Auth redirect URLs before testing email confirmation.
+- Keep `http://localhost:3000/auth/callback` in Supabase Auth redirect URLs for local development.
 - Do not use `LLM_PROVIDER=mock` for real staging validation.
 - Keep `.env.staging` on the server only.
 
