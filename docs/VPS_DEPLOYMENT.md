@@ -4,6 +4,8 @@ This guide prepares MentorAndI for a VPS such as Hostinger KVM. It does not repl
 
 Before inviting alpha users, complete `docs/ALPHA_DEPLOYMENT_CHECKLIST.md`.
 
+For Docker-based staging behind the existing Hostinger Traefik setup, use `docs/HOSTINGER_STAGING_RUNBOOK.md`.
+
 ## 1. Prepare The Server
 
 Install a current Node.js LTS runtime, Git and PM2 on the VPS.

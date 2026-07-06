@@ -1,0 +1,26 @@
+services:
+  mentorandi-staging:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:?Set NEXT_PUBLIC_SUPABASE_URL in the staging env file}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:?Set NEXT_PUBLIC_SUPABASE_ANON_KEY in the staging env file}
+    container_name: mentorandi-staging
+    env_file:
+      - ./.env.staging
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+      NEXT_TELEMETRY_DISABLED: "1"
+    expose:
+      - "3000"
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.mentorandi-staging.rule=Host(`staging.mentorandi.com`)
+      - traefik.http.routers.mentorandi-staging.entrypoints=websecure
+      - traefik.http.routers.mentorandi-staging.tls=true
+      - traefik.http.routers.mentorandi-staging.tls.certresolver=letsencrypt
+      - traefik.http.services.mentorandi-staging.loadbalancer.server.port=3000
