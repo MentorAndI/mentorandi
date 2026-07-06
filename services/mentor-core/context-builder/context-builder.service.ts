@@ -307,6 +307,10 @@ export class ContextBuilderService {
     userAuthUserId: string,
     authContext: BuildMentorContextAuthContext,
   ) {
+    if (!authContext.authUserId) {
+      throw new ContextBuilderServiceError("Unauthorized.", 401);
+    }
+
     if (authContext.authUserId && authContext.authUserId !== userAuthUserId) {
       throw new ContextBuilderServiceError("Forbidden.", 403);
     }

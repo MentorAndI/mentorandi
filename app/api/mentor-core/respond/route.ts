@@ -22,7 +22,7 @@ async function getMentorResponsePipelineAuthContext(): Promise<{
   authContext: MentorResponsePipelineAuthContext;
   userId: string;
 }> {
-  const user = await new UserService().resolveCurrentUser();
+  const user = await new UserService().resolveAuthenticatedUser();
 
   return {
     authContext: {

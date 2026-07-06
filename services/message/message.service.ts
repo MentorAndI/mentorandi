@@ -47,24 +47,13 @@ export class MessageService {
     authContext: MessageAuthContext,
   ) {
     if (!authContext.authUserId) {
-      return this.ensureConversationExists(conversationId);
+      throw new MessageServiceError("Unauthorized.", 401);
     }
 
     const conversation = await this.repository.findConversationForAuthUser(
       conversationId,
       authContext.authUserId,
     );
-
-    if (!conversation) {
-      throw new MessageServiceError("Conversation was not found.", 404);
-    }
-
-    return conversation;
-  }
-
-  private async ensureConversationExists(conversationId: string) {
-    const conversation =
-      await this.repository.findConversationById(conversationId);
 
     if (!conversation) {
       throw new MessageServiceError("Conversation was not found.", 404);

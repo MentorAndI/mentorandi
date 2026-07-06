@@ -18,7 +18,7 @@ async function getContextBuilderAuthContext(): Promise<{
   authContext: BuildMentorContextAuthContext;
   userId: string;
 }> {
-  const user = await new UserService().resolveCurrentUser();
+  const user = await new UserService().resolveAuthenticatedUser();
 
   return {
     authContext: {

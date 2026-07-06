@@ -78,13 +78,13 @@ export class MentorSessionService {
   }
 
   async getResolvedMarcusSession(): Promise<MentorSessionDto> {
-    const user = await this.userService.resolveCurrentUser();
+    const user = await this.userService.resolveAuthenticatedUser();
 
     return this.getMarcusSessionForUser(user);
   }
 
   async getResolvedMarcusSessionOverview(): Promise<MentorSessionOverviewDto> {
-    const user = await this.userService.resolveCurrentUser();
+    const user = await this.userService.resolveAuthenticatedUser();
     const session = await this.getMarcusSessionForUser(user);
     const [activeGoals, conversations] = await Promise.all([
       this.listActiveGoalsForUser(user),
@@ -101,7 +101,7 @@ export class MentorSessionService {
   async getResolvedMarcusSessionForConversation(
     conversationId: string,
   ): Promise<MentorSessionDto> {
-    const user = await this.userService.resolveCurrentUser();
+    const user = await this.userService.resolveAuthenticatedUser();
 
     return this.getMarcusSessionForConversation(user, conversationId);
   }
@@ -138,7 +138,7 @@ export class MentorSessionService {
   }
 
   async createNewMarcusSession(): Promise<MentorSessionDto> {
-    const user = await this.userService.resolveCurrentUser();
+    const user = await this.userService.resolveAuthenticatedUser();
 
     return this.createNewMarcusSessionForUser(user);
   }

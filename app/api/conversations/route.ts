@@ -14,7 +14,7 @@ import {
 export const dynamic = "force-dynamic";
 
 async function getAuthenticatedUser() {
-  const user = await new UserService().resolveCurrentUser();
+  const user = await new UserService().resolveAuthenticatedUser();
 
   return { authUserId: user.authUserId };
 }

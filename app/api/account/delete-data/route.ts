@@ -25,7 +25,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const user = await new UserService().resolveCurrentUser();
+    const user = await new UserService().resolveAuthenticatedUser();
     const counts = await new AccountDataService().deleteMentorDataForUser(user);
 
     return NextResponse.json({ counts }, { status: 200 });

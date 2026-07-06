@@ -4,12 +4,6 @@ import type { CreateMessageInput } from "@/services/message/message.types";
 export class MessageRepository {
   private readonly prisma = getPrismaClient();
 
-  async findConversationById(conversationId: string) {
-    return this.prisma.conversation.findUnique({
-      where: { id: conversationId },
-    });
-  }
-
   async findConversationForAuthUser(
     conversationId: string,
     authUserId: string,

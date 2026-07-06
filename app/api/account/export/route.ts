@@ -14,7 +14,7 @@ export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const user = await new UserService().resolveCurrentUser();
+    const user = await new UserService().resolveAuthenticatedUser();
     const exportData = await new AccountDataService().exportDataForUser(user);
 
     return NextResponse.json(exportData, { status: 200 });

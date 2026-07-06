@@ -24,7 +24,7 @@ interface MessageRouteContext {
 }
 
 async function getMessageAuthContext(): Promise<MessageAuthContext> {
-  const user = await new UserService().resolveCurrentUser();
+  const user = await new UserService().resolveAuthenticatedUser();
 
   return {
     authUserId: user.authUserId,

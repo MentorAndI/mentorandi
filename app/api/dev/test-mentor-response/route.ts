@@ -16,6 +16,10 @@ import type {
   MentorResponsePipelineAuthContext,
   MentorResponsePipelineResult,
 } from "@/services/mentor-core/response-pipeline/response-pipeline.types";
+import {
+  UserService,
+  UserServiceError,
+} from "@/services/user/user.service";
 
 export const dynamic = "force-dynamic";
 
@@ -46,9 +50,17 @@ const supportedDevProviders: DevMentorResponseProvider[] = [
   "openai",
 ];
 
-function getDevMentorResponseAuthContext(): MentorResponsePipelineAuthContext {
+async function getDevMentorResponseAuthContext(
+  userId: string,
+): Promise<MentorResponsePipelineAuthContext> {
+  const user = await new UserService().getUserById(userId);
+
+  if (!user) {
+    throw new UserServiceError("User was not found.", 404);
+  }
+
   return {
-    authUserId: null,
+    authUserId: user.authUserId,
   };
 }
 
@@ -80,6 +92,9 @@ export async function POST(request: Request) {
         );
 
     const pipeline = new MentorResponsePipelineService();
+    const authContext = await getDevMentorResponseAuthContext(
+      validation.input.userId,
+    );
     const response = await pipeline.run(
       {
         conversationId: conversation.id,
@@ -88,7 +103,7 @@ export async function POST(request: Request) {
         provider: validation.input.provider,
         userId: validation.input.userId,
       },
-      getDevMentorResponseAuthContext(),
+      authContext,
     );
 
     return NextResponse.json(
@@ -126,6 +141,13 @@ export async function POST(request: Request) {
             error,
           ),
         },
+        { status: error.statusCode },
+      );
+    }
+
+    if (error instanceof UserServiceError) {
+      return NextResponse.json(
+        { error: error.message },
         { status: error.statusCode },
       );
     }

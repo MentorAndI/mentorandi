@@ -18,6 +18,12 @@ export class UserServiceError extends Error {
 export class UserService {
   constructor(private readonly repository = new UserRepository()) {}
 
+  async getUserById(userId: string): Promise<UserDto | null> {
+    const user = await this.repository.findUserById(userId);
+
+    return user ? toUserDto(user) : null;
+  }
+
   async getUserByAuthUserId(authUserId: string): Promise<UserDto | null> {
     const validatedAuthUserId = validateUserAuthId(authUserId);
     const user =
@@ -43,6 +49,16 @@ export class UserService {
     }
 
     return this.getOrCreateUserByAuthUserId(developmentAuthUserId);
+  }
+
+  async resolveAuthenticatedUser(): Promise<UserDto> {
+    const authUserId = await this.getCurrentSupabaseAuthUserId();
+
+    if (!authUserId) {
+      throw new UserServiceError("Unauthorized.", 401);
+    }
+
+    return this.getOrCreateUserByAuthUserId(authUserId);
   }
 
   async resolveCurrentUser(): Promise<UserDto> {

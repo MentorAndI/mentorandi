@@ -352,7 +352,7 @@ export class MentorResponsePipelineService {
     authContext: MentorResponsePipelineAuthContext,
   ) {
     if (!authContext.authUserId) {
-      return;
+      throw new MentorResponsePipelineServiceError("Unauthorized.", 401);
     }
 
     const user = await this.userService.getUserByAuthUserId(
