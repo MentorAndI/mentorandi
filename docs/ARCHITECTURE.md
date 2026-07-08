@@ -43,6 +43,12 @@ Current service areas include:
 
 Repositories are Prisma-only. They should not contain product behavior, authorization policy or UI assumptions.
 
+## Database Access And RLS
+
+Supabase Postgres is not a public table API for MentorAndI application data. Direct browser access to public application tables must remain blocked; data access goes through server-side Prisma repositories, service-layer ownership checks and API routes.
+
+RLS must stay enabled on all public app tables: `User`, `Mentor`, `Conversation`, `Message`, `Memory`, `Goal`, `Reflection` and `JournalEntry`. The hardening script at `prisma/security/rls-hardening.sql` enables RLS, revokes direct `anon`/`authenticated` table grants and verifies no unrestricted public policies exist. Do not add permissive Supabase policies for app data without a separate security review.
+
 ## Mentor Core Flow
 
 The intended flow is:

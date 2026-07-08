@@ -67,6 +67,8 @@ Cost and usage guardrails:
 - Confirm Supabase Auth redirect URLs include:
   - `https://staging.mentorandi.com/auth/callback`
   - `http://localhost:3000/auth/callback`
+- Confirm `prisma/security/rls-hardening.sql` has been reviewed or run for the target database.
+- Confirm RLS is enabled on all public app tables and no unrestricted `anon`/`authenticated` policies exist.
 - Confirm database backups or recovery plan are available before risky operations.
 - Do not apply Prisma schema changes unless the feature explicitly requires them and the migration has been reviewed.
 
