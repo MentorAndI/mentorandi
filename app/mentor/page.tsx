@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 
 import { AccountNavigation } from "@/components/auth/AccountNavigation";
+import { FeedbackButton } from "@/components/feedback/FeedbackButton";
 import { Container } from "@/components/layout/Container";
 import { MentorConversationClient } from "@/components/mentor/MentorConversationClient";
 
@@ -20,6 +21,7 @@ export default function MentorPage() {
           ]}
         />
         <MentorConversationClient />
+        <FeedbackButton />
       </Container>
     </main>
   );

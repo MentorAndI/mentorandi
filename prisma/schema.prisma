@@ -20,6 +20,20 @@ enum GoalStatus {
   ARCHIVED
 }
 
+enum FeedbackRating {
+  USEFUL
+  NEUTRAL
+  NOT_USEFUL
+}
+
+enum FeedbackCategory {
+  BUG
+  CONFUSING
+  MENTOR_QUALITY
+  IDEA
+  OTHER
+}
+
 model User {
   id         String   @id @default(uuid()) @db.Uuid
   authUserId String   @unique @db.Uuid
@@ -27,11 +41,27 @@ model User {
   updatedAt  DateTime @updatedAt
 
   conversations  Conversation[]
+  feedback       Feedback[]
   goals          Goal[]
   journalEntries JournalEntry[]
   memories       Memory[]
   reflections    Reflection[]
 
+  @@index([createdAt])
+}
+
+model Feedback {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @db.Uuid
+  rating    FeedbackRating
+  category  FeedbackCategory
+  message   String
+  pagePath  String?
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
   @@index([createdAt])
 }
 

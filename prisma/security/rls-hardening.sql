@@ -21,7 +21,8 @@ declare
     'Memory',
     'Goal',
     'Reflection',
-    'JournalEntry'
+    'JournalEntry',
+    'Feedback'
   ];
 begin
   foreach app_table in array app_tables loop
@@ -50,7 +51,8 @@ begin
       'Memory',
       'Goal',
       'Reflection',
-      'JournalEntry'
+      'JournalEntry',
+      'Feedback'
     )
     and not c.relrowsecurity;
 
@@ -67,7 +69,8 @@ begin
       ('Memory'),
       ('Goal'),
       ('Reflection'),
-      ('JournalEntry')
+      ('JournalEntry'),
+      ('Feedback')
   ),
   risky_policies as (
     select

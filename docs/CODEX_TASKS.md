@@ -83,3 +83,11 @@ Prepare final deployment checklist for Hostinger/VPS.
 
 Goal:
 Deploy staging version and verify health, auth, real provider, and protected dev routes.
+
+### Feature 097 - Alpha Feedback Capture
+
+Status:
+Implemented. Authenticated alpha users can submit categorized usefulness feedback from `/start` and `/mentor`; submissions are stored per user through the server-side Feedback service and Prisma repository.
+
+Goal:
+Capture lightweight usefulness, bug and product feedback before expanding the alpha.

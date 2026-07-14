@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 
+import { FeedbackButton } from "@/components/feedback/FeedbackButton";
 import { ConversationCard } from "@/components/mentor/ConversationCard";
 import { FirstConversationForm } from "@/components/mentor/FirstConversationForm";
 import { Heading } from "@/components/ui/Heading";
@@ -41,6 +42,7 @@ export default function StartPage() {
 
         <FirstConversationForm />
       </ConversationCard>
+      <FeedbackButton />
     </main>
   );
 }

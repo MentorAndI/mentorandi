@@ -15,7 +15,7 @@ Route handlers should stay thin. They validate requests, resolve users where nee
 
 ## API Routes
 
-API routes expose the application boundary for conversations, messages, memories, mentor sessions and Mentor Core test endpoints.
+API routes expose the application boundary for conversations, messages, memories, mentor sessions, alpha feedback and Mentor Core test endpoints.
 
 They should not contain database logic. They should not bypass user ownership checks. Production routes must resolve the current user through the user service.
 
@@ -37,6 +37,7 @@ Current service areas include:
 - Mentor Expertise Library.
 - Mentor Source Library.
 - Usage limits.
+- Alpha feedback.
 - LLM provider orchestration.
 
 ## Repositories
@@ -47,7 +48,13 @@ Repositories are Prisma-only. They should not contain product behavior, authoriz
 
 Supabase Postgres is not a public table API for MentorAndI application data. Direct browser access to public application tables must remain blocked; data access goes through server-side Prisma repositories, service-layer ownership checks and API routes.
 
-RLS must stay enabled on all public app tables: `User`, `Mentor`, `Conversation`, `Message`, `Memory`, `Goal`, `Reflection` and `JournalEntry`. The hardening script at `prisma/security/rls-hardening.sql` enables RLS, revokes direct `anon`/`authenticated` table grants and verifies no unrestricted public policies exist. Do not add permissive Supabase policies for app data without a separate security review.
+RLS must stay enabled on all public app tables: `User`, `Mentor`, `Conversation`, `Message`, `Memory`, `Goal`, `Reflection`, `JournalEntry` and `Feedback`. The hardening script at `prisma/security/rls-hardening.sql` enables RLS, revokes direct `anon`/`authenticated` table grants and verifies no unrestricted public policies exist. Do not add permissive Supabase policies for app data without a separate security review.
+
+## Alpha Feedback
+
+The feedback entry point checks `/api/me` before appearing, so it is visible only with a real Supabase session. `POST /api/feedback` independently resolves the authenticated user without a development fallback, validates the rating, category, message and optional page path, then calls the Feedback service and Prisma-only repository. The API does not expose feedback IDs or provide a cross-user read endpoint.
+
+Feedback belongs to a user and is deleted when that user is deleted. Recent feedback is inspected directly in the database for now; no admin dashboard or browser-facing Supabase access is enabled.
 
 ## Mentor Core Flow
 

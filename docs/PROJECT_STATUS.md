@@ -12,6 +12,7 @@ MentorAndI
 - Mentor Core foundation is working with centralized LLM provider selection.
 - Aggregate Learning Suggestions v1 exists as a disabled design/service-interface foundation only; no cross-user learning is implemented.
 - Usage Limits v1 exists as an in-memory request-count foundation for mentor responses; database persistence is still future work.
+- Authenticated alpha feedback capture is available from `/start` and `/mentor`.
 - Full Mentor Evaluation Runner exists for dev-only Mentor Core evaluation through the seeded database-backed flow.
 - Alpha Deployment Checklist exists for Hostinger/VPS go/no-go review.
 - Mock mode is available for deterministic local testing.
@@ -37,6 +38,7 @@ MentorAndI
 - Goal extraction.
 - Active goals in UI.
 - Reflection engine.
+- Alpha feedback capture with usefulness rating, category and page context.
 - Reflection-aware context.
 - Basic account data export and mentor data deletion controls.
 - Context Builder.
@@ -57,6 +59,7 @@ MentorAndI
 - Conversations are user-scoped.
 - Development fallback user is allowed only outside production.
 - Development fallback user is blocked in production; missing authenticated users must receive `401`.
+- Feedback always requires a real authenticated user; the development fallback user is never accepted.
 - `/api/dev/*` routes and `/dev/mentor-test` are development-only and blocked in production.
 - Raw IDs are not exposed in user-facing UI.
 - `LLM_PROVIDER=mock` is safe for deterministic local testing only and is not allowed for production alpha.
