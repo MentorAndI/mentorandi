@@ -14,6 +14,7 @@ MentorAndI
 - Usage Limits v1 exists as an in-memory request-count foundation for mentor responses; database persistence is still future work.
 - Authenticated alpha feedback capture is available from `/start` and `/mentor`.
 - Allowlisted internal admins can review recent alpha feedback at `/admin/feedback`.
+- Public alpha privacy, terms and contact pages are available.
 - The active alpha mentor lineup is Life, ADHD, Relationship, Stress / Burnout,
   Parenting, Health & Fitness, Focus and Confidence; Business and Career are not
   active mentor categories.
@@ -27,6 +28,7 @@ MentorAndI
 - `/start` first conversation experience.
 - `/mentor` main mentor experience.
 - `/dev/mentor-test` development test page.
+- `/privacy`, `/terms` and `/contact` alpha trust pages.
 
 ## Core Systems Built
 

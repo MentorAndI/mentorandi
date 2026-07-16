@@ -114,3 +114,14 @@ Goal:
 Move MentorAndI away from Business/Career mentor positioning and toward
 personal, relational and executive-function support without breaking existing
 Marcus conversations.
+
+### Feature 100 - Alpha Legal, Privacy And Contact Pages
+
+Status:
+Implemented. Public `/privacy`, `/terms` and `/contact` pages provide simple
+alpha trust information, with unobtrusive footer links and optional support
+email configuration.
+
+Goal:
+Give invited alpha users clear privacy, usage-limit and contact information
+before broader testing.

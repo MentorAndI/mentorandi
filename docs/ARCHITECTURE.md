@@ -60,6 +60,14 @@ authenticated admins can inspect the 100 most recent submissions at
 against `ALPHA_ADMIN_EMAILS` before the Feedback service reads through Prisma.
 There is no public feedback read API or browser-facing Supabase access.
 
+## Alpha Trust Pages
+
+`/privacy`, `/terms` and `/contact` are public informational pages. They use
+simple alpha wording and do not create database records or expose an API.
+`/contact` reads the optional server-side `ALPHA_SUPPORT_EMAIL` configuration
+and falls back to invitation-based support instructions. These pages are not a
+substitute for final legal review. See `docs/ALPHA_LEGAL_AND_CONTACT.md`.
+
 ## Mentor Core Flow
 
 The intended flow is:

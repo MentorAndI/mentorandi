@@ -58,6 +58,7 @@ Cost and usage guardrails:
 - Decide whether `USAGE_LIMITS_ENABLED` should enforce limits.
 - Configure `ALPHA_DAILY_MESSAGE_LIMIT`, `ALPHA_WEEKLY_MESSAGE_LIMIT`, `ALPHA_MONTHLY_MESSAGE_LIMIT` and `ALPHA_WEEKLY_DEEP_LIMIT` if overriding the defaults.
 - Configure `ALPHA_ADMIN_EMAILS` with the authenticated emails allowed to review `/admin/feedback`.
+- Configure optional `ALPHA_SUPPORT_EMAIL`, or confirm the invitation-contact fallback is appropriate.
 
 ## 4. Supabase Gate
 
@@ -144,6 +145,9 @@ Manually verify:
 - `/mentor`
 - `/settings`
 - `/admin/feedback`
+- `/privacy`
+- `/terms`
+- `/contact`
 - `/api/health`
 
 Production expectations:
@@ -151,6 +155,7 @@ Production expectations:
 - Unauthenticated `/mentor` and `/settings` redirect to login.
 - Unauthenticated `/admin/feedback` redirects to login, non-admin accounts see
   the not-allowed state, and allowlisted admins can review recent feedback.
+- Privacy, terms and contact pages are public and show the intended alpha wording.
 - Development-only `/api/dev/*` routes are blocked.
 - `/dev/mentor-test` is blocked.
 - Safe errors do not expose stack traces or secrets.
