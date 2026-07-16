@@ -125,3 +125,14 @@ email configuration.
 Goal:
 Give invited alpha users clear privacy, usage-limit and contact information
 before broader testing.
+
+### Feature 101 - Improve Marcus Mentor Response Quality
+
+Status:
+Implemented. Marcus's prompt contract now defaults to warm conversational
+prose, reflects the user's specific tension, uses at most one tentative pattern
+and concrete next step, and ends with no more than one strong question.
+
+Goal:
+Make Marcus feel like a personal psychological Life Mentor instead of generic,
+list-heavy ChatGPT advice while preserving safety and Mentor Core context.

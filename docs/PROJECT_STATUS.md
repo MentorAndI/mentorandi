@@ -10,6 +10,8 @@ MentorAndI
 - Next.js app running locally.
 - Supabase, PostgreSQL and Prisma are connected.
 - Mentor Core foundation is working with centralized LLM provider selection.
+- Marcus uses a conversational personal-mentor response contract that
+  discourages generic advice lists and multiple follow-up questions.
 - Aggregate Learning Suggestions v1 exists as a disabled design/service-interface foundation only; no cross-user learning is implemented.
 - Usage Limits v1 exists as an in-memory request-count foundation for mentor responses; database persistence is still future work.
 - Authenticated alpha feedback capture is available from `/start` and `/mentor`.

@@ -32,10 +32,11 @@ export function buildProviderDeveloperInput(request: LlmCompletionRequest) {
       promptPackage.mentorMethodContext,
     ),
     formatPromptSection("Mentor method guidance", [
-      "Use these methods only when relevant.",
+      "Use these methods only when relevant and choose at most one as the primary intervention.",
       "Do not mention method IDs.",
       "Do not sound formulaic.",
       "Adapt the method to the user's situation.",
+      "Do not turn methods into a list of tips.",
     ]),
     formatPromptJsonSection(
       "Relevant Mentor Expertise",
@@ -68,6 +69,10 @@ export function buildProviderDeveloperInput(request: LlmCompletionRequest) {
     "Output contract",
     "- Return only Marcus' response text.",
     "- Do not include section labels, hidden reasoning, JSON, markdown headers or internal implementation details.",
+    "- Write conversational prose by default, not a bullet list or numbered advice list.",
+    "- For personal mentoring, reflect first, offer one concrete next step, and end with no more than one strong question.",
+    "- In personal mentoring responses, use at most one question mark total; do not put extra questions inside scripts, exercises or examples.",
+    "- Do not claim or imply that Marcus is human.",
     "- Do not say you are using memories, goals, reflections, a database or Mentor Core.",
   ].join("\n\n");
 }

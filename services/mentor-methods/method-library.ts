@@ -9,7 +9,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
     shortDescription: "Help the user begin with a tiny, time-limited first action.",
     whenToUse: "When the user cannot start, is procrastinating, or feels blocked by task initiation.",
     mentorInstruction:
-      "Shrink the work to a five-minute entry point. Define the first visible action, lower the standard for starting, and invite the user to stop after five minutes if needed.",
+      "Briefly reflect the friction around starting, then offer one five-minute entry point with a single visible action. Do not add a wider productivity list.",
     exampleQuestion: "What is the smallest five-minute version of starting this?",
   },
   {
@@ -20,7 +20,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
     shortDescription: "Identify and remove one practical obstacle that makes starting harder.",
     whenToUse: "When the user wants to work but the setup, ambiguity, or environment is getting in the way.",
     mentorInstruction:
-      "Look for one removable obstacle such as unclear materials, a missing link, an open tab, or a vague next step. Help the user remove that obstacle before asking for effort.",
+      "Reflect what seems to be creating friction, then help the user remove one obstacle before asking for more effort. Keep the response conversational rather than listing possible obstacles.",
     exampleQuestion: "What is one thing making this harder to start than it needs to be?",
   },
   {
@@ -31,7 +31,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
     shortDescription: "Use another person's presence or a lightweight check-in to support focus.",
     whenToUse: "When the user feels distracted, isolated, or unable to stay with a task alone.",
     mentorInstruction:
-      "Suggest a realistic co-working presence, timer check-in, or message-based accountability. Keep it simple and non-shaming.",
+      "Reflect the difficulty of holding attention alone, then suggest one realistic form of presence or accountability. Keep it simple and non-shaming.",
     exampleQuestion: "Would a quiet co-working check-in make it easier to begin?",
   },
   {
@@ -42,7 +42,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
     shortDescription: "Contain work inside a short named block of time.",
     whenToUse: "When the user is overwhelmed by an open-ended task or needs focus for a limited period.",
     mentorInstruction:
-      "Help the user choose one task, one timer length, and one stopping point. Emphasize containment over perfection.",
+      "Reflect why the task feels too open-ended, then offer one bounded work period with one task and one stopping point. Emphasize containment over perfection.",
     exampleQuestion: "What would be useful to do in one focused 20-minute box?",
   },
   {
@@ -53,7 +53,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
     shortDescription: "Move the task out of the user's head into visible steps.",
     whenToUse: "When the user is mentally juggling too much, feels scattered, or cannot see the task clearly.",
     mentorInstruction:
-      "Ask the user to write the task, next action, materials, and stopping point somewhere visible. Reduce working-memory load.",
+      "Reflect the mental load, then suggest one visible place for the task and its immediate next action. Do not turn the response into a multi-part setup checklist.",
     exampleQuestion: "Can we get this out of your head and into three visible steps?",
   },
   {
@@ -64,7 +64,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
     shortDescription: "Close the day with a brief review and prepared next start point.",
     whenToUse: "When the user is ending work, feeling scattered, or needs tomorrow to start more smoothly.",
     mentorInstruction:
-      "Guide a short shutdown: capture loose tasks, choose tomorrow's first action, clear one surface, and name work as done for now.",
+      "Reflect the difficulty of mentally leaving work, then offer one short shutdown action that makes tomorrow's first move visible.",
     exampleQuestion: "What should be ready so tomorrow has a clear first move?",
   },
   {
@@ -75,7 +75,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
     shortDescription: "Interrupt repeated analysis by setting criteria and a decision moment.",
     whenToUse: "When the user keeps circling a decision without gaining new information.",
     mentorInstruction:
-      "Name the loop, identify the decision criteria, separate knowns from unknowns, and help the user choose a bounded next decision point.",
+      "Name the possible analysis loop gently, then offer one bounded decision step. Do not explain a full decision framework unless the user asks.",
     exampleQuestion: "What new information would actually change this decision?",
   },
   {
@@ -86,7 +86,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
     shortDescription: "Separate repetitive replay from useful planning.",
     whenToUse: "When the user is replaying, spiraling, or mistaking mental repetition for problem solving.",
     mentorInstruction:
-      "Help the user distinguish planning, which changes an action, from rumination, which repeats distress. Redirect toward one concrete planning output.",
+      "Reflect the repetitive thought pattern, distinguish planning from rumination in one sentence, and redirect toward one concrete planning output.",
     exampleQuestion: "Is this thought producing a next action, or only replaying the same discomfort?",
   },
   {
@@ -97,7 +97,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
     shortDescription: "Use a short timed reflection to produce a clear next move.",
     whenToUse: "When the user needs clarity but could get lost in unbounded analysis.",
     mentorInstruction:
-      "Offer a ten-minute container: write the question, list facts, list fears, choose one next action, then stop.",
+      "Reflect the need for containment, then offer a brief ten-minute clarity exercise without over-explaining each stage.",
     exampleQuestion: "What question are we trying to answer in the next ten minutes?",
   },
   {
@@ -108,7 +108,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
     shortDescription: "Find the next step that actually commits the user, and keep earlier steps light.",
     whenToUse: "When the user treats every small action like a final decision.",
     mentorInstruction:
-      "Separate reversible exploration from irreversible commitment. Encourage a low-risk reversible step before the true point of no return.",
+      "Reflect how the user may be treating exploration like final commitment, then offer one low-risk reversible step.",
     exampleQuestion: "What is the next step that would actually make this hard to undo?",
   },
   {
@@ -119,7 +119,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
     shortDescription: "Clarify what the user wants a choice to stand for.",
     whenToUse: "When the user is choosing between paths or wants direction beyond productivity.",
     mentorInstruction:
-      "Invite the user to compare options by values, tradeoffs, and the kind of person or life each option supports.",
+      "Reflect the deeper tension in the choice, then help the user identify the single value that should guide the next move.",
     exampleQuestion: "What value do you want this decision to honor most?",
   },
   {
@@ -141,7 +141,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
     shortDescription: "Notice what is adding to or draining the user's energy.",
     whenToUse: "When the user feels tired, overloaded, burned out, or unsure where capacity is going.",
     mentorInstruction:
-      "Help the user name energy drains, energy sources, and one small adjustment that protects capacity.",
+      "Reflect the overload or depletion first, then suggest one small adjustment that protects capacity. Avoid turning recovery into another optimization plan.",
     exampleQuestion: "What has been draining you most, and what has been giving even a little energy back?",
   },
   {
@@ -152,7 +152,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
     shortDescription: "Spot a repeated behavior or situation without turning it into a judgment.",
     whenToUse: "When the user describes a repeated problem, reaction, or relationship dynamic.",
     mentorInstruction:
-      "Gently name the possible pattern, hold it as a hypothesis, and ask what tends to happen before and after it.",
+      "Gently name one possible pattern, clearly hold it as a hypothesis, and ask one question about the current example.",
     exampleQuestion: "Where have you seen this pattern show up before?",
   },
   {
@@ -163,7 +163,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
     shortDescription: "Choose one task to receive the user's real attention now.",
     whenToUse: "When the user asks what to focus on, has too many priorities, or needs a practical anchor.",
     mentorInstruction:
-      "Help the user select one meaningful task, name why it matters, and commit to the first work block before considering other tasks.",
+      "Reflect the tension behind competing priorities, then help the user choose one meaningful task and one first work block.",
     exampleQuestion: "If today only had one real focus, what would matter most to move forward?",
   },
   {
@@ -174,7 +174,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
     shortDescription: "Select a task small enough to complete and feel progress.",
     whenToUse: "When the user's task is too broad, vague, or likely to sprawl.",
     mentorInstruction:
-      "Narrow the task until it has a realistic finish line for the available energy and time.",
+      "Reflect why the current scope is hard to hold, then narrow it to one realistic finish line for the available energy and time.",
     exampleQuestion: "What version of this could you genuinely finish today?",
   },
   {
@@ -185,7 +185,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
     shortDescription: "Make the completion condition explicit before starting.",
     whenToUse: "When the user is unclear about the endpoint or risks overworking a task.",
     mentorInstruction:
-      "Ask for a simple done condition. Keep it observable, realistic, and tied to the user's actual need.",
+      "Reflect the cost of an unclear endpoint, then offer one observable and realistic done condition.",
     exampleQuestion: "What will count as done enough for this task?",
   },
   {
@@ -196,7 +196,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
     shortDescription: "Capture distractions without following them immediately.",
     whenToUse: "When the user is distracted, context-switching, or pulled by unrelated thoughts.",
     mentorInstruction:
-      "Suggest a visible parking lot for intrusive tasks or ideas, then return to the chosen task until the current block ends.",
+      "Reflect how competing thoughts are pulling attention, then suggest one visible parking place and a return to the chosen task.",
     exampleQuestion: "Where can we park the distractions so you do not have to obey them right now?",
   },
 ];

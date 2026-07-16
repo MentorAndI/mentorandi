@@ -17,21 +17,24 @@ const scenarioGroups = [
     name: "factual-routing",
     messages: [
       {
+        expectsMentorShape: false,
         name: "Direct factual question",
         text: "What day is it today?",
       },
     ],
   },
   {
-    name: "productivity-follow-up",
+    name: "focus-follow-up",
     messages: [
       {
-        name: "Productivity focus",
-        text: "What should I focus on today?",
+        expectsMentorShape: true,
+        name: "Competing focus priorities",
+        text: "I have five priorities and I keep bouncing between them without finishing anything.",
       },
       {
-        name: "Concrete next step",
-        text: "I am working on the MentorAndI design today. What should I focus on next?",
+        expectsMentorShape: true,
+        name: "Focus follow-up",
+        text: "The launch page matters most, but I am worried I will choose the wrong part to work on.",
       },
     ],
   },
@@ -39,6 +42,7 @@ const scenarioGroups = [
     name: "adhd-methods",
     messages: [
       {
+        expectsMentorShape: true,
         name: "ADHD task initiation",
         text: "I have ADHD and I can't get started on my work.",
       },
@@ -48,6 +52,7 @@ const scenarioGroups = [
     name: "overthinking-loop",
     messages: [
       {
+        expectsMentorShape: true,
         name: "Overthinking decision loop",
         text: "I keep overthinking the same decision.",
       },
@@ -57,17 +62,39 @@ const scenarioGroups = [
     name: "relationship-expertise",
     messages: [
       {
+        expectsMentorShape: true,
         name: "Relationship communication",
         text: "I keep arguing with my partner and I don't know how to communicate.",
       },
     ],
   },
   {
-    name: "business-expertise",
+    name: "stress-burnout",
     messages: [
       {
-        name: "Business decision",
-        text: "I need to make a business decision for my startup.",
+        expectsMentorShape: true,
+        name: "Stress and overload",
+        text: "I feel guilty whenever I stop working, but I am exhausted and starting to resent everything.",
+      },
+    ],
+  },
+  {
+    name: "confidence",
+    messages: [
+      {
+        expectsMentorShape: true,
+        name: "Imposter feelings",
+        text: "Everyone else seems more capable than me, so I stay quiet even when I have something useful to say.",
+      },
+    ],
+  },
+  {
+    name: "life-direction",
+    messages: [
+      {
+        expectsMentorShape: true,
+        name: "Life direction",
+        text: "My life looks fine from the outside, but I feel disconnected from it and I don't know what needs to change.",
       },
     ],
   },
@@ -135,7 +162,7 @@ const report = {
 await mkdir(path.dirname(reportPath), { recursive: true });
 await writeFile(reportPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
 
-const failures = results.filter((result) => !result.success);
+const failures = results.filter((result) => !result.passed);
 
 console.log(`Wrote JSON report: ${reportPath}`);
 
@@ -271,6 +298,13 @@ async function runScenario({
     const usage = diagnostics?.llmUsage;
     const modelRouting = usage?.modelRouting;
     const success = response.ok;
+    const responseText = success
+      ? sanitizeText(body?.mentorMessage?.content ?? "")
+      : "";
+    const responseQuality = analyzeResponseQuality(
+      responseText,
+      scenario.expectsMentorShape === true,
+    );
 
     return {
       conversationId: isNonEmptyString(body?.conversation?.id)
@@ -296,6 +330,7 @@ async function runScenario({
       matchedSources: readMatchedKnowledge(diagnostics?.matchedSources),
       model: sanitizeText(usage?.model ?? body?.model ?? "unknown"),
       outputTokens: readNullableNumber(usage?.outputTokens),
+      passed: success && responseQuality.passed,
       provider: sanitizeText(
         usage?.provider ??
           diagnostics?.providerUsed ??
@@ -303,9 +338,9 @@ async function runScenario({
           evalCase.provider ??
           "unknown",
       ),
-      responsePreview: success
-        ? buildPreview(body?.mentorMessage?.content)
-        : "",
+      responsePreview: buildPreview(responseText),
+      responseQuality,
+      responseText,
       routeReason: sanitizeText(modelRouting?.reason ?? "Not available"),
       routeSignals: Array.isArray(modelRouting?.signals)
         ? modelRouting.signals.filter(isNonEmptyString).map(sanitizeText)
@@ -333,8 +368,14 @@ async function runScenario({
       matchedSources: emptyMatchedKnowledge(),
       model: evalCase.model ?? "unknown",
       outputTokens: null,
+      passed: false,
       provider: evalCase.provider ?? "unknown",
       responsePreview: "",
+      responseQuality: analyzeResponseQuality(
+        "",
+        scenario.expectsMentorShape === true,
+      ),
+      responseText: "",
       routeReason: "Request failed before model routing diagnostics were returned.",
       routeSignals: [],
       routeType: "unknown",
@@ -347,7 +388,7 @@ async function runScenario({
 }
 
 function printScenarioResult(result) {
-  const status = result.success ? "success" : "failure";
+  const status = result.passed ? "success" : "failure";
 
   console.log(
     `[${status}] ${result.scenarioName} | ${result.provider} / ${result.model}`,
@@ -367,6 +408,7 @@ function printScenarioResult(result) {
     `  expertise: ${formatMatchedKnowledge(result.matchedExpertise)}`,
   );
   console.log(`  sources: ${formatMatchedKnowledge(result.matchedSources)}`);
+  console.log(`  quality: ${formatResponseQuality(result.responseQuality)}`);
 
   if (result.success) {
     console.log(`  preview: ${result.responsePreview || "No response text."}`);
@@ -476,6 +518,55 @@ function buildPreview(value) {
   return normalized.length > 240
     ? `${normalized.slice(0, 237).trimEnd()}...`
     : normalized;
+}
+
+function analyzeResponseQuality(responseText, expectsMentorShape) {
+  const bulletLineCount = responseText
+    .split("\n")
+    .filter((line) => /^\s*(?:[-*•]|\d+[.)])\s+/.test(line)).length;
+  const questionCount = (responseText.match(/\?/g) ?? []).length;
+  const wordCount = responseText.split(/\s+/).filter(Boolean).length;
+  const issues = [];
+
+  if (
+    (expectsMentorShape && bulletLineCount > 0) ||
+    (!expectsMentorShape && bulletLineCount > 2)
+  ) {
+    issues.push("list-heavy response");
+  }
+
+  if (questionCount > 1) {
+    issues.push("more than one question");
+  }
+
+  if (expectsMentorShape && responseText && questionCount === 0) {
+    issues.push("missing follow-up question");
+  }
+
+  if (wordCount > 220) {
+    issues.push("response exceeds 220 words");
+  }
+
+  return {
+    bulletLineCount,
+    expectsMentorShape,
+    issues,
+    passed: responseText ? issues.length === 0 : false,
+    questionCount,
+    wordCount,
+  };
+}
+
+function formatResponseQuality(quality) {
+  if (!quality) {
+    return "not available";
+  }
+
+  const metrics = `${quality.wordCount} words, ${quality.bulletLineCount} bullets, ${quality.questionCount} questions`;
+
+  return quality.passed
+    ? `pass (${metrics})`
+    : `review (${metrics}; ${quality.issues.join(", ") || "no response"})`;
 }
 
 function readNullableNumber(value) {

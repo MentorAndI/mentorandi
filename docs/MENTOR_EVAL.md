@@ -24,6 +24,15 @@ The runner sends multi-scenario messages through `/api/dev/test-mentor-response`
 - Model routing.
 - LLM provider adapter.
 - Mentor Method, Expertise and Source matching diagnostics.
+- Response-quality diagnostics for word count, list-heavy formatting and
+  follow-up question count.
+
+The personal mentoring scenarios cover Focus, ADHD-like task initiation,
+overthinking, relationship conflict, stress/burnout, confidence and life
+direction. For these scenarios the report expects conversational prose with no
+more than one question and flags a missing follow-up question. These checks are
+simple diagnostics, not a substitute for human review of warmth, specificity,
+pattern recognition and usefulness.
 
 By default the runner omits an explicit provider so automatic model routing can choose the configured route. Set `EVAL_MENTOR_PROVIDERS=mock,openai,anthropic` to add explicit provider cases.
 
@@ -36,3 +45,16 @@ reports/mentor-eval-latest.json
 ```
 
 Generated JSON reports are ignored by git.
+
+Review `responseText` and `responseQuality` in the report. A strong Marcus
+response should:
+
+- reflect the user's specific situation before advice;
+- name no more than one tentative emotional or behavioral pattern;
+- offer one concrete next step;
+- end with one useful question;
+- avoid generic advice lists and productivity-blog language.
+
+The question-count check includes questions inside quoted scripts and exercises.
+Those should be rewritten as statements so the final follow-up remains the only
+question in the response.
