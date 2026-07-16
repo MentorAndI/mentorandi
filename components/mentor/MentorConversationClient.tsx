@@ -40,8 +40,8 @@ interface MentorResponsePayload {
 
 const defaultMentor = {
   name: "Marcus",
-  role: "Strategic Mentor",
-  tagline: "Focused thinking. Better decisions. Long-term growth.",
+  role: "Life Mentor",
+  tagline: "Personal clarity, honest reflection, and sustainable change.",
 };
 
 export function MentorConversationClient() {

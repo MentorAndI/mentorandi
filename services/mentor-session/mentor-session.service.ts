@@ -45,8 +45,9 @@ export class MentorSessionServiceError extends Error {
 }
 
 const marcusSlug = "marcus";
-const marcusRole = "Strategic Mentor";
-const marcusTagline = "Focused thinking. Better decisions. Long-term growth.";
+const marcusRole = "Life Mentor";
+const marcusTagline =
+  "Personal clarity, honest reflection, and sustainable change.";
 const activeGoalLimit = 5;
 
 export class MentorSessionService {

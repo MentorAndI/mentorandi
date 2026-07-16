@@ -102,3 +102,15 @@ server-rendered Prisma read.
 Goal:
 Review alpha feedback without using manual Supabase SQL or exposing a public
 feedback read API.
+
+### Feature 099 - Personal Psychology Alpha Mentor Lineup
+
+Status:
+Implemented. Marcus is positioned as the Life Mentor, and the active alpha
+support lineup is Life, ADHD, Relationship, Stress / Burnout, Parenting, Health
+& Fitness, Focus and Confidence.
+
+Goal:
+Move MentorAndI away from Business/Career mentor positioning and toward
+personal, relational and executive-function support without breaking existing
+Marcus conversations.

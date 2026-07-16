@@ -12,9 +12,9 @@ const headingId = "match-heading";
 
 const recommendedMentor: MentorRecommendation = {
   description:
-    "Marcus helps people think clearly, make better decisions and stay accountable over the long term.",
+    "Marcus helps you understand personal patterns, find emotional clarity, navigate difficult choices, and create sustainable change.",
   name: "Marcus",
-  role: "Strategic Mentor",
+  role: "Life Mentor",
 };
 
 export const metadata: Metadata = {

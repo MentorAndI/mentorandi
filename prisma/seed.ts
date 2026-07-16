@@ -37,14 +37,14 @@ async function main() {
     create: {
       active: true,
       description:
-        "Marcus helps people think clearly, make better decisions and stay accountable over the long term.",
+        "Marcus is a Life Mentor for personal direction, emotional clarity, relationships, confidence, and sustainable change.",
       name: "Marcus",
       slug: marcusSlug,
     },
     update: {
       active: true,
       description:
-        "Marcus helps people think clearly, make better decisions and stay accountable over the long term.",
+        "Marcus is a Life Mentor for personal direction, emotional clarity, relationships, confidence, and sustainable change.",
       name: "Marcus",
     },
     where: {

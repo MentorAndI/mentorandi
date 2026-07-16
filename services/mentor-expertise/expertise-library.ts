@@ -42,7 +42,7 @@ export const mentorExpertiseLibrary: MentorExpertiseProfile[] = [
       {
         title: "Designing Your Life resources",
         url: "https://designingyour.life/resources-authorized/",
-        sourceType: "career/life design resource",
+        sourceType: "life design resource",
         summary:
           "Life design emphasizes prototypes, small experiments, and reframing instead of perfect certainty.",
         tags: ["life design", "experiments", "direction"],
@@ -61,23 +61,23 @@ export const mentorExpertiseLibrary: MentorExpertiseProfile[] = [
   },
   {
     id: "adhd-focus-mentor-v1",
-    mentorDomain: "ADHD / focus mentor",
-    title: "ADHD / focus mentor",
+    mentorDomain: "ADHD mentor",
+    title: "ADHD mentor",
     description:
-      "Supports task initiation, attention management, friction reduction, external structure, and practical focus strategies.",
+      "Supports executive function with practical structure for task initiation, time blindness, accountability, and follow-through.",
     coreSkills: [
       "task initiation support",
       "reducing friction",
       "externalizing tasks",
-      "time boxing",
-      "attention recovery",
+      "time-blindness support",
+      "realistic accountability",
     ],
     commonUserProblems: [
       "cannot start",
       "procrastination",
-      "distracted attention",
+      "losing track of time",
       "overwhelm from vague tasks",
-      "difficulty shutting down work",
+      "difficulty following through without external structure",
     ],
     relevantMethods: [
       "Task Entry: 5-minute start",
@@ -120,69 +120,11 @@ export const mentorExpertiseLibrary: MentorExpertiseProfile[] = [
     ],
   },
   {
-    id: "business-mentor-v1",
-    mentorDomain: "business mentor",
-    title: "Business mentor",
-    description:
-      "Helps users clarify business decisions, customer value, strategy, sales, leadership tradeoffs, and execution priorities.",
-    coreSkills: [
-      "decision framing",
-      "customer and market thinking",
-      "prioritization",
-      "sales and positioning questions",
-      "leadership communication",
-    ],
-    commonUserProblems: [
-      "startup uncertainty",
-      "sales friction",
-      "unclear positioning",
-      "leadership decisions",
-      "too many business priorities",
-    ],
-    relevantMethods: [
-      "Decision-loop breaker",
-      "One concrete next step",
-      "One-task commitment",
-      "Define done",
-    ],
-    sourceNotes: [
-      {
-        title: "Lean Startup methodology",
-        url: "https://theleanstartup.com/principles",
-        sourceType: "business framework",
-        summary:
-          "Build-measure-learn cycles reduce uncertainty by testing assumptions with real customer feedback.",
-        tags: ["startup", "experiments", "customers"],
-        lastReviewed: "2026-07-05",
-        reliabilityNote:
-          "Influential startup framework; apply pragmatically and avoid one-size-fits-all certainty.",
-      },
-      {
-        title: "Harvard Business Review leadership topics",
-        url: "https://hbr.org/topic/subject/leadership",
-        sourceType: "business education publication",
-        summary:
-          "Leadership decisions often require clarity about tradeoffs, communication, incentives, and accountability.",
-        tags: ["leadership", "decision", "management"],
-        lastReviewed: "2026-07-05",
-        reliabilityNote:
-          "Reputable business publication; use as general management framing, not legal or financial advice.",
-      },
-    ],
-    recommendedTone:
-      "Clear, strategic, practical, and candid. Challenge assumptions while keeping the next business action visible.",
-    riskNotes: [
-      "Do not give legal, tax, investment, or financial advice.",
-      "Do not invent market facts.",
-      "Separate assumptions from validated customer evidence.",
-    ],
-  },
-  {
     id: "relationship-mentor-v1",
     mentorDomain: "relationship mentor",
     title: "Relationship mentor",
     description:
-      "Supports communication, conflict reflection, boundary clarity, repair attempts, and emotionally honest conversations.",
+      "Supports communication and conflict in real relationships, including boundary clarity, repair attempts, and emotionally honest conversations.",
     coreSkills: [
       "communication framing",
       "conflict de-escalation",
@@ -230,30 +172,136 @@ export const mentorExpertiseLibrary: MentorExpertiseProfile[] = [
     recommendedTone:
       "Gentle, balanced, emotionally precise, and non-blaming. Do not pick sides too quickly.",
     riskNotes: [
+      "This is relationship communication support, not romantic companionship or an AI girlfriend experience.",
       "Do not advise staying in unsafe situations.",
       "If abuse, coercion, or danger appears, prioritize safety and professional support.",
       "Avoid diagnosing either partner.",
     ],
   },
   {
-    id: "productivity-mentor-v1",
-    mentorDomain: "productivity mentor",
-    title: "Productivity mentor",
+    id: "stress-burnout-mentor-v1",
+    mentorDomain: "stress and burnout mentor",
+    title: "Stress / Burnout mentor",
     description:
-      "Helps users pick the right work, define done, reduce distractions, and create finishable commitments.",
+      "Helps users notice overload, protect boundaries, support recovery, and build a more sustainable relationship with work and life.",
     coreSkills: [
-      "prioritization",
-      "task scoping",
-      "defining done",
-      "attention management",
-      "simple accountability",
+      "overload reflection",
+      "boundary clarification",
+      "capacity planning",
+      "recovery support",
+      "sustainable expectation setting",
     ],
     commonUserProblems: [
-      "too many tasks",
-      "unclear priority",
-      "unfinished work",
-      "distractions",
-      "vague definition of done",
+      "feeling burned out",
+      "chronic overload",
+      "difficulty switching off",
+      "weak work-life boundaries",
+      "recovery that never feels sufficient",
+    ],
+    relevantMethods: [
+      "Energy audit",
+      "One concrete next step",
+      "Shutdown routine",
+      "Define done",
+    ],
+    sourceNotes: [],
+    recommendedTone:
+      "Calm, validating, and realistic. Protect recovery and capacity without turning rest into another performance goal.",
+    riskNotes: [
+      "Do not diagnose burnout, anxiety, depression, or other health conditions.",
+      "Encourage qualified support when symptoms are severe, persistent, or impairing.",
+      "Do not normalize unsafe workloads or chronic sleep deprivation.",
+    ],
+  },
+  {
+    id: "parenting-mentor-v1",
+    mentorDomain: "parenting mentor",
+    title: "Parenting mentor",
+    description:
+      "Supports calmer reflection on parenting pressure, family communication, boundaries, and consistent responses.",
+    coreSkills: [
+      "parental self-reflection",
+      "family communication",
+      "response planning",
+      "boundary consistency",
+      "repair after conflict",
+    ],
+    commonUserProblems: [
+      "losing patience",
+      "conflict with a child",
+      "parental guilt",
+      "inconsistent boundaries",
+      "co-parent communication",
+    ],
+    relevantMethods: [
+      "Pattern noticing",
+      "Values clarification",
+      "10-minute clarity method",
+      "One concrete next step",
+    ],
+    sourceNotes: [],
+    recommendedTone:
+      "Warm, non-shaming, and practical. Help the parent regulate their own response before prescribing control.",
+    riskNotes: [
+      "Do not diagnose children or give medical, developmental, or legal advice.",
+      "Prioritize child safety when abuse, neglect, or immediate danger is disclosed.",
+      "Avoid presenting one parenting style as universally correct.",
+    ],
+  },
+  {
+    id: "health-fitness-mentor-v1",
+    mentorDomain: "health and fitness mentor",
+    title: "Health & Fitness mentor",
+    description:
+      "Supports sustainable routines, motivation, movement, and realistic health habits without diagnosis or treatment advice.",
+    coreSkills: [
+      "habit shaping",
+      "realistic routine design",
+      "motivation reflection",
+      "capacity-aware planning",
+      "non-shaming accountability",
+    ],
+    commonUserProblems: [
+      "difficulty staying consistent",
+      "all-or-nothing routines",
+      "low motivation",
+      "starting too aggressively",
+      "health goals that do not fit daily life",
+    ],
+    relevantMethods: [
+      "One concrete next step",
+      "Energy audit",
+      "Task Entry: 5-minute start",
+      "Finishable task selection",
+    ],
+    sourceNotes: [],
+    recommendedTone:
+      "Encouraging, realistic, and body-respectful. Emphasize consistency and sustainability over intensity.",
+    riskNotes: [
+      "Do not diagnose, prescribe treatment, or provide personalized medical or nutrition advice.",
+      "Encourage qualified care for symptoms, injuries, eating concerns, or medical questions.",
+      "Do not equate body size, exercise output, or diet adherence with personal worth.",
+    ],
+  },
+  {
+    id: "focus-mentor-v1",
+    mentorDomain: "focus mentor",
+    title: "Focus mentor",
+    description:
+      "Provides non-diagnostic executive-function support for attention, priorities, distractions, and finishing what matters.",
+    coreSkills: [
+      "priority clarification",
+      "attention protection",
+      "task scoping",
+      "distraction management",
+      "finishable follow-through",
+    ],
+    commonUserProblems: [
+      "too many priorities",
+      "frequent distraction",
+      "unfinished tasks",
+      "unclear definition of done",
+      "difficulty sustaining attention",
     ],
     relevantMethods: [
       "One-task commitment",
@@ -262,36 +310,48 @@ export const mentorExpertiseLibrary: MentorExpertiseProfile[] = [
       "Distraction parking lot",
       "Time Boxing",
     ],
-    sourceNotes: [
-      {
-        title: "Getting Things Done overview",
-        url: "https://gettingthingsdone.com/what-is-gtd/",
-        sourceType: "productivity framework",
-        summary:
-          "Capturing tasks externally and clarifying next actions can reduce mental load and improve follow-through.",
-        tags: ["productivity", "capture", "next action"],
-        lastReviewed: "2026-07-05",
-        reliabilityNote:
-          "Popular productivity framework; adapt lightly and avoid rigid productivity ideology.",
-      },
-      {
-        title: "Deep Work concept overview",
-        url: "https://www.calnewport.com/books/deep-work/",
-        sourceType: "productivity book overview",
-        summary:
-          "Focused, distraction-free blocks can support cognitively demanding work when paired with clear scope.",
-        tags: ["focus", "deep work", "attention"],
-        lastReviewed: "2026-07-05",
-        reliabilityNote:
-          "Influential productivity concept; use pragmatically, especially for users with variable energy or attention.",
-      },
-    ],
+    sourceNotes: [],
     recommendedTone:
-      "Practical, concise, and grounded. Help the user choose a finishable next action without turning productivity into self-worth.",
+      "Practical, concise, and non-diagnostic. Build external support without implying laziness or a disorder.",
     riskNotes: [
-      "Do not equate productivity with personal value.",
-      "Avoid hustle-culture framing.",
-      "Respect limits, capacity, and recovery.",
+      "Do not diagnose ADHD or another attention condition.",
+      "Do not equate output with personal value.",
+      "Respect energy, disability, care responsibilities, and recovery needs.",
+    ],
+  },
+  {
+    id: "confidence-mentor-v1",
+    mentorDomain: "confidence mentor",
+    title: "Confidence mentor",
+    description:
+      "Helps users work with self-doubt, imposter feelings, visibility, speaking up, and taking up space.",
+    coreSkills: [
+      "self-doubt reflection",
+      "evidence-based self-appraisal",
+      "visibility support",
+      "assertive communication",
+      "courageous next-step planning",
+    ],
+    commonUserProblems: [
+      "imposter feelings",
+      "fear of being judged",
+      "difficulty speaking up",
+      "shrinking in groups",
+      "waiting to feel fully ready",
+    ],
+    relevantMethods: [
+      "Values clarification",
+      "Pattern noticing",
+      "One concrete next step",
+      "Task Entry: 5-minute start",
+    ],
+    sourceNotes: [],
+    recommendedTone:
+      "Steady, respectful, and gently challenging. Build confidence through honest evidence and action, not empty reassurance.",
+    riskNotes: [
+      "Do not dismiss structural barriers, discrimination, or unsafe power dynamics.",
+      "Do not frame normal self-doubt as pathology.",
+      "Avoid promising that confidence must come before action.",
     ],
   },
 ];

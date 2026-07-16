@@ -11,37 +11,65 @@ export interface MentorsProps {
 
 const defaultStyles: MentorStyle[] = [
   {
-    name: "Strategic",
+    name: "Life",
     description:
-      "For decisions that need perspective, prioritization, and a sharper understanding of consequences.",
+      "Personal direction, values, recurring patterns, difficult choices, and the next grounded step.",
   },
   {
-    name: "Reflective",
+    name: "ADHD",
     description:
-      "For moments that call for patience, self-awareness, and a more honest read of what is happening.",
+      "Executive-function support for structure, task initiation, time blindness, and accountability.",
   },
   {
-    name: "Accountable",
+    name: "Relationship",
     description:
-      "For keeping commitments visible and translating intentions into steady, practical movement.",
+      "Communication, boundaries, repair, and conflict in real relationships—not a romantic AI companion.",
+  },
+  {
+    name: "Stress / Burnout",
+    description:
+      "Boundaries, recovery, overload, and a more sustainable relationship with work and life.",
+  },
+  {
+    name: "Parenting",
+    description:
+      "Calmer reflection on family dynamics, parental pressure, communication, and consistent responses.",
+  },
+  {
+    name: "Health & Fitness",
+    description:
+      "Sustainable habits, motivation, routines, and realistic follow-through without medical diagnosis.",
+  },
+  {
+    name: "Focus",
+    description:
+      "Non-diagnostic executive-function support for priorities, attention, distractions, and finishing.",
+  },
+  {
+    name: "Confidence",
+    description:
+      "Support with self-doubt, imposter feelings, speaking up, and taking up space.",
   },
 ];
 
 export function Mentors({ styles = defaultStyles }: MentorsProps) {
   return (
     <Section
-      description="Different moments call for different kinds of support. The experience should feel thoughtful, direct, and grounded."
-      eyebrow="Mentoring modes"
+      description="The alpha lineup centers on personal life, relationships, emotional load, executive function, and sustainable change."
+      eyebrow="Alpha mentor lineup"
       id="mentors"
-      title="Guidance that adapts to the conversation."
+      title="Personal support for the parts of life that shape everything else."
     >
-      <div className="divide-y divide-zinc-200 rounded-lg border border-zinc-200 bg-white">
+      <div className="grid gap-4 md:grid-cols-2">
         {styles.map((style) => (
-          <article className="grid gap-3 p-6 md:grid-cols-3" key={style.name}>
+          <article
+            className="rounded-lg border border-zinc-200 bg-white p-6"
+            key={style.name}
+          >
             <h3 className="text-lg font-semibold text-zinc-950">
               {style.name}
             </h3>
-            <p className="text-sm leading-6 text-zinc-600 md:col-span-2">
+            <p className="mt-3 text-sm leading-6 text-zinc-600">
               {style.description}
             </p>
           </article>

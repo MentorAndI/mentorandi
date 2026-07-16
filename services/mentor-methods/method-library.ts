@@ -4,7 +4,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
   {
     id: "adhd-task-entry-5-minute-start",
     title: "Task Entry: 5-minute start",
-    domain: "ADHD / focus",
+    domain: "ADHD",
     tags: ["adhd", "focus", "procrastination", "task initiation", "start"],
     shortDescription: "Help the user begin with a tiny, time-limited first action.",
     whenToUse: "When the user cannot start, is procrastinating, or feels blocked by task initiation.",
@@ -15,7 +15,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
   {
     id: "adhd-reduce-friction-remove-one-obstacle",
     title: "Reduce Friction: remove one obstacle before starting",
-    domain: "ADHD / focus",
+    domain: "ADHD",
     tags: ["adhd", "focus", "friction", "avoidance", "task initiation"],
     shortDescription: "Identify and remove one practical obstacle that makes starting harder.",
     whenToUse: "When the user wants to work but the setup, ambiguity, or environment is getting in the way.",
@@ -26,7 +26,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
   {
     id: "adhd-body-doubling",
     title: "Body Doubling",
-    domain: "ADHD / focus",
+    domain: "ADHD",
     tags: ["adhd", "focus", "accountability", "body doubling", "distracted"],
     shortDescription: "Use another person's presence or a lightweight check-in to support focus.",
     whenToUse: "When the user feels distracted, isolated, or unable to stay with a task alone.",
@@ -37,7 +37,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
   {
     id: "adhd-time-boxing",
     title: "Time Boxing",
-    domain: "ADHD / focus",
+    domain: "ADHD",
     tags: ["adhd", "focus", "time box", "timer", "distracted"],
     shortDescription: "Contain work inside a short named block of time.",
     whenToUse: "When the user is overwhelmed by an open-ended task or needs focus for a limited period.",
@@ -48,7 +48,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
   {
     id: "adhd-externalize-the-task",
     title: "Externalize the task",
-    domain: "ADHD / focus",
+    domain: "ADHD",
     tags: ["adhd", "focus", "externalize", "working memory", "overwhelmed"],
     shortDescription: "Move the task out of the user's head into visible steps.",
     whenToUse: "When the user is mentally juggling too much, feels scattered, or cannot see the task clearly.",
@@ -59,7 +59,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
   {
     id: "adhd-shutdown-routine",
     title: "Shutdown routine",
-    domain: "ADHD / focus",
+    domain: "ADHD",
     tags: ["adhd", "focus", "shutdown", "routine", "end of day"],
     shortDescription: "Close the day with a brief review and prepared next start point.",
     whenToUse: "When the user is ending work, feeling scattered, or needs tomorrow to start more smoothly.",
@@ -158,7 +158,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
   {
     id: "productivity-one-task-commitment",
     title: "One-task commitment",
-    domain: "Productivity",
+    domain: "Focus",
     tags: ["productivity", "focus", "today", "priority", "one task"],
     shortDescription: "Choose one task to receive the user's real attention now.",
     whenToUse: "When the user asks what to focus on, has too many priorities, or needs a practical anchor.",
@@ -169,7 +169,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
   {
     id: "productivity-finishable-task-selection",
     title: "Finishable task selection",
-    domain: "Productivity",
+    domain: "Focus",
     tags: ["productivity", "finish", "scope", "priority", "focus"],
     shortDescription: "Select a task small enough to complete and feel progress.",
     whenToUse: "When the user's task is too broad, vague, or likely to sprawl.",
@@ -180,7 +180,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
   {
     id: "productivity-define-done",
     title: "Define done",
-    domain: "Productivity",
+    domain: "Focus",
     tags: ["productivity", "done", "scope", "finish", "clarity"],
     shortDescription: "Make the completion condition explicit before starting.",
     whenToUse: "When the user is unclear about the endpoint or risks overworking a task.",
@@ -191,7 +191,7 @@ export const mentorMethodLibrary: MentorMethod[] = [
   {
     id: "productivity-distraction-parking-lot",
     title: "Distraction parking lot",
-    domain: "Productivity",
+    domain: "Focus",
     tags: ["productivity", "distraction", "focus", "parking lot", "attention"],
     shortDescription: "Capture distractions without following them immediately.",
     whenToUse: "When the user is distracted, context-switching, or pulled by unrelated thoughts.",

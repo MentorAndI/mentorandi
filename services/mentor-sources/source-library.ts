@@ -6,7 +6,7 @@ export const mentorSourceLibrary: MentorSourceCard[] = [
     title: "CDC ADHD overview",
     url: "https://www.cdc.gov/adhd/",
     sourceType: "public health overview",
-    domain: "ADHD / focus",
+    domain: "ADHD",
     tags: ["adhd", "executive function", "attention", "focus"],
     summary:
       "ADHD can involve attention, impulsivity, and executive-function challenges. Practical structure and support can reduce friction.",
@@ -26,7 +26,7 @@ export const mentorSourceLibrary: MentorSourceCard[] = [
     title: "CHADD adult ADHD support overview",
     url: "https://chadd.org/for-adults/overview/",
     sourceType: "education and advocacy resource",
-    domain: "ADHD / focus",
+    domain: "ADHD",
     tags: ["adult adhd", "systems", "accountability", "task initiation"],
     summary:
       "Adult ADHD support often emphasizes realistic systems, environmental design, accountability, and reducing executive-function load.",
@@ -86,7 +86,7 @@ export const mentorSourceLibrary: MentorSourceCard[] = [
     title: "Getting Things Done next-action overview",
     url: "https://gettingthingsdone.com/what-is-gtd/",
     sourceType: "productivity framework",
-    domain: "productivity",
+    domain: "focus support",
     tags: ["productivity", "next action", "capture", "clarity"],
     summary:
       "Capturing tasks externally and clarifying the next visible action can reduce mental load and support follow-through.",
@@ -106,7 +106,7 @@ export const mentorSourceLibrary: MentorSourceCard[] = [
     title: "Deep Work concept overview",
     url: "https://www.calnewport.com/books/deep-work/",
     sourceType: "productivity book overview",
-    domain: "productivity",
+    domain: "focus support",
     tags: ["focus", "deep work", "attention", "distraction"],
     summary:
       "Distraction-free blocks of focused work can support demanding tasks when paired with clear scope and realistic capacity.",
@@ -138,7 +138,7 @@ export const mentorSourceLibrary: MentorSourceCard[] = [
     whenRelevant:
       "When the user feels stuck, wants direction, or needs a concrete life next step.",
     reliabilityNote:
-      "Educational framework; useful for mentoring, not clinical or career certainty.",
+      "Educational framework; useful for mentoring, not clinical certainty.",
     lastReviewed: "2026-07-05",
   },
   {
@@ -199,46 +199,6 @@ export const mentorSourceLibrary: MentorSourceCard[] = [
       "When the user needs help preparing a hard conversation or communicating without escalating.",
     reliabilityNote:
       "Widely used communication framework; use practically, not as a rigid script.",
-    lastReviewed: "2026-07-05",
-  },
-  {
-    id: "business-lean-startup-v1",
-    title: "Lean Startup principles",
-    url: "https://theleanstartup.com/principles",
-    sourceType: "business framework",
-    domain: "business decision-making",
-    tags: ["startup", "business", "experiment", "customer"],
-    summary:
-      "Build-measure-learn cycles help founders reduce uncertainty by testing assumptions with real customer feedback.",
-    keyPrinciples: [
-      "Identify the riskiest assumption.",
-      "Design a small test before overbuilding.",
-      "Let customer evidence improve the decision.",
-    ],
-    whenRelevant:
-      "When the user asks about a startup, business decision, customers, product direction, or sales uncertainty.",
-    reliabilityNote:
-      "Influential startup framework; apply pragmatically and avoid one-size-fits-all certainty.",
-    lastReviewed: "2026-07-05",
-  },
-  {
-    id: "business-decision-quality-v1",
-    title: "Decision Quality for business choices",
-    url: "https://www.decisioneducation.org/decision-quality",
-    sourceType: "decision education framework",
-    domain: "business decision-making",
-    tags: ["business", "decision", "leadership", "tradeoffs"],
-    summary:
-      "Business decisions improve when options, tradeoffs, information, values, and commitment are made explicit.",
-    keyPrinciples: [
-      "Clarify the decision and decision owner.",
-      "Name tradeoffs and unknowns.",
-      "Choose the next irreversible or evidence-gathering step.",
-    ],
-    whenRelevant:
-      "When the user needs to make a business, startup, sales, leadership, or strategy decision.",
-    reliabilityNote:
-      "General decision framework; not legal, tax, investment, or financial advice.",
     lastReviewed: "2026-07-05",
   },
 ];

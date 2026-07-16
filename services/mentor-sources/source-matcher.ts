@@ -8,16 +8,17 @@ import type {
 const defaultSourceLimit = 2;
 
 const domainSignals: Record<MentorSourceCard["domain"], string[]> = {
-  "ADHD / focus": [
+  ADHD: [
     "adhd",
     "can't start",
     "cannot start",
     "cant start",
     "get started",
     "distracted",
-    "focus",
     "procrastination",
     "task initiation",
+    "time blindness",
+    "accountability",
   ],
   overthinking: [
     "overthinking",
@@ -30,7 +31,7 @@ const domainSignals: Record<MentorSourceCard["domain"], string[]> = {
     "stuck in my head",
     "decision loop",
   ],
-  productivity: [
+  "focus support": [
     "productivity",
     "productive",
     "what should i focus on today",
@@ -39,6 +40,8 @@ const domainSignals: Record<MentorSourceCard["domain"], string[]> = {
     "finish",
     "define done",
     "distraction",
+    "attention",
+    "follow through",
   ],
   "life mentoring": [
     "life",
@@ -60,17 +63,6 @@ const domainSignals: Record<MentorSourceCard["domain"], string[]> = {
     "argue",
     "fighting",
     "boundaries",
-  ],
-  "business decision-making": [
-    "business",
-    "startup",
-    "sales",
-    "leadership",
-    "founder",
-    "customer",
-    "market",
-    "strategy",
-    "business decision",
   ],
 };
 

@@ -1,8 +1,8 @@
 export type MentorMethodDomain =
-  | "ADHD / focus"
+  | "ADHD"
+  | "Focus"
   | "Life mentor"
-  | "Overthinking"
-  | "Productivity";
+  | "Overthinking";
 
 export interface MentorMethod {
   domain: MentorMethodDomain;

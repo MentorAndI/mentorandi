@@ -18,7 +18,7 @@ export default function WelcomePage() {
           actionLabel="Start our first conversation"
           body={[
             "I'm looking forward to getting to know you.",
-            "Over time I'll learn how you think, what motivates you and what tends to hold you back.",
+            "Over time I'll learn how you think, what affects your confidence and energy, and which patterns tend to hold you back.",
             "We'll take this one step at a time.",
           ]}
           heading="Hi, I'm Marcus."

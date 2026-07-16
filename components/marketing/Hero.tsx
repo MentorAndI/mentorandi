@@ -11,8 +11,8 @@ export interface HeroProps {
 }
 
 export function Hero({
-  headline = "Meet the mentor who never stops believing in you.",
-  subheadline = "MentorAndI is a personal AI mentor designed to help you think clearly, make better decisions, stay accountable and continuously grow.",
+  headline = "A personal mentor for the life behind the to-do list.",
+  subheadline = "MentorAndI helps you understand patterns, navigate relationships, work with your attention and energy, and take grounded steps toward the person you want to become.",
   primaryCtaLabel = "Start Your Journey",
   primaryCtaHref = "/start",
   secondaryCtaLabel = "See How It Works",

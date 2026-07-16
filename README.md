@@ -2,6 +2,10 @@
 
 MentorAndI is a long-term AI mentor product built around memory, goals, reflections and an ongoing mentor relationship.
 
+The alpha mentor lineup focuses on Life, ADHD, Relationship, Stress / Burnout,
+Parenting, Health & Fitness, Focus and Confidence. See
+`docs/ALPHA_MENTOR_LINEUP.md`.
+
 It is not a generic chatbot.
 
 ## Current Status

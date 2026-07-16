@@ -1,9 +1,12 @@
 export type MentorExpertiseDomain =
-  | "ADHD / focus mentor"
-  | "business mentor"
+  | "ADHD mentor"
+  | "confidence mentor"
+  | "focus mentor"
+  | "health and fitness mentor"
   | "life mentor"
-  | "productivity mentor"
-  | "relationship mentor";
+  | "parenting mentor"
+  | "relationship mentor"
+  | "stress and burnout mentor";
 
 export interface MentorExpertiseSourceNote {
   lastReviewed: string;

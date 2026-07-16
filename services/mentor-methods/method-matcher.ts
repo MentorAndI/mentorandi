@@ -8,9 +8,8 @@ import type {
 const defaultMethodLimit = 2;
 
 const domainSignals: Record<MentorMethod["domain"], string[]> = {
-  "ADHD / focus": [
+  ADHD: [
     "adhd",
-    "focus",
     "procrastination",
     "task initiation",
     "can't start",
@@ -22,6 +21,8 @@ const domainSignals: Record<MentorMethod["domain"], string[]> = {
     "scattered",
     "body doubling",
     "time boxing",
+    "time blindness",
+    "accountability",
   ],
   Overthinking: [
     "overthinking",
@@ -47,7 +48,7 @@ const domainSignals: Record<MentorMethod["domain"], string[]> = {
     "pattern",
     "stuck",
   ],
-  Productivity: [
+  Focus: [
     "what should i focus on today",
     "focus on today",
     "focus today",
@@ -59,6 +60,8 @@ const domainSignals: Record<MentorMethod["domain"], string[]> = {
     "one task",
     "define done",
     "finish",
+    "attention",
+    "follow through",
   ],
 };
 

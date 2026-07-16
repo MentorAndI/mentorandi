@@ -14,6 +14,9 @@ MentorAndI
 - Usage Limits v1 exists as an in-memory request-count foundation for mentor responses; database persistence is still future work.
 - Authenticated alpha feedback capture is available from `/start` and `/mentor`.
 - Allowlisted internal admins can review recent alpha feedback at `/admin/feedback`.
+- The active alpha mentor lineup is Life, ADHD, Relationship, Stress / Burnout,
+  Parenting, Health & Fitness, Focus and Confidence; Business and Career are not
+  active mentor categories.
 - Full Mentor Evaluation Runner exists for dev-only Mentor Core evaluation through the seeded database-backed flow.
 - Alpha Deployment Checklist exists for Hostinger/VPS go/no-go review.
 - Mock mode is available for deterministic local testing.
@@ -39,6 +42,7 @@ MentorAndI
 - Goal extraction.
 - Active goals in UI.
 - Reflection engine.
+- Personal-psychology Mentor Expertise profiles for the active alpha lineup.
 - Alpha feedback capture with usefulness rating, category and page context.
 - Reflection-aware context.
 - Basic account data export and mentor data deletion controls.

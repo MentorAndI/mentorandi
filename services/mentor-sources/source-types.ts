@@ -1,9 +1,8 @@
 export type MentorSourceDomain =
-  | "ADHD / focus"
-  | "business decision-making"
+  | "ADHD"
+  | "focus support"
   | "life mentoring"
   | "overthinking"
-  | "productivity"
   | "relationship communication";
 
 export interface MentorSourceCard {
