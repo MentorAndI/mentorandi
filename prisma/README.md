@@ -6,7 +6,11 @@ Security hardening scripts live under `prisma/security/`. The RLS hardening scri
 
 ## Inspecting alpha feedback
 
-There is intentionally no application readback endpoint yet. Database administrators can inspect recent submissions with a read-only query:
+Authenticated admins listed in `ALPHA_ADMIN_EMAILS` can inspect the 100 most
+recent submissions at `/admin/feedback`. This is a server-rendered Prisma read;
+there is no public readback API or permissive Supabase policy.
+
+Database administrators can also use a read-only query:
 
 ```sql
 select "createdAt", rating, category, message, "pagePath"

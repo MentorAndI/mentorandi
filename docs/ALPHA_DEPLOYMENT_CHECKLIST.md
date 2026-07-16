@@ -57,6 +57,7 @@ Cost and usage guardrails:
 - Configure optional `LLM_INPUT_COST_PER_1M` and `LLM_OUTPUT_COST_PER_1M` for diagnostics.
 - Decide whether `USAGE_LIMITS_ENABLED` should enforce limits.
 - Configure `ALPHA_DAILY_MESSAGE_LIMIT`, `ALPHA_WEEKLY_MESSAGE_LIMIT`, `ALPHA_MONTHLY_MESSAGE_LIMIT` and `ALPHA_WEEKLY_DEEP_LIMIT` if overriding the defaults.
+- Configure `ALPHA_ADMIN_EMAILS` with the authenticated emails allowed to review `/admin/feedback`.
 
 ## 4. Supabase Gate
 
@@ -142,11 +143,14 @@ Manually verify:
 - `/start`
 - `/mentor`
 - `/settings`
+- `/admin/feedback`
 - `/api/health`
 
 Production expectations:
 
 - Unauthenticated `/mentor` and `/settings` redirect to login.
+- Unauthenticated `/admin/feedback` redirects to login, non-admin accounts see
+  the not-allowed state, and allowlisted admins can review recent feedback.
 - Development-only `/api/dev/*` routes are blocked.
 - `/dev/mentor-test` is blocked.
 - Safe errors do not expose stack traces or secrets.

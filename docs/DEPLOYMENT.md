@@ -32,6 +32,7 @@ ALPHA_DAILY_MESSAGE_LIMIT=
 ALPHA_WEEKLY_MESSAGE_LIMIT=
 ALPHA_MONTHLY_MESSAGE_LIMIT=
 ALPHA_WEEKLY_DEEP_LIMIT=
+ALPHA_ADMIN_EMAILS=
 OPENAI_API_KEY=
 OPENAI_MODEL=
 OPENAI_MODEL_CHEAP=
@@ -41,6 +42,16 @@ ANTHROPIC_MODEL=
 ANTHROPIC_MODEL_CHEAP=
 ANTHROPIC_MODEL_DEEP=
 ```
+
+Set `ALPHA_ADMIN_EMAILS` to a comma-separated allowlist of authenticated
+Supabase user emails that may open `/admin/feedback`, for example:
+
+```env
+ALPHA_ADMIN_EMAILS=rene@example.com,admin@example.com
+```
+
+Keep the allowlist in deployment secrets. After changing it, rebuild or restart
+the application so the server process receives the updated environment.
 
 ## LLM Provider
 

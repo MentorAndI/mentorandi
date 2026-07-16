@@ -12,6 +12,7 @@ const checks = [
   { path: "/start", redirectsAllowed: false },
   { path: "/mentor", redirectsAllowed: true },
   { path: "/settings", redirectsAllowed: true },
+  { path: "/admin/feedback", redirectsAllowed: true },
 ];
 
 if (isDevelopment) {

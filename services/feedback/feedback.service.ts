@@ -1,6 +1,11 @@
 import { FeedbackRepository } from "@/services/feedback/feedback.repository";
-import type { CreateFeedbackInput } from "@/services/feedback/feedback.types";
+import type {
+  AdminFeedbackEntry,
+  CreateFeedbackInput,
+} from "@/services/feedback/feedback.types";
 import { validateCreateFeedbackInput } from "@/services/feedback/feedback.validators";
+
+const adminFeedbackLimit = 100;
 
 export class FeedbackServiceError extends Error {
   constructor(message: string, public readonly statusCode: number) {
@@ -11,6 +16,15 @@ export class FeedbackServiceError extends Error {
 
 export class FeedbackService {
   constructor(private readonly repository = new FeedbackRepository()) {}
+
+  async getRecentFeedbackForAdmin(): Promise<AdminFeedbackEntry[]> {
+    const feedback = await this.repository.findRecentFeedback(adminFeedbackLimit);
+
+    return feedback.map((entry) => ({
+      ...entry,
+      createdAt: entry.createdAt.toISOString(),
+    }));
+  }
 
   async createFeedbackForUserId(userId: string, input: CreateFeedbackInput) {
     const validation = validateCreateFeedbackInput(input);

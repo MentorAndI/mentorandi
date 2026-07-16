@@ -69,6 +69,7 @@ ALPHA_DAILY_MESSAGE_LIMIT=
 ALPHA_WEEKLY_MESSAGE_LIMIT=
 ALPHA_MONTHLY_MESSAGE_LIMIT=
 ALPHA_WEEKLY_DEEP_LIMIT=
+ALPHA_ADMIN_EMAILS=
 
 OPENAI_API_KEY=
 OPENAI_MODEL=
@@ -89,6 +90,8 @@ Important:
 - Add `https://staging.mentorandi.com/auth/callback` to the Supabase Auth redirect URLs before testing email confirmation.
 - Keep `http://localhost:3000/auth/callback` in Supabase Auth redirect URLs for local development.
 - Do not use `LLM_PROVIDER=mock` for real staging validation.
+- Set `ALPHA_ADMIN_EMAILS` to the comma-separated authenticated emails allowed
+  to open `/admin/feedback`.
 - Keep `.env.staging` on the server only.
 
 ## Build And Start

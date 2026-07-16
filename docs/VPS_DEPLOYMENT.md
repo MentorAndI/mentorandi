@@ -47,6 +47,10 @@ Production should use a real provider for real users:
 
 Use a production-safe Supabase `DATABASE_URL`. OpenAI and Claude keys must live in deployment secrets, not in source control.
 
+Set `ALPHA_ADMIN_EMAILS` to the comma-separated Supabase account emails allowed
+to review `/admin/feedback`. Restart or reload the PM2 process after changing
+the allowlist.
+
 ## 5. Build
 
 ```bash

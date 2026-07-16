@@ -22,3 +22,12 @@ export interface FeedbackValidationResult {
   input?: CreateFeedbackInput;
   isValid: boolean;
 }
+
+export interface AdminFeedbackEntry {
+  category: FeedbackCategoryInput;
+  createdAt: string;
+  message: string;
+  pagePath: string | null;
+  rating: FeedbackRatingInput;
+  userId: string;
+}

@@ -54,7 +54,11 @@ RLS must stay enabled on all public app tables: `User`, `Mentor`, `Conversation`
 
 The feedback entry point checks `/api/me` before appearing, so it is visible only with a real Supabase session. `POST /api/feedback` independently resolves the authenticated user without a development fallback, validates the rating, category, message and optional page path, then calls the Feedback service and Prisma-only repository. The API does not expose feedback IDs or provide a cross-user read endpoint.
 
-Feedback belongs to a user and is deleted when that user is deleted. Recent feedback is inspected directly in the database for now; no admin dashboard or browser-facing Supabase access is enabled.
+Feedback belongs to a user and is deleted when that user is deleted. Allowlisted
+authenticated admins can inspect the 100 most recent submissions at
+`/admin/feedback`. The server-rendered page checks the Supabase session email
+against `ALPHA_ADMIN_EMAILS` before the Feedback service reads through Prisma.
+There is no public feedback read API or browser-facing Supabase access.
 
 ## Mentor Core Flow
 

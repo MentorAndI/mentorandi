@@ -91,3 +91,14 @@ Implemented. Authenticated alpha users can submit categorized usefulness feedbac
 
 Goal:
 Capture lightweight usefulness, bug and product feedback before expanding the alpha.
+
+### Feature 098 - Internal Alpha Feedback Admin View
+
+Status:
+Implemented. Authenticated admins allowlisted through `ALPHA_ADMIN_EMAILS` can
+review the 100 most recent feedback submissions at `/admin/feedback` through a
+server-rendered Prisma read.
+
+Goal:
+Review alpha feedback without using manual Supabase SQL or exposing a public
+feedback read API.
