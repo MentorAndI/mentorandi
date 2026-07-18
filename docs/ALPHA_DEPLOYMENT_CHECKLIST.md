@@ -58,7 +58,8 @@ Cost and usage guardrails:
 - Decide whether `USAGE_LIMITS_ENABLED` should enforce limits.
 - Configure `ALPHA_DAILY_MESSAGE_LIMIT`, `ALPHA_WEEKLY_MESSAGE_LIMIT`, `ALPHA_MONTHLY_MESSAGE_LIMIT` and `ALPHA_WEEKLY_DEEP_LIMIT` if overriding the defaults.
 - Configure `ALPHA_ADMIN_EMAILS` with the authenticated emails allowed to review `/admin/feedback`.
-- Configure optional `ALPHA_SUPPORT_EMAIL`, or confirm the invitation-contact fallback is appropriate.
+- Confirm `/contact` links to `support@mentorandi.com` and describes in-product
+  feedback and useful bug reports.
 
 ## 4. Supabase Gate
 

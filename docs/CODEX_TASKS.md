@@ -126,6 +126,16 @@ Goal:
 Give invited alpha users clear privacy, usage-limit and contact information
 before broader testing.
 
+### Feature 100B - Improve Alpha Contact Page
+
+Status:
+Implemented. `/contact` provides a direct alpha support email, points logged-in
+users to in-product feedback and explains what to include in a bug report.
+
+Goal:
+Give alpha users practical support and feedback paths without adding a public
+contact form or database persistence.
+
 ### Feature 101 - Improve Marcus Mentor Response Quality
 
 Status:

@@ -51,10 +51,6 @@ Set `ALPHA_ADMIN_EMAILS` to the comma-separated Supabase account emails allowed
 to review `/admin/feedback`. Restart or reload the PM2 process after changing
 the allowlist.
 
-Set optional `ALPHA_SUPPORT_EMAIL` to the public alpha support address shown on
-`/contact`. If it is not configured, invited users are directed back to the
-person who invited them.
-
 ## 5. Build
 
 ```bash

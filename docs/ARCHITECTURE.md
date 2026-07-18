@@ -64,9 +64,10 @@ There is no public feedback read API or browser-facing Supabase access.
 
 `/privacy`, `/terms` and `/contact` are public informational pages. They use
 simple alpha wording and do not create database records or expose an API.
-`/contact` reads the optional server-side `ALPHA_SUPPORT_EMAIL` configuration
-and falls back to invitation-based support instructions. These pages are not a
-substitute for final legal review. See `docs/ALPHA_LEGAL_AND_CONTACT.md`.
+`/contact` provides the alpha support email, directs authenticated users to the
+in-product feedback button and explains what to include in a bug report. It
+does not provide a public contact form. These pages are not a substitute for
+final legal review. See `docs/ALPHA_LEGAL_AND_CONTACT.md`.
 
 ## Mentor Core Flow
 

@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import {
   LegalPage,
   LegalSection,
 } from "@/components/legal/LegalPage";
-import { getAlphaSupportEmail } from "@/services/support/support-config";
+
+const alphaSupportEmail = "support@mentorandi.com";
 
 export const metadata: Metadata = {
   title: "Contact | MentorAndI",
@@ -12,28 +14,51 @@ export const metadata: Metadata = {
 };
 
 export default function ContactPage() {
-  const supportEmail = getAlphaSupportEmail();
-
   return (
     <LegalPage
       description="Questions, account requests, and alpha feedback for MentorAndI."
       title="Contact"
     >
       <LegalSection title="MentorAndI alpha support">
-        {supportEmail ? (
-          <p>
-            Email{" "}
-            <a
-              className="font-medium text-zinc-950 underline underline-offset-4"
-              href={`mailto:${supportEmail}`}
-            >
-              {supportEmail}
-            </a>
-            .
-          </p>
-        ) : (
-          <p>Contact support through the person who invited you.</p>
-        )}
+        <p>
+          For alpha support, contact:{" "}
+          <a
+            className="font-medium text-zinc-950 underline underline-offset-4"
+            href={`mailto:${alphaSupportEmail}`}
+          >
+            {alphaSupportEmail}
+          </a>
+        </p>
+      </LegalSection>
+
+      <LegalSection title="Share feedback">
+        <p>
+          If you are logged in, use the Feedback button inside{" "}
+          <Link
+            className="font-medium text-zinc-950 underline underline-offset-4"
+            href="/start"
+          >
+            /start
+          </Link>{" "}
+          or{" "}
+          <Link
+            className="font-medium text-zinc-950 underline underline-offset-4"
+            href="/mentor"
+          >
+            /mentor
+          </Link>
+          .
+        </p>
+      </LegalSection>
+
+      <LegalSection title="Report a bug">
+        <p>When reporting a bug, please include:</p>
+        <ul className="list-disc space-y-1 pl-6">
+          <li>the page you were on</li>
+          <li>what you clicked or wrote</li>
+          <li>what happened</li>
+          <li>a screenshot, if possible</li>
+        </ul>
       </LegalSection>
 
       <LegalSection title="Deletion requests">

@@ -33,7 +33,6 @@ ALPHA_WEEKLY_MESSAGE_LIMIT=
 ALPHA_MONTHLY_MESSAGE_LIMIT=
 ALPHA_WEEKLY_DEEP_LIMIT=
 ALPHA_ADMIN_EMAILS=
-ALPHA_SUPPORT_EMAIL=
 OPENAI_API_KEY=
 OPENAI_MODEL=
 OPENAI_MODEL_CHEAP=
@@ -53,11 +52,6 @@ ALPHA_ADMIN_EMAILS=rene@example.com,admin@example.com
 
 Keep the allowlist in deployment secrets. After changing it, rebuild or restart
 the application so the server process receives the updated environment.
-
-Set the optional `ALPHA_SUPPORT_EMAIL` to the address shown on `/contact`.
-Without a valid configured address, the page tells users to contact the person
-who invited them. Keep the address in deployment configuration and rebuild or
-restart the application after changing it.
 
 ## LLM Provider
 
