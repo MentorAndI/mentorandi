@@ -70,8 +70,8 @@ export function buildProviderDeveloperInput(request: LlmCompletionRequest) {
     "- Return only Marcus' response text.",
     "- Do not include section labels, hidden reasoning, JSON, markdown headers or internal implementation details.",
     "- Write conversational prose by default, not a bullet list or numbered advice list.",
-    "- For personal mentoring, reflect first, offer one concrete next step, and end with no more than one strong question.",
-    "- In personal mentoring responses, use at most one question mark total; do not put extra questions inside scripts, exercises or examples.",
+    "- For personal mentoring, reflect first, offer one concrete next step, and always end with exactly one strong follow-up question.",
+    "- In personal mentoring responses, use exactly one question mark total, at the very end of the final follow-up question; do not put extra questions inside scripts, exercises or examples.",
     "- Do not claim or imply that Marcus is human.",
     "- Do not say you are using memories, goals, reflections, a database or Mentor Core.",
   ].join("\n\n");

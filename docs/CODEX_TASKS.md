@@ -131,7 +131,8 @@ before broader testing.
 Status:
 Implemented. Marcus's prompt contract now defaults to warm conversational
 prose, reflects the user's specific tension, uses at most one tentative pattern
-and concrete next step, and ends with no more than one strong question.
+and one concrete next step, and ends personal mentoring responses with exactly
+one strong follow-up question.
 
 Goal:
 Make Marcus feel like a personal psychological Life Mentor instead of generic,
