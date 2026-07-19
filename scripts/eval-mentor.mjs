@@ -29,11 +29,13 @@ const scenarioGroups = [
       {
         expectsMentorShape: true,
         expectsWarmAffirmation: true,
+        mentorSpecialty: "focus",
         name: "Competing focus priorities",
         text: "I sat down to work on the launch today, but I kept bouncing between five priorities and finished none of them. Now I feel annoyed with myself.",
       },
       {
         expectsMentorShape: true,
+        mentorSpecialty: "focus",
         name: "Focus follow-up",
         text: "The launch page matters most, but I am worried I will choose the wrong part to work on.",
       },
@@ -45,6 +47,7 @@ const scenarioGroups = [
       {
         expectsMentorShape: true,
         expectsWarmAffirmation: true,
+        mentorSpecialty: "adhd",
         name: "ADHD task initiation",
         text: "I have ADHD, and even opening the document feels weirdly impossible today. I know the task matters, which makes me feel worse about being stuck.",
       },
@@ -55,6 +58,7 @@ const scenarioGroups = [
     messages: [
       {
         expectsMentorShape: true,
+        mentorSpecialty: "life",
         name: "Overthinking decision loop",
         text: "I keep overthinking the same decision.",
       },
@@ -66,6 +70,7 @@ const scenarioGroups = [
       {
         expectsMentorShape: true,
         expectsWarmAffirmation: true,
+        mentorSpecialty: "relationship",
         name: "Relationship communication",
         text: "My partner said I never listen, and I got defensive even though part of me knows they have a point. We ended the evening barely speaking.",
       },
@@ -77,6 +82,7 @@ const scenarioGroups = [
       {
         expectsMentorShape: true,
         expectsWarmAffirmation: true,
+        mentorSpecialty: "stress-burnout",
         name: "Stress and overload",
         text: "I feel guilty whenever I stop working, but I am exhausted and starting to resent everything.",
       },
@@ -88,6 +94,7 @@ const scenarioGroups = [
       {
         expectsMentorShape: true,
         expectsWarmAffirmation: true,
+        mentorSpecialty: "confidence",
         name: "Self-doubt in a group",
         text: "I had an idea in the meeting but stayed quiet because everyone else sounded more capable. Someone else said almost the same thing later, and now I'm frustrated with myself.",
       },
@@ -98,8 +105,33 @@ const scenarioGroups = [
     messages: [
       {
         expectsMentorShape: true,
+        mentorSpecialty: "life",
         name: "Life direction",
         text: "My life looks fine from the outside, but I feel disconnected from it and I don't know what needs to change.",
+      },
+    ],
+  },
+  {
+    name: "parenting-specialization",
+    messages: [
+      {
+        expectsMentorShape: true,
+        expectsWarmAffirmation: true,
+        mentorSpecialty: "parenting",
+        name: "Parenting patience and repair",
+        text: "I snapped at my child during the morning rush and now I feel guilty. I want to handle tomorrow differently without pretending it was fine.",
+      },
+    ],
+  },
+  {
+    name: "health-fitness-specialization",
+    messages: [
+      {
+        expectsMentorShape: true,
+        expectsWarmAffirmation: true,
+        mentorSpecialty: "health-fitness",
+        name: "Sustainable training routine",
+        text: "I train hard for one week and then stop for three. I want a routine I can sustain without punishing myself.",
       },
     ],
   },
@@ -286,6 +318,9 @@ async function runScenario({
     message: scenario.text,
     userId,
     ...(conversationId ? { conversationId } : {}),
+    ...(scenario.mentorSpecialty
+      ? { mentorSpecialty: scenario.mentorSpecialty }
+      : {}),
     ...(evalCase.model ? { model: evalCase.model } : {}),
     ...(evalCase.provider ? { provider: evalCase.provider } : {}),
   };
@@ -329,6 +364,7 @@ async function runScenario({
       explicitProvider: evalCase.provider,
       groupName,
       inputMessage: scenario.text,
+      mentorSpecialty: scenario.mentorSpecialty ?? null,
       inputTokens: readNullableNumber(usage?.inputTokens),
       latencyMs: readNullableNumber(usage?.latencyMs),
       matchedExpertise: readMatchedKnowledge(diagnostics?.matchedExpertise),
@@ -367,6 +403,7 @@ async function runScenario({
       explicitProvider: evalCase.provider,
       groupName,
       inputMessage: scenario.text,
+      mentorSpecialty: scenario.mentorSpecialty ?? null,
       inputTokens: null,
       latencyMs: null,
       matchedExpertise: emptyMatchedKnowledge(),
@@ -549,7 +586,7 @@ function analyzeResponseQuality(
     "you've got this",
   ].filter((phrase) => normalizedResponse.includes(phrase));
   const hasWarmAffirmation =
-    /\bthat makes sense\b|\bthat [^.!?\n]{0,80} makes sense\b|\b(?:it|your reaction) makes sense\b|\bthat sounds (?:difficult|exhausting|frustrating|hard|heavy|honest|painful|tiring|understandable)\b|\bthat(?:'s| is) (?:a )?(?:real|understandable|valid)\b|\byou(?:'re| are) not (?:wrong|lazy|failing|weak)\b|\b(?:good|helpful|important|useful) (?:that you|you've|you have)\b|\bno wonder\b|\bnot a character flaw\b|\bi hear (?:you|how)\b/i.test(
+    /\bthat makes sense\b|\bthat [^.!?\n]{0,80} makes sense\b|\b(?:it|your reaction) makes sense\b|\bthat sounds\b|\b[^.!?\n]{0,60} (?:is|feels) real\b|\bthat(?:'s| is) (?:a )?(?:real|understandable|valid)\b|\byou(?:'re| are) not (?:wrong|lazy|failing|weak)\b|\b(?:good|helpful|important|useful) (?:that you|you've|you have)\b|\bno wonder\b|\bnot a character flaw\b|\bi(?:'m| am) glad you\b|\bi hear (?:you|how)\b/i.test(
       responseText,
     );
   const issues = [];

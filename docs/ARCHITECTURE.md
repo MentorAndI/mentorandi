@@ -35,6 +35,7 @@ Current service areas include:
 - Mentor Core modules.
 - Mentor Method Library.
 - Mentor Expertise Library.
+- Active Mentor Catalog.
 - Mentor Source Library.
 - Usage limits.
 - Alpha feedback.
@@ -116,14 +117,21 @@ User memory is personal to one user. It captures that user's understandings, goa
 
 The Mentor Method Library is reusable product knowledge. It contains concise, curated mentor techniques that can be matched into context when the current user message and recent conversation make them relevant. The context builder includes only a small number of relevant methods, not the whole library.
 
-The Mentor Expertise Library is reusable product knowledge for the active alpha
-lineup: Life, ADHD, Relationship, Stress / Burnout, Parenting, Health & Fitness,
-Focus and Confidence. The profiles adapt Marcus's support to the current
-situation without creating separate database mentors or changing existing
-conversation ownership. Business and Career are not active alpha mentor
-categories; Education remains an undecided future candidate. Source notes are
-static knowledge cards, not live browsing results, and the context builder
-includes only a small number of relevant expertise profiles. See
+MentorAndI uses one core engine with specialized mentor profiles. The Active
+Mentor Catalog defines the slug, positioning, tone, boundaries, opening style,
+and persona instructions for Life, ADHD, Relationship, Stress / Burnout,
+Parenting, Health & Fitness, Focus, and Confidence. An explicit selection from
+`/mentors` is validated at the server boundary and makes that profile's prompt
+and expertise primary while preserving the existing owned Marcus conversation,
+memory, goals, and reflections. Specialization therefore comes from mentor
+definitions, prompts, methods, expertise, and context rather than duplicated
+chat engines or client-only instructions.
+
+This is an alpha-preview model: it does not create separate database mentors or
+separate histories per profile. Future versions can add deeper mentor-specific
+memory strategies and method libraries after their ownership and product
+behavior are designed. Business and Career are not active alpha categories;
+Education remains an undecided future candidate. See
 `docs/ALPHA_MENTOR_LINEUP.md`.
 
 The Mentor Source Library contains curated knowledge cards and URLs for trusted frameworks or educational resources. It is not live browsing, scraping or web research. Source cards are matched into context only when relevant, and the prompt tells the model not to cite URLs unless the user asks for sources.

@@ -44,7 +44,18 @@ const defaultMentor = {
   tagline: "Personal clarity, honest reflection, and sustainable change.",
 };
 
-export function MentorConversationClient() {
+interface SelectedMentorPreview {
+  name: string;
+  role: string;
+  slug: string;
+  tagline: string;
+}
+
+export function MentorConversationClient({
+  selectedMentor,
+}: {
+  selectedMentor?: SelectedMentorPreview;
+}) {
   const [conversationId, setConversationId] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
@@ -58,7 +69,7 @@ export function MentorConversationClient() {
   const [messages, setMessages] = useState<MentorConversationMessage[]>([]);
   const [message, setMessage] = useState("");
   const [messageError, setMessageError] = useState("");
-  const [mentor, setMentor] = useState(defaultMentor);
+  const [mentor, setMentor] = useState(selectedMentor ?? defaultMentor);
   const [recentConversations, setRecentConversations] = useState<
     MentorConversationSummary[]
   >([]);
@@ -82,7 +93,7 @@ export function MentorConversationClient() {
     const session = await fetchMentorSession();
 
     setGoals(session.activeGoals);
-    setMentor(session.mentor);
+    setMentor(selectedMentor ?? session.mentor);
     setRecentConversations(session.conversations);
 
     return session;
@@ -147,7 +158,7 @@ export function MentorConversationClient() {
           setConversationId(nextConversationId);
           setGoals(session.activeGoals);
           setRecentConversations(session.conversations);
-          setMentor(session.mentor);
+          setMentor(selectedMentor ?? session.mentor);
 
           await Promise.all([
             loadConversationHistory(nextConversationId),
@@ -179,7 +190,7 @@ export function MentorConversationClient() {
       isActive = false;
       controller.abort();
     };
-  }, []);
+  }, [selectedMentor]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -200,6 +211,7 @@ export function MentorConversationClient() {
         body: JSON.stringify({
           conversationId,
           message: trimmedMessage,
+          mentorSpecialty: selectedMentor?.slug,
         }),
         headers: {
           "Content-Type": "application/json",
@@ -227,7 +239,7 @@ export function MentorConversationClient() {
         refreshMentorSessionList(),
       ]);
     } catch {
-      setErrorMessage("Marcus had trouble responding. Try again.");
+      setErrorMessage(`${mentor.name} had trouble responding. Try again.`);
     } finally {
       setIsSending(false);
     }
@@ -312,6 +324,7 @@ export function MentorConversationClient() {
           error={messageError}
           isSending={isSending}
           message={message}
+          mentorName={mentor.name}
           onMessageChange={(nextMessage) => {
             setMessage(nextMessage);
 

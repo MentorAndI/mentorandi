@@ -20,6 +20,8 @@ import {
   UserService,
   UserServiceError,
 } from "@/services/user/user.service";
+import { isActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog";
+import type { ActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog.types";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +31,7 @@ interface DevMentorResponseInput {
   conversationId?: string;
   mentorId: string;
   message: string;
+  mentorSpecialty?: ActiveMentorSlug;
   model?: string;
   provider?: DevMentorResponseProvider;
   userId: string;
@@ -99,6 +102,7 @@ export async function POST(request: Request) {
       {
         conversationId: conversation.id,
         message: validation.input.message,
+        mentorSpecialty: validation.input.mentorSpecialty,
         model: validation.input.model,
         provider: validation.input.provider,
         userId: validation.input.userId,
@@ -442,6 +446,10 @@ function validateDevMentorResponseInput(
   const conversationId = readOptionalTrimmedStringField(body, "conversationId");
   const message = readStringField(body, "message");
   const model = readOptionalTrimmedStringField(body, "model");
+  const mentorSpecialty = readOptionalTrimmedStringField(
+    body,
+    "mentorSpecialty",
+  );
   const provider = readOptionalTrimmedStringField(body, "provider");
 
   validateUuidField(errors, "userId", userId, "User ID");
@@ -469,6 +477,10 @@ function validateDevMentorResponseInput(
     errors.model = `Model must be ${maxModelLength} characters or fewer.`;
   }
 
+  if (mentorSpecialty && !isActiveMentorSlug(mentorSpecialty)) {
+    errors.mentorSpecialty = "Mentor specialization is not active.";
+  }
+
   if (Object.keys(errors).length > 0) {
     return { errors, isValid: false };
   }
@@ -479,6 +491,9 @@ function validateDevMentorResponseInput(
       conversationId,
       mentorId,
       message,
+      ...(mentorSpecialty
+        ? { mentorSpecialty: mentorSpecialty as ActiveMentorSlug }
+        : {}),
       model,
       ...(provider ? { provider: provider as DevMentorResponseProvider } : {}),
       userId,

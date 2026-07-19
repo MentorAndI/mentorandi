@@ -25,6 +25,9 @@ MentorAndI
 - The active alpha mentor lineup is Life, ADHD, Relationship, Stress / Burnout,
   Parenting, Health & Fitness, Focus and Confidence; Business and Career are not
   active mentor categories.
+- `/mentors` lets users preview and select those eight distinct profiles. The
+  selection safely specializes the shared Mentor Core while retaining the
+  existing Marcus conversation and user context.
 - Full Mentor Evaluation Runner exists for dev-only Mentor Core evaluation through the seeded database-backed flow.
 - Alpha Deployment Checklist exists for Hostinger/VPS go/no-go review.
 - Mock mode is available for deterministic local testing.
@@ -37,6 +40,7 @@ MentorAndI
 - `/dev/mentor-test` development test page.
 - `/privacy`, `/terms` and `/contact` alpha trust pages.
 - `/alpha` invited tester instructions.
+- `/mentors` active alpha mentor selection and preview.
 
 ## Core Systems Built
 
@@ -54,6 +58,8 @@ MentorAndI
 - Active goals in UI.
 - Reflection engine.
 - Personal-psychology Mentor Expertise profiles for the active alpha lineup.
+- Active Mentor Catalog with distinct persona prompts, tones, boundaries, and
+  example openings for all eight alpha specializations.
 - Alpha feedback capture with usefulness rating, category and page context.
 - Server-rendered alpha admin overview and feedback review.
 - Reflection-aware context.
@@ -112,6 +118,8 @@ MentorAndI
 - Payment is not done.
 - Privacy controls are basic v1 only; Supabase auth user deletion and full compliance workflows are not done.
 - Usage limits are not yet persisted to the database.
+- Alpha specializations share the current Marcus conversation history; separate
+  per-profile histories and deeper profile-specific memory are future work.
 
 ## Current Test Checklist
 

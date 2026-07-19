@@ -191,3 +191,14 @@ links to the relevant public account and trust pages.
 Goal:
 Help invited users test MentorAndI consistently and safely without exposing
 internal admin pages or adding persistence.
+
+### Feature 105 - Specialized Mentor System v1
+
+Status:
+Implemented. `/mentors` presents eight active alpha profiles, and validated
+profile selection specializes the shared Mentor Core prompt, expertise, tone,
+and boundaries without changing the database model or existing user context.
+
+Goal:
+Make the alpha lineup visibly distinct and demo-ready while preserving one
+secure conversation engine, current memory behavior, and safety boundaries.

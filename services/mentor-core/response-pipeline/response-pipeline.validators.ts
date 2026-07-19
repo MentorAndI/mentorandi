@@ -2,6 +2,8 @@ import type {
   MentorResponsePipelineInput,
   MentorResponsePipelineValidationResult,
 } from "@/services/mentor-core/response-pipeline/response-pipeline.types";
+import { isActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog";
+import type { ActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog.types";
 
 const uuidPattern =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -23,6 +25,7 @@ export function validateMentorResponsePipelineInput(
   const userId = readStringField(body, "userId");
   const conversationId = readStringField(body, "conversationId");
   const message = readStringField(body, "message");
+  const mentorSpecialty = readStringField(body, "mentorSpecialty");
 
   validateUuidField(errors, "userId", userId, "User ID");
   validateUuidField(
@@ -38,6 +41,10 @@ export function validateMentorResponsePipelineInput(
     errors.message = `Message must be ${maxMessageLength} characters or fewer.`;
   }
 
+  if (mentorSpecialty && !isActiveMentorSlug(mentorSpecialty)) {
+    errors.mentorSpecialty = "Mentor specialization is not active.";
+  }
+
   if (Object.keys(errors).length > 0) {
     return { errors, isValid: false };
   }
@@ -47,6 +54,9 @@ export function validateMentorResponsePipelineInput(
     input: {
       conversationId,
       message,
+      mentorSpecialty: mentorSpecialty
+        ? (mentorSpecialty as ActiveMentorSlug)
+        : undefined,
       userId,
     },
     isValid: true,

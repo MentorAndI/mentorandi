@@ -52,6 +52,7 @@ import {
   UserService,
   UserServiceError,
 } from "@/services/user/user.service";
+import { getActiveMentorProfile } from "@/services/mentor-catalog/mentor-catalog";
 
 const minimumMemoryConfidence = 0.6;
 const minimumMemoryImportance = 3;
@@ -112,6 +113,7 @@ export class MentorResponsePipelineService {
       const promptPackage = this.promptComposer.compose({
         context,
         currentUserMessage: input.message,
+        specialization: getActiveMentorProfile(input.mentorSpecialty) ?? undefined,
       });
       const model = input.model?.trim() || undefined;
 

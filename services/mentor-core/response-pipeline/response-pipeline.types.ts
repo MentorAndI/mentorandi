@@ -8,10 +8,12 @@ import type { MessageDto } from "@/services/message/message.types";
 import type { MentorResponseContext } from "@/services/mentor-core/context-builder/context-builder.types";
 import type { PromptPackage } from "@/services/mentor-core/prompt-composer/prompt-composer.types";
 import type { ReflectionDto } from "@/services/reflection/reflection.types";
+import type { ActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog.types";
 
 export interface MentorResponsePipelineInput {
   conversationId: string;
   message: string;
+  mentorSpecialty?: ActiveMentorSlug;
   model?: string;
   provider?: LlmProviderName;
   userId: string;

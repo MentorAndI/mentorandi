@@ -10,6 +10,7 @@ export interface MentorMessageFormProps {
   error?: string;
   isSending: boolean;
   message: string;
+  mentorName?: string;
   onMessageChange: (message: string) => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }
@@ -19,6 +20,7 @@ export function MentorMessageForm({
   error,
   isSending,
   message,
+  mentorName = "Marcus",
   onMessageChange,
   onSubmit,
 }: MentorMessageFormProps) {
@@ -42,7 +44,7 @@ export function MentorMessageForm({
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {isSending ? (
           <p className="text-sm text-zinc-500" role="status">
-            Marcus is taking a moment with this.
+            {mentorName} is taking a moment with this.
           </p>
         ) : (
           <span aria-hidden="true" />

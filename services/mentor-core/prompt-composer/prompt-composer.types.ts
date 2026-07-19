@@ -1,4 +1,5 @@
 import type { MentorResponseContext } from "@/services/mentor-core/context-builder/context-builder.types";
+import type { ActiveMentorProfile } from "@/services/mentor-catalog/mentor-catalog.types";
 
 export type MentorToneOption = "calm" | "direct" | "warm" | "challenging";
 export type MentorResponseMode = "reflective" | "practical" | "accountability";
@@ -7,6 +8,7 @@ export interface ComposePromptInput {
   context: MentorResponseContext;
   currentUserMessage: string;
   responseMode?: MentorResponseMode;
+  specialization?: ActiveMentorProfile;
   tone?: MentorToneOption;
 }
 

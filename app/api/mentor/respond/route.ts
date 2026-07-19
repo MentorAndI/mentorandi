@@ -11,12 +11,17 @@ import {
 } from "@/services/mentor-core/response-pipeline/response-pipeline.service";
 import { MentorUsageLimitService } from "@/services/usage-limits/mentor-usage-limits.service";
 import { UserServiceError } from "@/services/user/user.service";
+import {
+  isActiveMentorSlug,
+} from "@/services/mentor-catalog/mentor-catalog";
+import type { ActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog.types";
 
 export const dynamic = "force-dynamic";
 
 interface MentorRespondInput {
   conversationId?: string;
   message: string;
+  mentorSpecialty?: ActiveMentorSlug;
 }
 
 const uuidPattern =
@@ -56,6 +61,7 @@ export async function POST(request: Request) {
       {
         conversationId: session.conversation.id,
         message: validation.input.message,
+        mentorSpecialty: validation.input.mentorSpecialty,
         userId: session.userId,
       },
       {
@@ -144,6 +150,10 @@ function validateMentorRespondInput(
     "conversationId" in body && typeof body.conversationId === "string"
       ? body.conversationId.trim()
       : "";
+  const mentorSpecialty =
+    "mentorSpecialty" in body && typeof body.mentorSpecialty === "string"
+      ? body.mentorSpecialty.trim()
+      : "";
 
   if (!message) {
     errors.message = "Message is required.";
@@ -153,6 +163,10 @@ function validateMentorRespondInput(
 
   if (conversationId && !uuidPattern.test(conversationId)) {
     errors.conversationId = "Conversation ID must be a valid UUID.";
+  }
+
+  if (mentorSpecialty && !isActiveMentorSlug(mentorSpecialty)) {
+    errors.mentorSpecialty = "Mentor specialization is not active.";
   }
 
   if (Object.keys(errors).length > 0) {
@@ -167,6 +181,9 @@ function validateMentorRespondInput(
     input: {
       conversationId: conversationId || undefined,
       message,
+      mentorSpecialty: mentorSpecialty
+        ? (mentorSpecialty as ActiveMentorSlug)
+        : undefined,
     },
     isValid: true,
   };

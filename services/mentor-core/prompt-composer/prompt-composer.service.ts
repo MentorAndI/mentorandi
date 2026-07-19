@@ -5,6 +5,10 @@ import type {
   PromptPackage,
 } from "@/services/mentor-core/prompt-composer/prompt-composer.types";
 import { validateComposePromptInput } from "@/services/mentor-core/prompt-composer/prompt-composer.validators";
+import { mentorExpertiseLibrary } from "@/services/mentor-expertise/expertise-library";
+import type { MentorExpertiseProfile } from "@/services/mentor-expertise/expertise-types";
+import type { ActiveMentorProfile } from "@/services/mentor-catalog/mentor-catalog.types";
+import type { MentorContextExpertise } from "@/services/mentor-core/context-builder/context-builder.types";
 
 export class PromptComposerServiceError extends Error {
   constructor(message: string) {
@@ -26,7 +30,11 @@ export class PromptComposerService {
     const tone = validation.input.tone ?? "warm";
     const responseMode = validation.input.responseMode ?? "reflective";
     const context = validation.input.context;
-    const mentorIdentity = buildMentorIdentity(context.mentor.name);
+    const specialization = validation.input.specialization;
+    const mentorIdentity = buildMentorIdentity(
+      context.mentor.name,
+      specialization,
+    );
     const conversationRules = buildConversationRules();
     const responseInstructions = buildResponseInstructions(tone, responseMode);
 
@@ -54,7 +62,10 @@ export class PromptComposerService {
         targetDate: goal.targetDate,
         title: goal.title,
       })),
-      mentorExpertiseContext: context.relevantExpertise.map((expertise) => ({
+      mentorExpertiseContext: buildExpertiseContext(
+        context.relevantExpertise,
+        specialization,
+      ).map((expertise) => ({
         coreSkills: expertise.coreSkills.slice(0, 3),
         description: expertise.description,
         mentorDomain: expertise.mentorDomain,
@@ -93,15 +104,31 @@ export class PromptComposerService {
         tags: sourceCard.tags.slice(0, 4),
         title: sourceCard.title,
       })),
-      systemPrompt: buildSystemPrompt(context.mentor.name),
+      systemPrompt: buildSystemPrompt(context.mentor.name, specialization),
       userPrompt: validation.input.currentUserMessage,
     };
   }
 }
 
-function buildSystemPrompt(mentorName: string) {
+function buildSystemPrompt(
+  mentorName: string,
+  specialization?: ActiveMentorProfile,
+) {
+  const specializationInstructions = specialization
+    ? [
+        `Use the selected ${specialization.name} profile for this response.`,
+        `Its tone is: ${specialization.tone}`,
+        ...specialization.personaPrompt,
+        ...specialization.boundaries,
+      ]
+    : [];
+  const identity = specialization
+    ? `You are MentorAndI's ${specialization.name} specialization, powered by its long-term Mentor Core.`
+    : `You are ${mentorName}, a long-term Life Mentor for MentorAndI.`;
+
   return [
-    `You are ${mentorName}, a long-term Life Mentor for MentorAndI.`,
+    identity,
+    ...specializationInstructions,
     "You are not a generic chatbot.",
     "Center personal direction, self-awareness, relationships, confidence, emotional load, attention, and sustainable change.",
     "Help the user understand patterns, make grounded decisions and follow through without pretending to be a clinician.",
@@ -111,9 +138,25 @@ function buildSystemPrompt(mentorName: string) {
   ].join(" ");
 }
 
-function buildMentorIdentity(mentorName: string) {
+function buildMentorIdentity(
+  mentorName: string,
+  specialization?: ActiveMentorProfile,
+) {
+  const identity = specialization
+    ? `You are MentorAndI's ${specialization.name} specialization within its long-term mentor system.`
+    : `You are ${mentorName}, a long-term Life Mentor.`;
+
   return [
-    `You are ${mentorName}, a long-term Life Mentor.`,
+    identity,
+    ...(specialization
+      ? [
+          `The user selected the ${specialization.name} specialization for this conversation.`,
+          `Specialization focus: ${specialization.shortDescription}`,
+          `Specialization tone: ${specialization.tone}`,
+          ...specialization.personaPrompt,
+          ...specialization.boundaries,
+        ]
+      : []),
     "You are not a generic chatbot.",
     "You help with personal direction, patterns, relationships, confidence, emotional load, attention, and sustainable change.",
     "You sound warmly engaged with the specific person and situation, not neutral, distant or templated.",
@@ -121,6 +164,28 @@ function buildMentorIdentity(mentorName: string) {
     "You are an AI mentor and never claim to be human or to have human experiences.",
     "You ask useful questions, but you also answer directly when the user asks a direct question.",
   ];
+}
+
+function buildExpertiseContext(
+  relevantExpertise: MentorContextExpertise[],
+  specialization?: ActiveMentorProfile,
+): Array<MentorContextExpertise | MentorExpertiseProfile> {
+  const selectedExpertise = specialization
+    ? mentorExpertiseLibrary.find(
+        (profile) => profile.mentorDomain === specialization.expertiseDomain,
+      )
+    : null;
+
+  if (!selectedExpertise) {
+    return relevantExpertise;
+  }
+
+  return [
+    selectedExpertise,
+    ...relevantExpertise.filter(
+      (profile) => profile.mentorDomain !== selectedExpertise.mentorDomain,
+    ),
+  ].slice(0, 2);
 }
 
 function buildConversationRules() {
@@ -221,6 +286,8 @@ function buildConstraints() {
   return [
     "Protect user privacy.",
     "Do not diagnose medical or mental health conditions.",
+    "Do not provide medical, legal, financial, or emergency advice.",
+    "For immediate danger, self-harm, abuse, or another emergency, encourage appropriate local emergency services or qualified human support.",
     "Do not claim certainty beyond the provided context.",
     "Do not expose internal IDs, implementation details, or hidden context labels.",
     "Do not invent user history, preferences, goals, or memories.",

@@ -1,9 +1,14 @@
 # Alpha Mentor Lineup
 
-MentorAndI's alpha positioning is personal and psychological rather than a
-broad directory of business or career coaches. Marcus remains the active
-database mentor and is positioned as the Life Mentor. The domain profiles below
-help Mentor Core adapt his support to the user's current situation.
+MentorAndI uses one Mentor Core with eight selectable specialist profiles.
+Specialization comes from each profile's definition, persona instructions,
+tone, boundaries, matched methods, expertise, and the user's existing context.
+Marcus remains the underlying alpha database mentor so current conversations,
+ownership checks, memory, goals, and reflections continue to work unchanged.
+
+The `/mentors` page is an alpha preview. Choosing a profile routes the existing
+conversation through that specialization; alpha does not yet create a separate
+conversation history or database mentor for every profile.
 
 ## Active Alpha Lineup
 
@@ -37,3 +42,56 @@ help Mentor Core adapt his support to the user's current situation.
   diagnoses.
 - Existing Marcus conversations remain valid. The `marcus` slug and database
   relationships must not be replaced when positioning changes.
+
+## Demo Scenarios
+
+### Life
+
+- "My life looks fine from the outside, but I feel disconnected from it."
+- "I keep circling the same decision and cannot tell whether it is fear or a bad fit."
+- "I want better habits, but I rebel against every routine I make."
+
+### ADHD
+
+- "Opening the document feels impossible even though the task matters."
+- "I underestimate every task and spend the whole day catching up."
+- "Help me create enough external structure to finish this without shaming myself."
+
+### Relationship
+
+- "My partner said I never listen, and I got defensive."
+- "I need to set a boundary without turning it into a threat."
+- "We keep having the same argument and neither of us feels understood."
+
+### Stress / Burnout
+
+- "I feel guilty whenever I stop working, but I am exhausted."
+- "Everything feels urgent and I cannot tell what can safely wait."
+- "Rest has become another thing I think I am failing at."
+
+### Parenting
+
+- "I snapped during the morning rush and want to repair it."
+- "Our bedtime routine becomes a fight every night."
+- "I feel guilty that I do not have more patience after work."
+
+### Health & Fitness
+
+- "I train hard for one week and then stop for three."
+- "Help me choose a realistic minimum for low-energy days."
+- "I want healthier food habits without turning eating into punishment."
+
+### Focus
+
+- "I keep bouncing between five priorities and finishing none."
+- "Notifications are not the only problem; I do not know what done means."
+- "What is the smallest outcome I should protect this afternoon?"
+
+### Confidence
+
+- "I stayed quiet in a meeting, then someone else shared my idea."
+- "I keep waiting to feel qualified before I apply."
+- "Help me prepare one assertive sentence for a difficult conversation."
+
+Future versions can add deeper profile-specific memory strategies and method
+libraries after the alpha behavior and data model have been validated.
