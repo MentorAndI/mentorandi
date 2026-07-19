@@ -29,5 +29,5 @@ export interface AdminFeedbackEntry {
   message: string;
   pagePath: string | null;
   rating: FeedbackRatingInput;
-  userId: string;
+  userEmail: string;
 }

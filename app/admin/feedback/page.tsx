@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 
+import { AdminAccessDenied } from "@/components/admin/AdminAccessDenied";
+import { AdminNav } from "@/components/admin/AdminNav";
 import { Container } from "@/components/layout/Container";
 import { Badge } from "@/components/ui/Badge";
 import { Heading } from "@/components/ui/Heading";
@@ -36,7 +38,7 @@ export default async function AdminFeedbackPage() {
   }
 
   if (access.status === "forbidden") {
-    return <NotAllowed email={access.email} />;
+    return <AdminAccessDenied email={access.email} />;
   }
 
   const feedback = await new FeedbackService().getRecentFeedbackForAdmin();
@@ -44,7 +46,7 @@ export default async function AdminFeedbackPage() {
   return (
     <main className="min-h-screen bg-zinc-50 py-10 text-zinc-950">
       <Container className="max-w-7xl">
-        <div className="mb-8 space-y-3">
+        <div className="mb-8 space-y-4">
           <Text className="font-medium uppercase tracking-[0.18em]" variant="muted">
             Internal admin
           </Text>
@@ -53,6 +55,7 @@ export default async function AdminFeedbackPage() {
             The 100 most recent submissions, newest first. Signed in as{" "}
             <span className="font-medium text-zinc-900">{access.email}</span>.
           </Text>
+          <AdminNav />
         </div>
 
         {feedback.length === 0 ? (
@@ -74,7 +77,7 @@ export default async function AdminFeedbackPage() {
               </thead>
               <tbody className="divide-y divide-zinc-200">
                 {feedback.map((entry, index) => (
-                  <tr key={`${entry.userId}-${entry.createdAt}-${index}`}>
+                  <tr key={`${entry.userEmail}-${entry.createdAt}-${index}`}>
                     <TableCell className="whitespace-nowrap text-zinc-600">
                       <time dateTime={entry.createdAt}>
                         {dateFormatter.format(new Date(entry.createdAt))}
@@ -94,8 +97,8 @@ export default async function AdminFeedbackPage() {
                     <TableCell className="max-w-64 break-all text-zinc-600">
                       {entry.pagePath ?? "—"}
                     </TableCell>
-                    <TableCell className="max-w-64 break-all font-mono text-xs text-zinc-600">
-                      {entry.userId}
+                    <TableCell className="max-w-64 break-all text-zinc-600">
+                      {entry.userEmail}
                     </TableCell>
                   </tr>
                 ))}
@@ -104,24 +107,6 @@ export default async function AdminFeedbackPage() {
           </div>
         )}
       </Container>
-    </main>
-  );
-}
-
-function NotAllowed({ email }: { email: string | null }) {
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 py-16 text-zinc-950">
-      <div className="w-full max-w-lg rounded-2xl border border-zinc-200 bg-white p-8 shadow-sm">
-        <p className="mb-3 text-sm font-semibold uppercase tracking-[0.18em] text-red-700">
-          403 — Not allowed
-        </p>
-        <Heading level={1}>Admin access required</Heading>
-        <Text className="mt-4">
-          {email
-            ? `${email} is authenticated but is not allowed to review alpha feedback.`
-            : "Your authenticated account has no email available for admin authorization."}
-        </Text>
-      </div>
     </main>
   );
 }

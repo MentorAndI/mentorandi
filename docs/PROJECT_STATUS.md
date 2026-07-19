@@ -16,7 +16,8 @@ MentorAndI
 - Aggregate Learning Suggestions v1 exists as a disabled design/service-interface foundation only; no cross-user learning is implemented.
 - Usage Limits v1 exists as an in-memory request-count foundation for mentor responses; database persistence is still future work.
 - Authenticated alpha feedback capture is available from `/start` and `/mentor`.
-- Allowlisted internal admins can review recent alpha feedback at `/admin/feedback`.
+- Allowlisted internal admins can monitor aggregate and recent alpha activity at
+  `/admin` and review recent feedback at `/admin/feedback`.
 - Public alpha privacy, terms and contact pages are available, with direct
   support, in-product feedback and bug-report guidance on `/contact`.
 - The active alpha mentor lineup is Life, ADHD, Relationship, Stress / Burnout,
@@ -50,6 +51,7 @@ MentorAndI
 - Reflection engine.
 - Personal-psychology Mentor Expertise profiles for the active alpha lineup.
 - Alpha feedback capture with usefulness rating, category and page context.
+- Server-rendered alpha admin overview and feedback review.
 - Reflection-aware context.
 - Basic account data export and mentor data deletion controls.
 - Context Builder.

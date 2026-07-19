@@ -55,10 +55,12 @@ RLS must stay enabled on all public app tables: `User`, `Mentor`, `Conversation`
 The feedback entry point checks `/api/me` before appearing, so it is visible only with a real Supabase session. `POST /api/feedback` independently resolves the authenticated user without a development fallback, validates the rating, category, message and optional page path, then calls the Feedback service and Prisma-only repository. The API does not expose feedback IDs or provide a cross-user read endpoint.
 
 Feedback belongs to a user and is deleted when that user is deleted. Allowlisted
-authenticated admins can inspect the 100 most recent submissions at
-`/admin/feedback`. The server-rendered page checks the Supabase session email
-against `ALPHA_ADMIN_EMAILS` before the Feedback service reads through Prisma.
-There is no public feedback read API or browser-facing Supabase access.
+authenticated admins can inspect aggregate alpha activity at `/admin` and the
+100 most recent submissions at `/admin/feedback`. Both server-rendered pages
+check the Supabase session email against `ALPHA_ADMIN_EMAILS` before their
+services read cross-user data through Prisma. There is no public admin or
+feedback read API and no browser-facing Supabase access. See
+`docs/ALPHA_ADMIN.md`.
 
 ## Alpha Trust Pages
 

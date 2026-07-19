@@ -159,3 +159,14 @@ Goal:
 Make Marcus warmer, more personal, encouraging and emotionally present without
 pretending to be human, becoming therapist-like or drifting into romantic AI
 companion behavior.
+
+### Feature 102 - Alpha Admin Overview
+
+Status:
+Implemented. Allowlisted authenticated admins can view aggregate activity,
+recent users and conversations, feedback summaries and available process-local
+usage counters at `/admin`, with navigation to `/admin/feedback`.
+
+Goal:
+Provide a simple internal view of early alpha activity without SQL, public admin
+APIs, client-only authorization or database schema changes.

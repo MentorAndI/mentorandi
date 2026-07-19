@@ -91,7 +91,7 @@ Important:
 - Keep `http://localhost:3000/auth/callback` in Supabase Auth redirect URLs for local development.
 - Do not use `LLM_PROVIDER=mock` for real staging validation.
 - Set `ALPHA_ADMIN_EMAILS` to the comma-separated authenticated emails allowed
-  to open `/admin/feedback`.
+  to open `/admin` and `/admin/feedback`.
 - Keep `.env.staging` on the server only.
 
 ## Build And Start

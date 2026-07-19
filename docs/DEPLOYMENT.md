@@ -44,7 +44,7 @@ ANTHROPIC_MODEL_DEEP=
 ```
 
 Set `ALPHA_ADMIN_EMAILS` to a comma-separated allowlist of authenticated
-Supabase user emails that may open `/admin/feedback`, for example:
+Supabase user emails that may open `/admin` and `/admin/feedback`, for example:
 
 ```env
 ALPHA_ADMIN_EMAILS=rene@example.com,admin@example.com

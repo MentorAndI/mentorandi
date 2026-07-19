@@ -62,6 +62,43 @@ export class UsageLimitService {
   }
 }
 
+export function getUsageLimitAdminSnapshot() {
+  const periods = getCurrentPeriods();
+  const totals = new Map<
+    UsageLimitScope,
+    {
+      dailyCount: number;
+      monthlyCount: number;
+      subjectCount: number;
+      weeklyCount: number;
+    }
+  >();
+
+  for (const [key, counter] of usageCounters) {
+    const separatorIndex = key.indexOf(":");
+    const scope = key.slice(0, separatorIndex) as UsageLimitScope;
+    const current = totals.get(scope) ?? {
+      dailyCount: 0,
+      monthlyCount: 0,
+      subjectCount: 0,
+      weeklyCount: 0,
+    };
+
+    current.dailyCount +=
+      counter.dailyPeriod === periods.daily ? counter.dailyCount : 0;
+    current.weeklyCount +=
+      counter.weeklyPeriod === periods.weekly ? counter.weeklyCount : 0;
+    current.monthlyCount +=
+      counter.monthlyPeriod === periods.monthly ? counter.monthlyCount : 0;
+    current.subjectCount += 1;
+    totals.set(scope, current);
+  }
+
+  return [...totals.entries()]
+    .map(([scope, counter]) => ({ scope, ...counter }))
+    .sort((left, right) => left.scope.localeCompare(right.scope));
+}
+
 export function readUsageLimitConfig(): UsageLimitConfig {
   return {
     dailyMessageLimit: readPositiveInteger(
