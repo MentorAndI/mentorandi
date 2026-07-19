@@ -9,6 +9,7 @@ const checks = [
   { path: "/login", redirectsAllowed: false },
   { path: "/signup", redirectsAllowed: false },
   { path: "/forgot-password", redirectsAllowed: false },
+  { path: "/alpha", redirectsAllowed: false },
   { path: "/privacy", redirectsAllowed: false },
   { path: "/terms", redirectsAllowed: false },
   { path: "/contact", redirectsAllowed: false },

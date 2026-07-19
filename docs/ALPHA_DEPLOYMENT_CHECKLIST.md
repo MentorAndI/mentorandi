@@ -145,6 +145,7 @@ Manually verify:
 - `/login`
 - `/signup`
 - `/forgot-password`
+- `/alpha`
 - `/start`
 - `/mentor`
 - `/settings`

@@ -20,6 +20,8 @@ MentorAndI
   `/admin` and review recent feedback at `/admin/feedback`.
 - Public alpha privacy, terms and contact pages are available, with direct
   support, in-product feedback and bug-report guidance on `/contact`.
+- A public `/alpha` guide explains the invited tester flow, safety boundaries,
+  test checklist and feedback format.
 - The active alpha mentor lineup is Life, ADHD, Relationship, Stress / Burnout,
   Parenting, Health & Fitness, Focus and Confidence; Business and Career are not
   active mentor categories.
@@ -34,6 +36,7 @@ MentorAndI
 - `/mentor` main mentor experience.
 - `/dev/mentor-test` development test page.
 - `/privacy`, `/terms` and `/contact` alpha trust pages.
+- `/alpha` invited tester instructions.
 
 ## Core Systems Built
 

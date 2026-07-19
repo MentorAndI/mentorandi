@@ -73,8 +73,11 @@ confirmation callback are unchanged. See `docs/ALPHA_INVITE_GATE.md`.
 
 ## Alpha Trust Pages
 
-`/privacy`, `/terms` and `/contact` are public informational pages. They use
-simple alpha wording and do not create database records or expose an API.
+`/alpha`, `/privacy`, `/terms` and `/contact` are public informational pages.
+They use simple alpha wording and do not create database records or expose an
+API. `/alpha` explains the invited tester flow, safe test scope, feedback path
+and bug-report format without linking to internal admin pages. See
+`docs/ALPHA_TESTER_GUIDE.md`.
 `/contact` provides the alpha support email, directs authenticated users to the
 in-product feedback button and explains what to include in a bug report. It
 does not provide a public contact form. These pages are not a substitute for

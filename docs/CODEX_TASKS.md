@@ -180,3 +180,14 @@ server before calling Supabase whenever `ALPHA_INVITE_CODE` is configured.
 Goal:
 Restrict new alpha accounts to invited testers without exposing the configured
 code to client bundles or affecting login, existing users or email confirmation.
+
+### Feature 104 - Alpha Tester Instructions
+
+Status:
+Implemented. The public `/alpha` page gives invited testers a signup-to-feedback
+checklist, low-risk testing guidance, safety boundaries, bug-report format and
+links to the relevant public account and trust pages.
+
+Goal:
+Help invited users test MentorAndI consistently and safely without exposing
+internal admin pages or adding persistence.
