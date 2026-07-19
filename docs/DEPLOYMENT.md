@@ -33,6 +33,7 @@ ALPHA_WEEKLY_MESSAGE_LIMIT=
 ALPHA_MONTHLY_MESSAGE_LIMIT=
 ALPHA_WEEKLY_DEEP_LIMIT=
 ALPHA_ADMIN_EMAILS=
+ALPHA_INVITE_CODE=
 OPENAI_API_KEY=
 OPENAI_MODEL=
 OPENAI_MODEL_CHEAP=
@@ -52,6 +53,10 @@ ALPHA_ADMIN_EMAILS=rene@example.com,admin@example.com
 
 Keep the allowlist in deployment secrets. After changing it, rebuild or restart
 the application so the server process receives the updated environment.
+
+Set `ALPHA_INVITE_CODE` to the private code required for new alpha signups. Keep
+it in deployment secrets and use the same value on every app instance. Leaving
+it empty keeps signup open. Rebuild or restart after changing it.
 
 ## LLM Provider
 

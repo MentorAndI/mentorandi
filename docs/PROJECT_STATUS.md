@@ -38,6 +38,7 @@ MentorAndI
 ## Core Systems Built
 
 - Supabase Auth foundation.
+- Optional server-side alpha invite gate for new signups.
 - Prisma database models.
 - User resolution.
 - Conversation ownership and user isolation.
@@ -89,6 +90,8 @@ MentorAndI
 ## Alpha Auth Behavior
 
 - `/login`, `/signup` and `/forgot-password` are public auth pages.
+- `/signup` requires a matching invite code only when `ALPHA_INVITE_CODE` is
+  configured; invalid codes are rejected before Supabase signup is called.
 - Successful login redirects to `/mentor`.
 - Successful signup either creates an immediate session and redirects to `/start`, or shows email confirmation instructions. Email confirmation links return through `/auth/callback` to create the session and continue to `/start`.
 - Sign out clears the Supabase session and sends the user to `/login`.

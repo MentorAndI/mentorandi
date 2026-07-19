@@ -16,6 +16,7 @@ import { validateSignupForm } from "@/services/auth/validation";
 
 interface SignupFormValues {
   email: string;
+  inviteCode: string;
   password: string;
   passwordConfirmation: string;
 }
@@ -23,6 +24,7 @@ interface SignupFormValues {
 interface SignupFormErrors {
   email?: string;
   form?: string;
+  inviteCode?: string;
   password?: string;
   passwordConfirmation?: string;
 }
@@ -37,6 +39,7 @@ export function SignupForm({
   const router = useRouter();
   const [values, setValues] = useState<SignupFormValues>({
     email: "",
+    inviteCode: "",
     password: "",
     passwordConfirmation: "",
   });
@@ -67,14 +70,17 @@ export function SignupForm({
     try {
       const { data, error } = await signUpWithEmailPassword({
         email: values.email,
-        emailRedirectTo:
-          typeof window === "undefined"
-            ? undefined
-            : `${window.location.origin}/auth/callback`,
+        inviteCode: values.inviteCode,
+        nextPath: redirectPath,
         password: values.password,
       });
 
       if (error) {
+        if (error.message === "Invalid alpha invite code.") {
+          setErrors({ inviteCode: error.message });
+          return;
+        }
+
         setErrors({
           form: formatSignupAuthError(error.message),
         });
@@ -155,6 +161,21 @@ export function SignupForm({
         }
         type="email"
         value={values.email}
+      />
+
+      <Input
+        autoComplete="off"
+        error={errors.inviteCode}
+        id="signup-invite-code"
+        label="Alpha invite code"
+        onChange={(event) =>
+          setValues((current) => ({
+            ...current,
+            inviteCode: event.target.value,
+          }))
+        }
+        type="text"
+        value={values.inviteCode}
       />
 
       <Input

@@ -170,3 +170,13 @@ usage counters at `/admin`, with navigation to `/admin/feedback`.
 Goal:
 Provide a simple internal view of early alpha activity without SQL, public admin
 APIs, client-only authorization or database schema changes.
+
+### Feature 103 - Alpha Invite Gate
+
+Status:
+Implemented. Signup accepts an optional invite code and validates it on the
+server before calling Supabase whenever `ALPHA_INVITE_CODE` is configured.
+
+Goal:
+Restrict new alpha accounts to invited testers without exposing the configured
+code to client bundles or affecting login, existing users or email confirmation.

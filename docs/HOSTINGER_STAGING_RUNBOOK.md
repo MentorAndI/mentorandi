@@ -70,6 +70,7 @@ ALPHA_WEEKLY_MESSAGE_LIMIT=
 ALPHA_MONTHLY_MESSAGE_LIMIT=
 ALPHA_WEEKLY_DEEP_LIMIT=
 ALPHA_ADMIN_EMAILS=
+ALPHA_INVITE_CODE=
 
 OPENAI_API_KEY=
 OPENAI_MODEL=
@@ -92,6 +93,7 @@ Important:
 - Do not use `LLM_PROVIDER=mock` for real staging validation.
 - Set `ALPHA_ADMIN_EMAILS` to the comma-separated authenticated emails allowed
   to open `/admin` and `/admin/feedback`.
+- Set `ALPHA_INVITE_CODE` to the private code required for new alpha signups.
 - Keep `.env.staging` on the server only.
 
 ## Build And Start

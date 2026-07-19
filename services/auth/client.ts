@@ -18,25 +18,35 @@ export async function signInWithEmailPassword({
 }
 
 export interface SignupCredentials extends EmailPasswordCredentials {
-  emailRedirectTo?: string;
+  inviteCode?: string;
+  nextPath?: string;
 }
 
 export async function signUpWithEmailPassword({
   email,
-  emailRedirectTo,
+  inviteCode,
+  nextPath,
   password,
 }: SignupCredentials) {
-  const supabase = createSupabaseBrowserClient();
-
-  return supabase.auth.signUp({
-    email,
-    options: emailRedirectTo
-      ? {
-          emailRedirectTo,
-        }
-      : undefined,
-    password,
+  const response = await fetch("/api/auth/signup", {
+    body: JSON.stringify({ email, inviteCode, nextPath, password }),
+    headers: {
+      Accept: "application/json",
+      "Content-Type": "application/json",
+    },
+    method: "POST",
   });
+  const body = (await response.json().catch(() => null)) as {
+    error?: string;
+    hasSession?: boolean;
+  } | null;
+
+  return {
+    data: { session: body?.hasSession ? true : null },
+    error: response.ok
+      ? null
+      : { errorCode: response.status, message: body?.error },
+  };
 }
 
 export async function requestPasswordReset(email: string, redirectTo: string) {

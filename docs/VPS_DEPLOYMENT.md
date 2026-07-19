@@ -51,6 +51,10 @@ Set `ALPHA_ADMIN_EMAILS` to the comma-separated Supabase account emails allowed
 to review `/admin` and `/admin/feedback`. Restart or reload the PM2 process
 after changing the allowlist.
 
+Set `ALPHA_INVITE_CODE` to the private code required for new alpha signups.
+Leave it empty only when signup should remain open. Restart or reload every app
+process after changing it.
+
 ## 5. Build
 
 ```bash

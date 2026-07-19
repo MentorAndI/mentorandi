@@ -62,6 +62,15 @@ services read cross-user data through Prisma. There is no public admin or
 feedback read API and no browser-facing Supabase access. See
 `docs/ALPHA_ADMIN.md`.
 
+## Alpha Invite Gate
+
+`/signup` sends account-creation requests to the server-only
+`/api/auth/signup` boundary. When `ALPHA_INVITE_CODE` is configured, the auth
+service validates the submitted code before calling Supabase Auth. The
+configured value is never sent to the browser. If the variable is absent or
+empty, signup remains open as before. Login, existing accounts and the email
+confirmation callback are unchanged. See `docs/ALPHA_INVITE_GATE.md`.
+
 ## Alpha Trust Pages
 
 `/privacy`, `/terms` and `/contact` are public informational pages. They use
