@@ -147,3 +147,15 @@ one strong follow-up question.
 Goal:
 Make Marcus feel like a personal psychological Life Mentor instead of generic,
 list-heavy ChatGPT advice while preserving safety and Mentor Core context.
+
+### Feature 101B - Warm Up Marcus Mentor Tone
+
+Status:
+Implemented. Marcus now usually gives one short, grounded affirmation before
+naming a pattern or suggesting action, and the mentor eval checks warmth across
+focus, stress, self-doubt, relationship conflict and ADHD task initiation.
+
+Goal:
+Make Marcus warmer, more personal, encouraging and emotionally present without
+pretending to be human, becoming therapist-like or drifting into romantic AI
+companion behavior.

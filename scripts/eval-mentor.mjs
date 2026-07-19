@@ -28,8 +28,9 @@ const scenarioGroups = [
     messages: [
       {
         expectsMentorShape: true,
+        expectsWarmAffirmation: true,
         name: "Competing focus priorities",
-        text: "I have five priorities and I keep bouncing between them without finishing anything.",
+        text: "I sat down to work on the launch today, but I kept bouncing between five priorities and finished none of them. Now I feel annoyed with myself.",
       },
       {
         expectsMentorShape: true,
@@ -43,8 +44,9 @@ const scenarioGroups = [
     messages: [
       {
         expectsMentorShape: true,
+        expectsWarmAffirmation: true,
         name: "ADHD task initiation",
-        text: "I have ADHD and I can't get started on my work.",
+        text: "I have ADHD, and even opening the document feels weirdly impossible today. I know the task matters, which makes me feel worse about being stuck.",
       },
     ],
   },
@@ -63,8 +65,9 @@ const scenarioGroups = [
     messages: [
       {
         expectsMentorShape: true,
+        expectsWarmAffirmation: true,
         name: "Relationship communication",
-        text: "I keep arguing with my partner and I don't know how to communicate.",
+        text: "My partner said I never listen, and I got defensive even though part of me knows they have a point. We ended the evening barely speaking.",
       },
     ],
   },
@@ -73,6 +76,7 @@ const scenarioGroups = [
     messages: [
       {
         expectsMentorShape: true,
+        expectsWarmAffirmation: true,
         name: "Stress and overload",
         text: "I feel guilty whenever I stop working, but I am exhausted and starting to resent everything.",
       },
@@ -83,8 +87,9 @@ const scenarioGroups = [
     messages: [
       {
         expectsMentorShape: true,
-        name: "Imposter feelings",
-        text: "Everyone else seems more capable than me, so I stay quiet even when I have something useful to say.",
+        expectsWarmAffirmation: true,
+        name: "Self-doubt in a group",
+        text: "I had an idea in the meeting but stayed quiet because everyone else sounded more capable. Someone else said almost the same thing later, and now I'm frustrated with myself.",
       },
     ],
   },
@@ -304,6 +309,7 @@ async function runScenario({
     const responseQuality = analyzeResponseQuality(
       responseText,
       scenario.expectsMentorShape === true,
+      scenario.expectsWarmAffirmation === true,
     );
 
     return {
@@ -374,6 +380,7 @@ async function runScenario({
       responseQuality: analyzeResponseQuality(
         "",
         scenario.expectsMentorShape === true,
+        scenario.expectsWarmAffirmation === true,
       ),
       responseText: "",
       routeReason: "Request failed before model routing diagnostics were returned.",
@@ -520,12 +527,31 @@ function buildPreview(value) {
     : normalized;
 }
 
-function analyzeResponseQuality(responseText, expectsMentorShape) {
+function analyzeResponseQuality(
+  responseText,
+  expectsMentorShape,
+  expectsWarmAffirmation,
+) {
   const bulletLineCount = responseText
     .split("\n")
     .filter((line) => /^\s*(?:[-*•]|\d+[.)])\s+/.test(line)).length;
   const questionCount = (responseText.match(/\?/g) ?? []).length;
   const wordCount = responseText.split(/\s+/).filter(Boolean).length;
+  const normalizedResponse = responseText.toLowerCase();
+  const genericPhrases = [
+    "here are some practical tips",
+    "a few things usually help",
+    "one useful question",
+    "it depends",
+    "let's break it down",
+    "believe in yourself",
+    "you are amazing",
+    "you've got this",
+  ].filter((phrase) => normalizedResponse.includes(phrase));
+  const hasWarmAffirmation =
+    /\bthat makes sense\b|\bthat [^.!?\n]{0,80} makes sense\b|\b(?:it|your reaction) makes sense\b|\bthat sounds (?:difficult|exhausting|frustrating|hard|heavy|honest|painful|tiring|understandable)\b|\bthat(?:'s| is) (?:a )?(?:real|understandable|valid)\b|\byou(?:'re| are) not (?:wrong|lazy|failing|weak)\b|\b(?:good|helpful|important|useful) (?:that you|you've|you have)\b|\bno wonder\b|\bnot a character flaw\b|\bi hear (?:you|how)\b/i.test(
+      responseText,
+    );
   const issues = [];
 
   if (
@@ -543,6 +569,14 @@ function analyzeResponseQuality(responseText, expectsMentorShape) {
     issues.push("missing follow-up question");
   }
 
+  if (expectsWarmAffirmation && responseText && !hasWarmAffirmation) {
+    issues.push("missing warm affirmation");
+  }
+
+  if (genericPhrases.length > 0) {
+    issues.push(`generic assistant phrase: ${genericPhrases.join(", ")}`);
+  }
+
   if (wordCount > 220) {
     issues.push("response exceeds 220 words");
   }
@@ -550,6 +584,9 @@ function analyzeResponseQuality(responseText, expectsMentorShape) {
   return {
     bulletLineCount,
     expectsMentorShape,
+    expectsWarmAffirmation,
+    genericPhrases,
+    hasWarmAffirmation,
     issues,
     passed: responseText ? issues.length === 0 : false,
     questionCount,
@@ -562,7 +599,10 @@ function formatResponseQuality(quality) {
     return "not available";
   }
 
-  const metrics = `${quality.wordCount} words, ${quality.bulletLineCount} bullets, ${quality.questionCount} questions`;
+  const warmthMetric = quality.expectsWarmAffirmation
+    ? `, affirmation ${quality.hasWarmAffirmation ? "present" : "missing"}`
+    : "";
+  const metrics = `${quality.wordCount} words, ${quality.bulletLineCount} bullets, ${quality.questionCount} questions${warmthMetric}`;
 
   return quality.passed
     ? `pass (${metrics})`

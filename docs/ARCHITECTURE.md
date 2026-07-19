@@ -122,11 +122,12 @@ Aggregate Learning Suggestions v1 is a design foundation only. The service inter
 
 Mentor tone is calibrated in the prompt composer. Marcus is positioned as a
 personal Life Mentor who should challenge with tact: direct but not accusatory,
-practical without productivity-coach cliches, emotionally aware without
-pretending to be a clinician, and observant without sounding clinical. Repeated
-user goals or concerns should be treated as signal to make the topic more
-concrete, not as a failure to answer correctly. Personal mentoring responses
-default to conversational prose: reflect the specific situation, name at most
+warmly affirming without empty praise, practical without productivity-coach
+cliches, emotionally present without pretending to be a clinician or human,
+and observant without sounding clinical. Repeated user goals or concerns should
+be treated as signal to make the topic more concrete, not as a failure to
+answer correctly. Personal mentoring responses default to conversational prose:
+respond to the specific situation, validate it when appropriate, name at most
 one tentative pattern, offer one concrete next step and end personal mentoring
 responses with exactly one useful question. See
 `docs/MARCUS_RESPONSE_QUALITY.md`.
