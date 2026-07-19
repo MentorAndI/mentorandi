@@ -6,6 +6,18 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
+## Repository Identity and Isolation
+
+- Project: **MentorAndI consumer AI mentoring application**.
+- Expected GitHub remote: `MentorAndI/mentorandi`.
+- Expected local repository: `~/mentorandi` unless the user explicitly provides another worktree for this same repository.
+- Work only inside this repository and its worktrees.
+- Never access, edit, copy from, or modify `ai-3d-platform`, `revault-portfolio-manager`, Mentor AI corporate-site repositories, or any unrelated repository.
+- Do not import assumptions, task lists, architecture, credentials, data, terminology, or product rules from another project.
+- Before beginning a new task, verify `pwd`, `git remote -v`, and `git status -sb`.
+- Stop if the remote is not `MentorAndI/mentorandi` or if the prompt appears to belong to Revault, AI 3D, or another project.
+- Start a fresh agent session whenever changing repositories. Do not continue one agent thread across multiple projects.
+
 ## Project Name
 
 MentorAndI
@@ -57,3 +69,5 @@ It is not a generic chatbot. It is built around memory, goals, reflections and a
 - Manual check `/start`
 - Manual check `/mentor`
 - Manual check `/dev/mentor-test`
+
+Before committing, confirm that only MentorAndI files are changed and no cross-project content was introduced.
