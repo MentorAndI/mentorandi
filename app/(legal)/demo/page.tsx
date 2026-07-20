@@ -259,6 +259,22 @@ export default function DemoPage() {
                   “{scenario.prompt}”
                 </blockquote>
 
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
+                    Relevant method frames
+                  </p>
+                  <ul className="mt-2 flex flex-wrap gap-2">
+                    {scenario.methodExamples.map((method) => (
+                      <li
+                        className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700"
+                        key={method}
+                      >
+                        {method}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
                 <Link
                   className="mt-auto inline-flex h-11 items-center justify-center rounded-md bg-zinc-950 px-4 text-sm font-medium text-white transition hover:bg-zinc-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
                   href={`/mentor?mentor=${scenario.slug}`}

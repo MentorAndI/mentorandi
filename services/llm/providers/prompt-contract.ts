@@ -36,6 +36,7 @@ export function buildProviderDeveloperInput(request: LlmCompletionRequest) {
       "Do not mention method IDs.",
       "Do not sound formulaic.",
       "Adapt the method to the user's situation.",
+      "Keep the warm reflection primary; the method should appear as one natural next step, not a lesson.",
       "Do not turn methods into a list of tips.",
     ]),
     formatPromptJsonSection(

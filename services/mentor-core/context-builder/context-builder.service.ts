@@ -4,6 +4,7 @@ import { MemoryService } from "@/services/memory/memory.service";
 import { MentorExpertiseService } from "@/services/mentor-expertise/expertise-service";
 import { MentorMethodService } from "@/services/mentor-methods/method-service";
 import { MentorSourceService } from "@/services/mentor-sources/source-service";
+import { getActiveMentorProfileByDatabaseSlug } from "@/services/mentor-catalog/mentor-catalog";
 import {
   ReflectionService,
   ReflectionServiceError,
@@ -99,11 +100,17 @@ export class ContextBuilderService {
       summary: reflection.summary,
     }));
     const controls = getLlmCostControls();
-    const relevantMethods = this.methodService.findRelevantMethods({
-      currentMessage: input.currentMessage,
-      limit: controls.methodsLimit,
-      recentContext: contextMessages.map((message) => message.content),
-    });
+    const mentorProfile = getActiveMentorProfileByDatabaseSlug(
+      conversation.mentor.slug,
+    );
+    const relevantMethods = mentorProfile
+      ? this.methodService.findRelevantMethods({
+          currentMessage: input.currentMessage,
+          limit: controls.methodsLimit,
+          mentorSlug: mentorProfile.slug,
+          recentContext: contextMessages.map((message) => message.content),
+        })
+      : [];
     const contextMethods = relevantMethods.map(toContextMethod);
     const methodsAvailable = contextMethods.length;
     const relevantExpertise = this.expertiseService.findRelevantExpertise({

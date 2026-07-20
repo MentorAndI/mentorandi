@@ -270,3 +270,15 @@ and fail unless the public health endpoint returns `status: "ok"`.
 Goal:
 Deploy reviewed `main` updates to staging consistently while retaining
 `npm run deploy:staging` as the local fallback and keeping secrets out of Git.
+
+### Feature 110 - Mentor-Specific Method Libraries v1
+
+Status:
+Implemented. Every active alpha mentor has four curated practical methods. The
+Context Builder filters by the persisted selected mentor, ranks relevance from
+the current and recent mentor-scoped messages, and includes at most two methods
+while the prompt uses at most one natural intervention.
+
+Goal:
+Make specialization substantive without list-heavy responses, weakening safety
+boundaries, or losing Marcus's warm personal mentoring response contract.

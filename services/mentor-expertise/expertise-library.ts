@@ -23,9 +23,9 @@ export const mentorExpertiseLibrary: MentorExpertiseProfile[] = [
     ],
     relevantMethods: [
       "Values clarification",
-      "One concrete next step",
-      "Energy audit",
+      "Small life experiment",
       "Pattern noticing",
+      "Decision-loop breaker",
     ],
     sourceNotes: [
       {
@@ -80,12 +80,10 @@ export const mentorExpertiseLibrary: MentorExpertiseProfile[] = [
       "difficulty following through without external structure",
     ],
     relevantMethods: [
-      "Task Entry: 5-minute start",
-      "Reduce Friction: remove one obstacle before starting",
-      "Body Doubling",
-      "Time Boxing",
-      "Externalize the task",
-      "Shutdown routine",
+      "Five-minute task entry",
+      "Task friction scan",
+      "Body doubling",
+      "Externalize the next action",
     ],
     sourceNotes: [
       {
@@ -140,10 +138,10 @@ export const mentorExpertiseLibrary: MentorExpertiseProfile[] = [
       "hard conversations",
     ],
     relevantMethods: [
-      "Values clarification",
-      "Pattern noticing",
-      "10-minute clarity method",
-      "One concrete next step",
+      "Conflict cycle map",
+      "Soft conversation start",
+      "Need-to-request translation",
+      "Repair attempt",
     ],
     sourceNotes: [
       {
@@ -199,10 +197,10 @@ export const mentorExpertiseLibrary: MentorExpertiseProfile[] = [
       "recovery that never feels sufficient",
     ],
     relevantMethods: [
-      "Energy audit",
-      "One concrete next step",
-      "Shutdown routine",
-      "Define done",
+      "Capacity triage",
+      "Demand boundary",
+      "Recovery match",
+      "Sustainable re-entry",
     ],
     sourceNotes: [],
     recommendedTone:
@@ -234,10 +232,10 @@ export const mentorExpertiseLibrary: MentorExpertiseProfile[] = [
       "co-parent communication",
     ],
     relevantMethods: [
-      "Pattern noticing",
-      "Values clarification",
-      "10-minute clarity method",
-      "One concrete next step",
+      "Regulate before responding",
+      "Connect, then hold the boundary",
+      "Family routine friction scan",
+      "Repair after rupture",
     ],
     sourceNotes: [],
     recommendedTone:
@@ -269,10 +267,10 @@ export const mentorExpertiseLibrary: MentorExpertiseProfile[] = [
       "health goals that do not fit daily life",
     ],
     relevantMethods: [
-      "One concrete next step",
-      "Energy audit",
-      "Task Entry: 5-minute start",
-      "Finishable task selection",
+      "Minimum viable routine",
+      "Consistency floor",
+      "Energy-matched movement",
+      "All-or-nothing reset",
     ],
     sourceNotes: [],
     recommendedTone:
@@ -304,11 +302,10 @@ export const mentorExpertiseLibrary: MentorExpertiseProfile[] = [
       "difficulty sustaining attention",
     ],
     relevantMethods: [
-      "One-task commitment",
-      "Finishable task selection",
+      "One-outcome commitment",
+      "Finishable scope",
       "Define done",
-      "Distraction parking lot",
-      "Time Boxing",
+      "Distraction parking place",
     ],
     sourceNotes: [],
     recommendedTone:
@@ -340,10 +337,10 @@ export const mentorExpertiseLibrary: MentorExpertiseProfile[] = [
       "waiting to feel fully ready",
     ],
     relevantMethods: [
-      "Values clarification",
-      "Pattern noticing",
-      "One concrete next step",
-      "Task Entry: 5-minute start",
+      "Evidence against the verdict",
+      "Courage before certainty",
+      "Small visibility repetition",
+      "Assertive sentence",
     ],
     sourceNotes: [],
     recommendedTone:

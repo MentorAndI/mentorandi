@@ -12,6 +12,10 @@ import {
   MentorResponsePipelineService,
   MentorResponsePipelineServiceError,
 } from "@/services/mentor-core/response-pipeline/response-pipeline.service";
+import {
+  MentorSessionService,
+  MentorSessionServiceError,
+} from "@/services/mentor-session/mentor-session.service";
 import type {
   MentorResponsePipelineAuthContext,
   MentorResponsePipelineResult,
@@ -53,20 +57,6 @@ const supportedDevProviders: DevMentorResponseProvider[] = [
   "openai",
 ];
 
-async function getDevMentorResponseAuthContext(
-  userId: string,
-): Promise<MentorResponsePipelineAuthContext> {
-  const user = await new UserService().getUserById(userId);
-
-  if (!user) {
-    throw new UserServiceError("User was not found.", 404);
-  }
-
-  return {
-    authUserId: user.authUserId,
-  };
-}
-
 export async function POST(request: Request) {
   if (isProductionEnvironment()) {
     return createProductionDevRouteResponse();
@@ -84,20 +74,33 @@ export async function POST(request: Request) {
 
   try {
     const conversationService = new ConversationService();
-    const conversation = validation.input.conversationId
-      ? await conversationService.getConversationForUserId(
-          validation.input.userId,
+    const user = await new UserService().getUserById(validation.input.userId);
+
+    if (!user) {
+      throw new UserServiceError("User was not found.", 404);
+    }
+
+    const mentorSpecialty = validation.input.mentorSpecialty ?? "life";
+    const mentorSessionService = new MentorSessionService();
+    const mentorSession = validation.input.conversationId
+      ? await mentorSessionService.getMentorSessionForConversation(
+          user,
           validation.input.conversationId,
+          mentorSpecialty,
         )
-      : await conversationService.createConversationForUserId(
-          validation.input.userId,
-          { mentorId: validation.input.mentorId },
+      : await mentorSessionService.createNewMentorSessionForUser(
+          user,
+          mentorSpecialty,
         );
+    const conversation = await conversationService.getConversationForUserId(
+      user.id,
+      mentorSession.conversation.id,
+    );
 
     const pipeline = new MentorResponsePipelineService();
-    const authContext = await getDevMentorResponseAuthContext(
-      validation.input.userId,
-    );
+    const authContext: MentorResponsePipelineAuthContext = {
+      authUserId: user.authUserId,
+    };
     const response = await pipeline.run(
       {
         conversationId: conversation.id,
@@ -145,6 +148,13 @@ export async function POST(request: Request) {
             error,
           ),
         },
+        { status: error.statusCode },
+      );
+    }
+
+    if (error instanceof MentorSessionServiceError) {
+      return NextResponse.json(
+        { error: error.message },
         { status: error.statusCode },
       );
     }

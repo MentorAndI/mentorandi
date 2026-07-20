@@ -23,7 +23,10 @@ unlinked and allowlist-protected.
 
 The five scenario cards remain available for ADHD, Relationship, Confidence,
 Stress / Burnout, and Life, each with its fixed demonstration prompt and a link
-to the matching validated mentor context.
+to the matching validated mentor context. Each card also names two relevant
+method frames from that mentor's own library so the presenter can explain the
+substantive specialization behind the response without claiming that both
+methods will be used.
 
 Demo selection does not create a parallel chat system. It reuses the existing
 mentor session and response boundaries from Features 105B and 105C. Each mentor

@@ -68,6 +68,8 @@ MentorAndI
 - Personal-psychology Mentor Expertise profiles for the active alpha lineup.
 - Active Mentor Catalog with distinct persona prompts, tones, boundaries, and
   example openings for all eight alpha specializations.
+- Four-method specialist libraries for each active mentor, selected only within
+  the persisted mentor context and capped to two method context entries.
 - Alpha feedback capture with usefulness rating, category and page context.
 - Server-rendered alpha admin overview and feedback review.
 - Reflection-aware context.

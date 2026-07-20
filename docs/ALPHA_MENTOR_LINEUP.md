@@ -2,7 +2,8 @@
 
 MentorAndI uses one Mentor Core with eight selectable specialist profiles.
 Specialization comes from each profile's definition, persona instructions,
-tone, boundaries, matched methods, expertise, and the user's existing context.
+tone, boundaries, its own four-method library, expertise, and the user's
+existing context.
 Marcus remains the Life mentor so legacy conversations continue to work. The
 other seven profiles have their own persisted Mentor records. Each authenticated
 user therefore gets a separate conversation space and message history per
@@ -97,5 +98,5 @@ profile.
 - "I keep waiting to feel qualified before I apply."
 - "Help me prepare one assertive sentence for a difficult conversation."
 
-Future versions can add deeper profile-specific memory strategies and method
-libraries after the alpha behavior has been validated.
+Future versions can add deeper profile-specific memory strategies and refine
+the curated method libraries after alpha behavior has been validated.

@@ -122,7 +122,12 @@ User-level data can inform future conversations. Conversation-level data should 
 
 User memory is personal to one user. It captures that user's understandings, goals, reflections and conversation history, and it must not become shared product knowledge.
 
-The Mentor Method Library is reusable product knowledge. It contains concise, curated mentor techniques that can be matched into context when the current user message and recent conversation make them relevant. The context builder includes only a small number of relevant methods, not the whole library.
+The Mentor Method Library is reusable product knowledge. Each active mentor has
+four concise, curated techniques. The persisted conversation's validated mentor
+record selects the eligible library before the current message and lower-weight
+recent mentor-scoped context rank its methods. At most two methods enter context,
+and the prompt may adapt at most one as the primary intervention so responses do
+not become framework-heavy or list-like. See `docs/MENTOR_METHOD_LIBRARIES.md`.
 
 MentorAndI uses one core engine with specialized mentor profiles. The Active
 Mentor Catalog defines the slug, positioning, tone, boundaries, opening style,
@@ -141,7 +146,7 @@ The recent-conversation view can summarize conversations across mentors, but
 message history is loaded only for the selected owned conversation. User-level
 memory, goals, and reflections remain shared personal context; conversation
 messages remain mentor-scoped. Future versions can add deeper mentor-specific
-memory strategies and method libraries. Business and Career are not active alpha categories;
+memory strategies. Business and Career are not active alpha categories;
 Education remains an undecided future candidate. See
 `docs/ALPHA_MENTOR_LINEUP.md`.
 

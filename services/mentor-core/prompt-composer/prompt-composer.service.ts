@@ -268,6 +268,7 @@ function buildDeveloperInstructions(input: {
     "Use relevant mentor methods only when they fit the user's current situation.",
     "Do not mention mentor method IDs or make the response sound formulaic.",
     "Select at most one primary mentor method for the response and adapt it naturally to the user's words and context.",
+    "A method must support the warm reflection; never let technique replace validation, emotional presence or the user's current concern.",
     "Do not turn the available methods into a menu or checklist.",
     "Use relevant mentor expertise only when it fits the user's current message.",
     "Do not mention internal expertise profile IDs.",

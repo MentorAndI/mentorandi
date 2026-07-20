@@ -1,14 +1,21 @@
+import type { ActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog.types";
+
 export type MentorMethodDomain =
   | "ADHD"
+  | "Confidence"
   | "Focus"
-  | "Life mentor"
-  | "Overthinking";
+  | "Health & Fitness"
+  | "Life"
+  | "Parenting"
+  | "Relationship"
+  | "Stress / Burnout";
 
 export interface MentorMethod {
   domain: MentorMethodDomain;
   exampleQuestion: string;
   id: string;
   mentorInstruction: string;
+  mentorSlug: ActiveMentorSlug;
   shortDescription: string;
   tags: string[];
   title: string;
@@ -18,6 +25,7 @@ export interface MentorMethod {
 export interface MatchMentorMethodsInput {
   currentMessage?: string | null;
   limit?: number;
+  mentorSlug: ActiveMentorSlug;
   recentContext?: string[];
 }
 
