@@ -1,18 +1,29 @@
 # Investor Demo Flow
 
-Feature 106 adds a public, alpha-safe overview at `/demo`. It presents
+Features 106 and 108 provide a public, alpha-safe overview at `/demo`. It presents
 MentorAndI as one Mentor Core with multiple specialized profiles, and makes the
 product easy to demonstrate without exposing internal administration pages or
 inventing users, activity, or metrics.
 
+The page includes a 5–7 minute presenter script. It walks through the full
+mentor lineup, an ADHD task-avoidance response, a switch to Confidence, proof
+of separated mentor history, authenticated feedback, internal-only admin
+monitoring, usage limits, and the privacy/security foundation. Presenter links
+open only public or normal authenticated product routes. Admin pages remain
+unlinked and allowlist-protected.
+
 ## Demo path
 
-1. Open `/demo`.
-2. Choose ADHD, Relationship, Confidence, Stress / Burnout, or Life.
-3. The link opens `/mentor?mentor=<slug>`.
-4. The server validates the mentor slug and loads that mentor's conversation.
-5. The user enters the fixed demo prompt shown on the scenario card and sends
-   it through the normal mentor response flow.
+1. Open `/demo` and follow the eight-step run-of-show.
+2. Preview `/mentors`, then open the ADHD Mentor.
+3. Send the fixed ADHD task-avoidance prompt and discuss the response.
+4. Switch to Confidence and show that its persisted conversation is separate.
+5. Explain authenticated feedback and allowlisted internal monitoring.
+6. Close on usage limits, privacy/security controls, and VPS staging.
+
+The five scenario cards remain available for ADHD, Relationship, Confidence,
+Stress / Burnout, and Life, each with its fixed demonstration prompt and a link
+to the matching validated mentor context.
 
 Demo selection does not create a parallel chat system. It reuses the existing
 mentor session and response boundaries from Features 105B and 105C. Each mentor

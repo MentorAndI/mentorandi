@@ -28,8 +28,9 @@ MentorAndI
 - `/mentors` lets users preview and select those eight distinct profiles. The
   selection safely specializes the shared Mentor Core and loads a separate
   persisted conversation history for that mentor.
-- `/demo` provides an investor-friendly private-alpha overview and five fixed
-  prompt scenarios that open the matching mentor.
+- `/demo` provides an investor-friendly private-alpha overview, a 5–7 minute
+  presenter script, proof points, and five fixed prompt scenarios that open the
+  matching mentor.
 - Full Mentor Evaluation Runner exists for dev-only Mentor Core evaluation through the seeded database-backed flow.
 - Alpha Deployment Checklist exists for Hostinger/VPS go/no-go review.
 - One-command staging deployment is available through `npm run deploy:staging`

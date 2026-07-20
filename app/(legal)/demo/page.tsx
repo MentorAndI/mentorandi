@@ -51,6 +51,98 @@ const platformFoundations = [
   },
 ];
 
+const investorProofPoints = [
+  "One mentor engine, specialized mentor profiles.",
+  "Persistent user accounts and conversation history.",
+  "Separate mentor contexts.",
+  "Feedback loop for alpha improvement.",
+  "Usage limits and security hardening in place.",
+];
+
+const demoSteps = [
+  {
+    action: "Open mentor lineup",
+    description:
+      "Start with the active mentor catalog and explain that every profile runs on the same Mentor Core.",
+    href: "/mentors",
+    title: "Show the mentor lineup",
+  },
+  {
+    action: "Open ADHD Mentor",
+    description:
+      "Choose the ADHD profile to show non-shaming, executive-function-focused positioning.",
+    href: "/mentor?mentor=adhd",
+    title: "Choose the ADHD Mentor",
+  },
+  {
+    description:
+      "Enter: “I keep avoiding an important task even though I know I need to do it.”",
+    title: "Use the task-avoidance prompt",
+  },
+  {
+    description:
+      "Point out the profile-specific tone, practical next step, and continuity from the user’s account context.",
+    title: "Show the mentor response",
+  },
+  {
+    action: "Open Confidence Mentor",
+    description:
+      "Switch profiles and use the confidence prompt to demonstrate a distinct mentoring emphasis.",
+    href: "/mentor?mentor=confidence",
+    title: "Switch to the Confidence Mentor",
+  },
+  {
+    description:
+      "Show that the ADHD thread does not appear in Confidence. Each mentor loads its own persisted conversation.",
+    title: "Show the separate context",
+  },
+  {
+    description:
+      "Show the authenticated feedback control. Explain that feedback review and monitoring are restricted to allowlisted internal admins—there is no public admin link.",
+    title: "Explain the alpha feedback loop",
+  },
+  {
+    action: "View privacy foundation",
+    description:
+      "Close with usage guardrails, server-side ownership checks, private data access, and the public privacy, terms, and contact foundation.",
+    href: "/privacy",
+    title: "Explain safeguards and staging",
+  },
+];
+
+const whatThisProves = [
+  {
+    description:
+      "The experience is organized around ongoing mentoring, memory, goals, reflection, and continuity—not an open-ended assistant box.",
+    title: "Not a generic chatbot",
+  },
+  {
+    description:
+      "ADHD, Confidence, Relationship, Stress / Burnout, and Life use distinct positioning, expertise, tone, and boundaries.",
+    title: "Mentor specialization works",
+  },
+  {
+    description:
+      "Authenticated users can return to their prior conversations instead of starting from zero each time.",
+    title: "User history persists",
+  },
+  {
+    description:
+      "Switching mentor profiles loads a separate persisted thread and prevents histories from being mixed.",
+    title: "Mentor conversations are separated",
+  },
+  {
+    description:
+      "Authenticated users can submit in-context usefulness and product feedback for internal alpha review.",
+    title: "Alpha feedback is captured",
+  },
+  {
+    description:
+      "The investor flow is available in the deployed VPS staging environment behind HTTPS health monitoring.",
+    title: "Infrastructure runs on VPS staging",
+  },
+];
+
 export default function DemoPage() {
   return (
     <main className="flex-1 bg-zinc-50 py-10 text-zinc-950 sm:py-16">
@@ -70,6 +162,70 @@ export default function DemoPage() {
             This is a private-alpha demonstration. It is not therapy, diagnosis,
             crisis support, or professional advice.
           </Text>
+        </section>
+
+        <section className="mt-10" aria-label="Investor summary">
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+            {investorProofPoints.map((point) => (
+              <li
+                className="rounded-lg border border-zinc-200 bg-white px-4 py-4 text-sm font-medium leading-6 text-zinc-800"
+                key={point}
+              >
+                {point}
+              </li>
+            ))}
+          </ul>
+        </section>
+
+        <section
+          className="mt-16 rounded-xl border border-zinc-200 bg-white p-6 sm:p-8"
+          aria-labelledby="demo-script"
+        >
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+            <div className="max-w-2xl">
+              <Badge variant="success">5–7 minute run-of-show</Badge>
+              <Heading className="mt-4" id="demo-script" level={2}>
+                Investor demo script
+              </Heading>
+              <Text className="mt-3">
+                Follow these eight steps in order. Use one prepared alpha account
+                so persisted history and mentor separation are visible.
+              </Text>
+            </div>
+            <Link
+              className="text-sm font-semibold text-zinc-700 underline decoration-zinc-300 underline-offset-4 transition hover:text-zinc-950"
+              href="#demo-scenarios"
+            >
+              Jump to demo prompts
+            </Link>
+          </div>
+
+          <ol className="mt-8 grid gap-4 md:grid-cols-2">
+            {demoSteps.map((step, index) => (
+              <li
+                className="flex gap-4 rounded-lg border border-zinc-200 bg-zinc-50 p-5"
+                key={step.title}
+              >
+                <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-zinc-950 text-sm font-semibold text-white">
+                  {index + 1}
+                </span>
+                <div>
+                  <h3 className="font-semibold text-zinc-950">{step.title}</h3>
+                  <p className="mt-1 text-sm leading-6 text-zinc-600">
+                    {step.description}
+                  </p>
+                  {step.href ? (
+                    <Link
+                      className="mt-3 inline-flex text-sm font-semibold text-zinc-900 underline decoration-zinc-300 underline-offset-4 transition hover:decoration-zinc-900"
+                      href={step.href}
+                    >
+                      {step.action}
+                    </Link>
+                  ) : null}
+                </div>
+              </li>
+            ))}
+          </ol>
         </section>
 
         <section className="mt-14" aria-labelledby="demo-scenarios">
@@ -109,6 +265,29 @@ export default function DemoPage() {
                 >
                   Start with {scenario.mentorName}
                 </Link>
+              </Card>
+            ))}
+          </div>
+        </section>
+
+        <section className="mt-16" aria-labelledby="what-this-proves">
+          <div className="max-w-2xl">
+            <Heading id="what-this-proves" level={2}>
+              What this proves
+            </Heading>
+            <Text className="mt-3">
+              The walkthrough demonstrates working product foundations, without
+              invented usage, customer, or performance metrics.
+            </Text>
+          </div>
+
+          <div className="mt-8 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {whatThisProves.map((proof) => (
+              <Card className="p-5" key={proof.title} variant="bordered">
+                <Heading level={4}>{proof.title}</Heading>
+                <Text className="mt-2" variant="small">
+                  {proof.description}
+                </Text>
               </Card>
             ))}
           </div>

@@ -248,3 +248,14 @@ fails unless the public staging health endpoint returns `status: "ok"`.
 Goal:
 Make the established staging deployment repeatable without copying long SSH
 commands or placing deployment secrets in the repository.
+
+### Feature 108 - Investor Demo Script And Proof Page Polish
+
+Status:
+Implemented. `/demo` now includes a 5–7 minute, eight-step presenter script,
+concise investor proof statements, the five fixed mentor prompts, and a “What
+this proves” section without fake metrics or public admin links.
+
+Goal:
+Make the working specialized-mentor, persistent-history, feedback, safeguards,
+and VPS staging story easy to demonstrate consistently.
