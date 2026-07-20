@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 import { MentorConversationHistory } from "@/components/mentor/MentorConversationHistory";
 import { MentorConversationList } from "@/components/mentor/MentorConversationList";
@@ -41,6 +42,7 @@ interface MentorResponsePayload {
 const defaultMentor = {
   name: "Marcus",
   role: "Life Mentor",
+  slug: "life",
   tagline: "Personal clarity, honest reflection, and sustainable change.",
 };
 
@@ -56,6 +58,7 @@ export function MentorConversationClient({
 }: {
   selectedMentor?: SelectedMentorPreview;
 }) {
+  const router = useRouter();
   const [conversationId, setConversationId] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
@@ -75,9 +78,13 @@ export function MentorConversationClient({
   >([]);
 
   async function fetchMentorSession(signal?: AbortSignal) {
-    const response = await fetch("/api/mentor/session", {
-      signal,
-    });
+    const mentorSlug = selectedMentor?.slug ?? "life";
+    const response = await fetch(
+      `/api/mentor/session?mentor=${encodeURIComponent(mentorSlug)}`,
+      {
+        signal,
+      },
+    );
     const responseBody = (await response.json()) as
       | MentorSession
       | MentorApiError;
@@ -99,27 +106,43 @@ export function MentorConversationClient({
     return session;
   }
 
-  async function loadConversationHistory(nextConversationId: string) {
+  async function loadConversationHistory(
+    nextConversationId: string,
+    options?: {
+      signal?: AbortSignal;
+      shouldCommit?: () => boolean;
+    },
+  ) {
     setIsLoadingHistory(true);
 
     try {
       const response = await fetch(
         `/api/conversations/${encodeURIComponent(nextConversationId)}/messages`,
+        { signal: options?.signal },
       );
       const responseBody = (await response.json()) as
         | MentorMessagesResponse
         | MentorApiError;
 
-      if (!response.ok) {
+      if (!response.ok && options?.shouldCommit?.() !== false) {
         setErrorMessage(formatErrorResponse(responseBody as MentorApiError));
         return;
       }
 
-      setMessages((responseBody as MentorMessagesResponse).messages);
-    } catch {
-      setErrorMessage("Unable to load the conversation.");
+      if (options?.shouldCommit?.() !== false) {
+        setMessages((responseBody as MentorMessagesResponse).messages);
+      }
+    } catch (error) {
+      if (
+        !(error instanceof DOMException && error.name === "AbortError") &&
+        options?.shouldCommit?.() !== false
+      ) {
+        setErrorMessage("Unable to load the conversation.");
+      }
     } finally {
-      setIsLoadingHistory(false);
+      if (options?.shouldCommit?.() !== false) {
+        setIsLoadingHistory(false);
+      }
     }
   }
 
@@ -149,6 +172,13 @@ export function MentorConversationClient({
     const controller = new AbortController();
     let isActive = true;
 
+    setConversationId("");
+    setErrorMessage("");
+    setIsLoadingSession(true);
+    setMessage("");
+    setMessages([]);
+    setMentor(selectedMentor ?? defaultMentor);
+
     async function loadMentorSession() {
       try {
         const session = await fetchMentorSession(controller.signal);
@@ -161,7 +191,10 @@ export function MentorConversationClient({
           setMentor(selectedMentor ?? session.mentor);
 
           await Promise.all([
-            loadConversationHistory(nextConversationId),
+            loadConversationHistory(nextConversationId, {
+              signal: controller.signal,
+              shouldCommit: () => isActive,
+            }),
             loadMemories(),
           ]);
         }
@@ -211,7 +244,7 @@ export function MentorConversationClient({
         body: JSON.stringify({
           conversationId,
           message: trimmedMessage,
-          mentorSpecialty: selectedMentor?.slug,
+          mentorSpecialty: mentor.slug,
         }),
         headers: {
           "Content-Type": "application/json",
@@ -252,6 +285,10 @@ export function MentorConversationClient({
 
     try {
       const response = await fetch("/api/mentor-session/new", {
+        body: JSON.stringify({ mentor: mentor.slug }),
+        headers: {
+          "Content-Type": "application/json",
+        },
         method: "POST",
       });
       const responseBody = (await response.json()) as
@@ -279,18 +316,27 @@ export function MentorConversationClient({
     }
   }
 
-  async function handleSelectConversation(nextConversationId: string) {
-    if (nextConversationId === conversationId) {
+  async function handleSelectConversation(
+    conversation: MentorConversationSummary,
+  ) {
+    if (conversation.id === conversationId) {
+      return;
+    }
+
+    if (conversation.mentor.slug !== mentor.slug) {
+      router.push(
+        `/mentor?mentor=${encodeURIComponent(conversation.mentor.slug)}`,
+      );
       return;
     }
 
     setErrorMessage("");
     setMessageError("");
-    setConversationId(nextConversationId);
+    setConversationId(conversation.id);
     setMessage("");
     setMessages([]);
 
-    await loadConversationHistory(nextConversationId);
+    await loadConversationHistory(conversation.id);
   }
 
   return (

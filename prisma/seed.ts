@@ -2,6 +2,7 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 import { PrismaClient } from "../lib/generated/prisma/client";
+import { activeMentorProfiles } from "../services/mentor-catalog/mentor-catalog";
 
 const testAuthUserId = "00000000-0000-0000-0000-000000000001";
 const marcusSlug = "marcus";
@@ -33,24 +34,37 @@ async function main() {
     },
   });
 
-  const mentor = await prisma.mentor.upsert({
-    create: {
-      active: true,
-      description:
-        "Marcus is a Life Mentor for personal direction, emotional clarity, relationships, confidence, and sustainable change.",
-      name: "Marcus",
-      slug: marcusSlug,
-    },
-    update: {
-      active: true,
-      description:
-        "Marcus is a Life Mentor for personal direction, emotional clarity, relationships, confidence, and sustainable change.",
-      name: "Marcus",
-    },
-    where: {
-      slug: marcusSlug,
-    },
-  });
+  const mentors = await Promise.all(
+    activeMentorProfiles.map((profile) => {
+      const isLifeMentor = profile.slug === "life";
+      const description = isLifeMentor
+        ? "Marcus is a Life Mentor for personal direction, emotional clarity, relationships, confidence, and sustainable change."
+        : profile.shortDescription;
+      const name = isLifeMentor ? "Marcus" : profile.name;
+
+      return prisma.mentor.upsert({
+        create: {
+          active: true,
+          description,
+          name,
+          slug: profile.databaseSlug,
+        },
+        update: {
+          active: true,
+          description,
+          name,
+        },
+        where: {
+          slug: profile.databaseSlug,
+        },
+      });
+    }),
+  );
+  const mentor = mentors.find((item) => item.slug === marcusSlug);
+
+  if (!mentor) {
+    throw new Error("Life mentor seed failed.");
+  }
 
   const conversation =
     (await prisma.conversation.findFirst({

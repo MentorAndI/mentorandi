@@ -184,6 +184,22 @@ export class ConversationService {
     return conversations.map(toConversationSummaryDto);
   }
 
+  async getRecentConversationsForUser(
+    userId: string,
+    limit = 12,
+  ): Promise<ConversationSummaryDto[]> {
+    const user = await this.repository.findUserById(userId);
+
+    if (!user) {
+      throw new ConversationServiceError("User was not found.", 404);
+    }
+
+    const conversations =
+      await this.repository.findRecentConversationsForUser(user.id, limit);
+
+    return conversations.map(toConversationSummaryDto);
+  }
+
   private async ensureUser(authUserId: string) {
     const existingUser =
       await this.repository.findUserByAuthUserId(authUserId);

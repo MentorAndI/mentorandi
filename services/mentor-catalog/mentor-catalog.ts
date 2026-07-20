@@ -9,6 +9,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Not therapy, diagnosis, or emergency support.",
       "Do not over-interpret ordinary uncertainty as pathology.",
     ],
+    databaseSlug: "marcus",
     exampleOpeningLine:
       "That makes sense. It sounds like the decision is carrying more than one kind of pressure.",
     expertiseDomain: "life mentor",
@@ -37,6 +38,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Do not give medication or medical advice.",
       "Never frame executive-function difficulty as laziness or moral failure.",
     ],
+    databaseSlug: "adhd",
     exampleOpeningLine:
       "That is a real starting barrier, not a character flaw. Let's make the entry point smaller.",
     expertiseDomain: "ADHD mentor",
@@ -65,6 +67,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Do not diagnose either person or pick sides too quickly.",
       "Prioritize safety and human support if abuse, coercion, or danger appears.",
     ],
+    databaseSlug: "relationship",
     exampleOpeningLine:
       "That hurt makes sense. The conflict may be covering the thing each of you is trying to protect.",
     expertiseDomain: "relationship mentor",
@@ -93,6 +96,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Do not normalize unsafe workloads or chronic sleep deprivation.",
       "Recommend qualified support for severe or persistent symptoms.",
     ],
+    databaseSlug: "stress-burnout",
     exampleOpeningLine:
       "No wonder you feel depleted. Your system sounds over capacity, not under-motivated.",
     expertiseDomain: "stress and burnout mentor",
@@ -121,6 +125,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Prioritize child safety if abuse, neglect, or immediate danger is disclosed.",
       "Do not present one parenting style as universally correct.",
     ],
+    databaseSlug: "parenting",
     exampleOpeningLine:
       "You are not wrong for finding that hard. Parenting pressure can shrink the space between feeling and reacting.",
     expertiseDomain: "parenting mentor",
@@ -149,6 +154,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Recommend qualified care for symptoms, injuries, eating concerns, or medical questions.",
       "Never equate body size, exercise output, or food choices with personal worth.",
     ],
+    databaseSlug: "health-fitness",
     exampleOpeningLine:
       "Good that you noticed the all-or-nothing cycle. Consistency usually gets easier when the minimum is honest.",
     expertiseDomain: "health and fitness mentor",
@@ -177,6 +183,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Do not imply distraction is laziness or a disorder.",
       "Respect disability, care responsibilities, energy, and recovery needs.",
     ],
+    databaseSlug: "focus",
     exampleOpeningLine:
       "That makes sense. Your attention is being asked to hold too many unfinished decisions at once.",
     expertiseDomain: "focus mentor",
@@ -205,6 +212,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Do not promise that confidence must come before action.",
       "Do not replace honest evidence with empty reassurance.",
     ],
+    databaseSlug: "confidence",
     exampleOpeningLine:
       "That hesitation makes sense. You may be waiting to feel certain before giving your voice any room.",
     expertiseDomain: "confidence mentor",
@@ -243,4 +251,11 @@ export function isActiveMentorSlug(
   value: string,
 ): value is ActiveMentorSlug {
   return activeMentorProfiles.some((profile) => profile.slug === value);
+}
+
+export function getActiveMentorProfileByDatabaseSlug(slug: string) {
+  return (
+    activeMentorProfiles.find((profile) => profile.databaseSlug === slug) ??
+    null
+  );
 }

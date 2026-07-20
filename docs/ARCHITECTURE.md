@@ -122,17 +122,27 @@ Mentor Catalog defines the slug, positioning, tone, boundaries, opening style,
 and persona instructions for Life, ADHD, Relationship, Stress / Burnout,
 Parenting, Health & Fitness, Focus, and Confidence. An explicit selection from
 `/mentors` is validated at the server boundary and makes that profile's prompt
-and expertise primary while preserving the existing owned Marcus conversation,
-memory, goals, and reflections. Specialization therefore comes from mentor
-definitions, prompts, methods, expertise, and context rather than duplicated
-chat engines or client-only instructions.
+and expertise primary. Each specialist maps to an active `Mentor` record, and
+each `Conversation` keeps its existing `mentorId` relation. Session services
+load or create a conversation for the authenticated user and selected mentor;
+response services verify both user ownership and mentor match before accepting
+a message. Changing a URL parameter cannot attach another profile to an
+existing conversation. Legacy `marcus` conversations map to Life and are not
+rewritten.
 
-This is an alpha-preview model: it does not create separate database mentors or
-separate histories per profile. Future versions can add deeper mentor-specific
-memory strategies and method libraries after their ownership and product
-behavior are designed. Business and Career are not active alpha categories;
+The recent-conversation view can summarize conversations across mentors, but
+message history is loaded only for the selected owned conversation. User-level
+memory, goals, and reflections remain shared personal context; conversation
+messages remain mentor-scoped. Future versions can add deeper mentor-specific
+memory strategies and method libraries. Business and Career are not active alpha categories;
 Education remains an undecided future candidate. See
 `docs/ALPHA_MENTOR_LINEUP.md`.
+
+On a mentor URL change, the conversation client is keyed by mentor slug. It
+clears and disables the previous thread before loading, aborts the previous
+history request, and commits a history response only while that request still
+belongs to the active mentor load. This prevents out-of-order browser responses
+from visually mixing otherwise correctly scoped database conversations.
 
 The Mentor Source Library contains curated knowledge cards and URLs for trusted frameworks or educational resources. It is not live browsing, scraping or web research. Source cards are matched into context only when relevant, and the prompt tells the model not to cite URLs unless the user asks for sources.
 

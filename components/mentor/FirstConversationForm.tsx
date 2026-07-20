@@ -9,10 +9,12 @@ import { Textarea } from "@/components/ui/Textarea";
 
 export interface FirstConversationFormProps {
   characterLimit?: number;
+  mentorSlug?: string;
 }
 
 export function FirstConversationForm({
   characterLimit = 1200,
+  mentorSlug = "life",
 }: FirstConversationFormProps) {
   const router = useRouter();
   const textareaId = useId();
@@ -41,6 +43,7 @@ export function FirstConversationForm({
     try {
       const response = await fetch("/api/first-conversation", {
         body: JSON.stringify({
+          mentor: mentorSlug,
           text: trimmedReflection,
         }),
         headers: {
@@ -68,7 +71,7 @@ export function FirstConversationForm({
         return;
       }
 
-      router.push("/mentor");
+      router.push(`/mentor?mentor=${encodeURIComponent(mentorSlug)}`);
     } catch {
       setErrorMessage("We had trouble starting the conversation. Try again.");
     } finally {

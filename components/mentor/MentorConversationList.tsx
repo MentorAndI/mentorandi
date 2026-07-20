@@ -5,7 +5,7 @@ export interface MentorConversationListProps {
   activeConversationId: string;
   conversations: MentorConversationSummary[];
   isLoading: boolean;
-  onSelectConversation: (conversationId: string) => void;
+  onSelectConversation: (conversation: MentorConversationSummary) => void;
 }
 
 export function MentorConversationList({
@@ -33,7 +33,7 @@ export function MentorConversationList({
 
       {!isLoading && conversations.length === 0 ? (
         <p className="rounded-md border border-zinc-200 bg-zinc-50 px-3 py-4 text-sm leading-6 text-zinc-500">
-          Your conversations with Marcus will appear here.
+          Your mentor conversations will appear here.
         </p>
       ) : null}
 
@@ -53,19 +53,21 @@ export function MentorConversationList({
                     : "border-zinc-200 bg-zinc-50 hover:border-zinc-300 hover:bg-white",
                 )}
                 key={conversation.id}
-                onClick={() => onSelectConversation(conversation.id)}
+                onClick={() => onSelectConversation(conversation)}
                 type="button"
               >
                 <span className="block text-sm font-medium text-zinc-950">
-                  {formatConversationTime(
-                    conversation.latestMessageAt ?? conversation.updatedAt,
-                  )}
+                  {conversation.mentor.name}
                 </span>
                 <span className="mt-1 line-clamp-2 block text-sm leading-6 text-zinc-500">
                   {conversation.latestMessagePreview ?? "New conversation"}
                 </span>
                 <span className="mt-2 block text-xs font-medium text-zinc-500">
-                  {isActive ? "Current" : "Continue"}
+                  {isActive
+                    ? "Current"
+                    : formatConversationTime(
+                        conversation.latestMessageAt ?? conversation.updatedAt,
+                      )}
                 </span>
               </button>
             );

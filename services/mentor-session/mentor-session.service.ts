@@ -11,6 +11,11 @@ import {
   GoalServiceError,
 } from "@/services/goal/goal.service";
 import type { GoalDto } from "@/services/goal/goal.types";
+import {
+  getActiveMentorProfile,
+  getActiveMentorProfileByDatabaseSlug,
+} from "@/services/mentor-catalog/mentor-catalog";
+import type { ActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog.types";
 import { UserService } from "@/services/user/user.service";
 import type { UserDto } from "@/services/user/user.types";
 
@@ -22,6 +27,7 @@ export interface MentorSessionDto {
   mentor: {
     name: string;
     role: string;
+    slug: ActiveMentorSlug;
     tagline: string;
   };
   mentorId: string;
@@ -44,10 +50,7 @@ export class MentorSessionServiceError extends Error {
   }
 }
 
-const marcusSlug = "marcus";
-const marcusRole = "Life Mentor";
-const marcusTagline =
-  "Personal clarity, honest reflection, and sustainable change.";
+const defaultMentorSlug: ActiveMentorSlug = "life";
 const activeGoalLimit = 5;
 
 export class MentorSessionService {
@@ -57,154 +60,171 @@ export class MentorSessionService {
     private readonly goalService = new GoalService(),
   ) {}
 
-  async getMarcusSessionForUser(user: UserDto): Promise<MentorSessionDto> {
+  async getMentorSessionForUser(
+    user: UserDto,
+    mentorSlug: ActiveMentorSlug,
+  ): Promise<MentorSessionDto> {
     try {
+      const profile = requireMentorProfile(mentorSlug);
       const conversation =
         await this.conversationService.getOrCreateConversationForUserAndMentorSlug(
           user.id,
-          marcusSlug,
+          profile.databaseSlug,
         );
 
       return toMentorSessionDto(user, conversation);
     } catch (error) {
-      if (error instanceof ConversationServiceError) {
-        throw new MentorSessionServiceError(
-          error.message,
-          error.statusCode,
-        );
-      }
-
-      throw error;
+      throw mapConversationError(error);
     }
   }
 
-  async getResolvedMarcusSession(): Promise<MentorSessionDto> {
+  async getResolvedMentorSession(
+    mentorSlug: ActiveMentorSlug,
+  ): Promise<MentorSessionDto> {
     const user = await this.userService.resolveAuthenticatedUser();
 
-    return this.getMarcusSessionForUser(user);
+    return this.getMentorSessionForUser(user, mentorSlug);
   }
 
-  async getResolvedMarcusSessionOverview(): Promise<MentorSessionOverviewDto> {
+  async getResolvedMentorSessionOverview(
+    mentorSlug: ActiveMentorSlug,
+  ): Promise<MentorSessionOverviewDto> {
     const user = await this.userService.resolveAuthenticatedUser();
-    const session = await this.getMarcusSessionForUser(user);
+    const session = await this.getMentorSessionForUser(user, mentorSlug);
     const [activeGoals, conversations] = await Promise.all([
       this.listActiveGoalsForUser(user),
-      this.listMarcusConversationsForUser(user),
+      this.listRecentConversationsForUser(user),
     ]);
 
-    return {
-      activeGoals,
-      conversations,
-      session,
-    };
+    return { activeGoals, conversations, session };
   }
 
-  async getResolvedMarcusSessionForConversation(
+  async getResolvedMentorSessionForConversation(
     conversationId: string,
+    mentorSlug: ActiveMentorSlug,
   ): Promise<MentorSessionDto> {
     const user = await this.userService.resolveAuthenticatedUser();
 
-    return this.getMarcusSessionForConversation(user, conversationId);
+    return this.getMentorSessionForConversation(
+      user,
+      conversationId,
+      mentorSlug,
+    );
   }
 
-  async getMarcusSessionForConversation(
+  async getMentorSessionForConversation(
     user: UserDto,
     conversationId: string,
+    mentorSlug: ActiveMentorSlug,
   ): Promise<MentorSessionDto> {
     try {
+      const profile = requireMentorProfile(mentorSlug);
       const conversation =
         await this.conversationService.getConversationForUserId(
           user.id,
           conversationId,
         );
 
-      if (conversation.mentor.slug !== marcusSlug) {
-        throw new MentorSessionServiceError(
-          "Conversation was not found.",
-          404,
-        );
+      if (conversation.mentor.slug !== profile.databaseSlug) {
+        throw new MentorSessionServiceError("Conversation was not found.", 404);
       }
 
       return toMentorSessionDto(user, conversation);
     } catch (error) {
-      if (error instanceof ConversationServiceError) {
-        throw new MentorSessionServiceError(
-          error.message,
-          error.statusCode,
-        );
-      }
-
-      throw error;
+      throw mapConversationError(error);
     }
   }
 
-  async createNewMarcusSession(): Promise<MentorSessionDto> {
+  async createNewMentorSession(
+    mentorSlug: ActiveMentorSlug,
+  ): Promise<MentorSessionDto> {
     const user = await this.userService.resolveAuthenticatedUser();
 
-    return this.createNewMarcusSessionForUser(user);
+    return this.createNewMentorSessionForUser(user, mentorSlug);
   }
 
-  async createNewMarcusSessionForUser(user: UserDto): Promise<MentorSessionDto> {
+  async createNewMentorSessionForUser(
+    user: UserDto,
+    mentorSlug: ActiveMentorSlug,
+  ): Promise<MentorSessionDto> {
     try {
+      const profile = requireMentorProfile(mentorSlug);
       const conversation =
         await this.conversationService.createConversationForUserAndMentorSlug(
           user.id,
-          marcusSlug,
+          profile.databaseSlug,
         );
 
       return toMentorSessionDto(user, conversation);
     } catch (error) {
-      if (error instanceof ConversationServiceError) {
-        throw new MentorSessionServiceError(
-          error.message,
-          error.statusCode,
-        );
-      }
-
-      throw error;
+      throw mapConversationError(error);
     }
   }
 
-  async getDevelopmentMarcusSession(): Promise<MentorSessionDto> {
+  // Compatibility helpers keep existing Life/Marcus and dev flows stable.
+  async getMarcusSessionForUser(user: UserDto) {
+    return this.getMentorSessionForUser(user, defaultMentorSlug);
+  }
+
+  async getResolvedMarcusSession() {
+    return this.getResolvedMentorSession(defaultMentorSlug);
+  }
+
+  async getResolvedMarcusSessionOverview() {
+    return this.getResolvedMentorSessionOverview(defaultMentorSlug);
+  }
+
+  async getResolvedMarcusSessionForConversation(conversationId: string) {
+    return this.getResolvedMentorSessionForConversation(
+      conversationId,
+      defaultMentorSlug,
+    );
+  }
+
+  async getMarcusSessionForConversation(
+    user: UserDto,
+    conversationId: string,
+  ) {
+    return this.getMentorSessionForConversation(
+      user,
+      conversationId,
+      defaultMentorSlug,
+    );
+  }
+
+  async createNewMarcusSession() {
+    return this.createNewMentorSession(defaultMentorSlug);
+  }
+
+  async createNewMarcusSessionForUser(user: UserDto) {
+    return this.createNewMentorSessionForUser(user, defaultMentorSlug);
+  }
+
+  async getDevelopmentMarcusSession() {
     const user = await this.userService.getDevelopmentUser();
 
-    return this.getMarcusSessionForUser(user);
+    return this.getMentorSessionForUser(user, defaultMentorSlug);
   }
 
-  private async listMarcusConversationsForUser(
-    user: UserDto,
-  ): Promise<ConversationSummaryDto[]> {
+  private async listRecentConversationsForUser(user: UserDto) {
     try {
-      return this.conversationService.getRecentConversationsForUserAndMentorSlug(
+      return await this.conversationService.getRecentConversationsForUser(
         user.id,
-        marcusSlug,
       );
     } catch (error) {
-      if (error instanceof ConversationServiceError) {
-        throw new MentorSessionServiceError(
-          error.message,
-          error.statusCode,
-        );
-      }
-
-      throw error;
+      throw mapConversationError(error);
     }
   }
 
-  private async listActiveGoalsForUser(
-    user: UserDto,
-  ): Promise<GoalDto[]> {
+  private async listActiveGoalsForUser(user: UserDto) {
     try {
-      return this.goalService.listActiveGoalsForUserId(
+      return await this.goalService.listActiveGoalsForUserId(
         user.id,
         activeGoalLimit,
       );
     } catch (error) {
       if (error instanceof GoalServiceError) {
-        throw new MentorSessionServiceError(
-          error.message,
-          error.statusCode,
-        );
+        throw new MentorSessionServiceError(error.message, error.statusCode);
       }
 
       throw error;
@@ -216,17 +236,40 @@ function toMentorSessionDto(
   user: UserDto,
   conversation: ConversationDto,
 ): MentorSessionDto {
+  const profile = getActiveMentorProfileByDatabaseSlug(conversation.mentor.slug);
+
+  if (!profile) {
+    throw new MentorSessionServiceError("Mentor was not found.", 404);
+  }
+
   return {
     authUserId: user.authUserId,
-    conversation: {
-      id: conversation.id,
-    },
+    conversation: { id: conversation.id },
     mentor: {
       name: conversation.mentor.name,
-      role: marcusRole,
-      tagline: marcusTagline,
+      role: profile.slug === "life" ? "Life Mentor" : "Specialized Mentor",
+      slug: profile.slug,
+      tagline: profile.shortDescription,
     },
     mentorId: conversation.mentor.id,
     userId: user.id,
   };
+}
+
+function requireMentorProfile(slug: ActiveMentorSlug) {
+  const profile = getActiveMentorProfile(slug);
+
+  if (!profile) {
+    throw new MentorSessionServiceError("Mentor was not found.", 404);
+  }
+
+  return profile;
+}
+
+function mapConversationError(error: unknown) {
+  if (error instanceof ConversationServiceError) {
+    return new MentorSessionServiceError(error.message, error.statusCode);
+  }
+
+  return error;
 }

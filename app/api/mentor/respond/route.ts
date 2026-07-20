@@ -40,12 +40,14 @@ export async function POST(request: Request) {
   }
 
   try {
+    const mentorSlug = validation.input.mentorSpecialty ?? "life";
     const sessionService = new MentorSessionService();
     const session = validation.input.conversationId
-      ? await sessionService.getResolvedMarcusSessionForConversation(
+      ? await sessionService.getResolvedMentorSessionForConversation(
           validation.input.conversationId,
+          mentorSlug,
         )
-      : await sessionService.getResolvedMarcusSession();
+      : await sessionService.getResolvedMentorSession(mentorSlug);
     const usageLimitService = new MentorUsageLimitService();
     const usageDecision = usageLimitService.checkBeforeMentorResponse({
       authUserId: session.authUserId,
@@ -61,7 +63,7 @@ export async function POST(request: Request) {
       {
         conversationId: session.conversation.id,
         message: validation.input.message,
-        mentorSpecialty: validation.input.mentorSpecialty,
+        mentorSpecialty: mentorSlug,
         userId: session.userId,
       },
       {

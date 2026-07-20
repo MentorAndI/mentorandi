@@ -26,8 +26,8 @@ MentorAndI
   Parenting, Health & Fitness, Focus and Confidence; Business and Career are not
   active mentor categories.
 - `/mentors` lets users preview and select those eight distinct profiles. The
-  selection safely specializes the shared Mentor Core while retaining the
-  existing Marcus conversation and user context.
+  selection safely specializes the shared Mentor Core and loads a separate
+  persisted conversation history for that mentor.
 - Full Mentor Evaluation Runner exists for dev-only Mentor Core evaluation through the seeded database-backed flow.
 - Alpha Deployment Checklist exists for Hostinger/VPS go/no-go review.
 - Mock mode is available for deterministic local testing.
@@ -118,13 +118,18 @@ MentorAndI
 - Payment is not done.
 - Privacy controls are basic v1 only; Supabase auth user deletion and full compliance workflows are not done.
 - Usage limits are not yet persisted to the database.
-- Alpha specializations share the current Marcus conversation history; separate
-  per-profile histories and deeper profile-specific memory are future work.
+- Mentor histories are separated by persisted Mentor relationship. Deeper
+  profile-specific memory remains future work; user-level memory is currently
+  shared personal context across the user's mentors.
+- Mentor switching clears and locks the previous client thread immediately,
+  aborts stale history requests, and remounts by selected mentor slug so a late
+  response cannot overwrite another mentor's messages.
 
 ## Current Test Checklist
 
 - `npm run lint`
 - `npm run build`
+- `npm run test:mentor-scope`
 - `/start` works.
 - `/mentor` works.
 - `/dev/mentor-test` works.

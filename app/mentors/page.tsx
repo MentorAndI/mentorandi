@@ -77,7 +77,7 @@ export default function MentorsPage() {
                 </p>
                 <Link
                   className="mt-5 inline-flex h-10 items-center justify-center rounded-md bg-zinc-950 px-4 text-sm font-medium text-white transition hover:bg-zinc-800"
-                  href={`/mentor?specialty=${mentor.slug}`}
+                  href={`/mentor?mentor=${mentor.slug}`}
                 >
                   Choose {mentor.name}
                 </Link>

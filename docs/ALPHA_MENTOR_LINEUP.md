@@ -3,12 +3,16 @@
 MentorAndI uses one Mentor Core with eight selectable specialist profiles.
 Specialization comes from each profile's definition, persona instructions,
 tone, boundaries, matched methods, expertise, and the user's existing context.
-Marcus remains the underlying alpha database mentor so current conversations,
-ownership checks, memory, goals, and reflections continue to work unchanged.
+Marcus remains the Life mentor so legacy conversations continue to work. The
+other seven profiles have their own persisted Mentor records. Each authenticated
+user therefore gets a separate conversation space and message history per
+mentor, while user-level memory, goals, and reflections remain available to the
+shared Mentor Core.
 
-The `/mentors` page is an alpha preview. Choosing a profile routes the existing
-conversation through that specialization; alpha does not yet create a separate
-conversation history or database mentor for every profile.
+The `/mentors` page routes to `/mentor?mentor=<slug>`. The server validates the
+slug, loads or creates that user's conversation for the matching Mentor record,
+and rejects a conversation when its persisted mentor does not match the selected
+profile.
 
 ## Active Alpha Lineup
 
@@ -40,8 +44,8 @@ conversation history or database mentor for every profile.
   active alpha mentor.
 - Mentor categories describe support modes, not clinical professionals or
   diagnoses.
-- Existing Marcus conversations remain valid. The `marcus` slug and database
-  relationships must not be replaced when positioning changes.
+- Existing Marcus conversations remain valid and are treated as Life. The
+  `marcus` slug and its database relationships are not rewritten.
 
 ## Demo Scenarios
 
@@ -94,4 +98,4 @@ conversation history or database mentor for every profile.
 - "Help me prepare one assertive sentence for a difficult conversation."
 
 Future versions can add deeper profile-specific memory strategies and method
-libraries after the alpha behavior and data model have been validated.
+libraries after the alpha behavior has been validated.

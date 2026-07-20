@@ -30,6 +30,12 @@ export interface MentorConversationSummary {
   id: string;
   latestMessageAt: string | null;
   latestMessagePreview: string | null;
+  mentor: {
+    name: string;
+    role: string;
+    slug: string;
+    tagline: string;
+  };
   updatedAt: string;
 }
 
@@ -48,6 +54,7 @@ export interface MentorSession {
   mentor: {
     name: string;
     role: string;
+    slug: string;
     tagline: string;
   };
 }

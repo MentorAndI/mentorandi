@@ -14,10 +14,12 @@ export const metadata: Metadata = {
 export default async function MentorPage({
   searchParams,
 }: {
-  searchParams: Promise<{ specialty?: string }>;
+  searchParams: Promise<{ mentor?: string; specialty?: string }>;
 }) {
-  const { specialty } = await searchParams;
-  const selectedMentor = getActiveMentorProfile(specialty);
+  const { mentor, specialty } = await searchParams;
+  const selectedMentor =
+    getActiveMentorProfile(mentor ?? specialty) ??
+    getActiveMentorProfile("life");
 
   return (
     <main className="min-h-screen bg-zinc-50 py-6 text-zinc-950 sm:py-10">
@@ -30,16 +32,21 @@ export default async function MentorPage({
           ]}
         />
         <MentorConversationClient
-          selectedMentor={
-            selectedMentor
-              ? {
-                  name: selectedMentor.name,
-                  role: "Alpha specialization",
-                  slug: selectedMentor.slug,
-                  tagline: selectedMentor.shortDescription,
-                }
-              : undefined
-          }
+          key={selectedMentor?.slug ?? "life"}
+          selectedMentor={{
+            name:
+              selectedMentor?.slug === "life"
+                ? "Marcus"
+                : (selectedMentor?.name ?? "Marcus"),
+            role:
+              selectedMentor?.slug === "life"
+                ? "Life Mentor"
+                : "Specialized Mentor",
+            slug: selectedMentor?.slug ?? "life",
+            tagline:
+              selectedMentor?.shortDescription ??
+              "Personal clarity, honest reflection, and sustainable change.",
+          }}
         />
         <FeedbackButton />
       </Container>

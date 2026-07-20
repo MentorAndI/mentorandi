@@ -11,7 +11,12 @@ export const metadata: Metadata = {
   description: "Begin your first conversation with MentorAndI.",
 };
 
-export default function StartPage() {
+export default async function StartPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ mentor?: string }>;
+}) {
+  const { mentor } = await searchParams;
   return (
     <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 py-16 text-zinc-950">
       <ConversationCard>
@@ -40,7 +45,7 @@ export default function StartPage() {
           </div>
         </div>
 
-        <FirstConversationForm />
+        <FirstConversationForm mentorSlug={mentor} />
       </ConversationCard>
       <FeedbackButton />
     </main>

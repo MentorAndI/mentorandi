@@ -202,3 +202,26 @@ and boundaries without changing the database model or existing user context.
 Goal:
 Make the alpha lineup visibly distinct and demo-ready while preserving one
 secure conversation engine, current memory behavior, and safety boundaries.
+
+### Feature 105B - Separate Conversations By Mentor
+
+Status:
+Implemented. Each active profile maps to a persisted Mentor record and an
+authenticated user's selected mentor loads or creates an isolated conversation
+history. Legacy Marcus conversations remain Life conversations.
+
+Goal:
+Make mentor switching feel like moving between distinct mentor spaces without
+mixing messages or weakening user ownership checks.
+
+### Feature 105C - Harden Mentor-Scoped Conversations
+
+Status:
+Implemented. Mentor switches now remount and lock the conversation client,
+abort stale history requests, and ignore responses from the previous mentor.
+A database-backed regression test verifies Confidence, ADHD, and legacy Life
+messages remain isolated.
+
+Goal:
+Prevent an older asynchronous history response from overwriting the newly
+selected mentor thread.

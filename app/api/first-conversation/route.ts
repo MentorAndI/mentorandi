@@ -11,10 +11,13 @@ import {
   MentorResponsePipelineServiceError,
 } from "@/services/mentor-core/response-pipeline/response-pipeline.service";
 import { UserServiceError } from "@/services/user/user.service";
+import { isActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog";
+import type { ActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog.types";
 
 export const dynamic = "force-dynamic";
 
 interface FirstConversationInput {
+  mentor: ActiveMentorSlug;
   text: string;
 }
 
@@ -33,12 +36,15 @@ export async function POST(request: Request) {
 
   try {
     const sessionService = new MentorSessionService();
-    const session = await sessionService.getResolvedMarcusSession();
+    const session = await sessionService.getResolvedMentorSession(
+      validation.input.mentor,
+    );
     const pipeline = new MentorResponsePipelineService();
     const response = await pipeline.run(
       {
         conversationId: session.conversation.id,
         message: validation.input.text,
+        mentorSpecialty: validation.input.mentor,
         userId: session.userId,
       },
       {
@@ -117,6 +123,14 @@ function validateFirstConversationInput(
 
   const text =
     "text" in body && typeof body.text === "string" ? body.text.trim() : "";
+  const mentor =
+    "mentor" in body && typeof body.mentor === "string"
+      ? body.mentor.trim()
+      : "life";
+
+  if (!isActiveMentorSlug(mentor)) {
+    errors.mentor = "Mentor is not active.";
+  }
 
   if (!text) {
     errors.text = "Please write a few words before continuing.";
@@ -134,6 +148,7 @@ function validateFirstConversationInput(
   return {
     errors,
     input: {
+      mentor: mentor as ActiveMentorSlug,
       text,
     },
     isValid: true,

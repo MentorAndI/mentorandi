@@ -142,6 +142,41 @@ export class ConversationRepository {
     });
   }
 
+  async findRecentConversationsForUser(userId: string, limit: number) {
+    return this.prisma.conversation.findMany({
+      include: {
+        mentor: {
+          select: {
+            description: true,
+            id: true,
+            name: true,
+            slug: true,
+          },
+        },
+        messages: {
+          orderBy: {
+            createdAt: "desc",
+          },
+          select: {
+            content: true,
+            createdAt: true,
+          },
+          take: 1,
+        },
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+      take: limit,
+      where: {
+        mentor: {
+          active: true,
+        },
+        userId,
+      },
+    });
+  }
+
   async createConversation(userId: string, mentorId: string) {
     return this.prisma.conversation.create({
       data: {
