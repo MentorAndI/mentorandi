@@ -174,12 +174,13 @@ different SSH destination, set `DEPLOY_HOST` to a host or `user@host` value:
 DEPLOY_HOST=deploy@example-vps npm run deploy:staging
 ```
 
-The script connects non-interactively, changes to `/docker/mentorandi`, fetches
-and fast-forward pulls `origin/main`, rebuilds the staging Compose service with
-the server-only `.env.staging`, waits, and checks
+The script opens a normal interactive SSH session and may prompt for the VPS
+password when an SSH key is not available. It then changes to
+`/docker/mentorandi`, fetches and fast-forward pulls `origin/main`, rebuilds the
+staging Compose service with the server-only `.env.staging`, waits, and checks
 `https://staging.mentorandi.com/api/health`. It exits unsuccessfully unless the
 endpoint returns HTTP success, valid JSON, and `status: "ok"`. The script does
-not contain or transfer environment secrets.
+not contain, store, or transfer the SSH password or environment secrets.
 
 The equivalent manual server commands remain:
 

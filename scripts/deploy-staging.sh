@@ -14,7 +14,7 @@ fi
 
 echo "Deploying MentorAndI staging through ${deploy_host}..."
 
-ssh -o BatchMode=yes -o ConnectTimeout=15 "$deploy_host" '
+ssh -o ConnectTimeout=15 "$deploy_host" '
   set -eu
   cd /docker/mentorandi
   git fetch origin main
