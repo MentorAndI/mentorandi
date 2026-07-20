@@ -32,6 +32,8 @@ MentorAndI
   prompt scenarios that open the matching mentor.
 - Full Mentor Evaluation Runner exists for dev-only Mentor Core evaluation through the seeded database-backed flow.
 - Alpha Deployment Checklist exists for Hostinger/VPS go/no-go review.
+- One-command staging deployment is available through `npm run deploy:staging`
+  for operators with configured VPS SSH access.
 - Mock mode is available for deterministic local testing.
 - OpenAI and Claude provider modes are the intended paths for real mentor response quality.
 

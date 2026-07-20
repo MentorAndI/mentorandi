@@ -237,3 +237,14 @@ metrics.
 Goal:
 Show MentorAndI as one secure Mentor Core with distinct specialized mentor
 experiences while preserving mentor-scoped conversations.
+
+### Feature 107 - One-Command Staging Deploy
+
+Status:
+Implemented. `npm run deploy:staging` securely connects to the configured VPS,
+fast-forward pulls `origin/main`, rebuilds the staging Compose service, and
+fails unless the public staging health endpoint returns `status: "ok"`.
+
+Goal:
+Make the established staging deployment repeatable without copying long SSH
+commands or placing deployment secrets in the repository.

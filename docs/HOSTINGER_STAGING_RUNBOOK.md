@@ -161,15 +161,32 @@ This is expected for public staging unless a separate access-control layer is ad
 
 ## Update Deployment
 
-To deploy a new commit:
+To deploy `origin/main` from a local MentorAndI checkout with one command:
+
+```bash
+npm run deploy:staging
+```
+
+The command requires working SSH key access to `root@2.25.72.127`. To use a
+different SSH destination, set `DEPLOY_HOST` to a host or `user@host` value:
+
+```bash
+DEPLOY_HOST=deploy@example-vps npm run deploy:staging
+```
+
+The script connects non-interactively, changes to `/docker/mentorandi`, fetches
+and fast-forward pulls `origin/main`, rebuilds the staging Compose service with
+the server-only `.env.staging`, waits, and checks
+`https://staging.mentorandi.com/api/health`. It exits unsuccessfully unless the
+endpoint returns HTTP success, valid JSON, and `status: "ok"`. The script does
+not contain or transfer environment secrets.
+
+The equivalent manual server commands remain:
 
 ```bash
 git fetch origin main
-git checkout main
 git pull --ff-only origin main
 docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build
-docker logs mentorandi-staging --tail 100
-APP_URL=https://staging.mentorandi.com npm run smoke:prod
 ```
 
 ## Rollback
