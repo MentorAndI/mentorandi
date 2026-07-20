@@ -172,13 +172,6 @@ export function MentorConversationClient({
     const controller = new AbortController();
     let isActive = true;
 
-    setConversationId("");
-    setErrorMessage("");
-    setIsLoadingSession(true);
-    setMessage("");
-    setMessages([]);
-    setMentor(selectedMentor ?? defaultMentor);
-
     async function loadMentorSession() {
       try {
         const session = await fetchMentorSession(controller.signal);

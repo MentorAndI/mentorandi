@@ -28,6 +28,8 @@ MentorAndI
 - `/mentors` lets users preview and select those eight distinct profiles. The
   selection safely specializes the shared Mentor Core and loads a separate
   persisted conversation history for that mentor.
+- `/demo` provides an investor-friendly private-alpha overview and five fixed
+  prompt scenarios that open the matching mentor.
 - Full Mentor Evaluation Runner exists for dev-only Mentor Core evaluation through the seeded database-backed flow.
 - Alpha Deployment Checklist exists for Hostinger/VPS go/no-go review.
 - Mock mode is available for deterministic local testing.
@@ -41,6 +43,7 @@ MentorAndI
 - `/privacy`, `/terms` and `/contact` alpha trust pages.
 - `/alpha` invited tester instructions.
 - `/mentors` active alpha mentor selection and preview.
+- `/demo` investor and product demonstration flow.
 
 ## Core Systems Built
 

@@ -74,7 +74,7 @@ confirmation callback are unchanged. See `docs/ALPHA_INVITE_GATE.md`.
 
 ## Alpha Trust Pages
 
-`/alpha`, `/privacy`, `/terms` and `/contact` are public informational pages.
+`/alpha`, `/demo`, `/privacy`, `/terms` and `/contact` are public informational pages.
 They use simple alpha wording and do not create database records or expose an
 API. `/alpha` explains the invited tester flow, safe test scope, feedback path
 and bug-report format without linking to internal admin pages. See
@@ -83,6 +83,13 @@ and bug-report format without linking to internal admin pages. See
 in-product feedback button and explains what to include in a bug report. It
 does not provide a public contact form. These pages are not a substitute for
 final legal review. See `docs/ALPHA_LEGAL_AND_CONTACT.md`.
+
+`/demo` is the investor-facing product walkthrough. Its five fixed scenarios
+link to the normal `/mentor` route with a validated mentor slug. Demo prompt
+text is displayed on the card and is not passed through the URL. Authentication,
+mentor session loading, ownership enforcement, usage limits, and mentor-scoped
+conversation history remain on the existing product path. The page has no
+admin links, fake users, or fake metrics. See `docs/INVESTOR_DEMO.md`.
 
 ## Mentor Core Flow
 

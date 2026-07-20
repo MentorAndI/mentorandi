@@ -225,3 +225,15 @@ messages remain isolated.
 Goal:
 Prevent an older asynchronous history response from overwriting the newly
 selected mentor thread.
+
+### Feature 106 - Investor Demo Flow
+
+Status:
+Implemented. The public `/demo` page presents five investor-ready scenarios,
+routes each card into its validated mentor context, and explains the
+implemented alpha product foundation without exposing admin links or fake
+metrics.
+
+Goal:
+Show MentorAndI as one secure Mentor Core with distinct specialized mentor
+experiences while preserving mentor-scoped conversations.

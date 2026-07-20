@@ -16,6 +16,9 @@ export function Footer({ copyrightName = "MentorAndI" }: FooterProps) {
         <Logo />
         <div className="flex flex-col gap-3 text-sm text-zinc-500 sm:items-end">
           <nav aria-label="Legal and support" className="flex flex-wrap gap-x-5 gap-y-2">
+            <Link className="transition hover:text-zinc-950" href="/demo">
+              Demo
+            </Link>
             <Link className="transition hover:text-zinc-950" href="/privacy">
               Privacy
             </Link>
