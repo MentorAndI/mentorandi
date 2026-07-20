@@ -167,8 +167,9 @@ To deploy `origin/main` from a local MentorAndI checkout with one command:
 npm run deploy:staging
 ```
 
-The command requires working SSH key access to `root@2.25.72.127`. To use a
-different SSH destination, set `DEPLOY_HOST` to a host or `user@host` value:
+The command defaults to the `mentorandi-vps` alias in the local SSH config and
+requires working SSH authentication for that alias. To use a different SSH
+destination, set `DEPLOY_HOST` to a host or `user@host` value:
 
 ```bash
 DEPLOY_HOST=deploy@example-vps npm run deploy:staging

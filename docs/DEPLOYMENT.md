@@ -111,10 +111,10 @@ Confirm production secrets are set in the deployment environment, not committed 
 For VPS deployment with PM2, see `docs/VPS_DEPLOYMENT.md`.
 
 For Docker-based Hostinger staging behind Traefik, see `docs/HOSTINGER_STAGING_RUNBOOK.md`.
-Once that server setup is complete and local SSH key access is available, deploy
-staging with `npm run deploy:staging`. It defaults to `root@2.25.72.127`; set
-`DEPLOY_HOST=user@host` to use another SSH destination. No server secrets are
-stored in the command or repository.
+Once that server setup is complete and local SSH access is available, deploy
+staging with `npm run deploy:staging`. It defaults to the local SSH config alias
+`mentorandi-vps`; set `DEPLOY_HOST=user@host` to use another SSH destination.
+No server secrets are stored in the command or repository.
 
 ## Post-Deployment Check
 

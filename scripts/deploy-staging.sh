@@ -2,7 +2,7 @@
 
 set -Eeuo pipefail
 
-readonly DEFAULT_DEPLOY_HOST="root@2.25.72.127"
+readonly DEFAULT_DEPLOY_HOST="mentorandi-vps"
 readonly STAGING_HEALTH_URL="https://staging.mentorandi.com/api/health"
 
 deploy_host="${DEPLOY_HOST:-$DEFAULT_DEPLOY_HOST}"
