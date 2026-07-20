@@ -161,6 +161,41 @@ This is expected for public staging unless a separate access-control layer is ad
 
 ## Update Deployment
 
+### Automatic deployment from GitHub
+
+The workflow at `.github/workflows/deploy-staging.yml` deploys staging after
+every push to `main`. It can also be run manually from **GitHub → Actions →
+Deploy staging → Run workflow**. Concurrent staging deployments are serialized
+so two container rebuilds do not run at the same time.
+
+Configure these GitHub Actions repository secrets under **Settings → Secrets
+and variables → Actions**:
+
+- `STAGING_SSH_HOST`: the VPS hostname or IP address, without a username;
+- `STAGING_SSH_USER`: the VPS account that owns or can operate
+  `/docker/mentorandi` and Docker;
+- `STAGING_SSH_KEY`: a dedicated private SSH key whose public key is authorized
+  for that VPS account;
+- `STAGING_APP_URL`: `https://staging.mentorandi.com`.
+
+Setup steps:
+
+1. Create a dedicated, automation-only SSH key pair without a passphrase for
+   GitHub Actions, and do not commit either key.
+2. Add the public key to the deployment account's `authorized_keys` on the VPS.
+3. Add the private key and the other three values as GitHub repository secrets.
+4. Confirm the VPS checkout at `/docker/mentorandi` can fetch `origin/main`
+   non-interactively and that the deployment account can run Docker Compose.
+5. Run the workflow manually once and confirm the final health step reports
+   `status: "ok"`.
+
+The runner writes the private key only to its temporary `~/.ssh` directory for
+the job. No SSH key, environment file, password, or application secret belongs
+in the repository. The workflow host-key scan should be compared with the VPS
+host fingerprint during initial setup.
+
+### Manual fallback
+
 To deploy `origin/main` from a local MentorAndI checkout with one command:
 
 ```bash

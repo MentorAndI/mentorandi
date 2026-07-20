@@ -1,0 +1,113 @@
+name: Deploy staging
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mentorandi-staging-deploy
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Hostinger staging
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      STAGING_APP_URL: ${{ secrets.STAGING_APP_URL }}
+      STAGING_SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+      STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+      STAGING_SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+
+    steps:
+      - name: Validate deployment configuration
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+
+          if [[ ! "$STAGING_SSH_HOST" =~ ^[A-Za-z0-9.-]+$ ]]; then
+            echo "Deployment configuration error: STAGING_SSH_HOST is missing or invalid." >&2
+            exit 1
+          fi
+
+          if [[ ! "$STAGING_SSH_USER" =~ ^[A-Za-z0-9._-]+$ ]]; then
+            echo "Deployment configuration error: STAGING_SSH_USER is missing or invalid." >&2
+            exit 1
+          fi
+
+          if [[ -z "$STAGING_SSH_KEY" ]]; then
+            echo "Deployment configuration error: STAGING_SSH_KEY is missing." >&2
+            exit 1
+          fi
+
+          if [[ ! "$STAGING_APP_URL" =~ ^https://[^[:space:]]+$ ]]; then
+            echo "Deployment configuration error: STAGING_APP_URL must be an HTTPS URL." >&2
+            exit 1
+          fi
+
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$STAGING_SSH_KEY" > "$HOME/.ssh/staging_deploy_key"
+          chmod 600 "$HOME/.ssh/staging_deploy_key"
+          ssh-keyscan -H -T 15 "$STAGING_SSH_HOST" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+
+      - name: Update staging containers
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh \
+            -i "$HOME/.ssh/staging_deploy_key" \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            "$STAGING_SSH_USER@$STAGING_SSH_HOST" \
+            'set -eu
+             cd /docker/mentorandi
+             git fetch origin main
+             git pull --ff-only origin main
+             docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build'
+
+      - name: Verify staging health
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          echo "Waiting for staging to become healthy..."
+          sleep 10
+
+          health_url="${STAGING_APP_URL%/}/api/health"
+          health_response="$(curl \
+            --connect-timeout 10 \
+            --fail \
+            --max-time 20 \
+            --retry 6 \
+            --retry-all-errors \
+            --retry-delay 5 \
+            --show-error \
+            --silent \
+            "$health_url")"
+
+          HEALTH_RESPONSE="$health_response" node <<'NODE'
+          try {
+            const health = JSON.parse(process.env.HEALTH_RESPONSE ?? "");
+
+            if (health.status !== "ok") {
+              console.error(
+                `Staging deploy failed: health status is ${JSON.stringify(health.status)}, expected "ok".`,
+              );
+              process.exit(1);
+            }
+
+            console.log("Staging health check passed with status ok.");
+          } catch (error) {
+            console.error("Staging deploy failed: health response was not valid JSON.");
+            process.exit(1);
+          }
+          NODE

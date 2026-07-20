@@ -111,6 +111,11 @@ Confirm production secrets are set in the deployment environment, not committed 
 For VPS deployment with PM2, see `docs/VPS_DEPLOYMENT.md`.
 
 For Docker-based Hostinger staging behind Traefik, see `docs/HOSTINGER_STAGING_RUNBOOK.md`.
+Pushes to `main` deploy staging through `.github/workflows/deploy-staging.yml`
+after the four required `STAGING_*` repository secrets have been configured.
+The workflow can also be started with `workflow_dispatch` and fails unless the
+public health endpoint returns `status: "ok"`.
+
 Once that server setup is complete and local SSH access is available, deploy
 staging with `npm run deploy:staging`. It defaults to the local SSH config alias
 `mentorandi-vps`; set `DEPLOY_HOST=user@host` to use another SSH destination.

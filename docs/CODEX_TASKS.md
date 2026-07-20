@@ -259,3 +259,14 @@ this proves” section without fake metrics or public admin links.
 Goal:
 Make the working specialized-mentor, persistent-history, feedback, safeguards,
 and VPS staging story easy to demonstrate consistently.
+
+### Feature 109 - Automatic Staging Deploy Via GitHub Actions
+
+Status:
+Implemented. Pushes to `main` and manual workflow dispatches use repository
+secrets to update the Hostinger staging Compose service, serialize deployments,
+and fail unless the public health endpoint returns `status: "ok"`.
+
+Goal:
+Deploy reviewed `main` updates to staging consistently while retaining
+`npm run deploy:staging` as the local fallback and keeping secrets out of Git.

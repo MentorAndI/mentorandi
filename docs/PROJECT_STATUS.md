@@ -35,6 +35,8 @@ MentorAndI
 - Alpha Deployment Checklist exists for Hostinger/VPS go/no-go review.
 - One-command staging deployment is available through `npm run deploy:staging`
   for operators with configured VPS SSH access.
+- GitHub Actions automatically deploys pushes to `main` to Hostinger staging
+  once the required repository secrets and dedicated SSH key are configured.
 - Mock mode is available for deterministic local testing.
 - OpenAI and Claude provider modes are the intended paths for real mentor response quality.
 
