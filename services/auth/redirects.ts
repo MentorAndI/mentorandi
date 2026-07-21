@@ -1,4 +1,9 @@
-const allowedNextPathPrefixes = ["/start", "/mentor", "/settings"] as const;
+const allowedNextPathPrefixes = [
+  "/start",
+  "/mentor",
+  "/mentors",
+  "/settings",
+] as const;
 const defaultAuthCallbackNextPath = "/start";
 const internalHostnames = new Set([
   "0.0.0.0",

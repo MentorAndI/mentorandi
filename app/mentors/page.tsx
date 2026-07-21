@@ -30,6 +30,13 @@ export default function MentorsPage() {
           </Text>
         </div>
 
+        <div className="mx-auto mt-8 max-w-3xl rounded-xl border border-sky-200 bg-sky-50 p-4 text-center text-sm leading-6 text-sky-950">
+          <span className="font-semibold">First time here?</span> Choose the
+          mentor closest to your situation, write as naturally as you would to
+          a thoughtful person, and use the Feedback button after chatting to
+          help improve the alpha.
+        </div>
+
         <div className="mt-10 grid gap-5 md:grid-cols-2">
           {activeMentorProfiles.map((mentor) => (
             <Card

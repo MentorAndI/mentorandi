@@ -25,8 +25,9 @@ MentorAndI
   `/admin` and review recent feedback at `/admin/feedback`.
 - Public alpha privacy, terms and contact pages are available, with direct
   support, in-product feedback and bug-report guidance on `/contact`.
-- A public `/alpha` guide explains the invited tester flow, safety boundaries,
-  test checklist and feedback format.
+- A public `/alpha` entry page explains the invited tester flow, safety
+  boundaries, test checklist and feedback format, then shows session-aware
+  signup/login or mentor-start actions without exposing admin routes.
 - The active alpha mentor lineup is Life, ADHD, Relationship, Stress / Burnout,
   Parenting, Health & Fitness, Focus and Confidence; Business and Career are not
   active mentor categories.
@@ -128,7 +129,10 @@ MentorAndI
 - `/signup` requires a matching invite code only when `ALPHA_INVITE_CODE` is
   configured; invalid codes are rejected before Supabase signup is called.
 - Successful login redirects to `/mentor`.
-- Successful signup either creates an immediate session and redirects to `/start`, or shows email confirmation instructions. Email confirmation links return through `/auth/callback` to create the session and continue to `/start`.
+- Successful signup either creates an immediate session and continues to mentor
+  selection, or shows email confirmation instructions. Email confirmation links
+  return through `/auth/callback` and continue to `/mentors` by default. Safe
+  requested `/start` or mentor destinations are preserved.
 - Sign out clears the Supabase session and sends the user to `/login`.
 - In development, `/mentor` and `/settings` may use the seeded fallback user when no Supabase session exists.
 - In production, unauthenticated users are redirected from `/mentor` and `/settings` to `/login`.

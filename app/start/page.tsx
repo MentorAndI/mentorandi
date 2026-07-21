@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 
 import { FeedbackButton } from "@/components/feedback/FeedbackButton";
 import { ConversationCard } from "@/components/mentor/ConversationCard";
@@ -42,6 +43,22 @@ export default async function StartPage({
             <Text className="text-lg leading-8 text-zinc-700">
               Just tell me whatever comes to mind.
             </Text>
+          </div>
+
+          <div className="rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm leading-6 text-sky-950">
+            <p className="font-semibold">A quick alpha guide</p>
+            <p className="mt-1">
+              Choose the mentor closest to your situation, write naturally,
+              and use the Feedback button to tell us what helped or felt off. You
+              can{" "}
+              <Link
+                className="font-semibold underline underline-offset-4"
+                href="/mentors"
+              >
+                compare mentors
+              </Link>{" "}
+              before you begin.
+            </p>
           </div>
         </div>
 

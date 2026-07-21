@@ -5,6 +5,7 @@ import {
   LegalPage,
   LegalSection,
 } from "@/components/legal/LegalPage";
+import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Alpha tester guide | MentorAndI",
@@ -14,21 +15,58 @@ export const metadata: Metadata = {
 const linkClassName =
   "font-medium text-zinc-950 underline underline-offset-4";
 
-export default function AlphaTesterGuidePage() {
+export default async function AlphaTesterGuidePage() {
+  const supabase = await createSupabaseServerClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const isAuthenticated = Boolean(user);
+
   return (
     <LegalPage
-      description="A short guide for invited testers: what to try, how to stay safe, and how to report what you find."
+      description="Your entry point for the invited alpha: what MentorAndI does, how to begin, what to test, and where its boundaries are."
       title="Welcome to the MentorAndI private alpha"
     >
-      <LegalSection title="Before you start">
+      <div className="rounded-2xl border border-sky-200 bg-sky-50 p-5 sm:p-6">
+        <p className="text-sm font-semibold uppercase tracking-[0.14em] text-sky-800">
+          {isAuthenticated ? "You are signed in" : "Invite-only testing"}
+        </p>
+        <p className="mt-2 text-base leading-7 text-sky-950">
+          {isAuthenticated
+            ? "Choose a specialized mentor, or begin with Marcus as your Life mentor."
+            : "You need your private invite code to create an account. Existing testers can log in below."}
+        </p>
+        <div className="mt-4 flex flex-wrap gap-3">
+          {isAuthenticated ? (
+            <>
+              <AlphaAction href="/mentors" label="Choose a mentor" primary />
+              <AlphaAction href="/mentor?mentor=life" label="Start with Marcus" />
+            </>
+          ) : (
+            <>
+              <AlphaAction href="/signup" label="Sign up with invite code" primary />
+              <AlphaAction href="/login" label="Log in" />
+              <AlphaAction href="/demo" label="View the demo" />
+            </>
+          )}
+        </div>
+      </div>
+
+      <LegalSection title="What MentorAndI is">
         <p>
-          MentorAndI is currently in private alpha. You need the invite code you
-          received to create an account. Start on the{" "}
-          <Link className={linkClassName} href="/signup">
-            signup page
-          </Link>
-          , then verify your email before beginning your first mentor
-          conversation.
+          MentorAndI is a long-term AI mentoring product with specialized
+          mentors for different situations. It keeps your account,
+          mentor-specific conversation history, and relevant personal context
+          so you can continue instead of starting over each time.
+        </p>
+      </LegalSection>
+
+      <LegalSection title="What private alpha means">
+        <p>
+          This is an early test environment, not a finished public product.
+          Features and responses may change, and you may encounter rough edges.
+          New accounts require the invite code sent to you, followed by email
+          verification. Your honest feedback directly informs alpha improvements.
         </p>
         <p>
           Please use a real but low-risk personal issue when testing. Do not
@@ -54,7 +92,7 @@ export default function AlphaTesterGuidePage() {
         </p>
       </LegalSection>
 
-      <LegalSection title="Safety during alpha">
+      <LegalSection title="What not to use it for">
         <p>
           The mentor can support reflection and practical next steps, but it is
           not medical, legal, financial, or emergency advice. For urgent danger
@@ -86,6 +124,16 @@ export default function AlphaTesterGuidePage() {
             </Link>
           </li>
           <li>
+            <Link className={linkClassName} href="/mentors">
+              Mentors
+            </Link>
+          </li>
+          <li>
+            <Link className={linkClassName} href="/demo">
+              Demo
+            </Link>
+          </li>
+          <li>
             <Link className={linkClassName} href="/privacy">
               Privacy
             </Link>
@@ -103,5 +151,28 @@ export default function AlphaTesterGuidePage() {
         </ul>
       </LegalSection>
     </LegalPage>
+  );
+}
+
+function AlphaAction({
+  href,
+  label,
+  primary = false,
+}: {
+  href: string;
+  label: string;
+  primary?: boolean;
+}) {
+  return (
+    <Link
+      className={
+        primary
+          ? "inline-flex h-10 items-center rounded-md bg-sky-900 px-4 text-sm font-semibold text-white hover:bg-sky-800"
+          : "inline-flex h-10 items-center rounded-md border border-sky-300 bg-white px-4 text-sm font-semibold text-sky-950 hover:bg-sky-100"
+      }
+      href={href}
+    >
+      {label}
+    </Link>
   );
 }

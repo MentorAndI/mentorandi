@@ -76,8 +76,11 @@ confirmation callback are unchanged. See `docs/ALPHA_INVITE_GATE.md`.
 
 `/alpha`, `/demo`, `/privacy`, `/terms` and `/contact` are public informational pages.
 They use simple alpha wording and do not create database records or expose an
-API. `/alpha` explains the invited tester flow, safe test scope, feedback path
-and bug-report format without linking to internal admin pages. See
+API. `/alpha` reads server-side auth state only to show appropriate signup/login
+or mentor-start actions. It explains the invited tester flow, safe test scope,
+feedback path and bug-report format without linking to internal admin pages. New
+signup confirmation callbacks default to `/mentors`; safe requested onboarding
+destinations remain supported. See
 `docs/ALPHA_TESTER_GUIDE.md`.
 `/contact` provides the alpha support email, directs authenticated users to the
 in-product feedback button and explains what to include in a bug report. It

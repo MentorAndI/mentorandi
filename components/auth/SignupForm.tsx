@@ -34,7 +34,7 @@ export interface SignupFormProps {
 }
 
 export function SignupForm({
-  redirectPath = "/start",
+  redirectPath = "/mentors",
 }: SignupFormProps) {
   const router = useRouter();
   const [values, setValues] = useState<SignupFormValues>({
@@ -123,8 +123,8 @@ export function SignupForm({
               take a minute to arrive.
             </p>
             <p>
-              Clicking the confirmation link will log you in and continue setup
-              in MentorAndI.
+              Clicking the confirmation link will log you in and take you to
+              the next step: choosing a mentor or starting your conversation.
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -167,6 +167,7 @@ export function SignupForm({
         autoComplete="off"
         error={errors.inviteCode}
         id="signup-invite-code"
+        hint="Use the private code included with your alpha invitation."
         label="Alpha invite code"
         onChange={(event) =>
           setValues((current) => ({
