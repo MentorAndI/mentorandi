@@ -82,8 +82,8 @@ feedback view closes the product-learning loop. Both pages are server-rendered,
 require a real Supabase session, and check an email allowlist before reading
 cross-user data. These are internal tools, not public dashboards.”
 
-Do not present totals as traction metrics. The alpha admin counts are
-operational data, and usage counters are process-local.
+Do not present totals as traction metrics. The alpha admin counts and persistent
+usage records are operational data, and cost values are estimates.
 
 ## 5:15–6:30 — Explain account, access, and deployment proof
 
@@ -117,8 +117,9 @@ a real deployed product foundation rather than a generic-chat mock-up.”
   serves specialized profiles, expertise, boundaries, and method libraries.
 - **Is history persistent?** Yes. Accounts and conversations are stored through
   Supabase/PostgreSQL and Prisma; conversation messages are mentor-scoped.
-- **Are usage metrics durable?** Not yet. Current usage-limit counters are
-  process-local and reset when the app restarts.
+- **Are usage metrics durable?** Alpha usage events and limit windows are now
+  database-backed. Cost figures are estimates and the system is not a
+  billing-grade analytics ledger.
 - **Is this therapy or medical care?** No. Mentor profiles and the shared prompt
   retain explicit non-diagnostic and crisis/professional-support boundaries.
 - **Is security complete?** No security program is ever “complete.” The alpha

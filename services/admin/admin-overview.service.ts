@@ -1,6 +1,5 @@
 import { AdminOverviewRepository } from "@/services/admin/admin-overview.repository";
 import type { AdminOverview } from "@/services/admin/admin-overview.types";
-import { getUsageLimitAdminSnapshot } from "@/services/usage-limits/usage-limits.service";
 
 const recentItemLimit = 10;
 
@@ -42,10 +41,6 @@ export class AdminOverviewService {
         lastActivityAt: user.lastActivityAt.toISOString(),
       })),
       totals: data.totals,
-      usage: {
-        counters: getUsageLimitAdminSnapshot(),
-        note: "Process-local counters reset when the app restarts and are not shared across app instances.",
-      },
     };
   }
 }

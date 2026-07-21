@@ -4,6 +4,7 @@ export function AdminNav() {
   return (
     <nav aria-label="Admin navigation" className="flex flex-wrap gap-2">
       <AdminLink href="/admin">Overview</AdminLink>
+      <AdminLink href="/admin/usage">Usage</AdminLink>
       <AdminLink href="/admin/feedback">Feedback</AdminLink>
     </nav>
   );

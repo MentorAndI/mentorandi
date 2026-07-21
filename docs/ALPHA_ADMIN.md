@@ -1,11 +1,12 @@
 # Alpha Admin
 
-MentorAndI has two internal, server-rendered alpha admin pages:
+MentorAndI has three internal, server-rendered alpha admin pages:
 
-- `/admin` shows aggregate user, conversation, message and feedback totals;
-  recent users and conversations; a feedback summary; and process-local
-  usage-limit counters when available.
+- `/admin` shows aggregate user, conversation, message and feedback totals,
+  recent users and conversations, and a feedback summary.
 - `/admin/feedback` shows the 100 most recent feedback submissions.
+- `/admin/usage` shows persistent message counts, estimated costs,
+  provider/model/mentor breakdowns, blocked attempts, and recent usage events.
 
 Both routes require a real Supabase-authenticated user whose normalized email is
 included in the comma-separated `ALPHA_ADMIN_EMAILS` environment variable:
@@ -23,5 +24,8 @@ Admin reads go through Prisma. User emails are joined server-side from Supabase
 Auth and are never exposed through a public endpoint. No permissive RLS policy
 is required.
 
-Usage-limit counters are process-local alpha diagnostics. They reset on restart
-and are not shared between app instances, so they are not durable analytics.
+Usage monitoring is now database-backed for production/staging. The usage page
+does not show message content or secrets. Cost values depend on configured token
+prices and provider-reported token counts, so they are estimates rather than
+billing-grade analytics. Local development can still use process-local counters
+when its database is unavailable.

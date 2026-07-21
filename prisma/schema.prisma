@@ -34,6 +34,12 @@ enum FeedbackCategory {
   OTHER
 }
 
+enum UsageEventStatus {
+  SUCCESS
+  FAILURE
+  BLOCKED
+}
+
 model User {
   id         String   @id @default(uuid()) @db.Uuid
   authUserId String   @unique @db.Uuid
@@ -46,6 +52,7 @@ model User {
   journalEntries JournalEntry[]
   memories       Memory[]
   reflections    Reflection[]
+  usageEvents    UsageEvent[]
 
   @@index([createdAt])
 }
@@ -75,6 +82,7 @@ model Mentor {
   updatedAt   DateTime @updatedAt
 
   conversations Conversation[]
+  usageEvents   UsageEvent[]
 
   @@index([active])
   @@index([slug])
@@ -87,15 +95,46 @@ model Conversation {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  mentor   Mentor    @relation(fields: [mentorId], references: [id], onDelete: Restrict)
-  memories Memory[]  @relation("ConversationMemories")
-  messages Message[]
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mentor      Mentor       @relation(fields: [mentorId], references: [id], onDelete: Restrict)
+  memories    Memory[]     @relation("ConversationMemories")
+  messages    Message[]
+  usageEvents UsageEvent[]
 
   @@index([userId])
   @@index([mentorId])
   @@index([userId, updatedAt])
   @@index([mentorId, updatedAt])
+}
+
+model UsageEvent {
+  id               String           @id @default(uuid()) @db.Uuid
+  userId           String           @db.Uuid
+  mentorId         String?          @db.Uuid
+  conversationId   String?          @db.Uuid
+  provider         String?
+  model            String?
+  route            String?
+  inputTokens      Int?
+  outputTokens     Int?
+  totalTokens      Int?
+  estimatedCostUsd Decimal?         @db.Decimal(14, 8)
+  status           UsageEventStatus
+  errorCode        String?
+  createdAt        DateTime         @default(now())
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mentor       Mentor?       @relation(fields: [mentorId], references: [id], onDelete: SetNull)
+  conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+
+  @@index([userId, status, createdAt])
+  @@index([status, createdAt])
+  @@index([provider, createdAt])
+  @@index([model, createdAt])
+  @@index([mentorId, createdAt])
+  @@index([conversationId, createdAt])
+  @@index([route, createdAt])
+  @@index([createdAt])
 }
 
 model Message {

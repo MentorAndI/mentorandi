@@ -17,7 +17,9 @@ MentorAndI
   reflection grounded in the user's effort, honesty, awareness, courage,
   pattern recognition, or willingness instead of relying on stock reassurance.
 - Aggregate Learning Suggestions v1 exists as a disabled design/service-interface foundation only; no cross-user learning is implemented.
-- Usage Limits v1 exists as an in-memory request-count foundation for mentor responses; database persistence is still future work.
+- Usage and cost monitoring persists safe mentor-request metadata, token usage,
+  estimated cost, failures, and blocked attempts. Alpha limits query successful
+  usage in UTC periods instead of relying on process memory in production.
 - Authenticated alpha feedback capture is available from `/start` and `/mentor`.
 - Allowlisted internal admins can monitor aggregate and recent alpha activity at
   `/admin` and review recent feedback at `/admin/feedback`.
@@ -77,6 +79,8 @@ MentorAndI
   the persisted mentor context and capped to two method context entries.
 - Alpha feedback capture with usefulness rating, category and page context.
 - Server-rendered alpha admin overview and feedback review.
+- Allowlisted `/admin/usage` monitoring for persistent counts, estimated cost,
+  provider/model/mentor breakdowns, blocked attempts, and recent events.
 - Reflection-aware context.
 - Basic account data export and mentor data deletion controls.
 - Context Builder.
@@ -108,7 +112,10 @@ MentorAndI
 - Mentor Core prepares context; the selected real LLM provider produces the natural-language answer.
 - Mock should not be treated as the source of real mentor quality.
 - Aggregate learning suggestions are not active runtime behavior. Personal user data must never become shared knowledge automatically, and reusable knowledge changes must remain curated/admin-approved.
-- Usage limits are enforced only when configured, with local development left unblocked by default. Current counts are process-local and reset on restart.
+- Usage limits are enforced only when configured, with local development left
+  unblocked by default. Production/staging reads persistent usage and fails
+  closed when tracking is unavailable; local development may use a process-local
+  fallback.
 - `npm run eval:mentor` requires the local app server, database connection and seeded development user because it evaluates the full Mentor Core flow.
 
 ## Alpha Auth Behavior
@@ -132,7 +139,9 @@ MentorAndI
 - Hostinger VPS staging is live; a production launch is not done.
 - Payment is not done.
 - Privacy controls are basic v1 only; Supabase auth user deletion and full compliance workflows are not done.
-- Usage limits are not yet persisted to the database.
+- Usage and cost monitoring is alpha operational data, not billing-grade
+  analytics; cost values depend on configured price estimates and provider token
+  reporting.
 - Mentor histories are separated by persisted Mentor relationship. Deeper
   profile-specific memory remains future work; user-level memory is currently
   shared personal context across the user's mentors.

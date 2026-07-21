@@ -58,7 +58,7 @@ Cost and usage guardrails:
 - Decide whether `USAGE_LIMITS_ENABLED` should enforce limits.
 - Configure `ALPHA_DAILY_MESSAGE_LIMIT`, `ALPHA_WEEKLY_MESSAGE_LIMIT`, `ALPHA_MONTHLY_MESSAGE_LIMIT` and `ALPHA_WEEKLY_DEEP_LIMIT` if overriding the defaults.
 - Configure `ALPHA_ADMIN_EMAILS` with the authenticated emails allowed to review
-  `/admin` and `/admin/feedback`.
+  `/admin`, `/admin/feedback` and `/admin/usage`.
 - Configure `ALPHA_INVITE_CODE` with the private signup code and verify that a
   missing or incorrect code cannot create a Supabase account.
 - Confirm `/contact` links to `support@mentorandi.com` and describes in-product
@@ -75,6 +75,8 @@ Cost and usage guardrails:
   - `http://localhost:3000/auth/callback`
 - Confirm `prisma/security/rls-hardening.sql` has been reviewed or run for the target database.
 - Confirm RLS is enabled on all public app tables and no unrestricted `anon`/`authenticated` policies exist.
+- Run `prisma migrate deploy` through the one-shot staging migration service
+  before starting an app image that depends on new tables; stop if it fails.
 - Confirm database backups or recovery plan are available before risky operations.
 - Do not apply Prisma schema changes unless the feature explicitly requires them and the migration has been reviewed.
 

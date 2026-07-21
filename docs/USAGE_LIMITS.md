@@ -1,20 +1,9 @@
 # Usage Limits
 
-Usage Limits v1 provides basic request-count guardrails before alpha.
-
-## Current Status
-
-Feature 094 enforces alpha limits on top of the in-memory foundation:
-
-- No Prisma schema changes.
-- No database dependency.
-- No packages.
-- Mentor response requests are checked before the LLM pipeline runs.
-- Successful mentor responses are recorded after the pipeline succeeds.
-- Failed requests and public page views are not counted.
-- Counters are scoped by authenticated Supabase user ID, not fallback users.
-
-Counts are process-local. They reset when the server process restarts and are not shared across multiple running instances.
+MentorAndI enforces alpha request limits from persistent server-side
+`UsageEvent` records. Successful mentor responses count toward limits; failure
+and blocked events remain available for operational review without consuming a
+successful-message allowance.
 
 ## Configuration
 
@@ -26,29 +15,28 @@ ALPHA_MONTHLY_MESSAGE_LIMIT=300
 ALPHA_WEEKLY_DEEP_LIMIT=5
 ```
 
-Behavior:
-
 - `USAGE_LIMITS_ENABLED=true` enforces limits in any environment.
 - `USAGE_LIMITS_ENABLED=false` disables enforcement in any environment.
-- If `USAGE_LIMITS_ENABLED` is empty, enforcement is enabled only when `NODE_ENV=production`.
-- Empty or invalid alpha limit values use the safe defaults shown above.
-- Local development records counts but does not block requests unless enforcement is explicitly enabled.
+- If it is empty, enforcement defaults on only for `NODE_ENV=production`.
+- Empty or invalid limit values use the safe defaults above.
 
-Limits:
+The daily window starts at 00:00 UTC, the weekly window is the ISO week starting
+Monday UTC, and the monthly window starts on the first day of the UTC month.
+Deep-route successful events also have a separate ISO-week count.
 
-- Mentor messages: 25 daily, 100 weekly, 300 monthly by default.
-- Deep/Claude mentor calls: 5 weekly by default.
-- Deep calls that exceed the weekly limit are blocked server-side with a clear alpha usage message.
+## Enforcement and failure behavior
 
-## Current Scope
+`/api/mentor/respond` and `/api/mentor-core/respond` query the authenticated
+application user's persistent successful usage before the LLM pipeline runs.
+Exceeded limits return a clear 429 alpha message and create a blocked event.
+Successful calls store provider, model, route, token counts, and an estimated
+cost when pricing and token data are available. Safe failure codes are recorded
+without prompts, responses, secrets, or stack traces.
 
-Usage limits are checked for:
+Production and staging fail closed with a safe 503 when persistent usage cannot
+be read or written. Local development falls back to the legacy process-local
+counters when its database is unavailable, so local work is not blocked.
 
-- `/api/mentor/respond`
-- `/api/mentor-core/respond`
-
-The limiter uses the authenticated Supabase user ID internally as the counter key, but raw IDs are not returned to the UI.
-
-## Future Persistence
-
-Later versions should persist usage to the database so limits survive restarts and work across multiple app instances. That future implementation will need a Prisma schema change and migration, so it is intentionally out of scope for v1.
+The v1 persistent flow survives process restarts and supports alpha operations.
+It is not a billing-grade, high-concurrency reservation ledger. Cost figures are
+configured estimates, not invoices. See `docs/ALPHA_USAGE_MONITORING.md`.

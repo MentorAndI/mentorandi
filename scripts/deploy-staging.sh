@@ -19,6 +19,8 @@ ssh -o ConnectTimeout=15 "$deploy_host" '
   cd /docker/mentorandi
   git fetch origin main
   git pull --ff-only origin main
+  docker compose --env-file .env.staging -f docker-compose.staging.yml --profile tools build mentorandi-staging-migrate
+  docker compose --env-file .env.staging -f docker-compose.staging.yml --profile tools run --rm mentorandi-staging-migrate
   docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build
 '
 

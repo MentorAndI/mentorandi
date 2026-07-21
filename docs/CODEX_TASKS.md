@@ -261,6 +261,17 @@ Goal:
 Give investors and OTC viewers a concise, verifiable explanation of the working
 MentorAndI alpha, its operational product loop, and its current boundaries.
 
+### Feature 112 - Persistent Usage And Cost Monitoring v1
+
+Status:
+Implemented. Successful, failed, and blocked mentor usage is persisted with
+safe provider/model/token/cost metadata; production limits query UTC database
+windows and fail closed; allowlisted admins can inspect `/admin/usage`.
+
+Goal:
+Make alpha volume, estimated cost, and limit enforcement durable across app
+restarts without treating operational estimates as billing-grade analytics.
+
 ### Feature 107 - One-Command Staging Deploy
 
 Status:

@@ -1,4 +1,15 @@
 services:
+  mentorandi-staging-migrate:
+    profiles:
+      - tools
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrator
+    env_file:
+      - ./.env.staging
+    restart: "no"
+
   mentorandi-staging:
     build:
       context: .

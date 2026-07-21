@@ -18,7 +18,7 @@ users, testimonials, growth claims, revenue claims, or usage metrics.
 | Mentor-specific methods | Each active mentor has four curated methods, selected only from that mentor's library using the current message and lower-weight recent context. | `services/mentor-methods/` and `docs/MENTOR_METHOD_LIBRARIES.md`. At most two matches enter context and the prompt uses at most one primary intervention. |
 | Admin overview | Allowlisted admins can inspect aggregate alpha activity and recent records. | `/admin` is server-rendered and checks a real Supabase user against `ALPHA_ADMIN_EMAILS`; it is not linked publicly. Counts are operational, not investor traction metrics. |
 | Feedback capture | Authenticated users can submit categorized usefulness and product feedback; admins can review recent submissions. | `/api/feedback`, the feedback service/repository, in-product controls, and protected `/admin/feedback`. No public cross-user feedback API exists. |
-| Usage limits | Mentor requests can enforce daily, weekly, monthly, and higher-cost-route limits. | Usage-limit service and response-route checks. Counters are currently process-local, reset on restart, and are not billing-grade analytics. |
+| Persistent usage and limits | Mentor requests persist success, failure, and blocked events with safe provider/model/token metadata. Daily, weekly, monthly, and deep-weekly checks use successful database events in UTC periods. | `UsageEvent`, the usage monitoring repository/service, and `/admin/usage`. Cost values are configured estimates, not billing-grade analytics; local development retains a process fallback. |
 | RLS and security hardening | Public application tables are covered by an RLS hardening script that revokes direct `anon` and `authenticated` access and rejects unrestricted policies. | `prisma/security/rls-hardening.sql` and `docs/DATABASE_SECURITY.md`; application reads go through server-side Prisma and ownership-aware services. |
 | Privacy, terms, and contact | Public alpha trust and support pages exist. | `/privacy`, `/terms`, and `/contact`; these are alpha documents, not a substitute for final legal review. |
 | Alpha tester instructions | Invited testers have a public guide covering signup, safe test scope, feedback, and bug reporting. | `/alpha` and `docs/ALPHA_TESTER_GUIDE.md`. |
@@ -80,7 +80,8 @@ moving beyond alpha.
   platform.
 - MentorAndI is mentoring support, not therapy, diagnosis, emergency support,
   medical advice, legal advice, or financial advice.
-- Usage counters are not persistent and should not be presented as analytics.
+- Usage records are persistent alpha operational monitoring. Estimated costs
+  should not be presented as billing-grade analytics.
 - User-level memories, goals, and reflections are shared across the user's
   mentors in v1; conversation messages remain mentor-scoped.
 - The public pages contain no private admin data. Admin proof must be shown only

@@ -113,6 +113,9 @@ For VPS deployment with PM2, see `docs/VPS_DEPLOYMENT.md`.
 For Docker-based Hostinger staging behind Traefik, see `docs/HOSTINGER_STAGING_RUNBOOK.md`.
 Pushes to `main` deploy staging through `.github/workflows/deploy-staging.yml`
 after the four required `STAGING_*` repository secrets have been configured.
+Both automatic and manual staging deployment run the one-shot Compose migration
+service (`prisma migrate deploy`) before rebuilding the application container.
+A migration failure stops deployment before the new app version starts.
 The workflow can also be started with `workflow_dispatch` and fails unless the
 public health endpoint returns `status: "ok"`.
 

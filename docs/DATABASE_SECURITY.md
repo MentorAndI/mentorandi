@@ -14,6 +14,8 @@ Direct public Supabase table access must remain blocked for all application tabl
 - `Goal`
 - `Reflection`
 - `JournalEntry`
+- `Feedback`
+- `UsageEvent`
 
 Do not add permissive `anon` or `authenticated` policies for these tables. Browser clients should not read or write MentorAndI application tables through Supabase directly.
 
@@ -27,6 +29,11 @@ Use `prisma/security/rls-hardening.sql` as the persistent hardening script. It:
 - fails if a permissive unrestricted `anon`, `authenticated` or `public` policy exists
 
 The script intentionally does not create policies. If a future feature needs database-level policies, they must be reviewed as a separate security change and must not bypass server-side ownership checks.
+
+`UsageEvent` is operational metadata and is server-side only. It stores no
+message or response content. The usage migration enables RLS and revokes direct
+`anon` and `authenticated` grants immediately, while the persistent hardening
+script verifies that protection alongside the other application tables.
 
 ## Access Model
 

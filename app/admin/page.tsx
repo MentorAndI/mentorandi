@@ -121,22 +121,6 @@ export default async function AdminOverviewPage() {
             />
           </AdminSection>
 
-          <AdminSection title="Usage-limit counters">
-            <Text className="mb-4 text-sm" variant="muted">
-              {overview.usage.note}
-            </Text>
-            <DataTable
-              emptyMessage="No usage has been recorded in this app process yet."
-              headers={["Scope", "Subjects", "Today", "This week", "This month"]}
-              rows={overview.usage.counters.map((counter) => [
-                formatLabel(counter.scope),
-                String(counter.subjectCount),
-                String(counter.dailyCount),
-                String(counter.weeklyCount),
-                String(counter.monthlyCount),
-              ])}
-            />
-          </AdminSection>
         </div>
       </Container>
     </main>

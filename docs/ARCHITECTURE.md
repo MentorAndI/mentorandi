@@ -49,7 +49,7 @@ Repositories are Prisma-only. They should not contain product behavior, authoriz
 
 Supabase Postgres is not a public table API for MentorAndI application data. Direct browser access to public application tables must remain blocked; data access goes through server-side Prisma repositories, service-layer ownership checks and API routes.
 
-RLS must stay enabled on all public app tables: `User`, `Mentor`, `Conversation`, `Message`, `Memory`, `Goal`, `Reflection`, `JournalEntry` and `Feedback`. The hardening script at `prisma/security/rls-hardening.sql` enables RLS, revokes direct `anon`/`authenticated` table grants and verifies no unrestricted public policies exist. Do not add permissive Supabase policies for app data without a separate security review.
+RLS must stay enabled on all public app tables: `User`, `Mentor`, `Conversation`, `Message`, `Memory`, `Goal`, `Reflection`, `JournalEntry`, `Feedback` and `UsageEvent`. The hardening script at `prisma/security/rls-hardening.sql` enables RLS, revokes direct `anon`/`authenticated` table grants and verifies no unrestricted public policies exist. Do not add permissive Supabase policies for app data without a separate security review.
 
 ## Alpha Feedback
 
@@ -189,9 +189,20 @@ The routed configuration can choose a provider and model per route with `LLM_CHE
 
 ## Usage Limits
 
-Usage Limits v1 is an in-memory service-layer guardrail for alpha request counts. `/api/mentor/respond` and `/api/mentor-core/respond` resolve a real authenticated user first, check usage before running the Mentor Core response pipeline, and record usage only after a successful mentor response. Public page views, failed requests and unauthenticated submissions are not counted. Local development records counts without blocking unless `USAGE_LIMITS_ENABLED=true`; production enforces alpha defaults with `ALPHA_DAILY_MESSAGE_LIMIT`, `ALPHA_WEEKLY_MESSAGE_LIMIT`, `ALPHA_MONTHLY_MESSAGE_LIMIT` and `ALPHA_WEEKLY_DEEP_LIMIT`.
+Persistent usage monitoring stores safe operational metadata for successful,
+failed, and blocked mentor requests. `/api/mentor/respond` and
+`/api/mentor-core/respond` resolve a real authenticated user first, query
+successful events for UTC daily, weekly, monthly, and deep-weekly windows, then
+record provider/model/route, token counts, estimated cost, status, and a safe
+error code when available. Message content is not duplicated into usage events.
 
-This is not durable storage. Counts reset when the process restarts and are not shared across app instances. Persisted usage limits should be added later with an explicit database-backed design and Prisma schema change.
+Production enforces alpha defaults with `ALPHA_DAILY_MESSAGE_LIMIT`,
+`ALPHA_WEEKLY_MESSAGE_LIMIT`, `ALPHA_MONTHLY_MESSAGE_LIMIT` and
+`ALPHA_WEEKLY_DEEP_LIMIT`. A persistent tracking failure returns a safe error
+instead of bypassing limits. Local development can use the legacy process-local
+fallback. `/admin/usage` exposes aggregates and recent metadata only to
+allowlisted admins. Cost data is estimated and not billing-grade. See
+`docs/ALPHA_USAGE_MONITORING.md`.
 
 ## Mentor Evaluation
 

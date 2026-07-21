@@ -9,7 +9,10 @@ import {
   MentorResponsePipelineService,
   MentorResponsePipelineServiceError,
 } from "@/services/mentor-core/response-pipeline/response-pipeline.service";
-import { MentorUsageLimitService } from "@/services/usage-limits/mentor-usage-limits.service";
+import {
+  MentorUsageLimitService,
+  MentorUsageMonitoringError,
+} from "@/services/usage-limits/mentor-usage-limits.service";
 import { UserServiceError } from "@/services/user/user.service";
 import {
   isActiveMentorSlug,
@@ -49,30 +52,50 @@ export async function POST(request: Request) {
         )
       : await sessionService.getResolvedMentorSession(mentorSlug);
     const usageLimitService = new MentorUsageLimitService();
-    const usageDecision = usageLimitService.checkBeforeMentorResponse({
+    const usageContext = {
       authUserId: session.authUserId,
+      conversationId: session.conversation.id,
       message: validation.input.message,
-    });
+      mentorId: session.mentorId,
+      userId: session.userId,
+    };
+    const usageDecision =
+      await usageLimitService.checkBeforeMentorResponse(usageContext);
 
     if (usageDecision.message) {
       return createUsageLimitResponse(usageDecision.message);
     }
 
     const pipeline = new MentorResponsePipelineService();
-    const response = await pipeline.run(
-      {
-        conversationId: session.conversation.id,
-        message: validation.input.message,
-        mentorSpecialty: mentorSlug,
-        userId: session.userId,
-      },
-      {
-        authUserId: session.authUserId,
-      },
-    );
-    usageLimitService.recordSuccessfulMentorResponse({
-      authUserId: session.authUserId,
-      modelRouting: response.llmUsage.modelRouting,
+    let response;
+
+    try {
+      response = await pipeline.run(
+        {
+          conversationId: session.conversation.id,
+          message: validation.input.message,
+          mentorSpecialty: mentorSlug,
+          userId: session.userId,
+        },
+        {
+          authUserId: session.authUserId,
+        },
+      );
+    } catch (error) {
+      await usageLimitService.recordFailedMentorResponse({
+        ...usageContext,
+        errorCode:
+          error instanceof MentorResponsePipelineServiceError
+            ? (error.providerErrorState ?? "pipeline_error")
+            : "pipeline_error",
+        modelRouting: usageDecision.modelRouting,
+      });
+      throw error;
+    }
+
+    await usageLimitService.recordSuccessfulMentorResponse({
+      ...usageContext,
+      llmUsage: response.llmUsage,
     });
 
     return NextResponse.json(
@@ -84,6 +107,15 @@ export async function POST(request: Request) {
       { status: 200 },
     );
   } catch (error) {
+    if (error instanceof MentorUsageMonitoringError) {
+      return createSafeErrorResponse({
+        context: "api/mentor/respond:usage",
+        error,
+        fallbackMessage: error.message,
+        statusCode: error.statusCode,
+      });
+    }
+
     if (error instanceof MentorSessionServiceError) {
       return createSafeErrorResponse({
         context: "api/mentor/respond:session",

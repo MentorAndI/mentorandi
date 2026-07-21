@@ -33,21 +33,9 @@ export interface AdminFeedbackSummary {
   }>;
 }
 
-export interface AdminUsageCounter {
-  dailyCount: number;
-  monthlyCount: number;
-  scope: string;
-  subjectCount: number;
-  weeklyCount: number;
-}
-
 export interface AdminOverview {
   feedbackSummary: AdminFeedbackSummary;
   recentConversations: AdminRecentConversation[];
   recentUsers: AdminRecentUser[];
   totals: AdminOverviewTotals;
-  usage: {
-    counters: AdminUsageCounter[];
-    note: string;
-  };
 }

@@ -105,10 +105,16 @@ git fetch origin main
 git checkout main
 git pull --ff-only origin main
 npm run check:env
+docker compose --env-file .env.staging -f docker-compose.staging.yml --profile tools build mentorandi-staging-migrate
+docker compose --env-file .env.staging -f docker-compose.staging.yml --profile tools run --rm mentorandi-staging-migrate
 docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build
 ```
 
-The `--env-file .env.staging` flag is required because Docker build args for public Supabase values are interpolated from the compose environment. The same file is also mounted into the service with `env_file` for runtime variables.
+The one-shot migration service runs `prisma migrate deploy` and must succeed
+before the application image starts using a new schema. The `--env-file
+.env.staging` flag is required because Docker build args for public Supabase
+values are interpolated from the compose environment. The same file is also
+mounted into the services for runtime variables.
 
 ## Verify Container And Traefik
 
@@ -186,8 +192,8 @@ Setup steps:
 3. Add the private key and the other three values as GitHub repository secrets.
 4. Confirm the VPS checkout at `/docker/mentorandi` can fetch `origin/main`
    non-interactively and that the deployment account can run Docker Compose.
-5. Run the workflow manually once and confirm the final health step reports
-   `status: "ok"`.
+5. Run the workflow manually once, confirm the migration step succeeds, and
+   confirm the final health step reports `status: "ok"`.
 
 The runner writes the private key only to its temporary `~/.ssh` directory for
 the job. No SSH key, environment file, password, or application secret belongs
@@ -223,6 +229,8 @@ The equivalent manual server commands remain:
 ```bash
 git fetch origin main
 git pull --ff-only origin main
+docker compose --env-file .env.staging -f docker-compose.staging.yml --profile tools build mentorandi-staging-migrate
+docker compose --env-file .env.staging -f docker-compose.staging.yml --profile tools run --rm mentorandi-staging-migrate
 docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build
 ```
 

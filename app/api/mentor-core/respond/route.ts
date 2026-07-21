@@ -11,7 +11,10 @@ import {
   UserService,
   UserServiceError,
 } from "@/services/user/user.service";
-import { MentorUsageLimitService } from "@/services/usage-limits/mentor-usage-limits.service";
+import {
+  MentorUsageLimitService,
+  MentorUsageMonitoringError,
+} from "@/services/usage-limits/mentor-usage-limits.service";
 
 export const dynamic = "force-dynamic";
 
@@ -53,26 +56,54 @@ export async function POST(request: Request) {
     }
 
     const usageLimitService = new MentorUsageLimitService();
-    const usageDecision = usageLimitService.checkBeforeMentorResponse({
+    const usageContext = {
       authUserId,
+      conversationId: validation.input.conversationId,
       message: validation.input.message,
       model: validation.input.model,
       provider: validation.input.provider,
-    });
+      userId,
+    };
+    const usageDecision =
+      await usageLimitService.checkBeforeMentorResponse(usageContext);
 
     if (usageDecision.message) {
       return createUsageLimitResponse(usageDecision.message);
     }
 
     const service = new MentorResponsePipelineService();
-    const response = await service.run(validation.input, authContext);
-    usageLimitService.recordSuccessfulMentorResponse({
-      authUserId,
-      modelRouting: response.llmUsage.modelRouting,
+    let response;
+
+    try {
+      response = await service.run(validation.input, authContext);
+    } catch (error) {
+      await usageLimitService.recordFailedMentorResponse({
+        ...usageContext,
+        errorCode:
+          error instanceof MentorResponsePipelineServiceError
+            ? (error.providerErrorState ?? "pipeline_error")
+            : "pipeline_error",
+        modelRouting: usageDecision.modelRouting,
+      });
+      throw error;
+    }
+
+    await usageLimitService.recordSuccessfulMentorResponse({
+      ...usageContext,
+      llmUsage: response.llmUsage,
     });
 
     return NextResponse.json({ response }, { status: 200 });
   } catch (error) {
+    if (error instanceof MentorUsageMonitoringError) {
+      return createSafeErrorResponse({
+        context: "api/mentor-core/respond:usage",
+        error,
+        fallbackMessage: error.message,
+        statusCode: error.statusCode,
+      });
+    }
+
     if (error instanceof UserServiceError) {
       return createSafeErrorResponse({
         context: "api/mentor-core/respond:user",

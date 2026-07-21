@@ -633,6 +633,9 @@ function analyzeResponseQuality(
   const questionCount = (responseText.match(/\?/g) ?? []).length;
   const wordCount = responseText.split(/\s+/).filter(Boolean).length;
   const normalizedResponse = responseText.toLowerCase();
+  const normalizedPunctuationResponse = responseText
+    .replaceAll("’", "'")
+    .replace(/[“”]/g, '"');
   const thatMakesSenseCount = (
     normalizedResponse.match(/\bthat makes sense\b/g) ?? []
   ).length;
@@ -655,10 +658,10 @@ function analyzeResponseQuality(
     /^i(?:'m| am) sorry (?:to hear|that you(?:'re| are))/i,
     /^it sounds like you(?:'re| are)/i,
     /^as an ai/i,
-  ].some((pattern) => pattern.test(responseText.trimStart()));
+  ].some((pattern) => pattern.test(normalizedPunctuationResponse.trimStart()));
   const hasGroundedEncouragement =
-    /\bi(?:'m| am) glad you (?:noticed|named|recognized|said|shared)\b|\bthat(?:'s| is) (?:a )?(?:useful|important|honest|clear|valuable) observation\b|\byou(?:'re| are) naming something important\b|\bthere(?:'s| is) something honest in (?:the way|how) you\b|\bgood\s*[—–-]\s*(?:the fact that )?[^.!?\n]{0,90}(?:concrete|work with|starting point)\b|\bit(?:'s| is) (?:a )?good (?:sign|thing) that you\b|\bthe fact that you [^.!?\n]{0,100}(?:is useful information|is a strength|gives us something concrete|shows (?:effort|honesty|awareness|courage|willingness))\b|\b(?:that|this) is useful information\b|\bthat(?:'s| is) not laziness;? (?:it )?(?:sounds|looks) like friction\b|\bit(?:'s| is) good that you can (?:see|name|notice|recognize)\b|\byou(?:'ve| have) already (?:noticed|named|recognized)\b|\b(?:your|the) (?:effort|honesty|self-awareness|awareness|courage|willingness|pattern recognition) [^.!?\n]{0,70}(?:matters|is useful|gives us|shows)\b/i.test(
-      responseText,
+    /\bi(?:'m| am) glad you (?:noticed|named|recognized|said|shared)\b|\bthat(?:'s| is) (?:a )?(?:useful|important|honest|clear|valuable) observation\b|\byou(?:'re| are) (?:naming|noticing) something important\b|\bthere(?:'s| is) something honest in (?:the way|how) you\b|\bgood\s*[—–-]\s*(?:the fact that )?[^.!?\n]{0,90}(?:concrete|work with|starting point)\b|\bit(?:'s| is) (?:a )?good (?:sign|thing) that you\b|\bthe fact that you [^.!?\n]{0,100}(?:is useful information|is a strength|gives us something concrete|shows (?:effort|honesty|awareness|courage|willingness))\b|\b(?:that|this) is useful information\b|\bthat(?:'s| is) not laziness;? (?:it )?(?:sounds|looks) like friction\b|\bit(?:'s| is) good that you can (?:see|name|notice|recognize)\b|\byou(?:'ve| have) already (?:noticed|named|recognized)\b|\byou(?:'re| are)? [^.!?\n]{0,120},? (?:which is|and that(?:'s| is)) (?:useful|important|meaningful)\b|\byou(?:'re| are)? [^.!?\n]{0,120},? (?:which|and that) matters\b|\byou (?:noticed|named|recognized|caught) [\s\S]{0,160}(?:useful|important|concrete|strength|starting point)\b|\b(?:your|the) (?:effort|honesty|self-awareness|awareness|courage|willingness|pattern recognition) [^.!?\n]{0,70}(?:matters|is useful|gives us|shows)\b/i.test(
+      normalizedPunctuationResponse,
     );
   const issues = [];
 
