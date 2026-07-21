@@ -5,6 +5,10 @@ MentorAndI as one Mentor Core with multiple specialized profiles, and makes the
 product easy to demonstrate without exposing internal administration pages or
 inventing users, activity, or metrics.
 
+The presenter-ready narration is in `docs/INVESTOR_DEMO_SCRIPT.md`. A concise
+capability inventory with implementation evidence and current limitations is in
+`docs/ALPHA_PROGRESS_PROOF.md`.
+
 The page includes a 5–7 minute presenter script. It walks through the full
 mentor lineup, an ADHD task-avoidance response, a switch to Confidence, proof
 of separated mentor history, authenticated feedback, internal-only admin

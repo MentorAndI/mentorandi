@@ -250,6 +250,17 @@ Goal:
 Make specialized mentor responses feel more encouraging and human without
 becoming generic, flattering, or unsafe.
 
+### Feature 111 - Investor Proof Pack
+
+Status:
+Implemented. The repository includes a 5–7 minute investor demo script and a
+direct alpha capability inventory with evidence, limitations, and no invented
+metrics or public admin exposure.
+
+Goal:
+Give investors and OTC viewers a concise, verifiable explanation of the working
+MentorAndI alpha, its operational product loop, and its current boundaries.
+
 ### Feature 107 - One-Command Staging Deploy
 
 Status:

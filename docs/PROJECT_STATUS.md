@@ -34,6 +34,8 @@ MentorAndI
 - `/demo` provides an investor-friendly private-alpha overview, a 5–7 minute
   presenter script, proof points, and five fixed prompt scenarios that open the
   matching mentor.
+- `docs/INVESTOR_DEMO_SCRIPT.md` and `docs/ALPHA_PROGRESS_PROOF.md` provide a
+  presenter-ready walkthrough and evidence-based alpha capability inventory.
 - Full Mentor Evaluation Runner exists for dev-only Mentor Core evaluation through the seeded database-backed flow.
 - Alpha Deployment Checklist exists for Hostinger/VPS go/no-go review.
 - One-command staging deployment is available through `npm run deploy:staging`
@@ -127,7 +129,7 @@ MentorAndI
 - Mock provider is deterministic and useful for local testing, but it is not representative of final mentor quality.
 - Memory, goal and reflection extraction is rule-based.
 - UI is functional but not final design.
-- Deployment is not done.
+- Hostinger VPS staging is live; a production launch is not done.
 - Payment is not done.
 - Privacy controls are basic v1 only; Supabase auth user deletion and full compliance workflows are not done.
 - Usage limits are not yet persisted to the database.
