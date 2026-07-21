@@ -24,7 +24,7 @@ export function Header({ navItems = defaultNavItems }: HeaderProps) {
   return (
     <header className="border-b border-zinc-200 bg-white">
       <Container className="flex h-16 items-center justify-between gap-6">
-        <Link aria-label="MentorAndI home" href="/">
+        <Link aria-label="Mentor And I home" href="/">
           <Logo />
         </Link>
         <nav aria-label="Main navigation" className="hidden items-center gap-6 md:flex">

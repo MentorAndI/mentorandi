@@ -1,6 +1,6 @@
 # Database Security
 
-MentorAndI uses Supabase Postgres as the database, but application data access must stay behind server-side Prisma repositories and API routes.
+Mentor And I uses Supabase Postgres as the database, but application data access must stay behind server-side Prisma repositories and API routes.
 
 ## Public Table Access
 
@@ -18,7 +18,7 @@ Direct public Supabase table access must remain blocked for all application tabl
 - `UsageEvent`
 - `AlphaInvite`
 
-Do not add permissive `anon` or `authenticated` policies for these tables. Browser clients should not read or write MentorAndI application tables through Supabase directly.
+Do not add permissive `anon` or `authenticated` policies for these tables. Browser clients should not read or write Mentor And I application tables through Supabase directly.
 
 ## RLS Hardening
 

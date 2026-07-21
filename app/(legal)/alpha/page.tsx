@@ -8,8 +8,8 @@ import {
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
-  title: "Alpha tester guide | MentorAndI",
-  description: "How invited testers can test MentorAndI safely.",
+  title: "Alpha tester guide | Mentor And I",
+  description: "How invited testers can test Mentor And I safely.",
 };
 
 const linkClassName =
@@ -24,8 +24,8 @@ export default async function AlphaTesterGuidePage() {
 
   return (
     <LegalPage
-      description="Your entry point for the invited alpha: what MentorAndI does, how to begin, what to test, and where its boundaries are."
-      title="Welcome to the MentorAndI private alpha"
+      description="Your entry point for the invited alpha: what Mentor And I does, how to begin, what to test, and where its boundaries are."
+      title="Welcome to the Mentor And I private alpha"
     >
       <div className="rounded-2xl border border-sky-200 bg-sky-50 p-5 sm:p-6">
         <p className="text-sm font-semibold uppercase tracking-[0.14em] text-sky-800">
@@ -52,9 +52,9 @@ export default async function AlphaTesterGuidePage() {
         </div>
       </div>
 
-      <LegalSection title="What MentorAndI is">
+      <LegalSection title="What Mentor And I is">
         <p>
-          MentorAndI is a long-term AI mentoring product with specialized
+          Mentor And I is a long-term AI mentoring product with specialized
           mentors for different situations. It keeps your account,
           mentor-specific conversation history, and relevant personal context
           so you can continue instead of starting over each time.

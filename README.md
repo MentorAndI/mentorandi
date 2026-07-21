@@ -1,6 +1,6 @@
-# MentorAndI
+# Mentor And I
 
-MentorAndI is a long-term AI mentor product built around memory, goals, reflections and an ongoing mentor relationship.
+Mentor And I is a long-term AI mentor product built around memory, goals, reflections and an ongoing mentor relationship.
 
 The alpha mentor lineup focuses on Life, ADHD, Relationship, Stress / Burnout,
 Parenting, Health & Fitness, Focus and Confidence. See

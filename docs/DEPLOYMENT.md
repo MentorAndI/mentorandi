@@ -1,4 +1,4 @@
-# MentorAndI Deployment
+# Mentor And I Deployment
 
 ## Required Environment Variables
 
@@ -78,7 +78,7 @@ Before using a real provider for alpha users, test it from `/dev/mentor-test` wi
 
 Real provider usage should be monitored before alpha. Optional `LLM_INPUT_COST_PER_1M` and `LLM_OUTPUT_COST_PER_1M` values can be configured manually from current provider pricing pages so development diagnostics can estimate cost. Do not hardcode pricing into business logic.
 
-LLM cost controls are required before alpha. If unset, MentorAndI uses conservative defaults: `LLM_MAX_OUTPUT_TOKENS=500`, `LLM_CONTEXT_BUDGET_TOKENS=6000`, `LLM_RECENT_MESSAGES_LIMIT=8`, `LLM_MEMORIES_LIMIT=5`, `LLM_GOALS_LIMIT=3` and `LLM_REFLECTIONS_LIMIT=5`. Sonnet-class models may be treated as premium/deep mode; cheaper models can be introduced later for normal daily use.
+LLM cost controls are required before alpha. If unset, Mentor And I uses conservative defaults: `LLM_MAX_OUTPUT_TOKENS=500`, `LLM_CONTEXT_BUDGET_TOKENS=6000`, `LLM_RECENT_MESSAGES_LIMIT=8`, `LLM_MEMORIES_LIMIT=5`, `LLM_GOALS_LIMIT=3` and `LLM_REFLECTIONS_LIMIT=5`. Sonnet-class models may be treated as premium/deep mode; cheaper models can be introduced later for normal daily use.
 
 Model routing is deterministic and optional. `LLM_CHEAP_MODEL` is used for simple factual questions and lightweight daily chat, `LLM_DEFAULT_MODEL` is used for normal mentor messages, and `LLM_DEEP_MODEL` is used for deeper reflection, complexity or risk-sensitive messages. For Claude deployments, set `LLM_DEEP_MODEL` to a Sonnet-class model. If a route-specific model is missing, the provider falls back to its configured provider model.
 
@@ -86,7 +86,7 @@ Model routing is deterministic and optional. `LLM_CHEAP_MODEL` is used for simpl
 
 Set `APP_URL` to the public browser URL for the deployment, for example `APP_URL=https://staging.mentorandi.com`. Server-side auth callbacks use `APP_URL` for success and failure redirects so Docker or proxy internals such as `0.0.0.0:3000` are never sent to the browser.
 
-Supabase Auth must allow the MentorAndI confirmation callback URL for each environment. Add these redirect URLs in the Supabase dashboard:
+Supabase Auth must allow the Mentor And I confirmation callback URL for each environment. Add these redirect URLs in the Supabase dashboard:
 
 ```text
 https://staging.mentorandi.com/auth/callback

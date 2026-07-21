@@ -7,7 +7,7 @@ export function Logo({ className = "" }: LogoProps) {
     <span
       className={`inline-flex items-center text-lg font-semibold tracking-tight text-zinc-950 ${className}`}
     >
-      MentorAndI
+      Mentor And I
     </span>
   );
 }

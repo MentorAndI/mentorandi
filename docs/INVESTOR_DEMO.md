@@ -1,7 +1,7 @@
 # Investor Demo Flow
 
 Features 106 and 108 provide a public, alpha-safe overview at `/demo`. It presents
-MentorAndI as one Mentor Core with multiple specialized profiles, and makes the
+Mentor And I as one Mentor Core with multiple specialized profiles, and makes the
 product easy to demonstrate without exposing internal administration pages or
 inventing users, activity, or metrics.
 

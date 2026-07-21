@@ -1,6 +1,6 @@
 # Alpha Usage And Cost Monitoring
 
-MentorAndI stores one server-side `UsageEvent` for successful, failed, and
+Mentor And I stores one server-side `UsageEvent` for successful, failed, and
 limit-blocked mentor requests. Usage events contain operational metadata only:
 user, optional mentor and conversation relationships, provider, model, route,
 token counts, estimated cost, safe error code, status, and creation time. They

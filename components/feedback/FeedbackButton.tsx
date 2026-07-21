@@ -139,7 +139,7 @@ export function FeedbackButton() {
 
             <form className="space-y-5" onSubmit={handleSubmit}>
               <label className="block space-y-2 text-sm font-medium text-zinc-900">
-                <span>How useful is MentorAndI?</span>
+                <span>How useful is Mentor And I?</span>
                 <select
                   className="block h-11 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm"
                   defaultValue="USEFUL"
@@ -175,7 +175,7 @@ export function FeedbackButton() {
                   setMessage(event.target.value);
                   if (status) setStatus("");
                 }}
-                placeholder="What happened, or what would make MentorAndI better?"
+                placeholder="What happened, or what would make Mentor And I better?"
                 required
                 value={message}
               />

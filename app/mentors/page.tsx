@@ -9,8 +9,8 @@ import { Text } from "@/components/ui/Text";
 import { activeMentorProfiles } from "@/services/mentor-catalog/mentor-catalog";
 
 export const metadata: Metadata = {
-  title: "Mentors | MentorAndI",
-  description: "Choose an active MentorAndI alpha mentor specialization.",
+  title: "Mentors | Mentor And I",
+  description: "Choose an active Mentor And I alpha mentor specialization.",
 };
 
 export default function MentorsPage() {

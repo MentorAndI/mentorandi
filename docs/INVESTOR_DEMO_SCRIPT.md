@@ -1,4 +1,4 @@
-# MentorAndI Investor Demo Script
+# Mentor And I Investor Demo Script
 
 This is a 5–7 minute walkthrough of the working private alpha. Use a normal
 alpha account for mentor flows and an allowlisted admin account for the final
@@ -17,7 +17,7 @@ codes, environment values, secrets, or admin data belonging to another person.
 
 Open `/demo`.
 
-Say: “MentorAndI is a long-term AI mentoring product, not a general-purpose
+Say: “Mentor And I is a long-term AI mentoring product, not a general-purpose
 chat window. One Mentor Core powers specialized mentor profiles, each with its
 own focus, boundaries, expertise, and small practical method library. This is a
 private alpha running on staging.”

@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MentorAndI",
+  title: "Mentor And I",
   description: "A long-term personal AI mentor for reflection and growth.",
 };
 

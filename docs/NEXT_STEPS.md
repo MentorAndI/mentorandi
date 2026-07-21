@@ -1,4 +1,4 @@
-# MentorAndI Next Steps
+# Mentor And I Next Steps
 
 ## Immediate Next Features
 

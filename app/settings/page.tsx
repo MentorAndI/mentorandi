@@ -7,8 +7,8 @@ import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
 
 export const metadata: Metadata = {
-  title: "Settings | MentorAndI",
-  description: "Manage MentorAndI account data controls.",
+  title: "Settings | Mentor And I",
+  description: "Manage Mentor And I account data controls.",
 };
 
 export default function SettingsPage() {
@@ -21,7 +21,7 @@ export default function SettingsPage() {
         <div className="mb-8 max-w-2xl space-y-3">
           <Heading level={1}>Account data</Heading>
           <Text>
-            Export your MentorAndI data or delete your mentor data.
+            Export your Mentor And I data or delete your mentor data.
           </Text>
         </div>
 

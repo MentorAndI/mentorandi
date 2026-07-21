@@ -1,8 +1,8 @@
-# MentorAndI Engineering Guide
+# Mentor And I Engineering Guide
 
 ## 1. Purpose
 
-This document is the engineering constitution for the MentorAndI project. It defines how the team designs, builds, reviews, tests, and maintains the codebase for a production SaaS product.
+This document is the engineering constitution for the Mentor And I project. It defines how the team designs, builds, reviews, tests, and maintains the codebase for a production SaaS product.
 
 The guide exists to keep engineering decisions consistent as the project grows. It should help contributors move quickly without sacrificing reliability, security, accessibility, or long-term maintainability.
 
@@ -10,7 +10,7 @@ This document does not define product strategy or business logic. Product behavi
 
 ## 2. Core Philosophy
 
-MentorAndI should be built as a dependable production system, not as a prototype that happens to run in production.
+Mentor And I should be built as a dependable production system, not as a prototype that happens to run in production.
 
 Engineering decisions must favor clarity, correctness, and maintainability over cleverness. Code should be easy to read, easy to change, and difficult to misuse.
 
@@ -20,7 +20,7 @@ Every change should have a reason. Avoid speculative abstractions, unused config
 
 ## 3. Project Architecture
 
-MentorAndI is a Next.js application using the App Router, React, TypeScript, ESLint, and Tailwind CSS. Contributors must read the relevant local Next.js documentation in `node_modules/next/dist/docs/` before changing framework-specific behavior, because this project may use a Next.js version with breaking changes from earlier conventions.
+Mentor And I is a Next.js application using the App Router, React, TypeScript, ESLint, and Tailwind CSS. Contributors must read the relevant local Next.js documentation in `node_modules/next/dist/docs/` before changing framework-specific behavior, because this project may use a Next.js version with breaking changes from earlier conventions.
 
 The architecture should keep routing, UI, data access, domain logic, and infrastructure concerns separated. Route files should coordinate request or page behavior, while reusable logic should live outside route entry points when it grows beyond local presentation needs.
 

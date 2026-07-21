@@ -1,6 +1,6 @@
 # Alpha Deployment Checklist
 
-Use this checklist before deploying MentorAndI alpha to Hostinger/VPS or a staging VPS. It is an operational gate, not a replacement for `docs/DEPLOYMENT.md`, `docs/VPS_DEPLOYMENT.md` or `docs/BACKUP_AND_RECOVERY.md`.
+Use this checklist before deploying Mentor And I alpha to Hostinger/VPS or a staging VPS. It is an operational gate, not a replacement for `docs/DEPLOYMENT.md`, `docs/VPS_DEPLOYMENT.md` or `docs/BACKUP_AND_RECOVERY.md`.
 
 ## 1. Scope Gate
 

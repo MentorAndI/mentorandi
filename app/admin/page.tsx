@@ -12,8 +12,8 @@ import { AdminOverviewService } from "@/services/admin/admin-overview.service";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Alpha admin | MentorAndI",
-  description: "Internal MentorAndI alpha overview.",
+  title: "Alpha admin | Mentor And I",
+  description: "Internal Mentor And I alpha overview.",
   robots: {
     follow: false,
     index: false,

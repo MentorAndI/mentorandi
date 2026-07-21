@@ -1,6 +1,6 @@
 # Alpha Legal, Privacy And Contact Pages
 
-MentorAndI provides three public trust pages for alpha users:
+Mentor And I provides three public trust pages for alpha users:
 
 - `/privacy` explains the information stored for the mentor experience, product
   improvement, deletion requests and third-party providers.

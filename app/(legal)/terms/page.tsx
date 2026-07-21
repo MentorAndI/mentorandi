@@ -6,8 +6,8 @@ import {
 } from "@/components/legal/LegalPage";
 
 export const metadata: Metadata = {
-  title: "Terms | MentorAndI",
-  description: "Basic terms for using the MentorAndI alpha.",
+  title: "Terms | Mentor And I",
+  description: "Basic terms for using the Mentor And I alpha.",
 };
 
 export default function TermsPage() {
@@ -18,7 +18,7 @@ export default function TermsPage() {
     >
       <LegalSection title="Alpha software">
         <p>
-          MentorAndI is early alpha or beta software. Features, providers,
+          Mentor And I is early alpha or beta software. Features, providers,
           limits, and availability may change. The service may contain errors,
           lose availability, or be discontinued.
         </p>
@@ -26,7 +26,7 @@ export default function TermsPage() {
 
       <LegalSection title="Mentoring, not professional advice">
         <p>
-          MentorAndI is not medical, mental-health, legal, financial, or
+          Mentor And I is not medical, mental-health, legal, financial, or
           emergency advice. AI responses can be incomplete or wrong. You are
           responsible for checking important information and for the decisions
           you make.
@@ -35,7 +35,7 @@ export default function TermsPage() {
 
       <LegalSection title="Emergencies and crisis situations">
         <p>
-          Do not use MentorAndI for emergencies or crisis situations. If you or
+          Do not use Mentor And I for emergencies or crisis situations. If you or
           someone else may be in immediate danger, contact local emergency
           services or an appropriate crisis service now.
         </p>

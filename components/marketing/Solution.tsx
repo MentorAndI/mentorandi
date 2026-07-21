@@ -31,7 +31,7 @@ export function Solution({ items = defaultItems }: SolutionProps) {
   return (
     <Section
       className="bg-zinc-50"
-      description="MentorAndI is designed as a calm, focused layer for reflection, direction, and personal momentum."
+      description="Mentor And I is designed as a calm, focused layer for reflection, direction, and personal momentum."
       eyebrow="The solution"
       id="solution"
       title="A personal mentor for the moments between meetings."

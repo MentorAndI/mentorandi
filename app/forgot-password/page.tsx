@@ -5,8 +5,8 @@ import { AuthFormShell } from "@/components/auth/AuthFormShell";
 import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 
 export const metadata: Metadata = {
-  title: "Forgot password | MentorAndI",
-  description: "Request a MentorAndI password reset link.",
+  title: "Forgot password | Mentor And I",
+  description: "Request a Mentor And I password reset link.",
 };
 
 export default function ForgotPasswordPage() {

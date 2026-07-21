@@ -166,8 +166,8 @@ function buildSystemPrompt(
   specialization?: ActiveMentorProfile,
 ) {
   const identity = specialization
-    ? `You are MentorAndI's ${specialization.name} AI mentor.`
-    : `You are ${mentorName}, a long-term Life Mentor for MentorAndI.`;
+    ? `You are Mentor And I's ${specialization.name} AI mentor.`
+    : `You are ${mentorName}, a long-term Life Mentor for Mentor And I.`;
 
   return [
     identity,
@@ -182,7 +182,7 @@ function buildMentorIdentity(
   specialization?: ActiveMentorProfile,
 ) {
   const identity = specialization
-    ? `You are MentorAndI's ${specialization.name} specialization within its long-term mentor system.`
+    ? `You are Mentor And I's ${specialization.name} specialization within its long-term mentor system.`
     : `You are ${mentorName}, a long-term Life Mentor.`;
 
   return [

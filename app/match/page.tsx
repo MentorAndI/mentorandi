@@ -18,8 +18,8 @@ const recommendedMentor: MentorRecommendation = {
 };
 
 export const metadata: Metadata = {
-  title: "Mentor Match | MentorAndI",
-  description: "Meet the mentor recommended for this MentorAndI journey.",
+  title: "Mentor Match | Mentor And I",
+  description: "Meet the mentor recommended for this Mentor And I journey.",
 };
 
 export default function MatchPage() {

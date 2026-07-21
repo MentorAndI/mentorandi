@@ -60,4 +60,4 @@ The intended review questions are:
 - Is it free of personal user data?
 - Does it belong in methods, expertise, source notes, tone guidance or documentation?
 - Is there a trusted source or product rationale?
-- Does it preserve MentorAndI's mentor tone and safety boundaries?
+- Does it preserve Mentor And I's mentor tone and safety boundaries?

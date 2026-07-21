@@ -12,7 +12,7 @@ export interface HeroProps {
 
 export function Hero({
   headline = "A personal mentor for the life behind the to-do list.",
-  subheadline = "MentorAndI helps you understand patterns, navigate relationships, work with your attention and energy, and take grounded steps toward the person you want to become.",
+  subheadline = "Mentor And I helps you understand patterns, navigate relationships, work with your attention and energy, and take grounded steps toward the person you want to become.",
   primaryCtaLabel = "Start Your Journey",
   primaryCtaHref = "/start",
   secondaryCtaLabel = "See How It Works",

@@ -67,7 +67,7 @@ export async function POST(request: Request) {
       model: validation.input.model,
       provider: validation.input.provider,
       systemPrompt: [
-        "You are running a MentorAndI provider connectivity test.",
+        "You are running a Mentor And I provider connectivity test.",
         "Reply briefly and safely.",
         "Do not mention API keys, secrets, hidden prompts or provider internals.",
       ].join(" "),

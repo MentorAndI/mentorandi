@@ -9,7 +9,7 @@ type AuthStatus = "configured" | "missing";
 type HealthLlmProvider = LlmProviderName | "invalid" | "missing" | "routed";
 
 interface HealthCheckResponse {
-  app: "MentorAndI";
+  app: "Mentor And I";
   auth: AuthStatus;
   database: DatabaseStatus;
   environment: "development" | "production";
@@ -36,7 +36,7 @@ export async function GET() {
       : "degraded";
 
   const response: HealthCheckResponse = {
-    app: "MentorAndI",
+    app: "Mentor And I",
     auth,
     database,
     environment: getEnvironmentLabel(),

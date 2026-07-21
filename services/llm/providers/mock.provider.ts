@@ -306,7 +306,7 @@ function buildNextStepQuestion(
 
   if (kind === "project-focus") {
     if (projectDesignContext?.mentionsMentorAndI) {
-      return "The next thing to focus on is whether MentorAndI feels like a personal mentor before it tries to explain features.";
+      return "The next thing to focus on is whether Mentor And I feels like a personal mentor before it tries to explain features.";
     }
 
     return "The next thing to focus on is whether the page makes the user feel understood before it tries to explain features.";
@@ -318,7 +318,7 @@ function buildNextStepQuestion(
     }
 
     if (projectDesignContext?.mentionsMentorAndI) {
-      return "Does it make MentorAndI feel like a personal mentor rather than another AI tool?";
+      return "Does it make Mentor And I feel like a personal mentor rather than another AI tool?";
     }
 
     return "Does it make the product feel human, clear and personal?";
@@ -512,7 +512,9 @@ function getProjectDesignContext(
   return {
     hasContext:
       hasProjectDesignSignal(currentText) || hasProjectDesignSignal(combinedText),
-    mentionsMentorAndI: /\bmentorandi\b/.test(combinedText),
+    mentionsMentorAndI: /\bmentor(?:\s+and\s+|&)i\b|\bmentorandi\b/.test(
+      combinedText,
+    ),
   };
 }
 

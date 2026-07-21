@@ -1,6 +1,6 @@
 # Alpha Mentor Lineup
 
-MentorAndI uses one Mentor Core with eight selectable specialist profiles.
+Mentor And I uses one Mentor Core with eight selectable specialist profiles.
 Specialization comes from each profile's definition, persona instructions,
 tone, boundaries, its own four-method library, expertise, and the user's
 existing context.

@@ -7,8 +7,8 @@ import { MentorConversationClient } from "@/components/mentor/MentorConversation
 import { getActiveMentorProfile } from "@/services/mentor-catalog/mentor-catalog";
 
 export const metadata: Metadata = {
-  title: "Mentor | MentorAndI",
-  description: "Continue your conversation with your MentorAndI mentor.",
+  title: "Mentor | Mentor And I",
+  description: "Continue your conversation with your Mentor And I mentor.",
 };
 
 export default async function MentorPage({

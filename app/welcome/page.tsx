@@ -6,7 +6,7 @@ import { JourneyStep } from "@/components/mentor/JourneyStep";
 const headingId = "welcome-heading";
 
 export const metadata: Metadata = {
-  title: "Welcome | MentorAndI",
+  title: "Welcome | Mentor And I",
   description: "Welcome to the first mentoring conversation with Marcus.",
 };
 

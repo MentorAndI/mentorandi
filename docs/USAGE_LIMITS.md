@@ -1,6 +1,6 @@
 # Usage Limits
 
-MentorAndI enforces alpha request limits from persistent server-side
+Mentor And I enforces alpha request limits from persistent server-side
 `UsageEvent` records. Successful mentor responses count toward limits; failure
 and blocked events remain available for operational review without consuming a
 successful-message allowance.

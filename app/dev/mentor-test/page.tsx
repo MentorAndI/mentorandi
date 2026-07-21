@@ -7,7 +7,7 @@ import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
 
 export const metadata: Metadata = {
-  title: "Mentor Pipeline Test | MentorAndI",
+  title: "Mentor Pipeline Test | Mentor And I",
   description: "Local development tool for testing Mentor Core responses.",
 };
 

@@ -14,8 +14,8 @@ import type { AdminUsageGroup } from "@/services/usage-monitoring/usage-monitori
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Alpha usage | MentorAndI",
-  description: "Internal MentorAndI alpha usage and estimated cost monitoring.",
+  title: "Alpha usage | Mentor And I",
+  description: "Internal Mentor And I alpha usage and estimated cost monitoring.",
   robots: { follow: false, index: false },
 };
 

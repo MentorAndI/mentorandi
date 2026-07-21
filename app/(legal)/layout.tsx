@@ -10,7 +10,7 @@ export default function LegalLayout({ children }: { children: ReactNode }) {
     <div className="flex min-h-screen flex-col bg-zinc-50">
       <header className="border-b border-zinc-200 bg-white">
         <Container className="flex h-16 items-center">
-          <Link aria-label="MentorAndI home" href="/">
+          <Link aria-label="Mentor And I home" href="/">
             <Logo />
           </Link>
         </Container>

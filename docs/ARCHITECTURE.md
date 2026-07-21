@@ -1,8 +1,8 @@
-# MentorAndI Architecture
+# Mentor And I Architecture
 
 ## App Router Structure
 
-MentorAndI uses the Next.js App Router.
+Mentor And I uses the Next.js App Router.
 
 - User-facing routes live under `app/`.
 - API route handlers live under `app/api/`.
@@ -47,7 +47,7 @@ Repositories are Prisma-only. They should not contain product behavior, authoriz
 
 ## Database Access And RLS
 
-Supabase Postgres is not a public table API for MentorAndI application data. Direct browser access to public application tables must remain blocked; data access goes through server-side Prisma repositories, service-layer ownership checks and API routes.
+Supabase Postgres is not a public table API for Mentor And I application data. Direct browser access to public application tables must remain blocked; data access goes through server-side Prisma repositories, service-layer ownership checks and API routes.
 
 RLS must stay enabled on all public app tables: `User`, `Mentor`, `Conversation`, `Message`, `Memory`, `Goal`, `Reflection`, `JournalEntry`, `Feedback`, `UsageEvent` and `AlphaInvite`. The hardening script at `prisma/security/rls-hardening.sql` enables RLS, revokes direct `anon`/`authenticated` table grants and verifies no unrestricted public policies exist. Do not add permissive Supabase policies for app data without a separate security review.
 
@@ -135,7 +135,7 @@ primary method (with room for only one short supporting method when strongly
 relevant), so responses do
 not become framework-heavy or list-like. See `docs/MENTOR_METHOD_LIBRARIES.md`.
 
-MentorAndI uses one core engine with specialized mentor profiles. The Active
+Mentor And I uses one core engine with specialized mentor profiles. The Active
 Mentor Catalog defines the slug, positioning, tone, boundaries, opening style,
 and persona instructions for Life, ADHD, Relationship, Stress / Burnout,
 Parenting, Health & Fitness, Focus, and Confidence. An explicit selection from

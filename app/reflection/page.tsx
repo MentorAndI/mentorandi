@@ -6,8 +6,8 @@ import { JourneyStep } from "@/components/mentor/JourneyStep";
 const headingId = "reflection-heading";
 
 export const metadata: Metadata = {
-  title: "Reflection | MentorAndI",
-  description: "A calm reflection step in the MentorAndI journey.",
+  title: "Reflection | Mentor And I",
+  description: "A calm reflection step in the Mentor And I journey.",
 };
 
 export default function ReflectionPage() {

@@ -13,8 +13,8 @@ import { AdminAuthService } from "@/services/admin/admin-auth.service";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Alpha invites | MentorAndI",
-  description: "Internal MentorAndI alpha invite management.",
+  title: "Alpha invites | Mentor And I",
+  description: "Internal Mentor And I alpha invite management.",
   robots: { follow: false, index: false },
 };
 

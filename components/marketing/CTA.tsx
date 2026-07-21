@@ -10,7 +10,7 @@ export interface CTAProps {
 
 export function CTA({
   title = "Start with one honest conversation.",
-  description = "Use MentorAndI as a focused space to think clearly, make a decision, and take the next step with more confidence.",
+  description = "Use Mentor And I as a focused space to think clearly, make a decision, and take the next step with more confidence.",
   ctaLabel = "Start Your Journey",
   ctaHref = "/start",
 }: CTAProps) {

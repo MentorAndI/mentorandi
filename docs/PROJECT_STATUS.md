@@ -1,8 +1,8 @@
-# MentorAndI Project Status
+# Mentor And I Project Status
 
 ## Product Name
 
-MentorAndI
+Mentor And I
 
 ## Current Status
 

@@ -7,7 +7,7 @@ export interface FooterProps {
   copyrightName?: string;
 }
 
-export function Footer({ copyrightName = "MentorAndI" }: FooterProps) {
+export function Footer({ copyrightName = "Mentor And I" }: FooterProps) {
   const year = new Date().getFullYear();
 
   return (

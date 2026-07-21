@@ -1,6 +1,6 @@
 # Alpha Admin
 
-MentorAndI has four internal alpha admin pages:
+Mentor And I has four internal alpha admin pages:
 
 - `/admin` shows aggregate user, conversation, message and feedback totals,
   recent users and conversations, and a feedback summary.

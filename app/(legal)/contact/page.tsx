@@ -9,17 +9,17 @@ import {
 const alphaSupportEmail = "support@mentorandi.com";
 
 export const metadata: Metadata = {
-  title: "Contact | MentorAndI",
-  description: "Contact MentorAndI alpha support.",
+  title: "Contact | Mentor And I",
+  description: "Contact Mentor And I alpha support.",
 };
 
 export default function ContactPage() {
   return (
     <LegalPage
-      description="Questions, account requests, and alpha feedback for MentorAndI."
+      description="Questions, account requests, and alpha feedback for Mentor And I."
       title="Contact"
     >
-      <LegalSection title="MentorAndI alpha support">
+      <LegalSection title="Mentor And I alpha support">
         <p>
           For alpha support, contact:{" "}
           <a
@@ -65,7 +65,7 @@ export default function ContactPage() {
         <p>
           If you want your account or stored information deleted, say that
           clearly in your message and use the email address connected to your
-          MentorAndI account.
+          Mentor And I account.
         </p>
       </LegalSection>
     </LegalPage>

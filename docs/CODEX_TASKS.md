@@ -1,6 +1,6 @@
 # Codex Task Backlog
 
-This document is the repo-readable backlog for upcoming MentorAndI implementation work. Future Codex prompts may be short, for example:
+This document is the repo-readable backlog for upcoming Mentor And I implementation work. Future Codex prompts may be short, for example:
 
 `Implement Feature 086 from docs/CODEX_TASKS.md.`
 
@@ -111,7 +111,7 @@ support lineup is Life, ADHD, Relationship, Stress / Burnout, Parenting, Health
 & Fitness, Focus and Confidence.
 
 Goal:
-Move MentorAndI away from Business/Career mentor positioning and toward
+Move Mentor And I away from Business/Career mentor positioning and toward
 personal, relational and executive-function support without breaking existing
 Marcus conversations.
 
@@ -189,7 +189,7 @@ checklist, low-risk testing guidance, safety boundaries, bug-report format and
 links to the relevant public account and trust pages.
 
 Goal:
-Help invited users test MentorAndI consistently and safely without exposing
+Help invited users test Mentor And I consistently and safely without exposing
 internal admin pages or adding persistence.
 
 ### Feature 105 - Specialized Mentor System v1
@@ -235,7 +235,7 @@ implemented alpha product foundation without exposing admin links or fake
 metrics.
 
 Goal:
-Show MentorAndI as one secure Mentor Core with distinct specialized mentor
+Show Mentor And I as one secure Mentor Core with distinct specialized mentor
 experiences while preserving mentor-scoped conversations.
 
 ### Feature 110B - Grounded Mentor Encouragement
@@ -259,7 +259,7 @@ metrics or public admin exposure.
 
 Goal:
 Give investors and OTC viewers a concise, verifiable explanation of the working
-MentorAndI alpha, its operational product loop, and its current boundaries.
+Mentor And I alpha, its operational product loop, and its current boundaries.
 
 ### Feature 112 - Persistent Usage And Cost Monitoring v1
 

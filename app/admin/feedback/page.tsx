@@ -17,8 +17,8 @@ import type {
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Alpha feedback | MentorAndI",
-  description: "Internal MentorAndI alpha feedback review.",
+  title: "Alpha feedback | Mentor And I",
+  description: "Internal Mentor And I alpha feedback review.",
   robots: {
     follow: false,
     index: false,

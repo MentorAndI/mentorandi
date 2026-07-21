@@ -5,8 +5,8 @@ import { LoginForm } from "@/components/auth/LoginForm";
 import { getSafeAuthRedirectPath } from "@/services/auth/redirects";
 
 export const metadata: Metadata = {
-  title: "Log in | MentorAndI",
-  description: "Log in to MentorAndI.",
+  title: "Log in | Mentor And I",
+  description: "Log in to Mentor And I.",
 };
 
 export default async function LoginPage({
@@ -25,7 +25,7 @@ export default async function LoginPage({
         footerLink={{
           href: "/signup",
           label: "Create an account",
-          text: "New to MentorAndI?",
+          text: "New to Mentor And I?",
         }}
         title="Log in"
       >

@@ -1,4 +1,4 @@
-# MentorAndI Alpha Progress Proof
+# Mentor And I Alpha Progress Proof
 
 This document is a concise inventory of working alpha capabilities and the
 repository evidence behind them. It intentionally contains no fabricated
@@ -8,7 +8,7 @@ users, testimonials, growth claims, revenue claims, or usage metrics.
 
 | Capability | What exists now | Evidence or boundary |
 | --- | --- | --- |
-| VPS staging live | MentorAndI runs at `https://staging.mentorandi.com`. | The public health endpoint returned `status: "ok"` with auth configured, database connected, production environment, and OpenAI provider on July 21, 2026. No private data is exposed by that health response. |
+| VPS staging live | Mentor And I runs at `https://staging.mentorandi.com`. | The public health endpoint returned `status: "ok"` with auth configured, database connected, production environment, and OpenAI provider on July 21, 2026. No private data is exposed by that health response. |
 | GitHub Actions deployment | Pushes to `main` and manual dispatch can deploy staging over SSH, rebuild Docker Compose, and verify public health. | `.github/workflows/deploy-staging.yml`; four repository secrets are required and are not committed. `npm run deploy:staging` remains the manual fallback. |
 | Supabase auth and database | Email/password authentication, session resolution, PostgreSQL persistence, and Prisma repositories are integrated. | Signup/login/callback routes, Supabase server clients, Prisma schema and repositories. The health endpoint reports auth configured and database connected. |
 | Resend email verification | The alpha signup flow supports verification email delivery through the current Resend/Supabase Auth setup and returns confirmation links through `/auth/callback`. | The repo implements Supabase signup, `emailRedirectTo`, code/OTP verification, and the safe callback. Resend delivery configuration is operational infrastructure outside this repository; no API key is committed. |
@@ -35,7 +35,7 @@ instructions. The output still comes from one maintainable engine.
 
 ### Specialization is substantive
 
-MentorAndI does not rely only on renamed personas. Each active mentor owns a
+Mentor And I does not rely only on renamed personas. Each active mentor owns a
 four-method library. The persisted conversation's mentor determines which
 library is eligible before message relevance is scored, preventing another
 mentor's methods from entering that response context.
@@ -78,7 +78,7 @@ moving beyond alpha.
 
 - This is a private alpha, not a finished clinical, compliance, or commercial
   platform.
-- MentorAndI is mentoring support, not therapy, diagnosis, emergency support,
+- Mentor And I is mentoring support, not therapy, diagnosis, emergency support,
   medical advice, legal advice, or financial advice.
 - Usage records are persistent alpha operational monitoring. Estimated costs
   should not be presented as billing-grade analytics.

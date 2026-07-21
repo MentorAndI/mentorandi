@@ -8,8 +8,8 @@ import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
 
 export const metadata: Metadata = {
-  title: "Start | MentorAndI",
-  description: "Begin your first conversation with MentorAndI.",
+  title: "Start | Mentor And I",
+  description: "Begin your first conversation with Mentor And I.",
 };
 
 export default async function StartPage({

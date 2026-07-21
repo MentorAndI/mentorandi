@@ -1,6 +1,6 @@
 # Hostinger Staging Runbook
 
-This runbook deploys MentorAndI staging to a Hostinger VPS with the existing Traefik container.
+This runbook deploys Mentor And I staging to a Hostinger VPS with the existing Traefik container.
 
 Known Traefik setup:
 
@@ -203,7 +203,7 @@ host fingerprint during initial setup.
 
 ### Manual fallback
 
-To deploy `origin/main` from a local MentorAndI checkout with one command:
+To deploy `origin/main` from a local Mentor And I checkout with one command:
 
 ```bash
 npm run deploy:staging

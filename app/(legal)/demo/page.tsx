@@ -9,9 +9,9 @@ import { Text } from "@/components/ui/Text";
 import { demoScenarios } from "@/services/demo/demo-scenarios";
 
 export const metadata: Metadata = {
-  title: "Investor Demo | MentorAndI",
+  title: "Investor Demo | Mentor And I",
   description:
-    "See how one MentorAndI engine supports distinct, specialized AI mentor experiences.",
+    "See how one Mentor And I engine supports distinct, specialized AI mentor experiences.",
 };
 
 const platformFoundations = [
@@ -153,7 +153,7 @@ export default function DemoPage() {
             One mentoring engine. Specialized support for real life.
           </Heading>
           <Text className="mt-5 text-lg leading-8">
-            MentorAndI is a long-term AI mentor platform, not a generic chat.
+            Mentor And I is a long-term AI mentor platform, not a generic chat.
             One core engine powers multiple profiles designed around distinct
             needs—from ADHD and relationship patterns to confidence, burnout,
             and life direction.
