@@ -51,9 +51,10 @@ Set `ALPHA_ADMIN_EMAILS` to the comma-separated Supabase account emails allowed
 to review `/admin` and `/admin/feedback`. Restart or reload the PM2 process
 after changing the allowlist.
 
-Set `ALPHA_INVITE_CODE` to the private code required for new alpha signups.
-Leave it empty only when signup should remain open. Restart or reload every app
-process after changing it.
+Create primary tester invites at the protected `/admin/invites` page.
+`ALPHA_INVITE_CODE` is an optional emergency/development fallback only. Leaving
+it empty still requires a valid active database invite. Restart or reload every
+app process after changing the fallback.
 
 ## 5. Build
 

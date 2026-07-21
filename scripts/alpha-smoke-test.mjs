@@ -21,6 +21,7 @@ const checks = [
   { path: "/admin", redirectsAllowed: true },
   { path: "/admin/feedback", redirectsAllowed: true },
   { path: "/admin/usage", redirectsAllowed: true },
+  { path: "/admin/invites", redirectsAllowed: true },
 ];
 
 if (isDevelopment) {

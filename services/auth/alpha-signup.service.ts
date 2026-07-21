@@ -1,11 +1,15 @@
-import { timingSafeEqual } from "node:crypto";
-
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  AlphaInviteService,
+  AlphaInviteServiceError,
+} from "@/services/alpha-invite/alpha-invite.service";
+import type { ValidatedAlphaInvite } from "@/services/alpha-invite/alpha-invite.types";
 import {
   buildAuthCallbackUrl,
   getPublicAppOrigin,
   normalizeSafeAuthNextPath,
 } from "@/services/auth/redirects";
+import { UserService } from "@/services/user/user.service";
 
 export interface AlphaSignupInput {
   email: string;
@@ -26,11 +30,12 @@ export class AlphaSignupServiceError extends Error {
 }
 
 export class AlphaSignupService {
-  async signup(input: AlphaSignupInput) {
-    if (!isValidAlphaInviteCode(input.inviteCode)) {
-      throw new AlphaSignupServiceError("Invalid alpha invite code.", 403);
-    }
+  constructor(
+    private readonly inviteService = new AlphaInviteService(),
+    private readonly userService = new UserService(),
+  ) {}
 
+  async signup(input: AlphaSignupInput) {
     const email = input.email.trim();
     const password = input.password;
 
@@ -39,6 +44,17 @@ export class AlphaSignupService {
         "Email and password are required.",
         400,
       );
+    }
+
+    let validatedInvite: ValidatedAlphaInvite;
+
+    try {
+      validatedInvite = await this.inviteService.validateForSignup(
+        input.inviteCode,
+        email,
+      );
+    } catch (error) {
+      throw translateInviteError(error);
     }
 
     const supabase = await createSupabaseServerClient();
@@ -59,6 +75,25 @@ export class AlphaSignupService {
       );
     }
 
+    if (
+      !data.user ||
+      (Array.isArray(data.user.identities) && data.user.identities.length === 0)
+    ) {
+      throw new AlphaSignupServiceError(
+        "Signup failed. Please check your information and try again.",
+        400,
+      );
+    }
+
+    const appUser = await this.userService.getOrCreateUserByAuthUserId(
+      data.user.id,
+    );
+    try {
+      await this.inviteService.consumeAfterSignup(validatedInvite, appUser.id);
+    } catch (error) {
+      throw translateInviteError(error);
+    }
+
     return {
       confirmationRequired: !data.session,
       hasSession: Boolean(data.session),
@@ -66,20 +101,12 @@ export class AlphaSignupService {
   }
 }
 
-function isValidAlphaInviteCode(submittedCode?: string) {
-  const configuredCode = process.env.ALPHA_INVITE_CODE?.trim();
-
-  if (!configuredCode) {
-    return true;
+function translateInviteError(error: unknown) {
+  if (error instanceof AlphaInviteServiceError) {
+    return new AlphaSignupServiceError(error.message, error.statusCode);
   }
 
-  const submittedBuffer = Buffer.from(submittedCode?.trim() ?? "", "utf8");
-  const configuredBuffer = Buffer.from(configuredCode, "utf8");
-
-  return (
-    submittedBuffer.length === configuredBuffer.length &&
-    timingSafeEqual(submittedBuffer, configuredBuffer)
-  );
+  return error;
 }
 
 function formatSafeSignupError(message?: string) {

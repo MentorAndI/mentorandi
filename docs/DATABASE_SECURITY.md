@@ -16,6 +16,7 @@ Direct public Supabase table access must remain blocked for all application tabl
 - `JournalEntry`
 - `Feedback`
 - `UsageEvent`
+- `AlphaInvite`
 
 Do not add permissive `anon` or `authenticated` policies for these tables. Browser clients should not read or write MentorAndI application tables through Supabase directly.
 
@@ -34,6 +35,11 @@ The script intentionally does not create policies. If a future feature needs dat
 message or response content. The usage migration enables RLS and revokes direct
 `anon` and `authenticated` grants immediately, while the persistent hardening
 script verifies that protection alongside the other application tables.
+
+`AlphaInvite` is server-only access-control metadata. It stores a SHA-256 code
+hash and short preview, never the generated raw code. Its migration immediately
+enables RLS and revokes direct `anon` and `authenticated` grants; admin and
+signup operations go through protected server routes and Prisma services.
 
 ## Access Model
 

@@ -58,9 +58,11 @@ Cost and usage guardrails:
 - Decide whether `USAGE_LIMITS_ENABLED` should enforce limits.
 - Configure `ALPHA_DAILY_MESSAGE_LIMIT`, `ALPHA_WEEKLY_MESSAGE_LIMIT`, `ALPHA_MONTHLY_MESSAGE_LIMIT` and `ALPHA_WEEKLY_DEEP_LIMIT` if overriding the defaults.
 - Configure `ALPHA_ADMIN_EMAILS` with the authenticated emails allowed to review
-  `/admin`, `/admin/feedback` and `/admin/usage`.
-- Configure `ALPHA_INVITE_CODE` with the private signup code and verify that a
-  missing or incorrect code cannot create a Supabase account.
+  `/admin`, `/admin/feedback`, `/admin/usage` and `/admin/invites`.
+- Create database-backed tester invites from `/admin/invites` and verify that
+  missing, expired, revoked, exhausted, and email-mismatched codes are rejected.
+- Configure `ALPHA_INVITE_CODE` only if an emergency/development fallback is
+  needed; do not use it as the primary shared alpha access mechanism.
 - Confirm `/contact` links to `support@mentorandi.com` and describes in-product
   feedback and useful bug reports.
 

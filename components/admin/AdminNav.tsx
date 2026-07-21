@@ -6,6 +6,7 @@ export function AdminNav() {
       <AdminLink href="/admin">Overview</AdminLink>
       <AdminLink href="/admin/usage">Usage</AdminLink>
       <AdminLink href="/admin/feedback">Feedback</AdminLink>
+      <AdminLink href="/admin/invites">Invites</AdminLink>
     </nav>
   );
 }

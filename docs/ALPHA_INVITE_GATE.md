@@ -1,25 +1,35 @@
-# Alpha Invite Gate
+# Alpha Invite Management
 
-MentorAndI can require an invite code before creating a Supabase account.
+Database-backed `AlphaInvite` records are the primary private-alpha access
+mechanism. Allowlisted admins create and revoke them at `/admin/invites`.
+Generated codes use high-entropy randomness, are shown once, and are stored only
+as a SHA-256 hash plus a short display preview.
 
-Configure the server-side environment variable:
+An invite can be restricted to a normalized email, given an expiry and note,
+and configured for one or more uses. Signup rejects revoked, expired, exhausted,
+or email-mismatched records. The use counter and user reference are updated only
+after Supabase account creation and local application-user creation succeed.
+
+## Emergency environment fallback
+
+Configure the server-side environment variable only when a fallback is needed:
 
 ```env
 ALPHA_INVITE_CODE=
 ```
 
-- When `ALPHA_INVITE_CODE` has a value, `/signup` requires an exact matching
-  code. A missing or incorrect code returns `Invalid alpha invite code.` and
-  Supabase signup is not called.
-- When it is empty or absent, signup behaves as before and the invite-code field
-  is optional.
+- `ALPHA_INVITE_CODE` is an emergency/development fallback, not the primary
+  invite mechanism.
+- Its exact value is accepted when no database record matches, including during
+  a temporary invite-database lookup failure.
+- When it is empty or absent, a valid active database invite is required.
 - Login and existing accounts are unaffected.
 
-The browser sends the entered value to `/api/auth/signup`, but the configured
-code remains server-only and is never included in the client bundle or response.
-The server validates the code before calling Supabase Auth. Keep the configured
-value in VPS secrets and never commit it.
+The browser sends the entered value to `/api/auth/signup`, but stored hashes and
+the configured fallback remain server-only. The server validates the code before
+calling Supabase Auth. Keep any fallback in VPS secrets and never commit it. Raw
+database invite codes are not logged, listed, or recoverable from the database.
 
-After changing the value, rebuild or restart every app process so each instance
-uses the same gate configuration. Email confirmation still returns through
-`/auth/callback` and continues to `/start` by default.
+After changing the fallback, rebuild or restart every app process. Email
+confirmation still returns through `/auth/callback` and follows the safe
+onboarding destination.

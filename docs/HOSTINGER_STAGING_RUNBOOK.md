@@ -92,8 +92,9 @@ Important:
 - Keep `http://localhost:3000/auth/callback` in Supabase Auth redirect URLs for local development.
 - Do not use `LLM_PROVIDER=mock` for real staging validation.
 - Set `ALPHA_ADMIN_EMAILS` to the comma-separated authenticated emails allowed
-  to open `/admin` and `/admin/feedback`.
-- Set `ALPHA_INVITE_CODE` to the private code required for new alpha signups.
+  to open all `/admin` routes, including `/admin/invites`.
+- Create primary tester invites at `/admin/invites` after migration. Configure
+  `ALPHA_INVITE_CODE` only as an emergency/development fallback.
 - Keep `.env.staging` on the server only.
 
 ## Build And Start

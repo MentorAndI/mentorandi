@@ -46,15 +46,39 @@ model User {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  conversations  Conversation[]
-  feedback       Feedback[]
-  goals          Goal[]
-  journalEntries JournalEntry[]
-  memories       Memory[]
-  reflections    Reflection[]
-  usageEvents    UsageEvent[]
+  conversations    Conversation[]
+  feedback         Feedback[]
+  goals            Goal[]
+  journalEntries   JournalEntry[]
+  memories         Memory[]
+  reflections      Reflection[]
+  usageEvents      UsageEvent[]
+  alphaInvitesUsed AlphaInvite[]  @relation("AlphaInviteUsedBy")
 
   @@index([createdAt])
+}
+
+model AlphaInvite {
+  id           String    @id @default(uuid()) @db.Uuid
+  codeHash     String    @unique @db.VarChar(64)
+  codePreview  String    @db.VarChar(32)
+  email        String?   @db.VarChar(320)
+  createdAt    DateTime  @default(now())
+  expiresAt    DateTime?
+  usedAt       DateTime?
+  usedByUserId String?   @db.Uuid
+  revokedAt    DateTime?
+  maxUses      Int       @default(1)
+  useCount     Int       @default(0)
+  note         String?
+
+  usedByUser User? @relation("AlphaInviteUsedBy", fields: [usedByUserId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@index([email])
+  @@index([expiresAt])
+  @@index([revokedAt])
+  @@index([usedByUserId])
 }
 
 model Feedback {

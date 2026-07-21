@@ -54,9 +54,11 @@ ALPHA_ADMIN_EMAILS=rene@example.com,admin@example.com
 Keep the allowlist in deployment secrets. After changing it, rebuild or restart
 the application so the server process receives the updated environment.
 
-Set `ALPHA_INVITE_CODE` to the private code required for new alpha signups. Keep
-it in deployment secrets and use the same value on every app instance. Leaving
-it empty keeps signup open. Rebuild or restart after changing it.
+Create primary tester invites through the protected `/admin/invites` page after
+the invite migration is applied. `ALPHA_INVITE_CODE` is only an optional
+emergency/development fallback; keep it in deployment secrets and consistent
+across app instances if configured. Leaving it empty requires a valid database
+invite. Rebuild or restart after changing it.
 
 ## LLM Provider
 

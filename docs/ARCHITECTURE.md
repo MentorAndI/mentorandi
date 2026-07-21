@@ -49,7 +49,7 @@ Repositories are Prisma-only. They should not contain product behavior, authoriz
 
 Supabase Postgres is not a public table API for MentorAndI application data. Direct browser access to public application tables must remain blocked; data access goes through server-side Prisma repositories, service-layer ownership checks and API routes.
 
-RLS must stay enabled on all public app tables: `User`, `Mentor`, `Conversation`, `Message`, `Memory`, `Goal`, `Reflection`, `JournalEntry`, `Feedback` and `UsageEvent`. The hardening script at `prisma/security/rls-hardening.sql` enables RLS, revokes direct `anon`/`authenticated` table grants and verifies no unrestricted public policies exist. Do not add permissive Supabase policies for app data without a separate security review.
+RLS must stay enabled on all public app tables: `User`, `Mentor`, `Conversation`, `Message`, `Memory`, `Goal`, `Reflection`, `JournalEntry`, `Feedback`, `UsageEvent` and `AlphaInvite`. The hardening script at `prisma/security/rls-hardening.sql` enables RLS, revokes direct `anon`/`authenticated` table grants and verifies no unrestricted public policies exist. Do not add permissive Supabase policies for app data without a separate security review.
 
 ## Alpha Feedback
 
@@ -63,14 +63,16 @@ services read cross-user data through Prisma. There is no public admin or
 feedback read API and no browser-facing Supabase access. See
 `docs/ALPHA_ADMIN.md`.
 
-## Alpha Invite Gate
+## Alpha Invite Management
 
 `/signup` sends account-creation requests to the server-only
-`/api/auth/signup` boundary. When `ALPHA_INVITE_CODE` is configured, the auth
-service validates the submitted code before calling Supabase Auth. The
-configured value is never sent to the browser. If the variable is absent or
-empty, signup remains open as before. Login, existing accounts and the email
-confirmation callback are unchanged. See `docs/ALPHA_INVITE_GATE.md`.
+`/api/auth/signup` boundary. The invite service hashes the submitted code and
+validates an active `AlphaInvite` before calling Supabase Auth. It records usage
+only after Supabase and local user creation succeed. The allowlisted internal
+`/admin/invites` page can create, inspect safe metadata, and revoke invites; raw
+codes are shown once and never stored. `ALPHA_INVITE_CODE` remains a server-only
+emergency/development fallback. Login and existing accounts are unchanged. See
+`docs/ALPHA_INVITE_GATE.md`.
 
 ## Alpha Trust Pages
 

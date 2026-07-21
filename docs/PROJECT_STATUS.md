@@ -61,7 +61,8 @@ MentorAndI
 ## Core Systems Built
 
 - Supabase Auth foundation.
-- Optional server-side alpha invite gate for new signups.
+- Database-backed alpha invites with email/expiry/use controls, one-time code
+  display, revocation, and an emergency environment-code fallback.
 - Prisma database models.
 - User resolution.
 - Conversation ownership and user isolation.
@@ -83,6 +84,8 @@ MentorAndI
 - Allowlisted `/admin/usage` monitoring for persistent counts, estimated cost,
   24-hour/7-day average input and output tokens, provider/model/mentor
   breakdowns, blocked attempts, and recent events.
+- Allowlisted `/admin/invites` management for hashed, expiring,
+  email-restricted, usage-limited, and revocable alpha invites.
 - Compact default prompt composition with a 1,800-token context budget,
   relevance-filtered personal context, four recent messages, conditional
   environment context, and non-duplicated safety/response instructions.
@@ -126,8 +129,10 @@ MentorAndI
 ## Alpha Auth Behavior
 
 - `/login`, `/signup` and `/forgot-password` are public auth pages.
-- `/signup` requires a matching invite code only when `ALPHA_INVITE_CODE` is
-  configured; invalid codes are rejected before Supabase signup is called.
+- `/signup` requires an active database invite; revoked, expired, exhausted, and
+  email-mismatched invites are rejected before Supabase signup. Invite use is
+  recorded after Supabase and local user creation. `ALPHA_INVITE_CODE` is an
+  emergency/development fallback only.
 - Successful login redirects to `/mentor`.
 - Successful signup either creates an immediate session and continues to mentor
   selection, or shows email confirmation instructions. Email confirmation links

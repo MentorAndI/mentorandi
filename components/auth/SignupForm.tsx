@@ -76,7 +76,7 @@ export function SignupForm({
       });
 
       if (error) {
-        if (error.message === "Invalid alpha invite code.") {
+        if (isInviteError(error.message)) {
           setErrors({ inviteCode: error.message });
           return;
         }
@@ -220,6 +220,15 @@ export function SignupForm({
       </Button>
     </form>
   );
+}
+
+function isInviteError(message?: string) {
+  return [
+    "Invalid or expired alpha invite.",
+    "This alpha invite has already been used.",
+    "This alpha invite does not match that email address.",
+    "This alpha invite is no longer available.",
+  ].includes(message ?? "");
 }
 
 function formatSignupAuthError(message?: string) {
