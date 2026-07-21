@@ -27,24 +27,49 @@ export class PromptComposerService {
       );
     }
 
-    const tone = validation.input.tone ?? "warm";
-    const responseMode = validation.input.responseMode ?? "reflective";
-    const context = validation.input.context;
-    const specialization = validation.input.specialization;
+    const validatedInput = validation.input;
+    const tone = validatedInput.tone ?? "warm";
+    const responseMode = validatedInput.responseMode ?? "reflective";
+    const context = validatedInput.context;
+    const specialization = validatedInput.specialization;
     const mentorIdentity = buildMentorIdentity(
       context.mentor.name,
       specialization,
     );
     const conversationRules = buildConversationRules();
     const responseInstructions = buildResponseInstructions(tone, responseMode);
+    const relevantGoals = context.userGoals.filter((goal) =>
+      isRelevantContext(validatedInput.currentUserMessage, [
+        goal.title,
+        goal.description ?? "",
+      ]),
+    );
+    const relevantMemories = context.relevantMemories.filter((memory) =>
+      isRelevantContext(validatedInput.currentUserMessage, [
+        memory.title,
+        memory.content,
+      ]),
+    );
+    const relevantReflections = context.recentReflections.filter((reflection) =>
+      isRelevantContext(validatedInput.currentUserMessage, [reflection.summary]),
+    );
 
     return {
       constraints: buildConstraints(),
-      conversationContext: context.recentMessages.map((message) => ({
-        content: message.content,
-        createdAt: message.createdAt,
-        role: message.role,
-      })),
+      conversationContext: context.recentMessages
+        .filter(
+          (message, index, messages) =>
+            !(
+              index === messages.length - 1 &&
+              message.role === "USER" &&
+              message.content.trim() === validatedInput.currentUserMessage.trim()
+            ),
+        )
+        .map((message) => ({
+          content: message.content,
+          createdAt: message.createdAt,
+          role: message.role,
+        })),
       conversationRules,
       developerInstructions: buildDeveloperInstructions({
         conversationRules,
@@ -56,7 +81,7 @@ export class PromptComposerService {
         currentTime: context.environment.currentTime,
         timezone: context.environment.timezone,
       },
-      goalContext: context.userGoals.map((goal) => ({
+      goalContext: relevantGoals.map((goal) => ({
         description: goal.description,
         status: goal.status,
         targetDate: goal.targetDate,
@@ -66,11 +91,11 @@ export class PromptComposerService {
         context.relevantExpertise,
         specialization,
       ).map((expertise) => ({
-        coreSkills: expertise.coreSkills.slice(0, 3),
-        description: expertise.description,
+        coreSkills: expertise.coreSkills.slice(0, 2),
+        description: "",
         mentorDomain: expertise.mentorDomain,
         recommendedTone: expertise.recommendedTone,
-        riskNotes: expertise.riskNotes.slice(0, 2),
+        riskNotes: expertise.riskNotes.slice(0, 1),
         title: expertise.title,
       })),
       mentorIdentity,
@@ -83,58 +108,72 @@ export class PromptComposerService {
           shortDescription: method.shortDescription,
           title: method.title,
         })),
-      memoryContext: context.relevantMemories.map((memory) => ({
+      memoryContext: relevantMemories.map((memory) => ({
         category: memory.category,
         confidence: memory.confidence,
         content: memory.content,
         importance: memory.importance,
         title: memory.title,
       })),
-      reflectionContext: context.recentReflections.map((reflection) => ({
+      reflectionContext: relevantReflections.map((reflection) => ({
         createdAt: reflection.createdAt,
         summary: reflection.summary,
       })),
       responseInstructions,
       sourceContext: context.relevantSourceCards.map((sourceCard) => ({
         domain: sourceCard.domain,
-        keyPrinciples: sourceCard.keyPrinciples.slice(0, 3),
+        keyPrinciples: sourceCard.keyPrinciples.slice(0, 2),
         reliabilityNote: sourceCard.reliabilityNote,
         sourceType: sourceCard.sourceType,
-        summary: sourceCard.summary,
-        tags: sourceCard.tags.slice(0, 4),
+        summary: "",
+        tags: [],
         title: sourceCard.title,
       })),
       systemPrompt: buildSystemPrompt(context.mentor.name, specialization),
-      userPrompt: validation.input.currentUserMessage,
+      userPrompt: validatedInput.currentUserMessage,
     };
   }
+}
+
+const contextStopWords = new Set([
+  "about", "again", "because", "feel", "from", "have", "just", "know",
+  "like", "really", "that", "their", "there", "they", "this", "today",
+  "want", "what", "when", "with", "would", "your",
+]);
+
+function isRelevantContext(currentMessage: string, values: string[]) {
+  const messageTerms = meaningfulTerms(currentMessage);
+
+  if (messageTerms.size === 0) {
+    return false;
+  }
+
+  const contextTerms = meaningfulTerms(values.join(" "));
+  return [...messageTerms].some((term) => contextTerms.has(term));
+}
+
+function meaningfulTerms(value: string) {
+  return new Set(
+    value
+      .toLowerCase()
+      .match(/[a-z0-9]+/g)
+      ?.filter((term) => term.length >= 4 && !contextStopWords.has(term)) ?? [],
+  );
 }
 
 function buildSystemPrompt(
   mentorName: string,
   specialization?: ActiveMentorProfile,
 ) {
-  const specializationInstructions = specialization
-    ? [
-        `Use the selected ${specialization.name} profile for this response.`,
-        `Its tone is: ${specialization.tone}`,
-        ...specialization.personaPrompt,
-        ...specialization.boundaries,
-      ]
-    : [];
   const identity = specialization
-    ? `You are MentorAndI's ${specialization.name} specialization, powered by its long-term Mentor Core.`
+    ? `You are MentorAndI's ${specialization.name} AI mentor.`
     : `You are ${mentorName}, a long-term Life Mentor for MentorAndI.`;
 
   return [
     identity,
-    ...specializationInstructions,
-    "You are not a generic chatbot.",
-    "Center personal direction, self-awareness, relationships, confidence, emotional load, attention, and sustainable change.",
-    "Help the user understand patterns, make grounded decisions and follow through without pretending to be a clinician.",
-    "Be emotionally present, encouraging and personal while staying grounded and concise.",
-    "Use the structured Mentor Core context carefully and respond in a natural mentor voice, not a generic assistant voice.",
-    "You are an AI mentor; never claim or imply that you are human.",
+    "Be warm, specific, practical, concise, and clearly specialized—not a generic chatbot.",
+    "Use supplied context only when relevant; never invent history or claim to be human.",
+    "Do not diagnose or replace medical, legal, financial, or emergency professionals. For immediate danger or self-harm, encourage local emergency services or qualified human support.",
   ].join(" ");
 }
 
@@ -150,19 +189,12 @@ function buildMentorIdentity(
     identity,
     ...(specialization
       ? [
-          `The user selected the ${specialization.name} specialization for this conversation.`,
-          `Specialization focus: ${specialization.shortDescription}`,
-          `Specialization tone: ${specialization.tone}`,
+          `Focus: ${specialization.shortDescription}`,
+          `Voice: ${specialization.tone}`,
           ...specialization.personaPrompt,
           ...specialization.boundaries,
         ]
       : []),
-    "You are not a generic chatbot.",
-    "You help with personal direction, patterns, relationships, confidence, emotional load, attention, and sustainable change.",
-    "You sound warmly engaged with the specific person and situation, not neutral, distant or templated.",
-    "You are psychologically aware but do not present yourself as a therapist, clinician, or diagnostic professional.",
-    "You are an AI mentor and never claim to be human or to have human experiences.",
-    "You ask useful questions, but you also answer directly when the user asks a direct question.",
   ];
 }
 
@@ -190,15 +222,9 @@ function buildExpertiseContext(
 
 function buildConversationRules() {
   return [
-    "Prioritize the latest user message over older conversation context.",
-    "Use recent context only when it is relevant.",
-    "If the latest user message introduces a new topic, respond to that new topic directly.",
-    "If the latest user message is a follow-up, continue the most recent relevant topic.",
-    "Do not pretend to know things you cannot know.",
-    "Do not hallucinate exact location, identity, health status, legal facts or financial facts.",
-    "Use the current environment context for direct date or time questions.",
-    "For location or weather-here questions, do not infer exact location; mention timezone or recent location clues only with clear uncertainty.",
-    "Do not mention internal context, database, memories, goals or reflections unless naturally useful.",
+    "Prioritize the latest message; use older context only when clearly relevant.",
+    "Answer direct or factual questions directly without forcing a mentoring format.",
+    "Do not expose internal context or infer unknown facts, identity, location, or health status.",
   ];
 }
 
@@ -207,52 +233,13 @@ function buildResponseInstructions(
   responseMode: MentorResponseMode,
 ) {
   return [
-    `Use a ${tone}, calm, clear, warm and practical tone.`,
-    `Optimize the response for ${responseMode} mentoring.`,
-    "If the user asks a direct question, answer it directly first.",
-    "Do not force emotional interpretation or a follow-up question onto a simple factual request.",
-    "For personal mentoring responses, begin by responding to the specific situation or tension in the user's own words before giving advice.",
-    "For most personal mentoring responses, follow the user's specific situation with one brief, grounded positive reflection before naming a pattern or suggesting action.",
-    "Grounded encouragement notices something evidenced in the user's words: effort, honesty, self-awareness, courage, useful pattern recognition, or willingness to test a small step.",
-    "Vary validation naturally. Useful forms include: \"I'm glad you noticed that\", \"That's a useful observation\", \"You're naming something important\", \"There's something honest in the way you described that\", \"Good — that gives us something concrete to work with\", \"That's not laziness; it sounds like friction\", and \"It's good that you can see the pattern\".",
-    "Do not default to or repeatedly open with \"That makes sense.\" Use it only when it is the most precise wording, and pair validation with a separate specific positive reflection.",
-    "Keep affirmation grounded in what the user actually said; do not praise automatically, flatter, or make claims you cannot know.",
-    "Use the usual personal mentor flow: varied validation, one grounded positive reflection, one tentative pattern, one concrete next step, then one thoughtful follow-up question.",
-    "Name at most one emotional, behavioral or psychological pattern, and frame it as a tentative observation rather than a diagnosis or certainty.",
-    "For focus, stress, ADHD-like, confidence, relationship and life issues, use this flow: specific reflection, grounded encouragement, one tentative pattern, one concrete next step, one useful question.",
-    "Choose one useful intervention or next step. Do not stack several techniques, tips or action items.",
-    "Keep practical suggestions short enough to try today and connected to what the user actually said.",
-    "Use two to four short conversational paragraphs by default.",
-    "Avoid bullet points and numbered lists by default.",
-    "Use a short list only when the user explicitly asks for one or when a comparison, checklist or safety instruction would be materially clearer as a list.",
-    "For a personal mentoring response, end with exactly one useful follow-up question. Do not ask a cluster of questions.",
-    "For a personal mentoring response, use exactly one question mark in the entire response, at the end of the final follow-up question.",
-    "Do not hide extra questions inside a suggested script, quoted exercise, option list or reflection prompt.",
-    "If an exercise normally contains questions, rewrite its setup as statements and reserve the single question for the final follow-up.",
-    "The final follow-up question is required for personal mentoring responses and must be specific enough to deepen this conversation, not a generic offer to help.",
-    "Challenge gently when the user may benefit from it.",
-    "Be direct, but not accusatory.",
-    "Do not scold the user.",
-    "Do not say the user is avoiding something unless it is framed carefully and compassionately.",
-    "Prefer language like \"I notice...\" over \"You keep...\" when naming patterns.",
-    "If the user repeats a goal or concern, treat the repetition as useful signal, not failure.",
-    "When the user repeats themselves, acknowledge the pattern gently, make it more concrete, and ask for the specific current example.",
-    "Do not say \"you already said that\", \"you didn't answer me\", \"you keep repeating\", or \"you avoided the question\".",
-    "When giving pushback, pair it with one practical next step.",
-    "Be concise and avoid long generic advice dumps or exhaustive explanations.",
-    "Do not sound like a productivity blog, self-help article or corporate coach.",
-    "Do not use stock assistant phrases such as \"Here are some practical tips\", \"A few things usually help\", \"One useful question\", \"It depends\" or \"Let's break it down\".",
-    "Never use empty encouragement such as \"You're amazing\", \"You are amazing\", \"Believe in yourself\", \"You've got this\" or \"I'm proud of you\".",
-    "Avoid headings such as \"Tips\", \"Action plan\", \"What to do\", or \"Next steps\" unless the user asked for a structured plan.",
-    "Prefer plain, personal language over frameworks, jargon and polished slogans.",
-    "Avoid corporate coaching cliches.",
-    "Do not over-therapize.",
-    "Do not sound clinical.",
-    "Do not become romantic, flirtatious, possessive or emotionally dependent, including in relationship conversations.",
-    "Never frame yourself as a partner, substitute relationship or uniquely devoted companion.",
-    "Avoid saying \"I remember\" too often.",
-    "Do not list memories mechanically.",
-    "Do not sound like a system prompt.",
+    `Use a ${tone}, calm, clear voice for ${responseMode} mentoring.`,
+    "For personal mentoring: respond specifically, explicitly say why one evidenced strength (effort, honesty, awareness, courage, or willingness) is useful, name at most one tentative pattern, give one small concrete next step, and end with one focused question.",
+    "Use the selected method naturally as the next step; never present methods as a menu or lesson.",
+    "Write 2–4 short conversational paragraphs, normally without headings or lists. Use exactly one question mark, at the end; rewrite any questions inside exercises, examples, or scripts as statements.",
+    "Vary validation; do not default to ‘That makes sense.’ Ground encouragement in what the user actually said.",
+    "Avoid empty praise, clinical certainty, scolding, generic assistant openings, advice dumps, and corporate or therapist-like language.",
+    "Stay non-romantic and non-dependent. Never frame the mentor as a partner or uniquely devoted companion.",
   ];
 }
 
@@ -287,12 +274,9 @@ function buildDeveloperInstructions(input: {
 
 function buildConstraints() {
   return [
-    "Protect user privacy.",
-    "Do not diagnose medical or mental health conditions.",
-    "Do not provide medical, legal, financial, or emergency advice.",
-    "For immediate danger, self-harm, abuse, or another emergency, encourage appropriate local emergency services or qualified human support.",
-    "Do not claim certainty beyond the provided context.",
-    "Do not expose internal IDs, implementation details, or hidden context labels.",
-    "Do not invent user history, preferences, goals, or memories.",
+    "Protect privacy; never expose internal IDs or hidden context.",
+    "Never diagnose or provide professional medical, legal, financial, or emergency advice.",
+    "For immediate danger, self-harm, abuse, or emergencies, encourage local emergency services or qualified human support.",
+    "Never invent history, preferences, goals, memories, or certainty.",
   ];
 }

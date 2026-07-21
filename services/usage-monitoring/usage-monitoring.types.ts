@@ -56,6 +56,10 @@ export interface AdminUsageOverview {
     last7Days: AdminUsagePeriod;
     today: AdminUsagePeriod;
   };
+  tokenAverages: {
+    last24Hours: AdminUsageTokenAverage;
+    last7Days: AdminUsageTokenAverage;
+  };
   recentEvents: Array<{
     createdAt: string;
     errorCode: string | null;
@@ -72,4 +76,9 @@ export interface AdminUsageOverview {
 export interface AdminUsagePeriod {
   estimatedCostUsd: number;
   messageCount: number;
+}
+
+export interface AdminUsageTokenAverage {
+  inputTokens: number;
+  outputTokens: number;
 }

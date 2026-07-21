@@ -46,12 +46,17 @@ provider reconciliation, or billing-grade analytics.
 and `ALPHA_ADMIN_EMAILS` allowlist. It shows:
 
 - successful messages and estimated cost today, over 7 days, and over 30 days;
+- average provider-reported input and output tokens over 24 hours and 7 days;
 - usage by provider, model, and mentor over 30 days;
 - the all-time blocked-request count;
 - the 50 most recent usage events without message content.
 
 The page is linked only from internal admin navigation. There is no public usage
 API and no direct browser access to the usage table.
+
+The token averages make prompt regressions visible without exposing message
+content. They use successful events with provider token data; a zero indicates
+that no usable token measurements exist for that period.
 
 ## Deployment and security
 

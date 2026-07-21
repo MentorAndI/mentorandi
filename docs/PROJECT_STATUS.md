@@ -76,11 +76,15 @@ MentorAndI
 - Active Mentor Catalog with distinct persona prompts, tones, boundaries, and
   example openings for all eight alpha specializations.
 - Four-method specialist libraries for each active mentor, selected only within
-  the persisted mentor context and capped to two method context entries.
+  the persisted mentor context; default prompts carry one primary method.
 - Alpha feedback capture with usefulness rating, category and page context.
 - Server-rendered alpha admin overview and feedback review.
 - Allowlisted `/admin/usage` monitoring for persistent counts, estimated cost,
-  provider/model/mentor breakdowns, blocked attempts, and recent events.
+  24-hour/7-day average input and output tokens, provider/model/mentor
+  breakdowns, blocked attempts, and recent events.
+- Compact default prompt composition with a 1,800-token context budget,
+  relevance-filtered personal context, four recent messages, conditional
+  environment context, and non-duplicated safety/response instructions.
 - Reflection-aware context.
 - Basic account data export and mentor data deletion controls.
 - Context Builder.

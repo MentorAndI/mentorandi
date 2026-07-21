@@ -125,8 +125,9 @@ User memory is personal to one user. It captures that user's understandings, goa
 The Mentor Method Library is reusable product knowledge. Each active mentor has
 four concise, curated techniques. The persisted conversation's validated mentor
 record selects the eligible library before the current message and lower-weight
-recent mentor-scoped context rank its methods. At most two methods enter context,
-and the prompt may adapt at most one as the primary intervention so responses do
+recent mentor-scoped context rank its methods. The default prompt includes one
+primary method (with room for only one short supporting method when strongly
+relevant), so responses do
 not become framework-heavy or list-like. See `docs/MENTOR_METHOD_LIBRARIES.md`.
 
 MentorAndI uses one core engine with specialized mentor profiles. The Active
@@ -158,7 +159,14 @@ from visually mixing otherwise correctly scoped database conversations.
 
 The Mentor Source Library contains curated knowledge cards and URLs for trusted frameworks or educational resources. It is not live browsing, scraping or web research. Source cards are matched into context only when relevant, and the prompt tells the model not to cite URLs unless the user asks for sources.
 
-Reusable knowledge improves mentor quality, but it is budgeted to control prompt size and cost. `MENTOR_METHODS_LIMIT`, `MENTOR_EXPERTISE_LIMIT` and `MENTOR_SOURCES_LIMIT` control how many matched methods, expertise profiles and source cards can enter context. Not all matched knowledge is sent to the LLM, and the current user message remains the highest-priority context.
+Reusable knowledge improves mentor quality, but it is budgeted to control prompt
+size and cost. Default context is capped at 1,800 estimated tokens, four recent
+messages, two high-relevance memories, two goals, two reflections, one expertise
+profile, and one source card. The composer omits empty sections, duplicate current
+messages, and unrelated saved context; date/time context is sent only when asked.
+Profile, response-shape, and compact safety instructions are each serialized once.
+Environment variables can override these caps. The current user message remains
+the highest-priority context.
 
 Future aggregate learning may suggest improvements to the method, expertise and source libraries, but shared knowledge should remain curated and admin-approved. Personal user data should not be stored or reused as cross-user knowledge.
 
@@ -206,4 +214,4 @@ allowlisted admins. Cost data is estimated and not billing-grade. See
 
 ## Mentor Evaluation
 
-`npm run eval:mentor` runs the full Mentor Core flow through the development test API. It requires a running app server, connected database and seeded development user, then evaluates routing, context building, prompt composition, provider behavior and reusable knowledge matching together. Reports are written to `reports/mentor-eval-latest.json`.
+`npm run eval:mentor` runs the full Mentor Core flow through the development test API. It requires a running app server, connected database and seeded development user, then evaluates routing, context building, prompt composition, provider behavior and reusable knowledge matching together. Simple scenarios also fail when provider-reported input tokens exceed their prompt budget; method presence and grounded encouragement remain required. Reports are written to `reports/mentor-eval-latest.json`.

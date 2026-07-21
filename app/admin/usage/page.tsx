@@ -88,6 +88,22 @@ export default async function AdminUsagePage() {
               label="Estimated cost / 30 days"
               value={formatCost(usage.periods.last30Days.estimatedCostUsd)}
             />
+            <MetricCard
+              label="Avg input / 24h"
+              value={`${usage.tokenAverages.last24Hours.inputTokens.toLocaleString()} tokens`}
+            />
+            <MetricCard
+              label="Avg output / 24h"
+              value={`${usage.tokenAverages.last24Hours.outputTokens.toLocaleString()} tokens`}
+            />
+            <MetricCard
+              label="Avg input / 7 days"
+              value={`${usage.tokenAverages.last7Days.inputTokens.toLocaleString()} tokens`}
+            />
+            <MetricCard
+              label="Avg output / 7 days"
+              value={`${usage.tokenAverages.last7Days.outputTokens.toLocaleString()} tokens`}
+            />
           </div>
         </section>
 

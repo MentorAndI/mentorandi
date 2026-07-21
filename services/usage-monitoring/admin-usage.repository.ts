@@ -9,6 +9,7 @@ export class AdminUsageRepository {
 
   async getOverview(now = new Date()) {
     const utc = getUtcPeriodStarts(now);
+    const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const last7Days = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const last30Days = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const success = UsageEventStatus.SUCCESS;
@@ -21,6 +22,8 @@ export class AdminUsageRepository {
       byModel,
       byMentorId,
       recentEvents,
+      tokenAverages24Hours,
+      tokenAverages7Days,
     ] = await this.prisma.$transaction([
       this.prisma.usageEvent.aggregate({
         _count: { _all: true },
@@ -69,6 +72,14 @@ export class AdminUsageRepository {
         orderBy: { createdAt: "desc" },
         take: recentEventLimit,
       }),
+      this.prisma.usageEvent.aggregate({
+        _avg: { inputTokens: true, outputTokens: true },
+        where: { createdAt: { gte: last24Hours }, status: success },
+      }),
+      this.prisma.usageEvent.aggregate({
+        _avg: { inputTokens: true, outputTokens: true },
+        where: { createdAt: { gte: last7Days }, status: success },
+      }),
     ]);
     const mentorIds = byMentorId
       .map((entry) => entry.mentorId)
@@ -86,6 +97,10 @@ export class AdminUsageRepository {
       mentors,
       periods: { last30Days: thirtyDays, last7Days: sevenDays, today },
       recentEvents,
+      tokenAverages: {
+        last24Hours: tokenAverages24Hours,
+        last7Days: tokenAverages7Days,
+      },
     };
   }
 }

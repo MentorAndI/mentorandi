@@ -50,8 +50,21 @@ export class AdminUsageService {
         status: event.status,
         totalTokens: event.totalTokens,
       })),
+      tokenAverages: {
+        last24Hours: toTokenAverage(data.tokenAverages.last24Hours),
+        last7Days: toTokenAverage(data.tokenAverages.last7Days),
+      },
     };
   }
+}
+
+function toTokenAverage(value: {
+  _avg: { inputTokens: number | null; outputTokens: number | null };
+}) {
+  return {
+    inputTokens: Math.round(value._avg.inputTokens ?? 0),
+    outputTokens: Math.round(value._avg.outputTokens ?? 0),
+  };
 }
 
 function mapGroups<

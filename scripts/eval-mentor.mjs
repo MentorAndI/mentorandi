@@ -18,6 +18,7 @@ const scenarioGroups = [
     messages: [
       {
         expectsMentorShape: false,
+        maxInputTokens: 1800,
         name: "Direct factual question",
         text: "What day is it today?",
       },
@@ -50,6 +51,7 @@ const scenarioGroups = [
         expectsMentorShape: true,
         expectsWarmAffirmation: true,
         expectedMethodDomain: "ADHD",
+        maxInputTokens: 2400,
         mentorSpecialty: "adhd",
         name: "ADHD task initiation",
         text: "I have ADHD, and even opening the document feels weirdly impossible today. I know the task matters, which makes me feel worse about being stuck.",
@@ -362,6 +364,10 @@ async function runScenario({
       matchedMethods,
       scenario.expectedMethodDomain,
     );
+    const promptBudget = analyzePromptBudget(
+      readNullableNumber(usage?.inputTokens),
+      scenario.maxInputTokens,
+    );
 
     return {
       conversationId: isNonEmptyString(body?.conversation?.id)
@@ -389,7 +395,11 @@ async function runScenario({
       model: sanitizeText(usage?.model ?? body?.model ?? "unknown"),
       outputTokens: readNullableNumber(usage?.outputTokens),
       methodSelection,
-      passed: success && responseQuality.passed && methodSelection.passed,
+      passed:
+        success &&
+        responseQuality.passed &&
+        methodSelection.passed &&
+        promptBudget.passed,
       provider: sanitizeText(
         usage?.provider ??
           diagnostics?.providerUsed ??
@@ -398,6 +408,7 @@ async function runScenario({
           "unknown",
       ),
       responsePreview: buildPreview(responseText),
+      promptBudget,
       responseQuality,
       responseText,
       routeReason: sanitizeText(modelRouting?.reason ?? "Not available"),
@@ -434,6 +445,7 @@ async function runScenario({
       outputTokens: null,
       passed: false,
       provider: evalCase.provider ?? "unknown",
+      promptBudget: analyzePromptBudget(null, scenario.maxInputTokens),
       responsePreview: "",
       responseQuality: analyzeResponseQuality(
         "",
@@ -471,6 +483,7 @@ function printScenarioResult(result) {
     `  methods: ${formatMatchedKnowledge(result.matchedMethods)}`,
   );
   console.log(`  method selection: ${formatMethodSelection(result.methodSelection)}`);
+  console.log(`  prompt budget: ${formatPromptBudget(result.promptBudget)}`);
   console.log(
     `  expertise: ${formatMatchedKnowledge(result.matchedExpertise)}`,
   );
@@ -484,6 +497,33 @@ function printScenarioResult(result) {
   }
 
   console.log("");
+}
+
+function analyzePromptBudget(inputTokens, maxInputTokens) {
+  const issues = [];
+
+  if (maxInputTokens && inputTokens !== null && inputTokens > maxInputTokens) {
+    issues.push(
+      `simple prompt used ${inputTokens} input tokens (budget ${maxInputTokens})`,
+    );
+  }
+
+  return {
+    inputTokens,
+    maxInputTokens: maxInputTokens ?? null,
+    issues,
+    passed: issues.length === 0,
+  };
+}
+
+function formatPromptBudget(budget) {
+  if (!budget?.maxInputTokens) {
+    return "not applied";
+  }
+
+  return budget.passed
+    ? `pass (max ${budget.maxInputTokens})`
+    : `review (${budget.issues.join(", ")})`;
 }
 
 function readMatchedKnowledge(value) {
@@ -660,7 +700,7 @@ function analyzeResponseQuality(
     /^as an ai/i,
   ].some((pattern) => pattern.test(normalizedPunctuationResponse.trimStart()));
   const hasGroundedEncouragement =
-    /\bi(?:'m| am) glad you (?:noticed|named|recognized|said|shared)\b|\bthat(?:'s| is) (?:a )?(?:useful|important|honest|clear|valuable) observation\b|\byou(?:'re| are) (?:naming|noticing) something important\b|\bthere(?:'s| is) something honest in (?:the way|how) you\b|\bgood\s*[—–-]\s*(?:the fact that )?[^.!?\n]{0,90}(?:concrete|work with|starting point)\b|\bit(?:'s| is) (?:a )?good (?:sign|thing) that you\b|\bthe fact that you [^.!?\n]{0,100}(?:is useful information|is a strength|gives us something concrete|shows (?:effort|honesty|awareness|courage|willingness))\b|\b(?:that|this) is useful information\b|\bthat(?:'s| is) not laziness;? (?:it )?(?:sounds|looks) like friction\b|\bit(?:'s| is) good that you can (?:see|name|notice|recognize)\b|\byou(?:'ve| have) already (?:noticed|named|recognized)\b|\byou(?:'re| are)? [^.!?\n]{0,120},? (?:which is|and that(?:'s| is)) (?:useful|important|meaningful)\b|\byou(?:'re| are)? [^.!?\n]{0,120},? (?:which|and that) matters\b|\byou (?:noticed|named|recognized|caught) [\s\S]{0,160}(?:useful|important|concrete|strength|starting point)\b|\b(?:your|the) (?:effort|honesty|self-awareness|awareness|courage|willingness|pattern recognition) [^.!?\n]{0,70}(?:matters|is useful|gives us|shows)\b/i.test(
+    /\bi(?:'m| am) glad you (?:noticed|named|recognized|said|shared)\b|\bthat(?:'s| is) (?:a )?(?:useful|important|honest|clear|valuable) observation\b|\byou(?:'re| are) (?:naming|noticing) something important\b|\bthere(?:'s| is) something honest in (?:the way|how) you\b|\bgood\s*[—–-]\s*(?:the fact that )?[^.!?\n]{0,90}(?:concrete|work with|starting point)\b|\bit(?:'s| is) (?:a )?good (?:sign|thing) that you\b|\bthe fact that you [^.!?\n]{0,120}(?:is useful information|is a strength|gives us something concrete|shows (?:a lot of )?(?:effort|honesty|awareness|courage|willingness))\b|\b(?:that|this) is useful information\b|\bthat(?:'s| is) not laziness;? (?:it )?(?:sounds|looks) like friction\b|\bit(?:'s| is) good that you can (?:see|name|notice|recognize)\b|\byou(?:'ve| have) already (?:noticed|named|recognized)\b|\byou(?:'re| are)? [^.!?\n]{0,120},? (?:which is|and that(?:'s| is)) (?:useful|important|meaningful)\b|\byou(?:'re| are)? [^.!?\n]{0,120},? (?:which|and that) matters\b|\byou (?:noticed|named|recognized|caught) [\s\S]{0,180}(?:useful|important|concrete|strength|awareness|opening|starting point)\b|\byou noticing [^.!?\n]{0,120} is (?:real )?(?:effort|awareness|courage)\b|\byou did [^.!?\n]{0,100}important [^.!?\n]{0,100}(?:showed up|noticed|named)\b|\byou(?:'re| are) [^.!?\n]{0,160}(?:real effort|real strength|honesty matters)\b|\byou [^.!?\n]{0,160}(?:real effort|real strength|honesty matters|shows willingness)\b|\byou(?:'re| are) showing good judgment\b|\byou(?:'re| are) (?:already )?(?:seeing|doing|noticing|naming) [\s\S]{0,150}(?:useful|matters|honesty|awareness|opening)\b|\b(?:your|the) (?:effort|honesty|self-awareness|awareness|courage|willingness|pattern recognition) [^.!?\n]{0,70}(?:matters|is useful|gives us|shows)\b/i.test(
       normalizedPunctuationResponse,
     );
   const issues = [];

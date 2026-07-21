@@ -29,7 +29,10 @@ The Context Builder resolves the mentor profile from the persisted
 conversation's mentor record. Only methods whose `mentorSlug` matches that
 profile are eligible. The matcher scores tags against the current user message
 and, at lower weight, recent messages from that same mentor-scoped
-conversation. Unmatched methods are omitted.
+conversation. Unmatched methods are omitted. Default prompts include only the
+highest-ranked primary method; the prompt budget permits at most one short
+supporting method when future routing can establish strong relevance. The full
+library is never injected into a routine response.
 
 At most two matched methods enter context, even if a higher
 `MENTOR_METHODS_LIMIT` is configured. The prompt contract directs the provider

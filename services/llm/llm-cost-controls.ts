@@ -11,15 +11,15 @@ export interface LlmCostControls {
 }
 
 const defaultCostControls: LlmCostControls = {
-  contextBudgetTokens: 6000,
+  contextBudgetTokens: 1800,
   expertiseLimit: 1,
-  goalsLimit: 3,
+  goalsLimit: 2,
   maxOutputTokens: 500,
-  memoriesLimit: 5,
+  memoriesLimit: 2,
   methodsLimit: 2,
-  recentMessagesLimit: 8,
-  reflectionsLimit: 5,
-  sourcesLimit: 2,
+  recentMessagesLimit: 4,
+  reflectionsLimit: 2,
+  sourcesLimit: 1,
 };
 
 export function getLlmCostControls(): LlmCostControls {
