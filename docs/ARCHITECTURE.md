@@ -171,9 +171,10 @@ cliches, emotionally present without pretending to be a clinician or human,
 and observant without sounding clinical. Repeated user goals or concerns should
 be treated as signal to make the topic more concrete, not as a failure to
 answer correctly. Personal mentoring responses default to conversational prose:
-respond to the specific situation, validate it when appropriate, name at most
-one tentative pattern, offer one concrete next step and end personal mentoring
-responses with exactly one useful question. See
+respond to the specific situation, vary validation, recognize one evidenced
+strength such as honesty, awareness, effort, courage or willingness, name at
+most one tentative pattern, offer one concrete next step and end personal
+mentoring responses with exactly one useful question. See
 `docs/MARCUS_RESPONSE_QUALITY.md`.
 
 ## LLM Provider Abstraction

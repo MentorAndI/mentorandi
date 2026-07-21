@@ -13,6 +13,9 @@ MentorAndI
 - Marcus uses a warm, conversational personal-mentor response contract that
   validates the user's specific situation and discourages generic advice lists,
   stock assistant language and multiple follow-up questions.
+- Personal mentor responses vary their validation and usually add one positive
+  reflection grounded in the user's effort, honesty, awareness, courage,
+  pattern recognition, or willingness instead of relying on stock reassurance.
 - Aggregate Learning Suggestions v1 exists as a disabled design/service-interface foundation only; no cross-user learning is implemented.
 - Usage Limits v1 exists as an in-memory request-count foundation for mentor responses; database persistence is still future work.
 - Authenticated alpha feedback capture is available from `/start` and `/mentor`.

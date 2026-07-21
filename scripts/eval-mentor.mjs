@@ -354,7 +354,8 @@ async function runScenario({
     const responseQuality = analyzeResponseQuality(
       responseText,
       scenario.expectsMentorShape === true,
-      scenario.expectsWarmAffirmation === true,
+      scenario.expectsMentorShape === true ||
+        scenario.expectsWarmAffirmation === true,
     );
     const matchedMethods = readMatchedKnowledge(diagnostics?.matchedMethods);
     const methodSelection = analyzeMethodSelection(
@@ -437,7 +438,8 @@ async function runScenario({
       responseQuality: analyzeResponseQuality(
         "",
         scenario.expectsMentorShape === true,
-        scenario.expectsWarmAffirmation === true,
+        scenario.expectsMentorShape === true ||
+          scenario.expectsWarmAffirmation === true,
       ),
       responseText: "",
       routeReason: "Request failed before model routing diagnostics were returned.",
@@ -623,7 +625,7 @@ function buildPreview(value) {
 function analyzeResponseQuality(
   responseText,
   expectsMentorShape,
-  expectsWarmAffirmation,
+  expectsGroundedEncouragement,
 ) {
   const bulletLineCount = responseText
     .split("\n")
@@ -631,6 +633,9 @@ function analyzeResponseQuality(
   const questionCount = (responseText.match(/\?/g) ?? []).length;
   const wordCount = responseText.split(/\s+/).filter(Boolean).length;
   const normalizedResponse = responseText.toLowerCase();
+  const thatMakesSenseCount = (
+    normalizedResponse.match(/\bthat makes sense\b/g) ?? []
+  ).length;
   const genericPhrases = [
     "here are some practical tips",
     "a few things usually help",
@@ -638,11 +643,21 @@ function analyzeResponseQuality(
     "it depends",
     "let's break it down",
     "believe in yourself",
+    "you're amazing",
     "you are amazing",
     "you've got this",
+    "i'm proud of you",
   ].filter((phrase) => normalizedResponse.includes(phrase));
-  const hasWarmAffirmation =
-    /\bthat makes sense\b|\bthat [^.!?\n]{0,80} makes sense\b|\b(?:it|your reaction) makes sense\b|\b(?:the|your) [^.!?\n]{0,60} makes sense\b|\bthat sounds\b|\b[^.!?\n]{0,60} (?:is|feels) real\b|\bthat(?:'s| is) (?:a )?(?:real|understandable|valid)\b|\byou(?:'re| are) not (?:wrong|lazy|failing|weak)\b|\b(?:good|helpful|important|useful) (?:that you|you've|you have)\b|\bno wonder\b|\bnot a character flaw\b|\bi(?:'m| am) glad you\b|\bi hear (?:you|how)\b/i.test(
+  const genericOpening = [
+    /^that makes sense[.!]/i,
+    /^(?:certainly|absolutely|of course)[,!]/i,
+    /^thank you for sharing/i,
+    /^i(?:'m| am) sorry (?:to hear|that you(?:'re| are))/i,
+    /^it sounds like you(?:'re| are)/i,
+    /^as an ai/i,
+  ].some((pattern) => pattern.test(responseText.trimStart()));
+  const hasGroundedEncouragement =
+    /\bi(?:'m| am) glad you (?:noticed|named|recognized|said|shared)\b|\bthat(?:'s| is) (?:a )?(?:useful|important|honest|clear|valuable) observation\b|\byou(?:'re| are) naming something important\b|\bthere(?:'s| is) something honest in (?:the way|how) you\b|\bgood\s*[—–-]\s*(?:the fact that )?[^.!?\n]{0,90}(?:concrete|work with|starting point)\b|\bit(?:'s| is) (?:a )?good (?:sign|thing) that you\b|\bthe fact that you [^.!?\n]{0,100}(?:is useful information|is a strength|gives us something concrete|shows (?:effort|honesty|awareness|courage|willingness))\b|\b(?:that|this) is useful information\b|\bthat(?:'s| is) not laziness;? (?:it )?(?:sounds|looks) like friction\b|\bit(?:'s| is) good that you can (?:see|name|notice|recognize)\b|\byou(?:'ve| have) already (?:noticed|named|recognized)\b|\b(?:your|the) (?:effort|honesty|self-awareness|awareness|courage|willingness|pattern recognition) [^.!?\n]{0,70}(?:matters|is useful|gives us|shows)\b/i.test(
       responseText,
     );
   const issues = [];
@@ -662,8 +677,20 @@ function analyzeResponseQuality(
     issues.push("missing follow-up question");
   }
 
-  if (expectsWarmAffirmation && responseText && !hasWarmAffirmation) {
-    issues.push("missing warm affirmation");
+  if (
+    expectsGroundedEncouragement &&
+    responseText &&
+    !hasGroundedEncouragement
+  ) {
+    issues.push("advice without grounded encouragement");
+  }
+
+  if (thatMakesSenseCount > 1) {
+    issues.push('repeated "That makes sense"');
+  }
+
+  if (genericOpening) {
+    issues.push("generic assistant opening");
   }
 
   if (genericPhrases.length > 0) {
@@ -677,12 +704,14 @@ function analyzeResponseQuality(
   return {
     bulletLineCount,
     expectsMentorShape,
-    expectsWarmAffirmation,
+    expectsGroundedEncouragement,
     genericPhrases,
-    hasWarmAffirmation,
+    genericOpening,
+    hasGroundedEncouragement,
     issues,
     passed: responseText ? issues.length === 0 : false,
     questionCount,
+    thatMakesSenseCount,
     wordCount,
   };
 }
@@ -692,10 +721,10 @@ function formatResponseQuality(quality) {
     return "not available";
   }
 
-  const warmthMetric = quality.expectsWarmAffirmation
-    ? `, affirmation ${quality.hasWarmAffirmation ? "present" : "missing"}`
+  const encouragementMetric = quality.expectsGroundedEncouragement
+    ? `, grounded encouragement ${quality.hasGroundedEncouragement ? "present" : "missing"}`
     : "";
-  const metrics = `${quality.wordCount} words, ${quality.bulletLineCount} bullets, ${quality.questionCount} questions${warmthMetric}`;
+  const metrics = `${quality.wordCount} words, ${quality.bulletLineCount} bullets, ${quality.questionCount} questions, \"That makes sense\" ${quality.thatMakesSenseCount}${encouragementMetric}`;
 
   return quality.passed
     ? `pass (${metrics})`

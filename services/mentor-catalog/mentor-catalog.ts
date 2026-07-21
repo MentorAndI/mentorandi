@@ -11,7 +11,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
     ],
     databaseSlug: "marcus",
     exampleOpeningLine:
-      "That makes sense. It sounds like the decision is carrying more than one kind of pressure.",
+      "You're naming something important: the decision is carrying more than one kind of pressure.",
     expertiseDomain: "life mentor",
     helpsWith: [
       "daily life reflection",
@@ -69,7 +69,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
     ],
     databaseSlug: "relationship",
     exampleOpeningLine:
-      "That hurt makes sense. The conflict may be covering the thing each of you is trying to protect.",
+      "It's a good sign that you're looking at the conflict pattern, not only the last painful moment.",
     expertiseDomain: "relationship mentor",
     helpsWith: [
       "communication",
@@ -185,7 +185,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
     ],
     databaseSlug: "focus",
     exampleOpeningLine:
-      "That makes sense. Your attention is being asked to hold too many unfinished decisions at once.",
+      "Good — noticing the competing decisions gives us something concrete to work with.",
     expertiseDomain: "focus mentor",
     helpsWith: [
       "priorities",
@@ -214,7 +214,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
     ],
     databaseSlug: "confidence",
     exampleOpeningLine:
-      "That hesitation makes sense. You may be waiting to feel certain before giving your voice any room.",
+      "The fact that you can name the hesitation is useful; you may be waiting to feel certain before giving your voice any room.",
     expertiseDomain: "confidence mentor",
     helpsWith: [
       "self-doubt",

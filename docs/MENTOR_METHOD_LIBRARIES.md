@@ -34,8 +34,12 @@ conversation. Unmatched methods are omitted.
 At most two matched methods enter context, even if a higher
 `MENTOR_METHODS_LIMIT` is configured. The prompt contract directs the provider
 to use at most one as the primary intervention, adapt it to the user's words,
-and keep it subordinate to warm reflection. It must not expose method IDs,
-teach a framework unnecessarily, or turn methods into a menu or advice list.
+and keep it subordinate to varied validation and one grounded positive
+reflection. That reflection should recognize evidence in the user's message,
+such as effort, honesty, awareness, courage, pattern recognition, or
+willingness; it must not become generic praise. A method must not expose method
+IDs, teach a framework unnecessarily, or turn the response into a menu or
+advice list.
 
 ## Safety
 

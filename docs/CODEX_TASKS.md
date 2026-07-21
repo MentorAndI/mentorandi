@@ -238,6 +238,18 @@ Goal:
 Show MentorAndI as one secure Mentor Core with distinct specialized mentor
 experiences while preserving mentor-scoped conversations.
 
+### Feature 110B - Grounded Mentor Encouragement
+
+Status:
+Implemented. Personal mentor responses vary validation, recognize a specific
+strength evidenced in the user's message, and avoid stock or cheesy praise. The
+mentor evaluation penalizes repeated stock validation, generic openings, and
+personal advice that lacks grounded encouragement.
+
+Goal:
+Make specialized mentor responses feel more encouraging and human without
+becoming generic, flattering, or unsafe.
+
 ### Feature 107 - One-Command Staging Deploy
 
 Status:
