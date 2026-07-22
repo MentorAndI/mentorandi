@@ -6,6 +6,7 @@ import {
 } from "@/services/billing/billing-config";
 
 const stripeApiBase = "https://api.stripe.com/v1";
+export const stripeApiVersion = "2026-02-25.clover";
 const signatureToleranceSeconds = 300;
 
 export class StripeClient {
@@ -15,6 +16,7 @@ export class StripeClient {
       headers: {
         Authorization: `Bearer ${getStripeSecretKey()}`,
         "Content-Type": "application/x-www-form-urlencoded",
+        "Stripe-Version": stripeApiVersion,
       },
       method: "POST",
     });

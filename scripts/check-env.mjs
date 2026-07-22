@@ -60,9 +60,37 @@ if (stripeEnabled) {
   ]) {
     if (!hasEnvironmentValue(variableName)) missingVariables.push(variableName);
   }
+
+  if (
+    hasEnvironmentValue("STRIPE_SECRET_KEY") &&
+    !process.env.STRIPE_SECRET_KEY.trim().startsWith("sk_test_")
+  ) {
+    errors.push(
+      "STRIPE_SECRET_KEY must be a Stripe test secret key (sk_test_) during alpha.",
+    );
+  }
+
+  if (
+    hasEnvironmentValue("STRIPE_WEBHOOK_SECRET") &&
+    !process.env.STRIPE_WEBHOOK_SECRET.trim().startsWith("whsec_")
+  ) {
+    errors.push("STRIPE_WEBHOOK_SECRET must be a Stripe webhook signing secret.");
+  }
+
+  for (const variableName of [
+    "STRIPE_PRICE_PERSONAL_MONTHLY",
+    "STRIPE_PRICE_PREMIUM_MONTHLY",
+  ]) {
+    if (
+      hasEnvironmentValue(variableName) &&
+      !process.env[variableName].trim().startsWith("price_")
+    ) {
+      errors.push(`${variableName} must be a Stripe Price ID (price_).`);
+    }
+  }
 } else {
   warnings.push(
-    "Stripe payments are disabled; pricing will show the payments-coming-soon state.",
+    "Stripe payments are disabled; pricing will show that payments are not enabled yet.",
   );
 }
 

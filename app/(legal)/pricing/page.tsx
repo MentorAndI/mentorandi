@@ -7,6 +7,8 @@ import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
 import { paymentsAvailable } from "@/services/billing/billing.service";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Pricing | Mentor And I",
   description: "Planned Mentor And I access options after the private alpha.",
@@ -33,14 +35,24 @@ const plans = [
   },
 ];
 
-export default function PricingPage() {
+export default async function PricingPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ billing?: string }>;
+}) {
   const enabled = paymentsAvailable();
+  const billing = (await searchParams).billing;
 
   return (
     <main className="min-h-screen bg-gradient-to-b from-amber-50 via-white to-emerald-50 py-16 text-zinc-950">
       <Container>
+        {billing === "canceled" ? (
+          <div className="mx-auto mb-8 max-w-3xl rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm text-amber-900">
+            Test checkout was canceled. No charge or subscription change was made.
+          </div>
+        ) : null}
         <div className="mx-auto max-w-3xl text-center">
-          <Badge>{enabled ? "Billing preview" : "Private alpha"}</Badge>
+          <Badge>{enabled ? "Stripe test mode" : "Private alpha"}</Badge>
           <Heading className="mt-5" level={1}>Simple access, built for an ongoing mentor relationship</Heading>
           <Text className="mx-auto mt-4 max-w-2xl text-lg">
             Mentor And I is currently invite-based. Personal and Premium are
@@ -48,9 +60,14 @@ export default function PricingPage() {
           </Text>
           {!enabled ? (
             <p className="mt-4 text-sm font-medium text-amber-800">
-              Payments are not enabled during the current private alpha.
+              Payments are not enabled yet. Alpha access continues without payment.
             </p>
-          ) : null}
+          ) : (
+            <div className="mt-5 rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm font-medium text-sky-950">
+              Test mode only. Use Stripe test payment details—no real customer
+              will be charged from this staging flow.
+            </div>
+          )}
         </div>
 
         <div className="mt-12 grid gap-6 lg:grid-cols-3">

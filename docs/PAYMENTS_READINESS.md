@@ -1,8 +1,9 @@
 # Mentor And I Payments Readiness
 
-This foundation prepares the private alpha for a later paid launch. It does not
-enable payment collection by default and does not claim revenue, customers, or
-final pricing.
+This foundation prepares the private alpha for a later paid launch. Staging can
+be explicitly enabled for Stripe test-mode checkout by following
+`docs/STRIPE_STAGING_SETUP.md`; it does not enable live payment collection or
+claim revenue, customers, or final pricing.
 
 ## What exists now
 
@@ -31,8 +32,9 @@ STRIPE_PRICE_PERSONAL_MONTHLY=
 STRIPE_PRICE_PREMIUM_MONTHLY=
 ```
 
-Keep `NEXT_PUBLIC_STRIPE_ENABLED=false` during alpha. When it is `true`,
-`npm run check:env` requires all four private Stripe/price values. Only the
+Keep `NEXT_PUBLIC_STRIPE_ENABLED=false` unless running the controlled staging
+test flow. When it is `true`, `npm run check:env` requires all four private
+Stripe/price values and requires `STRIPE_SECRET_KEY` to be a test key. Only the
 boolean flag is public; secret keys, webhook secrets, and price IDs remain
 server-side environment values and must never be committed.
 
@@ -41,6 +43,11 @@ Next.js embeds `NEXT_PUBLIC_*` values at build time. Runtime containers receive
 the private values from `.env.staging`.
 
 ## Stripe setup before enabling
+
+Use the detailed staging runbook in `docs/STRIPE_STAGING_SETUP.md`. The alpha
+implementation pins Stripe API `2026-02-25.clover`, rejects live secret keys and
+live webhook events, and derives current billing periods from current
+subscription-item payloads.
 
 1. Approve final product names, prices, currencies, benefits, refund terms, and
    whether taxes are handled through Stripe Tax or another process.

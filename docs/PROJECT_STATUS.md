@@ -40,6 +40,10 @@ Mentor And I
 - `/pricing` describes invite-only Alpha and adjustable planned Personal and
   Premium tiers. Payments remain disabled unless the explicit Stripe flag and
   complete server configuration are present.
+- Stripe Checkout, Customer Portal, and signed subscription webhooks can be
+  exercised end to end on staging in test mode only. Live secret keys and live
+  webhook events are rejected during alpha; setup is documented in
+  `docs/STRIPE_STAGING_SETUP.md`.
 - `docs/INVESTOR_DEMO_SCRIPT.md` and `docs/ALPHA_PROGRESS_PROOF.md` provide a
   presenter-ready walkthrough and evidence-based alpha capability inventory.
 - Full Mentor Evaluation Runner exists for dev-only Mentor Core evaluation through the seeded database-backed flow.

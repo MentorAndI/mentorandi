@@ -4,8 +4,10 @@ import {
 } from "@/lib/generated/prisma/client";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
+  assertStripeTestModeReady,
+  getPlanForStripePrice,
   getStripePriceId,
-  isStripeEnabled,
+  isStripeTestModeReady,
 } from "@/services/billing/billing-config";
 import { BillingRepository } from "@/services/billing/billing.repository";
 import type { PurchasablePlan } from "@/services/billing/billing.types";
@@ -13,8 +15,9 @@ import { StripeClient } from "@/services/billing/stripe-client";
 import { UserService } from "@/services/user/user.service";
 
 interface StripeEvent {
-  type?: string;
   data?: { object?: Record<string, unknown> };
+  livemode?: boolean;
+  type?: string;
 }
 
 export class BillingService {
@@ -25,6 +28,7 @@ export class BillingService {
   ) {}
 
   async createCheckoutSession(plan: PurchasablePlan, origin: string) {
+    assertStripeTestModeReady();
     const [user, email] = await Promise.all([
       this.users.resolveAuthenticatedUser(),
       resolveAuthenticatedEmail(),
@@ -60,6 +64,7 @@ export class BillingService {
   }
 
   async createPortalSession(origin: string) {
+    assertStripeTestModeReady();
     const user = await this.users.resolveAuthenticatedUser();
     const subscription = await this.repository.findByUserId(user.id);
 
@@ -89,6 +94,13 @@ export class BillingService {
 
     if (!object || !event.type) return;
 
+    if (event.livemode !== false) {
+      throw new BillingServiceError(
+        "Live Stripe events are disabled during alpha testing.",
+        400,
+      );
+    }
+
     if (event.type === "checkout.session.completed") {
       await this.applyCheckout(object);
       return;
@@ -107,7 +119,9 @@ export class BillingService {
       billingCustomerId: readId(object.customer),
       billingSubscriptionId: readId(object.subscription),
       plan: readPlan(readMetadata(object, "plan")),
-      status: SubscriptionStatus.ACTIVE,
+      status: isCheckoutPaid(object)
+        ? SubscriptionStatus.ACTIVE
+        : SubscriptionStatus.INCOMPLETE,
       userId,
     });
   }
@@ -127,8 +141,8 @@ export class BillingService {
       billingCustomerId: readId(object.customer),
       billingSubscriptionId: subscriptionId,
       cancelAtPeriodEnd: object.cancel_at_period_end === true,
-      currentPeriodEnd: readUnixDate(object.current_period_end),
-      plan: readPlan(readMetadata(object, "plan"), existing?.plan),
+      currentPeriodEnd: readSubscriptionPeriodEnd(object),
+      plan: readSubscriptionPlan(object, existing?.plan),
       status: deleted
         ? SubscriptionStatus.CANCELED
         : readStatus(readString(object.status)),
@@ -145,7 +159,7 @@ export class BillingServiceError extends Error {
 }
 
 export function paymentsAvailable() {
-  return isStripeEnabled();
+  return isStripeTestModeReady();
 }
 
 async function resolveAuthenticatedEmail() {
@@ -176,6 +190,52 @@ function readUnixDate(value: unknown) {
   return typeof value === "number" && Number.isFinite(value)
     ? new Date(value * 1000)
     : null;
+}
+
+function readSubscriptionPeriodEnd(object: Record<string, unknown>) {
+  const topLevel = readUnixDate(object.current_period_end);
+  if (topLevel) return topLevel;
+
+  const items = readObject(object.items);
+  const data = items && Array.isArray(items.data) ? items.data : [];
+  const periodEnds = data
+    .map((item) => readObject(item))
+    .map((item) => readUnixDate(item?.current_period_end))
+    .filter((date): date is Date => Boolean(date));
+
+  return periodEnds.length > 0
+    ? new Date(Math.max(...periodEnds.map((date) => date.getTime())))
+    : null;
+}
+
+function readSubscriptionPlan(
+  object: Record<string, unknown>,
+  fallback?: SubscriptionPlan,
+) {
+  const items = readObject(object.items);
+  const data = items && Array.isArray(items.data) ? items.data : [];
+
+  for (const itemValue of data) {
+    const item = readObject(itemValue);
+    const price = item ? readObject(item.price) : null;
+    const priceId = price ? readString(price.id) : null;
+    const plan = priceId ? getPlanForStripePrice(priceId) : null;
+
+    if (plan) return readPlan(plan, fallback);
+  }
+
+  return readPlan(readMetadata(object, "plan"), fallback);
+}
+
+function readObject(value: unknown) {
+  return value && typeof value === "object"
+    ? (value as Record<string, unknown>)
+    : null;
+}
+
+function isCheckoutPaid(object: Record<string, unknown>) {
+  const paymentStatus = readString(object.payment_status);
+  return paymentStatus === "paid" || paymentStatus === "no_payment_required";
 }
 
 function readPlan(value: string | null, fallback?: SubscriptionPlan) {

@@ -52,10 +52,10 @@ export function CheckoutButton({ enabled, plan }: CheckoutButtonProps) {
         type="button"
       >
         {!enabled
-          ? "Payments coming soon"
+          ? "Payments are not enabled yet"
           : loading
             ? "Opening secure checkout…"
-            : `Choose ${plan === "PERSONAL" ? "Personal" : "Premium"}`}
+            : `Test ${plan === "PERSONAL" ? "Personal" : "Premium"} checkout`}
       </button>
       {error ? <p className="text-sm text-red-700" role="alert">{error}</p> : null}
     </div>

@@ -8,18 +8,32 @@ import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
 import { paymentsAvailable } from "@/services/billing/billing.service";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Settings | Mentor And I",
   description: "Manage Mentor And I account data controls.",
 };
 
-export default function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ billing?: string }>;
+}) {
+  const billing = (await searchParams).billing;
+
   return (
     <main className="min-h-screen bg-zinc-50 py-10 text-zinc-950">
       <Container className="max-w-5xl">
         <AccountNavigation
           links={[{ href: "/mentor", label: "Back to Mentor" }]}
         />
+        {billing === "success" ? (
+          <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950">
+            Stripe test checkout returned successfully. Subscription status is
+            applied by the verified webhook and may take a moment to appear.
+          </div>
+        ) : null}
         <div className="mb-8 max-w-2xl space-y-3">
           <Heading level={1}>Account data</Heading>
           <Text>

@@ -9,6 +9,7 @@ import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
 import { AdminAuthService } from "@/services/admin/admin-auth.service";
 import { AdminBillingService } from "@/services/billing/admin-billing.service";
+import { paymentsAvailable } from "@/services/billing/billing.service";
 
 export const dynamic = "force-dynamic";
 
@@ -43,8 +44,12 @@ export default async function AdminBillingPage() {
           <Text className="font-medium uppercase tracking-[0.18em]" variant="muted">Internal admin</Text>
           <Heading level={1}>Billing readiness</Heading>
           <Text>
-            Subscription state and entitlement plans. Customer identifiers are
+            Subscription state and entitlement plans. During alpha, configured
+            Stripe records are test-mode only. Customer identifiers are
             abbreviated and no billing secrets are displayed.
+          </Text>
+          <Text className="text-sm" variant="muted">
+            Stripe test checkout is {paymentsAvailable() ? "enabled" : "not enabled"} in this environment.
           </Text>
           <AdminNav />
         </div>
