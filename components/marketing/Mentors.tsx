@@ -1,58 +1,9 @@
+import Link from "next/link";
+
 import { Section } from "@/components/layout/Section";
+import { activeMentorProfiles } from "@/services/mentor-catalog/mentor-catalog";
 
-interface MentorStyle {
-  name: string;
-  description: string;
-}
-
-export interface MentorsProps {
-  styles?: MentorStyle[];
-}
-
-const defaultStyles: MentorStyle[] = [
-  {
-    name: "Life",
-    description:
-      "Personal direction, values, recurring patterns, difficult choices, and the next grounded step.",
-  },
-  {
-    name: "ADHD",
-    description:
-      "Executive-function support for structure, task initiation, time blindness, and accountability.",
-  },
-  {
-    name: "Relationship",
-    description:
-      "Communication, boundaries, repair, and conflict in real relationships—not a romantic AI companion.",
-  },
-  {
-    name: "Stress / Burnout",
-    description:
-      "Boundaries, recovery, overload, and a more sustainable relationship with work and life.",
-  },
-  {
-    name: "Parenting",
-    description:
-      "Calmer reflection on family dynamics, parental pressure, communication, and consistent responses.",
-  },
-  {
-    name: "Health & Fitness",
-    description:
-      "Sustainable habits, motivation, routines, and realistic follow-through without medical diagnosis.",
-  },
-  {
-    name: "Focus",
-    description:
-      "Non-diagnostic executive-function support for priorities, attention, distractions, and finishing.",
-  },
-  {
-    name: "Confidence",
-    description:
-      "Support with self-doubt, imposter feelings, speaking up, and taking up space.",
-  },
-];
-
-export function Mentors({ styles = defaultStyles }: MentorsProps) {
+export function Mentors() {
   return (
     <Section
       description="The alpha lineup centers on personal life, relationships, emotional load, executive function, and sustainable change."
@@ -60,18 +11,42 @@ export function Mentors({ styles = defaultStyles }: MentorsProps) {
       id="mentors"
       title="Personal support for the parts of life that shape everything else."
     >
-      <div className="grid gap-4 md:grid-cols-2">
-        {styles.map((style) => (
+      <div className="grid gap-5 md:grid-cols-2">
+        {activeMentorProfiles.map((mentor) => (
           <article
-            className="rounded-lg border border-zinc-200 bg-white p-6"
-            key={style.name}
+            className="flex h-full flex-col rounded-2xl border border-zinc-200 bg-white p-7 shadow-sm"
+            key={mentor.slug}
           >
-            <h3 className="text-lg font-semibold text-zinc-950">
-              {style.name}
+            <h3 className="text-xl font-semibold text-zinc-950">
+              {mentor.cardName}
             </h3>
-            <p className="mt-3 text-sm leading-6 text-zinc-600">
-              {style.description}
+            <p className="mt-3 text-sm leading-7 text-zinc-600">
+              {mentor.shortDescription}
             </p>
+            <ul
+              aria-label={`${mentor.cardName} focus areas`}
+              className="mt-5 flex flex-wrap gap-2"
+            >
+              {mentor.cardTags.map((tag) => (
+                <li
+                  className="rounded-full bg-sky-50 px-3 py-1 text-xs font-medium text-sky-900"
+                  key={tag}
+                >
+                  {tag}
+                </li>
+              ))}
+            </ul>
+            {mentor.cardBoundary ? (
+              <p className="mt-3 text-xs leading-5 text-zinc-500">
+                {mentor.cardBoundary}
+              </p>
+            ) : null}
+            <Link
+              className="mt-6 inline-flex h-10 items-center justify-center self-start rounded-lg border border-sky-200 px-4 text-sm font-semibold text-sky-950 transition hover:bg-sky-50"
+              href={`/mentor?mentor=${mentor.slug}`}
+            >
+              Start with this mentor
+            </Link>
           </article>
         ))}
       </div>

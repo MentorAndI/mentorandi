@@ -12,6 +12,9 @@ export type ActiveMentorSlug =
 
 export interface ActiveMentorProfile {
   boundaries: string[];
+  cardBoundary?: string;
+  cardName: string;
+  cardTags: [string, string, string];
   databaseSlug: string;
   exampleOpeningLine: string;
   expertiseDomain: MentorExpertiseDomain;

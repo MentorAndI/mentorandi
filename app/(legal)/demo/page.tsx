@@ -145,7 +145,7 @@ const whatThisProves = [
 
 export default function DemoPage() {
   return (
-    <main className="flex-1 bg-zinc-50 py-10 text-zinc-950 sm:py-16">
+    <main className="flex-1 bg-gradient-to-b from-stone-50 via-white to-sky-50 py-10 text-zinc-950 sm:py-16">
       <Container className="max-w-6xl">
         <section className="mx-auto max-w-3xl text-center">
           <Badge variant="warning">Private alpha · Demo environment</Badge>
@@ -240,10 +240,10 @@ export default function DemoPage() {
             </Text>
           </div>
 
-          <div className="mt-8 grid gap-5 md:grid-cols-2">
+          <div className="mt-8 grid gap-6 md:grid-cols-2">
             {demoScenarios.map((scenario) => (
               <Card
-                className="flex h-full flex-col gap-5 p-6"
+                className="flex h-full flex-col gap-5 rounded-2xl bg-white p-7 shadow-sm"
                 key={scenario.slug}
                 variant="bordered"
               >
@@ -252,7 +252,7 @@ export default function DemoPage() {
                   <Heading className="mt-3" level={3}>
                     {scenario.mentorName}
                   </Heading>
-                  <Text className="mt-2">{scenario.helpsWith}</Text>
+                  <Text className="mt-3 leading-7">{scenario.description}</Text>
                 </div>
 
                 <blockquote className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm italic leading-6 text-zinc-700">
@@ -261,25 +261,30 @@ export default function DemoPage() {
 
                 <div>
                   <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">
-                    Relevant method frames
+                    Focus areas
                   </p>
                   <ul className="mt-2 flex flex-wrap gap-2">
-                    {scenario.methodExamples.map((method) => (
+                    {scenario.tags.map((tag) => (
                       <li
                         className="rounded-full bg-zinc-100 px-3 py-1 text-xs font-medium text-zinc-700"
-                        key={method}
+                        key={tag}
                       >
-                        {method}
+                        {tag}
                       </li>
                     ))}
                   </ul>
+                  {scenario.boundary ? (
+                    <p className="mt-3 text-xs leading-5 text-zinc-500">
+                      {scenario.boundary}
+                    </p>
+                  ) : null}
                 </div>
 
                 <Link
-                  className="mt-auto inline-flex h-11 items-center justify-center rounded-md bg-zinc-950 px-4 text-sm font-medium text-white transition hover:bg-zinc-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-950"
+                  className="mt-auto inline-flex h-11 items-center justify-center rounded-lg bg-sky-950 px-4 text-sm font-semibold text-white transition hover:bg-sky-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-950"
                   href={`/mentor?mentor=${scenario.slug}`}
                 >
-                  Start with {scenario.mentorName}
+                  Start with this mentor
                 </Link>
               </Card>
             ))}
@@ -333,17 +338,16 @@ export default function DemoPage() {
           </div>
         </section>
 
-        <section className="mt-16 rounded-xl bg-zinc-950 px-6 py-9 text-center text-white sm:px-10">
+        <section className="mt-16 rounded-2xl border border-sky-200 bg-sky-50 px-6 py-9 text-center text-sky-950 sm:px-10">
           <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
             Explore the full alpha mentor lineup
           </h2>
-          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-zinc-300 sm:text-base">
-            The active catalog also includes Parenting, Health &amp; Fitness,
-            and Focus mentors, all using the same mentor-scoped conversation
-            system.
+          <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-sky-800 sm:text-base">
+            All eight active profiles use the same mentor-scoped conversation
+            system while keeping their own emphasis and practical methods.
           </p>
           <Link
-            className="mt-6 inline-flex h-11 items-center justify-center rounded-md bg-white px-5 text-sm font-medium text-zinc-950 transition hover:bg-zinc-200"
+            className="mt-6 inline-flex h-11 items-center justify-center rounded-lg bg-sky-950 px-5 text-sm font-semibold text-white transition hover:bg-sky-900"
             href="/mentors"
           >
             View all mentors

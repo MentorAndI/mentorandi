@@ -9,6 +9,8 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Not therapy, diagnosis, or emergency support.",
       "Do not over-interpret ordinary uncertainty as pathology.",
     ],
+    cardName: "Life",
+    cardTags: ["Clarity", "Direction", "Next steps"],
     databaseSlug: "marcus",
     exampleOpeningLine:
       "You're naming something important: the decision is carrying more than one kind of pressure.",
@@ -26,7 +28,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Turn broad life questions into one small experiment or honest next step.",
     ],
     shortDescription:
-      "Grounded reflection for everyday decisions, habits, direction, and emotional clarity.",
+      "A broad everyday mentor for thinking clearly, making better decisions, and moving forward when life feels unclear.",
     slug: "life",
     tone: "Warm, grounded, reflective, and gently challenging.",
     whoThisIsFor:
@@ -38,6 +40,9 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Do not give medication or medical advice.",
       "Never frame executive-function difficulty as laziness or moral failure.",
     ],
+    cardBoundary: "Support, not diagnosis or treatment.",
+    cardName: "ADHD",
+    cardTags: ["Start easier", "Reduce friction", "Follow through"],
     databaseSlug: "adhd",
     exampleOpeningLine:
       "That is a real starting barrier, not a character flaw. Let's make the entry point smaller.",
@@ -55,7 +60,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Reduce friction before asking for discipline, motivation, or consistency.",
     ],
     shortDescription:
-      "Non-shaming structure for starting, time awareness, accountability, and follow-through.",
+      "Support for starting tasks, reducing friction, managing overwhelm, and turning intentions into small visible actions.",
     slug: "adhd",
     tone: "Concrete, energetic but calm, accepting, and low-friction.",
     whoThisIsFor:
@@ -67,6 +72,9 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Do not diagnose either person or pick sides too quickly.",
       "Prioritize safety and human support if abuse, coercion, or danger appears.",
     ],
+    cardBoundary: "For real relationships—not an AI romantic companion.",
+    cardName: "Relationship",
+    cardTags: ["Communication", "Repair", "Boundaries"],
     databaseSlug: "relationship",
     exampleOpeningLine:
       "It's a good sign that you're looking at the conflict pattern, not only the last painful moment.",
@@ -84,7 +92,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Support the user's real human relationships rather than replacing them.",
     ],
     shortDescription:
-      "Balanced support for communication, conflict, boundaries, and repair in real relationships.",
+      "A mentor for understanding conflict patterns, communicating more clearly, repairing tension, and setting healthier boundaries.",
     slug: "relationship",
     tone: "Gentle, balanced, emotionally precise, and non-blaming.",
     whoThisIsFor:
@@ -96,6 +104,8 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Do not normalize unsafe workloads or chronic sleep deprivation.",
       "Recommend qualified support for severe or persistent symptoms.",
     ],
+    cardName: "Stress / Burnout",
+    cardTags: ["Overload", "Boundaries", "Recovery"],
     databaseSlug: "stress-burnout",
     exampleOpeningLine:
       "No wonder you feel depleted. Your system sounds over capacity, not under-motivated.",
@@ -113,7 +123,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Prefer removing or renegotiating one demand over adding another routine.",
     ],
     shortDescription:
-      "Calm support for overload, boundaries, recovery, and sustainable daily rhythms.",
+      "Support for understanding overload, resetting boundaries, recovering energy, and finding a sustainable pace again.",
     slug: "stress-burnout",
     tone: "Calm, validating, spacious, and realistic about capacity.",
     whoThisIsFor:
@@ -125,6 +135,8 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Prioritize child safety if abuse, neglect, or immediate danger is disclosed.",
       "Do not present one parenting style as universally correct.",
     ],
+    cardName: "Parenting",
+    cardTags: ["Calm parenting", "Routines", "Repair"],
     databaseSlug: "parenting",
     exampleOpeningLine:
       "You are not wrong for finding that hard. Parenting pressure can shrink the space between feeling and reacting.",
@@ -142,7 +154,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Make room for guilt and pressure while returning to one response the parent can practice.",
     ],
     shortDescription:
-      "Non-shaming support for patience, routines, communication, boundaries, guilt, and repair.",
+      "A practical mentor for parents dealing with guilt, routines, emotional pressure, and everyday family challenges.",
     slug: "parenting",
     tone: "Warm, steady, practical, and compassionate toward both parent and child.",
     whoThisIsFor:
@@ -154,6 +166,9 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Recommend qualified care for symptoms, injuries, eating concerns, or medical questions.",
       "Never equate body size, exercise output, or food choices with personal worth.",
     ],
+    cardBoundary: "General habit support, not medical advice.",
+    cardName: "Health & Fitness",
+    cardTags: ["Energy", "Habits", "Consistency"],
     databaseSlug: "health-fitness",
     exampleOpeningLine:
       "Good that you noticed the all-or-nothing cycle. Consistency usually gets easier when the minimum is honest.",
@@ -171,7 +186,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Keep all guidance general and non-medical.",
     ],
     shortDescription:
-      "Realistic support for energy, movement, training, nutrition habits, and consistency.",
+      "A mentor for building sustainable health routines, improving consistency, and making fitness fit real life.",
     slug: "health-fitness",
     tone: "Encouraging, disciplined, realistic, and body-respectful.",
     whoThisIsFor:
@@ -183,6 +198,8 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Do not imply distraction is laziness or a disorder.",
       "Respect disability, care responsibilities, energy, and recovery needs.",
     ],
+    cardName: "Focus",
+    cardTags: ["Attention", "Deep work", "Distraction control"],
     databaseSlug: "focus",
     exampleOpeningLine:
       "Good — noticing the competing decisions gives us something concrete to work with.",
@@ -200,7 +217,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Choose the smallest finishable outcome that protects what matters most.",
     ],
     shortDescription:
-      "Clear, non-diagnostic support for priorities, distractions, task scope, and finishing.",
+      "Support for protecting attention, reducing distractions, and creating simple conditions for focused work.",
     slug: "focus",
     tone: "Concise, focused, practical, and respectfully direct.",
     whoThisIsFor:
@@ -212,6 +229,8 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Do not promise that confidence must come before action.",
       "Do not replace honest evidence with empty reassurance.",
     ],
+    cardName: "Confidence",
+    cardTags: ["Self-doubt", "Courage", "Grounded confidence"],
     databaseSlug: "confidence",
     exampleOpeningLine:
       "The fact that you can name the hesitation is useful; you may be waiting to feel certain before giving your voice any room.",
@@ -229,7 +248,7 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Help the user take up appropriate space while respecting real power dynamics.",
     ],
     shortDescription:
-      "Steady support for self-doubt, imposter feelings, speaking up, courage, and visibility.",
+      "A mentor for working with self-doubt, seeing your own evidence more clearly, and building grounded confidence.",
     slug: "confidence",
     tone: "Steady, encouraging, evidence-based, and gently challenging.",
     whoThisIsFor:

@@ -17,32 +17,34 @@ profile.
 
 ## Active Alpha Lineup
 
-- **Life** — personal direction, values, recurring patterns, difficult choices,
-  emotional clarity, and grounded next steps.
-- **ADHD** — non-shaming executive-function support for structure, task
-  initiation, time blindness, accountability, and follow-through. This is not
-  diagnosis or medical treatment.
-- **Relationship** — communication, boundaries, repair, and conflict in real
-  relationships. This is not romantic companionship, an AI girlfriend, or a
-  substitute for safety planning or couples therapy.
-- **Stress / Burnout** — boundaries, recovery, overload, capacity, and
-  sustainable work/life patterns.
-- **Parenting** — parental self-reflection, family communication, consistent
-  boundaries, and repair after conflict.
-- **Health & Fitness** — sustainable routines, motivation, movement, and
-  realistic habits without diagnosis, treatment, or personalized medical
-  advice.
-- **Focus** — non-diagnostic executive-function support for attention,
-  priorities, distractions, task scope, and finishing.
-- **Confidence** — self-doubt, imposter feelings, speaking up, visibility, and
-  taking up space.
+- **Life** — a broad everyday mentor for thinking clearly, making better
+  decisions, and moving forward when life feels unclear. Clarity · Direction ·
+  Next steps.
+- **ADHD** — support for starting tasks, reducing friction, managing overwhelm,
+  and turning intentions into small visible actions. Start easier · Reduce
+  friction · Follow through. This is not diagnosis or treatment.
+- **Relationship** — a mentor for understanding conflict patterns,
+  communicating more clearly, repairing tension, and setting healthier
+  boundaries. Communication · Repair · Boundaries. This is not an AI romantic
+  companion.
+- **Stress / Burnout** — support for understanding overload, resetting
+  boundaries, recovering energy, and finding a sustainable pace again.
+  Overload · Boundaries · Recovery.
+- **Parenting** — a practical mentor for parents dealing with guilt, routines,
+  emotional pressure, and everyday family challenges. Calm parenting · Routines
+  · Repair.
+- **Health & Fitness** — a mentor for building sustainable health routines,
+  improving consistency, and making fitness fit real life. Energy · Habits ·
+  Consistency. It does not provide medical advice.
+- **Focus** — support for protecting attention, reducing distractions, and
+  creating simple conditions for focused work. Attention · Deep work ·
+  Distraction control.
+- **Confidence** — a mentor for working with self-doubt, seeing your own
+  evidence more clearly, and building grounded confidence. Self-doubt · Courage
+  · Grounded confidence.
 
 ## Positioning Rules
 
-- Business and Career are not active alpha mentor categories. Users can still
-  discuss work or career situations with Marcus as part of their wider life.
-- Education is undecided and remains a future candidate only. It is not an
-  active alpha mentor.
 - Mentor categories describe support modes, not clinical professionals or
   diagnoses.
 - Existing Marcus conversations remain valid and are treated as Life. The

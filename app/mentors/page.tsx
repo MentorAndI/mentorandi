@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 
 export default function MentorsPage() {
   return (
-    <main className="min-h-screen bg-zinc-50 py-10 text-zinc-950 sm:py-14">
+    <main className="min-h-screen bg-gradient-to-b from-stone-50 via-white to-sky-50 py-12 text-zinc-950 sm:py-16">
       <Container className="max-w-6xl">
         <div className="mx-auto max-w-3xl text-center">
           <Badge variant="muted">Alpha preview</Badge>
@@ -37,16 +37,16 @@ export default function MentorsPage() {
           help improve the alpha.
         </div>
 
-        <div className="mt-10 grid gap-5 md:grid-cols-2">
+        <div className="mt-12 grid gap-6 md:grid-cols-2">
           {activeMentorProfiles.map((mentor) => (
             <Card
-              className="flex h-full flex-col gap-5 p-6"
+              className="flex h-full flex-col gap-6 rounded-2xl bg-white p-7 shadow-sm"
               key={mentor.slug}
               variant="bordered"
             >
               <div>
-                <Heading level={3}>{mentor.name}</Heading>
-                <Text className="mt-2">{mentor.shortDescription}</Text>
+                <Heading level={3}>{mentor.cardName}</Heading>
+                <Text className="mt-3 leading-7">{mentor.shortDescription}</Text>
               </div>
 
               <div>
@@ -59,11 +59,8 @@ export default function MentorsPage() {
               </div>
 
               <div>
-                <p className="text-sm font-semibold text-zinc-900">
-                  Helps with
-                </p>
-                <ul className="mt-2 flex flex-wrap gap-2">
-                  {mentor.helpsWith.map((item) => (
+                <ul aria-label={`${mentor.cardName} focus areas`} className="flex flex-wrap gap-2">
+                  {mentor.cardTags.map((item) => (
                     <li
                       className="rounded-full bg-zinc-100 px-3 py-1 text-sm text-zinc-700"
                       key={item}
@@ -72,21 +69,19 @@ export default function MentorsPage() {
                     </li>
                   ))}
                 </ul>
+                {mentor.cardBoundary ? (
+                  <p className="mt-3 text-xs leading-5 text-zinc-500">
+                    {mentor.cardBoundary}
+                  </p>
+                ) : null}
               </div>
 
               <div className="mt-auto border-t border-zinc-200 pt-4">
-                <Text variant="small">
-                  <span className="font-semibold text-zinc-900">Tone:</span>{" "}
-                  {mentor.tone}
-                </Text>
-                <p className="mt-3 text-sm italic leading-6 text-zinc-600">
-                  “{mentor.exampleOpeningLine}”
-                </p>
                 <Link
-                  className="mt-5 inline-flex h-10 items-center justify-center rounded-md bg-zinc-950 px-4 text-sm font-medium text-white transition hover:bg-zinc-800"
+                  className="inline-flex h-11 items-center justify-center rounded-lg bg-sky-950 px-5 text-sm font-semibold text-white transition hover:bg-sky-900"
                   href={`/mentor?mentor=${mentor.slug}`}
                 >
-                  Choose {mentor.name}
+                  Start with this mentor
                 </Link>
               </div>
             </Card>

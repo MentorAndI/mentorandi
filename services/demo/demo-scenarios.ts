@@ -1,54 +1,33 @@
+import { activeMentorProfiles } from "@/services/mentor-catalog/mentor-catalog";
 import type { ActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog.types";
 
 export interface DemoScenario {
-  helpsWith: string;
-  methodExamples: string[];
+  boundary?: string;
+  description: string;
   mentorName: string;
   prompt: string;
   slug: ActiveMentorSlug;
+  tags: [string, string, string];
 }
 
-export const demoScenarios: DemoScenario[] = [
-  {
-    helpsWith:
-      "Task initiation, time awareness, realistic structure, and follow-through without shame.",
-    methodExamples: ["Five-minute task entry", "Task friction scan"],
-    mentorName: "ADHD Mentor",
-    prompt:
-      "I keep avoiding an important task even though I know I need to do it.",
-    slug: "adhd",
-  },
-  {
-    helpsWith:
-      "Communication, recurring conflict patterns, boundaries, and repair conversations.",
-    methodExamples: ["Conflict cycle map", "Soft conversation start"],
-    mentorName: "Relationship Mentor",
-    prompt:
-      "My partner and I keep arguing about small things and it escalates.",
-    slug: "relationship",
-  },
-  {
-    helpsWith:
-      "Self-doubt, imposter feelings, speaking up, and taking action before certainty.",
-    methodExamples: ["Evidence against the verdict", "Courage before certainty"],
-    mentorName: "Confidence Mentor",
-    prompt: "I feel like I am not good enough even when I do well.",
-    slug: "confidence",
-  },
-  {
-    helpsWith:
-      "Overload, capacity, boundaries, recovery, and more sustainable expectations.",
-    methodExamples: ["Capacity triage", "Recovery match"],
-    mentorName: "Stress / Burnout Mentor",
-    prompt: "I feel overloaded and I can’t recover even when I rest.",
-    slug: "stress-burnout",
-  },
-  {
-    helpsWith:
-      "Direction, decisions, habits, recurring patterns, and grounded next steps.",
-    methodExamples: ["Small life experiment", "Values clarification"],
-    mentorName: "Life Mentor",
-    prompt: "I feel stuck and I don’t know what I should change first.",
-    slug: "life",
-  },
-];
+const demoPrompts: Record<ActiveMentorSlug, string> = {
+  adhd: "I keep avoiding an important task even though I know I need to do it.",
+  confidence: "I feel like I am not good enough even when I do well.",
+  focus: "I keep getting distracted and reach the end of the day without finishing what matters.",
+  "health-fitness": "I start health routines with good intentions, but I cannot make them last in real life.",
+  life: "I feel stuck and I don’t know what I should change first.",
+  parenting: "I keep losing patience during the same family routine and feel guilty afterward.",
+  relationship: "My partner and I keep arguing about small things and it escalates.",
+  "stress-burnout": "I feel overloaded and I can’t recover even when I rest.",
+};
+
+export const demoScenarios: DemoScenario[] = activeMentorProfiles.map(
+  (profile) => ({
+    ...(profile.cardBoundary ? { boundary: profile.cardBoundary } : {}),
+    description: profile.shortDescription,
+    mentorName: profile.cardName,
+    prompt: demoPrompts[profile.slug],
+    slug: profile.slug,
+    tags: profile.cardTags,
+  }),
+);
