@@ -44,6 +44,9 @@ Mentor And I
   exercised end to end on staging in test mode only. Live secret keys and live
   webhook events are rejected during alpha; setup is documented in
   `docs/STRIPE_STAGING_SETUP.md`.
+- A test-mode-only staging helper creates or reuses Stripe products, monthly
+  prices, and the existing signed webhook destination without storing secrets
+  in the repository.
 - `docs/INVESTOR_DEMO_SCRIPT.md` and `docs/ALPHA_PROGRESS_PROOF.md` provide a
   presenter-ready walkthrough and evidence-based alpha capability inventory.
 - Full Mentor Evaluation Runner exists for dev-only Mentor Core evaluation through the seeded database-backed flow.

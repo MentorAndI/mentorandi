@@ -11,6 +11,7 @@
     "lint": "eslint",
     "check:env": "node scripts/check-env.mjs",
     "deploy:staging": "bash scripts/deploy-staging.sh",
+    "setup:stripe:staging": "node scripts/setup-stripe-staging.mjs",
     "eval:models": "node scripts/eval-models.mjs",
     "eval:mentor": "node scripts/eval-mentor.mjs",
     "smoke:alpha": "node scripts/alpha-smoke-test.mjs",

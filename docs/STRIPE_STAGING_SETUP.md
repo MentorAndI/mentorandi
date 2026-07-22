@@ -40,7 +40,53 @@ After changing the public flag, rebuild the app rather than only restarting it.
 The staging Docker build receives `NEXT_PUBLIC_STRIPE_ENABLED` at build time;
 the private values stay in the runtime env file.
 
-## Create test products and monthly prices
+## Recommended setup helper
+
+Create or reveal a new Stripe **test** secret key, then run the helper
+from a trusted local terminal or directly on the VPS:
+
+```bash
+STRIPE_SECRET_KEY=sk_test_xxx npm run setup:stripe:staging
+```
+
+The dependency-free helper uses Stripe's test API to create or reuse the
+`Mentor And I Personal` and `Mentor And I Premium` products, monthly test
+prices, and the existing app webhook route at
+`https://staging.mentorandi.com/api/billing/webhook`. It refuses live keys and
+live-mode resources. The default setup amounts are USD 10.00 and USD 20.00 per
+month for test-mode plumbing only; they are not approved customer pricing.
+Optional overrides use minor currency units:
+
+```bash
+STRIPE_SECRET_KEY=sk_test_xxx \
+STRIPE_TEST_CURRENCY=usd \
+STRIPE_TEST_PERSONAL_MONTHLY_AMOUNT=1000 \
+STRIPE_TEST_PREMIUM_MONTHLY_AMOUNT=2000 \
+npm run setup:stripe:staging
+```
+
+Copy the five printed `.env.staging` assignments into
+`/docker/mentorandi/.env.staging`. The helper deliberately redacts the API key;
+replace its `STRIPE_SECRET_KEY` placeholder with the same `sk_test_...` value
+from the shell. It prints a newly created webhook signing secret once, along
+with both Price IDs and the public enable flag. Do not save the terminal output
+in the repository or CI logs.
+
+Stripe does not reveal a webhook signing secret again after endpoint creation.
+On a later idempotent run, provide the already stored secret so the helper can
+reuse and update the destination safely:
+
+```bash
+STRIPE_SECRET_KEY=sk_test_xxx \
+STRIPE_WEBHOOK_SECRET=whsec_xxx \
+npm run setup:stripe:staging
+```
+
+The helper stops instead of duplicating an existing destination when that
+secret is unavailable. After copying the values, redeploy staging and test
+`/pricing` with `4242 4242 4242 4242`, a future expiry, and any valid CVC.
+
+## Manual alternative: create test products and monthly prices
 
 1. Open Stripe Dashboard/Workbench and turn on **Test mode**.
 2. Create a `Personal` product and add a recurring monthly price.
@@ -52,7 +98,7 @@ the private values stay in the runtime env file.
 The app sends only the server-configured Price ID. A browser cannot submit an
 arbitrary Stripe Price ID; it can request only `PERSONAL` or `PREMIUM`.
 
-## Configure the test webhook
+## Manual alternative: configure the test webhook
 
 1. In Stripe test mode, create a webhook destination for:
    `https://staging.mentorandi.com/api/billing/webhook`.
@@ -63,6 +109,8 @@ arbitrary Stripe Price ID; it can request only `PERSONAL` or `PREMIUM`.
    - `customer.subscription.created`
    - `customer.subscription.updated`
    - `customer.subscription.deleted`
+   - `invoice.payment_succeeded`
+   - `invoice.payment_failed`
 4. Reveal the destination signing secret and set it as
    `STRIPE_WEBHOOK_SECRET` in `.env.staging`.
 5. Send a Stripe test event and confirm the endpoint returns HTTP 200 for a
