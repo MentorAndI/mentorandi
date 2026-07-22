@@ -37,6 +37,9 @@ Mentor And I
 - `/demo` provides an investor-friendly private-alpha overview, a 5–7 minute
   presenter script, proof points, and five fixed prompt scenarios that open the
   matching mentor.
+- `/pricing` describes invite-only Alpha and adjustable planned Personal and
+  Premium tiers. Payments remain disabled unless the explicit Stripe flag and
+  complete server configuration are present.
 - `docs/INVESTOR_DEMO_SCRIPT.md` and `docs/ALPHA_PROGRESS_PROOF.md` provide a
   presenter-ready walkthrough and evidence-based alpha capability inventory.
 - Full Mentor Evaluation Runner exists for dev-only Mentor Core evaluation through the seeded database-backed flow.
@@ -86,6 +89,8 @@ Mentor And I
   breakdowns, blocked attempts, and recent events.
 - Allowlisted `/admin/invites` management for hashed, expiring,
   email-restricted, usage-limited, and revocable alpha invites.
+- Server-only subscription records, Stripe checkout/portal/webhook preparation,
+  plan-aware entitlements, and allowlisted `/admin/billing` visibility.
 - Compact default prompt composition with a 1,800-token context budget,
   relevance-filtered personal context, four recent messages, conditional
   environment context, and non-duplicated safety/response instructions.
@@ -151,6 +156,9 @@ Mentor And I
 - UI is functional but not final design.
 - Hostinger VPS staging is live; a production launch is not done.
 - Payment is not done.
+- Payment collection is not enabled by default. The readiness foundation still
+  needs final prices, Stripe account/product configuration, webhook registration,
+  tax/legal decisions, production testing, and an explicit launch decision.
 - Privacy controls are basic v1 only; Supabase auth user deletion and full compliance workflows are not done.
 - Usage and cost monitoring is alpha operational data, not billing-grade
   analytics; cost values depend on configured price estimates and provider token

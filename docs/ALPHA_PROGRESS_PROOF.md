@@ -23,6 +23,7 @@ users, testimonials, growth claims, revenue claims, or usage metrics.
 | Privacy, terms, and contact | Public alpha trust and support pages exist. | `/privacy`, `/terms`, and `/contact`; these are alpha documents, not a substitute for final legal review. |
 | Alpha tester instructions | Invited testers have a public guide covering signup, safe test scope, feedback, and bug reporting. | `/alpha` and `docs/ALPHA_TESTER_GUIDE.md`. |
 | Investor demo page | A public, alpha-safe walkthrough presents the mentor lineup, fixed prompts, proof points, and presenter flow. | `/demo` and `docs/INVESTOR_DEMO.md`; it exposes no admin links, private data, fake users, or fake metrics. |
+| Payments readiness | Planned Alpha, Personal and Premium access can be represented by server-only subscription records and tier-aware limits. Stripe routes remain disabled until explicitly configured. | `/pricing`, protected `/admin/billing`, the `Subscription` model, and `docs/PAYMENTS_READINESS.md`. This is readiness proof, not revenue or a claim that payments are live. |
 
 ## What this proves
 
@@ -86,3 +87,5 @@ moving beyond alpha.
   mentors in v1; conversation messages remain mentor-scoped.
 - The public pages contain no private admin data. Admin proof must be shown only
   from an authorized account in a controlled presentation.
+- Payments are disabled by default; planned tiers and limit multipliers are
+  adjustable product configuration, not promises of final pricing or benefits.

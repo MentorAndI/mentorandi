@@ -11,6 +11,7 @@ const checks = [
   { path: "/forgot-password", redirectsAllowed: false },
   { path: "/alpha", redirectsAllowed: false },
   { path: "/demo", redirectsAllowed: false },
+  { path: "/pricing", redirectsAllowed: false },
   { path: "/mentors", redirectsAllowed: false },
   { path: "/privacy", redirectsAllowed: false },
   { path: "/terms", redirectsAllowed: false },
@@ -22,6 +23,7 @@ const checks = [
   { path: "/admin/feedback", redirectsAllowed: true },
   { path: "/admin/usage", redirectsAllowed: true },
   { path: "/admin/invites", redirectsAllowed: true },
+  { path: "/admin/billing", redirectsAllowed: true },
 ];
 
 if (isDevelopment) {

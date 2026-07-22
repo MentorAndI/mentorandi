@@ -17,6 +17,7 @@ Direct public Supabase table access must remain blocked for all application tabl
 - `Feedback`
 - `UsageEvent`
 - `AlphaInvite`
+- `Subscription`
 
 Do not add permissive `anon` or `authenticated` policies for these tables. Browser clients should not read or write Mentor And I application tables through Supabase directly.
 
@@ -40,6 +41,12 @@ script verifies that protection alongside the other application tables.
 hash and short preview, never the generated raw code. Its migration immediately
 enables RLS and revokes direct `anon` and `authenticated` grants; admin and
 signup operations go through protected server routes and Prisma services.
+
+`Subscription` is server-only entitlement metadata. Billing customer and
+subscription identifiers are stored for reconciliation, but Stripe secrets and
+payment method data are never stored in this table. Its migration enables and
+forces RLS and revokes direct `anon` and `authenticated` access. Writes occur
+only through verified webhook handling or server-side billing services.
 
 ## Access Model
 

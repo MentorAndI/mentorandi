@@ -18,6 +18,8 @@ const provider = process.env.LLM_PROVIDER?.trim().toLowerCase();
 const isProduction = process.env.NODE_ENV === "production";
 const errors = [];
 const warnings = [];
+const stripeEnabled =
+  process.env.NEXT_PUBLIC_STRIPE_ENABLED?.trim().toLowerCase() === "true";
 
 for (const variableName of requiredVariables) {
   if (hasEnvironmentValue(variableName)) {
@@ -47,6 +49,21 @@ if (provider) {
       "LLM_PROVIDER=mock is intended for development and deterministic testing, not real production users.",
     );
   }
+}
+
+if (stripeEnabled) {
+  for (const variableName of [
+    "STRIPE_SECRET_KEY",
+    "STRIPE_WEBHOOK_SECRET",
+    "STRIPE_PRICE_PERSONAL_MONTHLY",
+    "STRIPE_PRICE_PREMIUM_MONTHLY",
+  ]) {
+    if (!hasEnvironmentValue(variableName)) missingVariables.push(variableName);
+  }
+} else {
+  warnings.push(
+    "Stripe payments are disabled; pricing will show the payments-coming-soon state.",
+  );
 }
 
 if (missingVariables.length > 0 || errors.length > 0) {

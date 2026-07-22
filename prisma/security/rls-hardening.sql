@@ -24,7 +24,8 @@ declare
     'JournalEntry',
     'Feedback',
     'UsageEvent',
-    'AlphaInvite'
+    'AlphaInvite',
+    'Subscription'
   ];
 begin
   foreach app_table in array app_tables loop
@@ -56,7 +57,8 @@ begin
       'JournalEntry',
       'Feedback',
       'UsageEvent',
-      'AlphaInvite'
+      'AlphaInvite',
+      'Subscription'
     )
     and not c.relrowsecurity;
 
@@ -76,7 +78,8 @@ begin
       ('JournalEntry'),
       ('Feedback'),
       ('UsageEvent'),
-      ('AlphaInvite')
+      ('AlphaInvite'),
+      ('Subscription')
   ),
   risky_policies as (
     select

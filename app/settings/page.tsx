@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 
 import { AccountDataControls } from "@/components/account/AccountDataControls";
+import { BillingPortalButton } from "@/components/billing/BillingPortalButton";
 import { AccountNavigation } from "@/components/auth/AccountNavigation";
 import { Container } from "@/components/layout/Container";
 import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
+import { paymentsAvailable } from "@/services/billing/billing.service";
 
 export const metadata: Metadata = {
   title: "Settings | Mentor And I",
@@ -26,6 +28,9 @@ export default function SettingsPage() {
         </div>
 
         <AccountDataControls />
+        <div className="mt-6">
+          <BillingPortalButton enabled={paymentsAvailable()} />
+        </div>
       </Container>
     </main>
   );

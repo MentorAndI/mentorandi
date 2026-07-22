@@ -40,6 +40,24 @@ enum UsageEventStatus {
   BLOCKED
 }
 
+enum SubscriptionPlan {
+  ALPHA
+  FREE
+  PERSONAL
+  PREMIUM
+  FOUNDER
+}
+
+enum SubscriptionStatus {
+  INACTIVE
+  INCOMPLETE
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  UNPAID
+}
+
 model User {
   id         String   @id @default(uuid()) @db.Uuid
   authUserId String   @unique @db.Uuid
@@ -54,7 +72,28 @@ model User {
   reflections      Reflection[]
   usageEvents      UsageEvent[]
   alphaInvitesUsed AlphaInvite[]  @relation("AlphaInviteUsedBy")
+  subscription     Subscription?
 
+  @@index([createdAt])
+}
+
+model Subscription {
+  id                    String             @id @default(uuid()) @db.Uuid
+  userId                String             @unique @db.Uuid
+  plan                  SubscriptionPlan   @default(ALPHA)
+  status                SubscriptionStatus @default(INACTIVE)
+  billingProvider       String?            @db.VarChar(32)
+  billingCustomerId     String?            @unique @db.VarChar(255)
+  billingSubscriptionId String?            @unique @db.VarChar(255)
+  currentPeriodEnd      DateTime?
+  cancelAtPeriodEnd     Boolean            @default(false)
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([plan, status])
+  @@index([status, currentPeriodEnd])
   @@index([createdAt])
 }
 

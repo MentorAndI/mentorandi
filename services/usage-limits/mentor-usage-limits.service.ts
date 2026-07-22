@@ -22,6 +22,7 @@ import type {
   PersistentUsageCounts,
   UsageEventContext,
 } from "@/services/usage-monitoring/usage-monitoring.types";
+import { EntitlementService } from "@/services/entitlements/entitlement.service";
 
 export interface MentorUsageLimitCheckInput extends UsageEventContext {
   authUserId: string;
@@ -61,6 +62,7 @@ export class MentorUsageLimitService {
   constructor(
     private readonly repository = new UsageMonitoringRepository(),
     private readonly localFallback = new UsageLimitService(),
+    private readonly entitlements = new EntitlementService(),
   ) {}
 
   async checkBeforeMentorResponse(
@@ -77,7 +79,7 @@ export class MentorUsageLimitService {
       return this.checkLocalFallback(input, modelRouting);
     }
 
-    const config = readUsageLimitConfig();
+    const config = await this.resolveUsageConfig(input.userId);
     const messageDecision = buildPersistentMessageDecision(counts, config);
     let status = messageDecision.status;
 
@@ -171,6 +173,21 @@ export class MentorUsageLimitService {
 
       logDevelopmentFallback();
       return null;
+    }
+  }
+
+  private async resolveUsageConfig(userId: string) {
+    const base = readUsageLimitConfig();
+
+    try {
+      return (await this.entitlements.resolveUsageConfig(userId, base)).config;
+    } catch {
+      if (requiresPersistentUsage()) {
+        throw new MentorUsageMonitoringError();
+      }
+
+      logDevelopmentFallback();
+      return base;
     }
   }
 

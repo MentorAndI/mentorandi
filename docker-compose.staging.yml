@@ -17,6 +17,7 @@ services:
       args:
         NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:?Set NEXT_PUBLIC_SUPABASE_URL in the staging env file}
         NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:?Set NEXT_PUBLIC_SUPABASE_ANON_KEY in the staging env file}
+        NEXT_PUBLIC_STRIPE_ENABLED: ${NEXT_PUBLIC_STRIPE_ENABLED:-false}
     container_name: mentorandi-staging
     env_file:
       - ./.env.staging

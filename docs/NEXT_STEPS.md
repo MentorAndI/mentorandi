@@ -16,3 +16,7 @@
 12. Evaluate cheaper daily-use models while keeping Sonnet-class models available for premium/deeper mentoring moments.
 13. Compare Claude Sonnet, Claude Haiku and OpenAI mini-class models before alpha, choose the default model based on quality and cost, and use stronger models only when routing requires it.
 14. Configure cheap/default routing for normal daily chat and deep routing for higher-value mentor moments; keep mock provider usage limited to development and deterministic tests.
+15. Complete the payments launch checklist in `docs/PAYMENTS_READINESS.md`:
+    approve final pricing and plan benefits, configure live Stripe products,
+    register and test the production webhook, review taxes/legal/refunds, and
+    explicitly enable checkout only after end-to-end production validation.

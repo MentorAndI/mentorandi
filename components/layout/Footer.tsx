@@ -19,6 +19,9 @@ export function Footer({ copyrightName = "Mentor And I" }: FooterProps) {
             <Link className="transition hover:text-zinc-950" href="/demo">
               Demo
             </Link>
+            <Link className="transition hover:text-zinc-950" href="/pricing">
+              Pricing
+            </Link>
             <Link className="transition hover:text-zinc-950" href="/privacy">
               Privacy
             </Link>
