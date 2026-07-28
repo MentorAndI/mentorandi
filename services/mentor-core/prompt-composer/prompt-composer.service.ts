@@ -10,6 +10,7 @@ import type { MentorExpertiseProfile } from "@/services/mentor-expertise/experti
 import type { ActiveMentorProfile } from "@/services/mentor-catalog/mentor-catalog.types";
 import type { MentorContextExpertise } from "@/services/mentor-core/context-builder/context-builder.types";
 import { healthConcretePlanInstructions } from "@/services/mentor-specialization/specialist-context.types";
+import { mentorResponseStyleInstructions } from "@/services/mentor-core/response-formatting/mentor-response-formatting";
 
 export class PromptComposerServiceError extends Error {
   constructor(message: string) {
@@ -242,6 +243,7 @@ function buildResponseInstructions(
   if (concretePlanMode) {
     return [
       `Use a ${tone}, calm, clear voice for practical mentoring.`,
+      ...mentorResponseStyleInstructions,
       ...healthConcretePlanInstructions,
       "Make reasonable starter assumptions and label them briefly. Ask at most one focused safety or constraint question only after giving the plan; do not withhold the plan pending ordinary preferences.",
       "Keep the plan sustainable and non-punitive. Do not diagnose, prescribe injury rehabilitation, coach eating disorders, suggest extreme fasting or starvation, or recommend supplements or fat burners.",
@@ -251,6 +253,7 @@ function buildResponseInstructions(
 
   return [
     `Use a ${tone}, calm, clear voice for ${responseMode} mentoring.`,
+    ...mentorResponseStyleInstructions,
     "For personal mentoring: respond specifically, explicitly say why one evidenced strength (effort, honesty, awareness, courage, or willingness) is useful, name at most one tentative pattern, give one small concrete next step, and end with one focused question.",
     "Use the selected method naturally as the next step; never present methods as a menu or lesson.",
     "Write 2–4 short conversational paragraphs, normally without headings or lists. Use exactly one question mark, at the end; rewrite any questions inside exercises, examples, or scripts as statements.",

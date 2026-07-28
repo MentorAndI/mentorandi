@@ -14,6 +14,7 @@ import type { GoalDto } from "@/services/goal/goal.types";
 import {
   getActiveMentorProfile,
   getActiveMentorProfileByDatabaseSlug,
+  getMentorDisplayName,
 } from "@/services/mentor-catalog/mentor-catalog";
 import type { ActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog.types";
 import { UserService } from "@/services/user/user.service";
@@ -246,7 +247,7 @@ function toMentorSessionDto(
     authUserId: user.authUserId,
     conversation: { id: conversation.id },
     mentor: {
-      name: conversation.mentor.name,
+      name: getMentorDisplayName(profile),
       role: profile.slug === "life" ? "Life Mentor" : "Specialized Mentor",
       slug: profile.slug,
       tagline: profile.shortDescription,

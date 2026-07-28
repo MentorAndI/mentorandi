@@ -4,7 +4,10 @@ import { AccountNavigation } from "@/components/auth/AccountNavigation";
 import { FeedbackButton } from "@/components/feedback/FeedbackButton";
 import { Container } from "@/components/layout/Container";
 import { MentorConversationClient } from "@/components/mentor/MentorConversationClient";
-import { getActiveMentorProfile } from "@/services/mentor-catalog/mentor-catalog";
+import {
+  getActiveMentorProfile,
+  getMentorDisplayName,
+} from "@/services/mentor-catalog/mentor-catalog";
 
 export const metadata: Metadata = {
   title: "Mentor | Mentor And I",
@@ -34,10 +37,9 @@ export default async function MentorPage({
         <MentorConversationClient
           key={selectedMentor?.slug ?? "life"}
           selectedMentor={{
-            name:
-              selectedMentor?.slug === "life"
-                ? "Marcus"
-                : (selectedMentor?.name ?? "Marcus"),
+            name: selectedMentor
+              ? getMentorDisplayName(selectedMentor)
+              : "Marcus",
             role:
               selectedMentor?.slug === "life"
                 ? "Life Mentor"

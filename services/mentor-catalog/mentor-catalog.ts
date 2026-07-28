@@ -278,3 +278,7 @@ export function getActiveMentorProfileByDatabaseSlug(slug: string) {
     null
   );
 }
+
+export function getMentorDisplayName(profile: ActiveMentorProfile) {
+  return profile.slug === "life" ? "Marcus" : profile.name;
+}

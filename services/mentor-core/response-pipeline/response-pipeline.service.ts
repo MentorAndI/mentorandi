@@ -54,6 +54,7 @@ import {
 } from "@/services/user/user.service";
 import { getActiveMentorProfile } from "@/services/mentor-catalog/mentor-catalog";
 import { MentorSpecialistContextService } from "@/services/mentor-specialization/specialist-context.service";
+import { normalizeMentorResponseFormatting } from "@/services/mentor-core/response-formatting/mentor-response-formatting";
 
 const minimumMemoryConfidence = 0.6;
 const minimumMemoryImportance = 3;
@@ -145,7 +146,7 @@ export class MentorResponsePipelineService {
       const mentorMessage = await this.messageService.createMessage(
         input.conversationId,
         {
-          content: llmResponse.content,
+          content: normalizeMentorResponseFormatting(llmResponse.content),
           role: MessageRole.MENTOR,
         },
         authContext,

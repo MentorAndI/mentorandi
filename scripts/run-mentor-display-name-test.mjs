@@ -7,3 +7,4 @@ const jiti = createJiti(import.meta.url, {
 });
 
 await jiti.import("../tests/mentor-display-name.test.ts");
+await jiti.import("../tests/mentor-response-formatting.test.ts");

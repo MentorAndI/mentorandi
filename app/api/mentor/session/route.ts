@@ -8,6 +8,7 @@ import {
 import { UserServiceError } from "@/services/user/user.service";
 import {
   getActiveMentorProfileByDatabaseSlug,
+  getMentorDisplayName,
   isActiveMentorSlug,
 } from "@/services/mentor-catalog/mentor-catalog";
 import type { ActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog.types";
@@ -45,7 +46,7 @@ export async function GET(request: Request) {
                   latestMessageAt: conversation.latestMessageAt,
                   latestMessagePreview: conversation.latestMessagePreview,
                   mentor: {
-                    name: conversation.mentor.name,
+                    name: getMentorDisplayName(profile),
                     role:
                       profile.slug === "life"
                         ? "Life Mentor"

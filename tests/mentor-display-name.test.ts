@@ -2,6 +2,10 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 
 import { getConversationAuthorLabel } from "@/components/mentor/mentor-display-name";
+import {
+  getActiveMentorProfile,
+  getMentorDisplayName,
+} from "@/services/mentor-catalog/mentor-catalog";
 
 test("uses the selected specialist display name for mentor messages", () => {
   assert.equal(
@@ -19,4 +23,14 @@ test("continues to label user messages as You", () => {
     getConversationAuthorLabel("USER", "Health & Fitness Mentor"),
     "You",
   );
+});
+
+test("resolves specialist names from the selected mentor profile", () => {
+  const healthMentor = getActiveMentorProfile("health-fitness");
+  const lifeMentor = getActiveMentorProfile("life");
+
+  assert.ok(healthMentor);
+  assert.ok(lifeMentor);
+  assert.equal(getMentorDisplayName(healthMentor), "Health & Fitness Mentor");
+  assert.equal(getMentorDisplayName(lifeMentor), "Marcus");
 });

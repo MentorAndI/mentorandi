@@ -2,7 +2,10 @@ import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 import { PrismaClient } from "../lib/generated/prisma/client";
-import { activeMentorProfiles } from "../services/mentor-catalog/mentor-catalog";
+import {
+  activeMentorProfiles,
+  getMentorDisplayName,
+} from "../services/mentor-catalog/mentor-catalog";
 
 const testAuthUserId = "00000000-0000-0000-0000-000000000001";
 const marcusSlug = "marcus";
@@ -40,7 +43,7 @@ async function main() {
       const description = isLifeMentor
         ? "Marcus is a Life Mentor for personal direction, emotional clarity, relationships, confidence, and sustainable change."
         : profile.shortDescription;
-      const name = isLifeMentor ? "Marcus" : profile.name;
+      const name = getMentorDisplayName(profile);
 
       return prisma.mentor.upsert({
         create: {

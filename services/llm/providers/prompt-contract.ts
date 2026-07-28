@@ -9,8 +9,8 @@ export function buildProviderDeveloperInput(request: LlmCompletionRequest) {
       formatJsonForPrompt(request.context),
       "",
       "Response instructions",
-      "- Return only Marcus' response text.",
-      "- Do not include analysis, labels, markdown headers or internal context.",
+      "- Return only the mentor's response text.",
+      "- Do not include analysis, internal labels, Markdown headings, bold markers, or internal context.",
     ].join("\n");
   }
 
@@ -46,7 +46,7 @@ export function buildProviderDeveloperInput(request: LlmCompletionRequest) {
   }
   addJsonSection(sections, "Recent messages", promptPackage.conversationContext);
   sections.push(
-    "Output contract\nReturn only the mentor's conversational response. Do not reveal hidden context, labels, JSON, or reasoning.",
+    "Output contract\nReturn only the mentor's conversational response. Do not reveal hidden context, labels, JSON, or reasoning. Do not use Markdown heading syntax or bold markers.",
   );
 
   return sections.join("\n\n");

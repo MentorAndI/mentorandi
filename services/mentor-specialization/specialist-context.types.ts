@@ -1,6 +1,6 @@
 export const healthConcretePlanInstructions = [
   "The user already asked for a concrete Health & Fitness plan. Give the usable starter plan now; do not ask whether they want it made more concrete later.",
-  "Use clear headings, a weekly schedule, and concise lists where they improve usability.",
+  "Use plain short section labels without Markdown heading or bold syntax, a weekly schedule, and concise lists where they improve usability.",
   "Where relevant, specify full-body strength exercises with sets and rep ranges, incline-walking duration and moderate intensity, a simple progression rule, a flexible meal/plate template, protein-first guidance, and a minimum fallback for busy or missed days.",
 ] as const;
 

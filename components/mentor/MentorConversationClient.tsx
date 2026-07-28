@@ -100,7 +100,7 @@ export function MentorConversationClient({
     const session = await fetchMentorSession();
 
     setGoals(session.activeGoals);
-    setMentor(selectedMentor ?? session.mentor);
+    setMentor(session.mentor);
     setRecentConversations(session.conversations);
 
     return session;
@@ -181,7 +181,7 @@ export function MentorConversationClient({
           setConversationId(nextConversationId);
           setGoals(session.activeGoals);
           setRecentConversations(session.conversations);
-          setMentor(selectedMentor ?? session.mentor);
+          setMentor(session.mentor);
 
           await Promise.all([
             loadConversationHistory(nextConversationId, {
