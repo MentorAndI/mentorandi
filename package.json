@@ -18,6 +18,7 @@
     "smoke:alpha": "node scripts/alpha-smoke-test.mjs",
     "smoke:prod": "node scripts/production-smoke-test.mjs",
     "test:mentor-scope": "node scripts/run-mentor-scope-test.mjs",
+    "test:mentor-display-name": "node scripts/run-mentor-display-name-test.mjs",
     "prisma": "prisma",
     "db:seed": "prisma generate && jiti prisma/seed.ts",
     "import:mentor-specialization": "prisma generate && jiti scripts/import-mentor-specialization.ts",

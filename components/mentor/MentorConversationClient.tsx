@@ -354,6 +354,7 @@ export function MentorConversationClient({
         <MentorConversationHistory
           isLoading={isLoadingSession || isLoadingHistory}
           messages={messages}
+          mentorName={mentor.name}
         />
 
         <MentorMessageForm

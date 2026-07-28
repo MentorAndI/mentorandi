@@ -1,13 +1,16 @@
 import type { MentorConversationMessage } from "@/components/mentor/mentor-conversation.types";
+import { getConversationAuthorLabel } from "@/components/mentor/mentor-display-name";
 
 export interface MentorConversationHistoryProps {
   isLoading: boolean;
   messages: MentorConversationMessage[];
+  mentorName: string;
 }
 
 export function MentorConversationHistory({
   isLoading,
   messages,
+  mentorName,
 }: MentorConversationHistoryProps) {
   if (isLoading && messages.length === 0) {
     return (
@@ -16,7 +19,7 @@ export function MentorConversationHistory({
         className="rounded-md border border-zinc-200 bg-zinc-50 px-4 py-6 text-sm text-zinc-500"
         role="status"
       >
-        Loading your conversation with Marcus...
+        Loading your conversation with {mentorName}...
       </p>
     );
   }
@@ -25,7 +28,7 @@ export function MentorConversationHistory({
     return (
       <div className="rounded-md border border-zinc-200 bg-zinc-50 px-4 py-6">
         <p className="text-sm leading-6 text-zinc-600">
-          Start by telling Marcus what you want help thinking through.
+          Start by telling {mentorName} what you want help thinking through.
         </p>
       </div>
     );
@@ -35,7 +38,7 @@ export function MentorConversationHistory({
     <ol className="space-y-5" aria-label="Conversation history">
       {messages.map((message) => (
         <li key={message.id}>
-          <MentorConversationEntry message={message} />
+          <MentorConversationEntry message={message} mentorName={mentorName} />
         </li>
       ))}
     </ol>
@@ -44,16 +47,18 @@ export function MentorConversationHistory({
 
 interface MentorConversationEntryProps {
   message: MentorConversationMessage;
+  mentorName: string;
 }
 
-function MentorConversationEntry({ message }: MentorConversationEntryProps) {
-  const isUser = message.role === "USER";
-
+function MentorConversationEntry({
+  message,
+  mentorName,
+}: MentorConversationEntryProps) {
   return (
     <article className="rounded-lg border border-zinc-200 bg-white px-4 py-4">
       <div className="mb-3 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm font-semibold text-zinc-950">
-          {isUser ? "You" : "Marcus"}
+          {getConversationAuthorLabel(message.role, mentorName)}
         </p>
         <time className="text-xs text-zinc-500" dateTime={message.createdAt}>
           {formatMessageTime(message.createdAt)}
