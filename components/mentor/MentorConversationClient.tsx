@@ -1,6 +1,6 @@
 "use client";
 
-import { type FormEvent, useEffect, useState } from "react";
+import { type FormEvent, useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 import { MentorConversationHistory } from "@/components/mentor/MentorConversationHistory";
@@ -77,7 +77,7 @@ export function MentorConversationClient({
     MentorConversationSummary[]
   >([]);
 
-  async function fetchMentorSession(signal?: AbortSignal) {
+  const fetchMentorSession = useCallback(async (signal?: AbortSignal) => {
     const mentorSlug = selectedMentor?.slug ?? "life";
     const response = await fetch(
       `/api/mentor/session?mentor=${encodeURIComponent(mentorSlug)}`,
@@ -94,7 +94,7 @@ export function MentorConversationClient({
     }
 
     return responseBody as MentorSession;
-  }
+  }, [selectedMentor?.slug]);
 
   async function refreshMentorSessionList() {
     const session = await fetchMentorSession();
@@ -216,7 +216,7 @@ export function MentorConversationClient({
       isActive = false;
       controller.abort();
     };
-  }, [selectedMentor]);
+  }, [fetchMentorSession, selectedMentor]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

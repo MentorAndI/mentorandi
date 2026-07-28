@@ -53,6 +53,7 @@ import {
   UserServiceError,
 } from "@/services/user/user.service";
 import { getActiveMentorProfile } from "@/services/mentor-catalog/mentor-catalog";
+import { MentorSpecialistContextService } from "@/services/mentor-specialization/specialist-context.service";
 
 const minimumMemoryConfidence = 0.6;
 const minimumMemoryImportance = 3;
@@ -82,6 +83,7 @@ export class MentorResponsePipelineService {
     private readonly reflectionEngine = new ReflectionEngineService(),
     private readonly reflectionService = new ReflectionService(),
     private readonly userService = new UserService(),
+    private readonly specialistContextService = new MentorSpecialistContextService(),
   ) {}
 
   async run(
@@ -113,6 +115,20 @@ export class MentorResponsePipelineService {
       const promptPackage = this.promptComposer.compose({
         context,
         currentUserMessage: input.message,
+        specialistContext:
+          await this.specialistContextService.selectMentorSpecialistContext({
+            currentGoalContext: context.userGoals.map(
+              (goal) => `${goal.title} ${goal.description ?? ""}`,
+            ),
+            latestUserMessage: input.message,
+            mentorSlug: context.mentor.slug,
+            recentConversationSummary: context.recentMessages.map(
+              (message) => message.content,
+            ),
+            userMemorySnippets: context.relevantMemories.map(
+              (memory) => `${memory.title} ${memory.content}`,
+            ),
+          }),
         specialization: getActiveMentorProfile(input.mentorSpecialty) ?? undefined,
       });
       const model = input.model?.trim() || undefined;

@@ -129,6 +129,7 @@ export class PromptComposerService {
         tags: [],
         title: sourceCard.title,
       })),
+      specialistContext: validatedInput.specialistContext ?? null,
       systemPrompt: buildSystemPrompt(context.mentor.name, specialization),
       userPrompt: validatedInput.currentUserMessage,
     };

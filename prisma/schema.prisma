@@ -58,6 +58,24 @@ enum SubscriptionStatus {
   UNPAID
 }
 
+enum MentorSpecialistPackStatus {
+  DRAFT
+  ACTIVE
+  ARCHIVED
+}
+
+enum MentorSafetySeverity {
+  NORMAL
+  HIGH
+  CRISIS
+}
+
+enum MentorEvalScenarioType {
+  STANDARD
+  REGRESSION
+  SAFETY
+}
+
 model User {
   id         String   @id @default(uuid()) @db.Uuid
   authUserId String   @unique @db.Uuid
@@ -144,11 +162,141 @@ model Mentor {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  conversations Conversation[]
-  usageEvents   UsageEvent[]
+  conversations   Conversation[]
+  specialistPacks MentorSpecialistPack[]
+  usageEvents     UsageEvent[]
 
   @@index([active])
   @@index([slug])
+}
+
+model MentorSpecialistPack {
+  id          String                     @id @default(uuid()) @db.Uuid
+  mentorId    String?                    @db.Uuid
+  mentorSlug  String                     @db.VarChar(64)
+  slug        String                     @db.VarChar(64)
+  displayName String
+  version     String                     @db.VarChar(32)
+  status      MentorSpecialistPackStatus @default(DRAFT)
+  description String
+  sourcePath  String
+  createdAt   DateTime                   @default(now())
+  updatedAt   DateTime                   @updatedAt
+
+  mentor         Mentor?               @relation(fields: [mentorId], references: [id], onDelete: SetNull)
+  techniques     MentorTechnique[]
+  knowledgeCards MentorKnowledgeCard[]
+  sources        MentorSource[]
+  safetyRules    MentorSafetyRule[]
+  evalScenarios  MentorEvalScenario[]
+
+  @@unique([slug, version])
+  @@index([mentorSlug, status])
+  @@index([mentorId])
+}
+
+model MentorTechnique {
+  id            String               @id @default(uuid()) @db.Uuid
+  packId        String               @db.Uuid
+  slug          String               @db.VarChar(128)
+  title         String
+  summary       String
+  whenToUse     String
+  stepsJson     Json
+  mentorWording String
+  tags          String[]
+  priority      Int                  @default(0)
+  sourcePath    String
+  version       String               @db.VarChar(32)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  pack          MentorSpecialistPack @relation(fields: [packId], references: [id], onDelete: Cascade)
+
+  @@unique([packId, slug])
+  @@index([packId, priority])
+}
+
+model MentorKnowledgeCard {
+  id             String               @id @default(uuid()) @db.Uuid
+  packId         String               @db.Uuid
+  slug           String               @db.VarChar(128)
+  title          String
+  summary        String
+  body           String
+  tags           String[]
+  selectionHints String[]
+  sourceRefs     String[]
+  priority       Int                  @default(0)
+  sourcePath     String
+  version        String               @db.VarChar(32)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  pack           MentorSpecialistPack @relation(fields: [packId], references: [id], onDelete: Cascade)
+
+  @@unique([packId, slug])
+  @@index([packId, priority])
+}
+
+model MentorSource {
+  id             String               @id @default(uuid()) @db.Uuid
+  packId         String               @db.Uuid
+  slug           String               @db.VarChar(128)
+  title          String
+  url            String?
+  publisher      String
+  sourceType     String
+  usage          String
+  trustLevel     String
+  refreshCadence String
+  notes          String
+  sourcePath     String
+  version        String               @db.VarChar(32)
+  createdAt      DateTime             @default(now())
+  updatedAt      DateTime             @updatedAt
+  pack           MentorSpecialistPack @relation(fields: [packId], references: [id], onDelete: Cascade)
+
+  @@unique([packId, slug])
+  @@index([packId])
+}
+
+model MentorSafetyRule {
+  id                       String               @id @default(uuid()) @db.Uuid
+  packId                   String               @db.Uuid
+  slug                     String               @db.VarChar(128)
+  title                    String
+  rule                     String
+  triggerPatterns          String[]
+  requiredResponseBehavior String
+  severity                 MentorSafetySeverity @default(NORMAL)
+  sourcePath               String
+  version                  String               @db.VarChar(32)
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+  pack                     MentorSpecialistPack @relation(fields: [packId], references: [id], onDelete: Cascade)
+
+  @@unique([packId, slug])
+  @@index([packId, severity])
+}
+
+model MentorEvalScenario {
+  id                String                 @id @default(uuid()) @db.Uuid
+  packId            String                 @db.Uuid
+  slug              String                 @db.VarChar(128)
+  title             String
+  userPrompt        String
+  expectedBehavior  String[]
+  mustUse           String[]
+  mustAvoid         String[]
+  safetyExpectation String
+  scenarioType      MentorEvalScenarioType @default(STANDARD)
+  sourcePath        String
+  version           String                 @db.VarChar(32)
+  createdAt         DateTime               @default(now())
+  updatedAt         DateTime               @updatedAt
+  pack              MentorSpecialistPack   @relation(fields: [packId], references: [id], onDelete: Cascade)
+
+  @@unique([packId, slug])
+  @@index([packId, scenarioType])
 }
 
 model Conversation {

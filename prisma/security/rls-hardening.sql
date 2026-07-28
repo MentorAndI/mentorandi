@@ -25,7 +25,13 @@ declare
     'Feedback',
     'UsageEvent',
     'AlphaInvite',
-    'Subscription'
+    'Subscription',
+    'MentorSpecialistPack',
+    'MentorTechnique',
+    'MentorKnowledgeCard',
+    'MentorSource',
+    'MentorSafetyRule',
+    'MentorEvalScenario'
   ];
 begin
   foreach app_table in array app_tables loop
@@ -58,7 +64,13 @@ begin
       'Feedback',
       'UsageEvent',
       'AlphaInvite',
-      'Subscription'
+      'Subscription',
+      'MentorSpecialistPack',
+      'MentorTechnique',
+      'MentorKnowledgeCard',
+      'MentorSource',
+      'MentorSafetyRule',
+      'MentorEvalScenario'
     )
     and not c.relrowsecurity;
 
@@ -79,7 +91,13 @@ begin
       ('Feedback'),
       ('UsageEvent'),
       ('AlphaInvite'),
-      ('Subscription')
+      ('Subscription'),
+      ('MentorSpecialistPack'),
+      ('MentorTechnique'),
+      ('MentorKnowledgeCard'),
+      ('MentorSource'),
+      ('MentorSafetyRule'),
+      ('MentorEvalScenario')
   ),
   risky_policies as (
     select

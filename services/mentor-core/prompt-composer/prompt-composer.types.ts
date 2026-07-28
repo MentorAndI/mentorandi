@@ -1,5 +1,6 @@
 import type { MentorResponseContext } from "@/services/mentor-core/context-builder/context-builder.types";
 import type { ActiveMentorProfile } from "@/services/mentor-catalog/mentor-catalog.types";
+import type { MentorSpecialistContext } from "@/services/mentor-specialization/specialist-context.types";
 
 export type MentorToneOption = "calm" | "direct" | "warm" | "challenging";
 export type MentorResponseMode = "reflective" | "practical" | "accountability";
@@ -8,6 +9,7 @@ export interface ComposePromptInput {
   context: MentorResponseContext;
   currentUserMessage: string;
   responseMode?: MentorResponseMode;
+  specialistContext?: MentorSpecialistContext | null;
   specialization?: ActiveMentorProfile;
   tone?: MentorToneOption;
 }
@@ -92,6 +94,7 @@ export interface PromptPackage {
   reflectionContext: PromptReflectionContextItem[];
   responseInstructions: string[];
   sourceContext: PromptMentorSourceContextItem[];
+  specialistContext: MentorSpecialistContext | null;
   systemPrompt: string;
   userPrompt: string;
 }

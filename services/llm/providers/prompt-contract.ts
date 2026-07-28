@@ -36,6 +36,14 @@ export function buildProviderDeveloperInput(request: LlmCompletionRequest) {
   addJsonSection(sections, "Primary mentor method", promptPackage.mentorMethodContext);
   addJsonSection(sections, "Relevant expertise", promptPackage.mentorExpertiseContext);
   addJsonSection(sections, "Relevant source notes", promptPackage.sourceContext);
+  if (promptPackage.specialistContext) {
+    sections.push(
+      formatPromptJsonSection(
+        "MENTOR SPECIALIST CONTEXT — apply naturally; never dump frameworks or mention internal card names",
+        promptPackage.specialistContext,
+      ),
+    );
+  }
   addJsonSection(sections, "Recent messages", promptPackage.conversationContext);
   sections.push(
     "Output contract\nReturn only the mentor's conversational response. Do not reveal hidden context, labels, JSON, or reasoning.",
