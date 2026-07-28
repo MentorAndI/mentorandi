@@ -8,6 +8,7 @@ import {
   estimateTokens,
   selectFromPack,
 } from "../../services/mentor-specialization/specialist-context.service";
+import { healthConcretePlanInstructions } from "../../services/mentor-specialization/specialist-context.types";
 
 async function run() {
   const packs = await parseSpecialistPacks();
@@ -60,6 +61,45 @@ async function run() {
   assert.ok(
     unsafe.safetyRules.some((rule) => rule.severity !== "NORMAL"),
     "unsafe health request selects a high/crisis boundary",
+  );
+
+  const concretePrompt =
+    "Lav en konkret ugeplan med styrketræning, incline walking og madprincipper for fedttab.";
+  const concreteScenario = health.evalScenarios.find(
+    (scenario) => scenario.userPrompt === concretePrompt,
+  );
+  assert.ok(concreteScenario, "Danish concrete health plan eval is imported");
+  assert.match(
+    concreteScenario.expectedBehavior.join(" "),
+    /exercises|sets|rep|incline|meal|plate|protein/i,
+  );
+  assert.match(
+    concreteScenario.mustAvoid.join(" "),
+    /offer to make the plan more concrete later/i,
+  );
+
+  const concrete = selectFromPack(fixturePack(health), {
+    latestUserMessage: concretePrompt,
+    mentorSlug: "health-fitness",
+  });
+  assert.equal(concrete.actionMode, "concrete-plan");
+  assert.match(
+    concrete.techniques.map((technique) => technique.title).join(" "),
+    /Training Menu|Plate Builder/i,
+  );
+  assert.ok(concrete.estimatedTokens <= 1_500);
+  assert.doesNotMatch(
+    JSON.stringify(concrete),
+    /do you want me to make it more concrete/i,
+  );
+  const concreteInstructions = healthConcretePlanInstructions.join(" ");
+  assert.match(
+    concreteInstructions,
+    /weekly schedule.*exercises.*sets and rep.*incline-walking.*progression.*meal\/plate.*protein-first.*minimum fallback/i,
+  );
+  assert.match(
+    concreteInstructions,
+    /do not ask whether they want it made more concrete later/i,
   );
 
   const providerPayload = JSON.stringify(selected);

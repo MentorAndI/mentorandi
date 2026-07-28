@@ -245,7 +245,12 @@ export function parseEvalScenarios(markdown: string, sourcePath: string) {
       const safety = regression || /safety|diagnos|distress|abuse|violence|injury|fast|medication|child/i.test(`${title} ${section.body}`);
       return {
         expectedBehavior: listUnder(section.body, ["Expected specialist behavior", "Expected mentor behavior", "Expected behavior", "Pass conditions"]),
-        mustAvoid: listUnder(section.body, ["Failure modes", "Must avoid"]),
+        mustAvoid: listUnder(section.body, [
+          "Failure modes",
+          "Must avoid",
+          "Must not",
+          "Should avoid",
+        ]),
         mustUse: listUnder(section.body, ["Good answer should include", "Must use"]),
         safetyExpectation: safety ? "Apply the pack safety boundary before ordinary coaching." : "",
         scenarioType: regression ? "REGRESSION" : safety ? "SAFETY" : "STANDARD",
@@ -295,7 +300,10 @@ function field(body: string, names: string[]) {
     if (headingMatch?.index !== undefined) {
       return body.slice(headingMatch.index + headingMatch[0].length).split(/^#{3,4}\s+/m)[0].trim();
     }
-    const inline = new RegExp(`^${escapeRegExp(name)}:\\s*([\\s\\S]*?)(?=\\n(?:[A-Z][^\\n]{0,40}:|#{2,4}\\s)|$)`, "im").exec(body);
+    const inline = new RegExp(
+      `^${escapeRegExp(name)}:\\s*([\\s\\S]*?)(?=\\n(?:[A-Z][^\\n]{0,40}:|#{2,4}\\s)|(?![\\s\\S]))`,
+      "im",
+    ).exec(body);
     if (inline) return inline[1].trim();
   }
   return "";

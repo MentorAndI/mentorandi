@@ -7,6 +7,8 @@ import type {
 
 const MAX_SPECIALIST_TOKENS = 1_500;
 const safetyTerms = /\b(suicid|self[- ]?harm|kill myself|immediate danger|abuse|violent|violence|unsafe|starv|eating disorder|medication|diagnos|injur|child safety|fasting)\b/i;
+const healthConcretePlanTerms =
+  /\b(?:concrete|konkret|ugeplan|weekly plan|workout plan|training plan|fat[- ]?loss plan|fedttab|styrketræning|strength training|øvelser|exercises|sets?(?:\s*(?:and|og|\/)\s*)reps?|incline walk(?:ing)?|nutrition|ernæring|meal(?:s| plan)?|måltider|madprincipper|food structure|plate structure|kostplan)\b/i;
 const stopWords = new Set(["about", "after", "again", "because", "before", "could", "their", "there", "these", "they", "this", "those", "user", "want", "when", "where", "which", "with", "would"]);
 
 type ActivePack = NonNullable<
@@ -39,11 +41,14 @@ export function selectFromPack(
     ].join(" "),
   );
   const score = (values: string[]) => relevanceScore(values, primary, supporting);
+  const concretePlanRequested =
+    pack.slug === "health-fitness" &&
+    healthConcretePlanTerms.test(input.latestUserMessage);
   const techniques = [...pack.techniques]
     .sort(
       (a, b) =>
-        score([b.title, b.summary, b.whenToUse, ...b.tags]) -
-          score([a.title, a.summary, a.whenToUse, ...a.tags]) ||
+        scoreTechnique(b, score, concretePlanRequested) -
+          scoreTechnique(a, score, concretePlanRequested) ||
         b.priority - a.priority,
     )
     .slice(0, 2)
@@ -57,8 +62,8 @@ export function selectFromPack(
   const knowledgeCards = [...pack.knowledgeCards]
     .sort(
       (a, b) =>
-        score([b.title, b.summary, ...b.selectionHints, ...b.tags]) -
-          score([a.title, a.summary, ...a.selectionHints, ...a.tags]) ||
+        scoreKnowledgeCard(b, score, concretePlanRequested) -
+          scoreKnowledgeCard(a, score, concretePlanRequested) ||
         b.priority - a.priority,
     )
     .slice(0, 4)
@@ -94,6 +99,7 @@ export function selectFromPack(
     .slice(0, 2)
     .map((item) => ({ publisher: item.publisher, title: item.title }));
   const context = {
+    actionMode: concretePlanRequested ? "concrete-plan" as const : "standard" as const,
     displayName: pack.displayName,
     estimatedTokens: 0,
     knowledgeCards,
@@ -106,6 +112,53 @@ export function selectFromPack(
   trimToBudget(context);
   context.estimatedTokens = estimateTokens(context);
   return context;
+}
+
+function scoreTechnique(
+  technique: ActivePack["techniques"][number],
+  score: (values: string[]) => number,
+  concretePlanRequested: boolean,
+) {
+  const relevance = score([
+    technique.title,
+    technique.summary,
+    technique.whenToUse,
+    ...technique.tags,
+  ]);
+  if (!concretePlanRequested) return relevance;
+
+  const concretePriority: Record<string, number> = {
+    "training-menu": 80,
+    "plate-builder": 70,
+    "progressive-overload-lite": 60,
+    "protein-and-plants-first": 50,
+    "minimum-viable-workout": 40,
+    "restart-without-punishment": 30,
+  };
+  return relevance + (concretePriority[technique.slug] ?? 0);
+}
+
+function scoreKnowledgeCard(
+  card: ActivePack["knowledgeCards"][number],
+  score: (values: string[]) => number,
+  concretePlanRequested: boolean,
+) {
+  const relevance = score([
+    card.title,
+    card.summary,
+    ...card.selectionHints,
+    ...card.tags,
+  ]);
+  if (!concretePlanRequested) return relevance;
+
+  const title = card.title.toLowerCase();
+  const boost =
+    /protein|strength, cardio|real life|consistency|safe plan|nutrition quality|recovery/.test(
+      title,
+    )
+      ? 40
+      : 0;
+  return relevance + boost;
 }
 
 function relevanceScore(

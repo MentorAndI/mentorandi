@@ -9,6 +9,7 @@ import { mentorExpertiseLibrary } from "@/services/mentor-expertise/expertise-li
 import type { MentorExpertiseProfile } from "@/services/mentor-expertise/expertise-types";
 import type { ActiveMentorProfile } from "@/services/mentor-catalog/mentor-catalog.types";
 import type { MentorContextExpertise } from "@/services/mentor-core/context-builder/context-builder.types";
+import { healthConcretePlanInstructions } from "@/services/mentor-specialization/specialist-context.types";
 
 export class PromptComposerServiceError extends Error {
   constructor(message: string) {
@@ -37,7 +38,11 @@ export class PromptComposerService {
       specialization,
     );
     const conversationRules = buildConversationRules();
-    const responseInstructions = buildResponseInstructions(tone, responseMode);
+    const responseInstructions = buildResponseInstructions(
+      tone,
+      responseMode,
+      validatedInput.specialistContext?.actionMode === "concrete-plan",
+    );
     const relevantGoals = context.userGoals.filter((goal) =>
       isRelevantContext(validatedInput.currentUserMessage, [
         goal.title,
@@ -232,7 +237,18 @@ function buildConversationRules() {
 function buildResponseInstructions(
   tone: MentorToneOption,
   responseMode: MentorResponseMode,
+  concretePlanMode = false,
 ) {
+  if (concretePlanMode) {
+    return [
+      `Use a ${tone}, calm, clear voice for practical mentoring.`,
+      ...healthConcretePlanInstructions,
+      "Make reasonable starter assumptions and label them briefly. Ask at most one focused safety or constraint question only after giving the plan; do not withhold the plan pending ordinary preferences.",
+      "Keep the plan sustainable and non-punitive. Do not diagnose, prescribe injury rehabilitation, coach eating disorders, suggest extreme fasting or starvation, or recommend supplements or fat burners.",
+      "Be supportive without repetitive praise. Do not use stock strengths language such as ‘your strength is’ unless it is unusually specific and necessary.",
+    ];
+  }
+
   return [
     `Use a ${tone}, calm, clear voice for ${responseMode} mentoring.`,
     "For personal mentoring: respond specifically, explicitly say why one evidenced strength (effort, honesty, awareness, courage, or willingness) is useful, name at most one tentative pattern, give one small concrete next step, and end with one focused question.",
