@@ -4,6 +4,7 @@ import type {
   LlmProviderName,
 } from "@/services/llm/llm.types";
 import type { MentorResponsePipelineLlmUsage } from "@/services/mentor-core/response-pipeline/response-pipeline.types";
+import type { MentorSpecialistContext } from "@/services/mentor-specialization/specialist-context.types";
 
 export interface UsageEventContext {
   conversationId?: string;
@@ -20,6 +21,7 @@ export interface PersistentUsageCounts {
 
 export interface RecordSuccessfulUsageInput extends UsageEventContext {
   llmUsage: MentorResponsePipelineLlmUsage;
+  specialistContext?: MentorSpecialistContext | null;
 }
 
 export interface RecordUnsuccessfulUsageInput extends UsageEventContext {
@@ -37,6 +39,7 @@ export interface UsageEventWriteInput extends UsageEventContext {
   provider?: LlmProviderName;
   route?: string;
   status: UsageEventStatus;
+  specialistContext?: MentorSpecialistContext | null;
   totalTokens?: number;
 }
 

@@ -319,20 +319,30 @@ model Conversation {
 }
 
 model UsageEvent {
-  id               String           @id @default(uuid()) @db.Uuid
-  userId           String           @db.Uuid
-  mentorId         String?          @db.Uuid
-  conversationId   String?          @db.Uuid
-  provider         String?
-  model            String?
-  route            String?
-  inputTokens      Int?
-  outputTokens     Int?
-  totalTokens      Int?
-  estimatedCostUsd Decimal?         @db.Decimal(14, 8)
-  status           UsageEventStatus
-  errorCode        String?
-  createdAt        DateTime         @default(now())
+  id                       String           @id @default(uuid()) @db.Uuid
+  userId                   String           @db.Uuid
+  mentorId                 String?          @db.Uuid
+  conversationId           String?          @db.Uuid
+  provider                 String?
+  model                    String?
+  route                    String?
+  inputTokens              Int?
+  outputTokens             Int?
+  totalTokens              Int?
+  estimatedCostUsd         Decimal?         @db.Decimal(14, 8)
+  status                   UsageEventStatus
+  errorCode                String?
+  specialistPackSlug       String?          @db.VarChar(64)
+  specialistPackName       String?
+  specialistPackVersion    String?          @db.VarChar(32)
+  selectedTechniqueSlugs   String[]         @default([])
+  selectedTechniqueTitles  String[]         @default([])
+  selectedKnowledgeSlugs   String[]         @default([])
+  selectedKnowledgeTitles  String[]         @default([])
+  selectedSafetyRuleSlugs  String[]         @default([])
+  selectedSafetyRuleTitles String[]         @default([])
+  specialistPromptTokens   Int?
+  createdAt                DateTime         @default(now())
 
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   mentor       Mentor?       @relation(fields: [mentorId], references: [id], onDelete: SetNull)
@@ -345,6 +355,7 @@ model UsageEvent {
   @@index([mentorId, createdAt])
   @@index([conversationId, createdAt])
   @@index([route, createdAt])
+  @@index([specialistPackSlug, createdAt])
   @@index([createdAt])
 }
 

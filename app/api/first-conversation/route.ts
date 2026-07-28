@@ -13,6 +13,10 @@ import {
 import { UserServiceError } from "@/services/user/user.service";
 import { isActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog";
 import type { ActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog.types";
+import {
+  MentorUsageLimitService,
+  MentorUsageMonitoringError,
+} from "@/services/usage-limits/mentor-usage-limits.service";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +55,14 @@ export async function POST(request: Request) {
         authUserId: session.authUserId,
       },
     );
+    await new MentorUsageLimitService().recordSuccessfulMentorResponse({
+      authUserId: session.authUserId,
+      conversationId: session.conversation.id,
+      llmUsage: response.llmUsage,
+      mentorId: session.mentorId,
+      specialistContext: response.promptPackage.specialistContext,
+      userId: session.userId,
+    });
 
     return NextResponse.json(
       {
@@ -61,6 +73,15 @@ export async function POST(request: Request) {
       { status: 200 },
     );
   } catch (error) {
+    if (error instanceof MentorUsageMonitoringError) {
+      return createSafeErrorResponse({
+        context: "api/first-conversation:usage",
+        error,
+        fallbackMessage: error.message,
+        statusCode: error.statusCode,
+      });
+    }
+
     if (error instanceof ConversationServiceError) {
       return createSafeErrorResponse({
         context: "api/first-conversation:conversation",

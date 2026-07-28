@@ -96,6 +96,7 @@ export async function POST(request: Request) {
     await usageLimitService.recordSuccessfulMentorResponse({
       ...usageContext,
       llmUsage: response.llmUsage,
+      specialistContext: response.promptPackage.specialistContext,
     });
 
     return NextResponse.json(

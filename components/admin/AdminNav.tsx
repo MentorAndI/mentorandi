@@ -9,6 +9,9 @@ export function AdminNav() {
       <AdminLink href="/admin/invites">Invites</AdminLink>
       <AdminLink href="/admin/billing">Billing</AdminLink>
       <AdminLink href="/admin/mentor-specialization">Specialist library</AdminLink>
+      <AdminLink href="/admin/specialist-observability">
+        Specialist observability
+      </AdminLink>
     </nav>
   );
 }

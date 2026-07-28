@@ -23,6 +23,7 @@ import type {
   UsageEventContext,
 } from "@/services/usage-monitoring/usage-monitoring.types";
 import { EntitlementService } from "@/services/entitlements/entitlement.service";
+import type { MentorSpecialistContext } from "@/services/mentor-specialization/specialist-context.types";
 
 export interface MentorUsageLimitCheckInput extends UsageEventContext {
   authUserId: string;
@@ -34,6 +35,7 @@ export interface MentorUsageLimitCheckInput extends UsageEventContext {
 export interface MentorUsageLimitRecordInput extends UsageEventContext {
   authUserId: string;
   llmUsage: MentorResponsePipelineLlmUsage;
+  specialistContext?: MentorSpecialistContext | null;
 }
 
 export interface MentorUsageFailureInput extends UsageEventContext {
@@ -127,6 +129,7 @@ export class MentorUsageLimitService {
         outputTokens: input.llmUsage.outputTokens,
         provider: input.llmUsage.provider,
         route: input.llmUsage.modelRouting?.route ?? input.llmUsage.provider,
+        specialistContext: input.specialistContext,
         status: UsageEventStatus.SUCCESS,
         totalTokens:
           input.llmUsage.totalTokens ??

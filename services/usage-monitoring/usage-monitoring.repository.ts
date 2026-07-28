@@ -48,6 +48,25 @@ export class UsageMonitoringRepository {
         outputTokens: input.outputTokens,
         provider: input.provider,
         route: input.route,
+        selectedKnowledgeSlugs:
+          input.specialistContext?.knowledgeCards.map((card) => card.slug) ?? [],
+        selectedKnowledgeTitles:
+          input.specialistContext?.knowledgeCards.map((card) => card.title) ?? [],
+        selectedSafetyRuleSlugs:
+          input.specialistContext?.safetyRules.map((rule) => rule.slug) ?? [],
+        selectedSafetyRuleTitles:
+          input.specialistContext?.safetyRules.map((rule) => rule.title) ?? [],
+        selectedTechniqueSlugs:
+          input.specialistContext?.techniques.map((technique) => technique.slug) ??
+          [],
+        selectedTechniqueTitles:
+          input.specialistContext?.techniques.map(
+            (technique) => technique.title,
+          ) ?? [],
+        specialistPackName: input.specialistContext?.displayName,
+        specialistPackSlug: input.specialistContext?.packSlug,
+        specialistPackVersion: input.specialistContext?.version,
+        specialistPromptTokens: input.specialistContext?.estimatedTokens,
         status: input.status,
         totalTokens: input.totalTokens,
         userId: input.userId,
