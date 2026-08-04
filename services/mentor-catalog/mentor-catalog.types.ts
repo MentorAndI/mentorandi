@@ -20,7 +20,9 @@ export interface ActiveMentorProfile {
   expertiseDomain: MentorExpertiseDomain;
   helpsWith: string[];
   name: string;
+  personaName: string;
   personaPrompt: string[];
+  portraitSrc: string;
   shortDescription: string;
   slug: ActiveMentorSlug;
   tone: string;

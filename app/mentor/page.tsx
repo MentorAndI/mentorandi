@@ -40,10 +40,9 @@ export default async function MentorPage({
             name: selectedMentor
               ? getMentorDisplayName(selectedMentor)
               : "Marcus",
-            role:
-              selectedMentor?.slug === "life"
-                ? "Life Mentor"
-                : "Specialized Mentor",
+            portraitSrc:
+              selectedMentor?.portraitSrc ?? "/images/mentors/marcus.png",
+            role: selectedMentor?.name ?? "Life Mentor",
             slug: selectedMentor?.slug ?? "life",
             tagline:
               selectedMentor?.shortDescription ??

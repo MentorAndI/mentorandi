@@ -41,6 +41,7 @@ interface MentorResponsePayload {
 
 const defaultMentor = {
   name: "Marcus",
+  portraitSrc: "/images/mentors/marcus.png",
   role: "Life Mentor",
   slug: "life",
   tagline: "Personal clarity, honest reflection, and sustainable change.",
@@ -48,6 +49,7 @@ const defaultMentor = {
 
 interface SelectedMentorPreview {
   name: string;
+  portraitSrc: string;
   role: string;
   slug: string;
   tagline: string;
@@ -100,7 +102,10 @@ export function MentorConversationClient({
     const session = await fetchMentorSession();
 
     setGoals(session.activeGoals);
-    setMentor(session.mentor);
+    setMentor({
+      ...session.mentor,
+      portraitSrc: selectedMentor?.portraitSrc ?? defaultMentor.portraitSrc,
+    });
     setRecentConversations(session.conversations);
 
     return session;
@@ -181,7 +186,11 @@ export function MentorConversationClient({
           setConversationId(nextConversationId);
           setGoals(session.activeGoals);
           setRecentConversations(session.conversations);
-          setMentor(session.mentor);
+          setMentor({
+            ...session.mentor,
+            portraitSrc:
+              selectedMentor?.portraitSrc ?? defaultMentor.portraitSrc,
+          });
 
           await Promise.all([
             loadConversationHistory(nextConversationId, {
@@ -342,6 +351,7 @@ export function MentorConversationClient({
             isLoadingSession ? undefined : handleStartNewConversation
           }
           role={mentor.role}
+          portraitSrc={mentor.portraitSrc}
           tagline={mentor.tagline}
         />
 

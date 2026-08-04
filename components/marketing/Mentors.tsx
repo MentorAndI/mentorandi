@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 
 import { Section } from "@/components/layout/Section";
@@ -17,9 +18,19 @@ export function Mentors() {
             className="flex h-full flex-col rounded-2xl border border-zinc-200 bg-white p-7 shadow-sm"
             key={mentor.slug}
           >
-            <h3 className="text-xl font-semibold text-zinc-950">
-              {mentor.cardName}
+            <Image
+              alt={`${mentor.personaName}, ${mentor.name}`}
+              className="aspect-[4/3] w-full rounded-xl object-cover object-top"
+              height={600}
+              src={mentor.portraitSrc}
+              width={800}
+            />
+            <h3 className="mt-5 text-xl font-semibold text-zinc-950">
+              {mentor.personaName}
             </h3>
+            <p className="mt-1 text-sm font-semibold text-sky-900">
+              {mentor.name}
+            </p>
             <p className="mt-3 text-sm leading-7 text-zinc-600">
               {mentor.shortDescription}
             </p>
@@ -43,9 +54,9 @@ export function Mentors() {
             ) : null}
             <Link
               className="mt-6 inline-flex h-10 items-center justify-center self-start rounded-lg border border-sky-200 px-4 text-sm font-semibold text-sky-950 transition hover:bg-sky-50"
-              href={`/mentor?mentor=${mentor.slug}`}
+              href={`/mentors/${mentor.slug}`}
             >
-              Start with this mentor
+              Meet {mentor.personaName}
             </Link>
           </article>
         ))}

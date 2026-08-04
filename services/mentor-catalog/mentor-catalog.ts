@@ -22,11 +22,13 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "emotional clarity",
     ],
     name: "Life Mentor",
+    personaName: "Marcus",
     personaPrompt: [
       "Take a wide-angle view of the user's life without becoming vague.",
       "Emphasize values, emotional clarity, tradeoffs, patterns, and grounded decisions.",
       "Turn broad life questions into one small experiment or honest next step.",
     ],
+    portraitSrc: "/images/mentors/marcus.png",
     shortDescription:
       "A broad everyday mentor for thinking clearly, making better decisions, and moving forward when life feels unclear.",
     slug: "life",
@@ -54,11 +56,13 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "accountability and follow-through",
     ],
     name: "ADHD Mentor",
+    personaName: "Adrian",
     personaPrompt: [
       "Lead with non-shaming executive-function support.",
       "Emphasize task entry, visible cues, external structure, time awareness, and realistic accountability.",
       "Reduce friction before asking for discipline, motivation, or consistency.",
     ],
+    portraitSrc: "/images/mentors/adrian.png",
     shortDescription:
       "Support for starting tasks, reducing friction, managing overwhelm, and turning intentions into small visible actions.",
     slug: "adhd",
@@ -86,11 +90,13 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "repair conversations",
     ],
     name: "Relationship Mentor",
+    personaName: "Celine",
     personaPrompt: [
       "Emphasize communication patterns, boundaries, perspective taking, and repair.",
       "Stay balanced and help the user prepare one honest, non-blaming conversation.",
       "Support the user's real human relationships rather than replacing them.",
     ],
+    portraitSrc: "/images/mentors/celine.png",
     shortDescription:
       "A mentor for understanding conflict patterns, communicating more clearly, repairing tension, and setting healthier boundaries.",
     slug: "relationship",
@@ -117,11 +123,13 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "sustainable routines",
     ],
     name: "Stress / Burnout Mentor",
+    personaName: "Victor",
     personaPrompt: [
       "Emphasize capacity, nervous-system load, boundaries, recovery, and sustainable expectations.",
       "Do not turn rest into another optimization project.",
       "Prefer removing or renegotiating one demand over adding another routine.",
     ],
+    portraitSrc: "/images/mentors/victor.png",
     shortDescription:
       "Support for understanding overload, resetting boundaries, recovering energy, and finding a sustainable pace again.",
     slug: "stress-burnout",
@@ -148,11 +156,13 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "guilt and repair",
     ],
     name: "Parenting Mentor",
+    personaName: "Suzan",
     personaPrompt: [
       "Support the parent without shaming them or treating the child as a problem to control.",
       "Emphasize parental regulation, clear routines, age-aware communication, consistency, and repair.",
       "Make room for guilt and pressure while returning to one response the parent can practice.",
     ],
+    portraitSrc: "/images/mentors/suzan.png",
     shortDescription:
       "A practical mentor for parents dealing with guilt, routines, emotional pressure, and everyday family challenges.",
     slug: "parenting",
@@ -180,11 +190,13 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "discipline without all-or-nothing thinking",
     ],
     name: "Health & Fitness Mentor",
+    personaName: "Leo",
     personaPrompt: [
       "Emphasize sustainable training, everyday movement, energy, routines, and general nutrition habits.",
       "Build consistency through realistic minimums rather than intensity or shame.",
       "Keep all guidance general and non-medical.",
     ],
+    portraitSrc: "/images/mentors/leo.png",
     shortDescription:
       "A mentor for building sustainable health routines, improving consistency, and making fitness fit real life.",
     slug: "health-fitness",
@@ -211,11 +223,13 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "finishing what matters",
     ],
     name: "Focus Mentor",
+    personaName: "Elias",
     personaPrompt: [
       "Emphasize priority clarity, attention protection, task boundaries, and a visible definition of done.",
       "Reduce competing commitments rather than stacking productivity techniques.",
       "Choose the smallest finishable outcome that protects what matters most.",
     ],
+    portraitSrc: "/images/mentors/elias.png",
     shortDescription:
       "Support for protecting attention, reducing distractions, and creating simple conditions for focused work.",
     slug: "focus",
@@ -242,11 +256,13 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "courage and taking up space",
     ],
     name: "Confidence Mentor",
+    personaName: "Joyce",
     personaPrompt: [
       "Emphasize accurate self-appraisal, visibility, assertive communication, courage, and action before certainty.",
       "Use evidence and small acts of participation rather than hype or empty praise.",
       "Help the user take up appropriate space while respecting real power dynamics.",
     ],
+    portraitSrc: "/images/mentors/joyce.png",
     shortDescription:
       "A mentor for working with self-doubt, seeing your own evidence more clearly, and building grounded confidence.",
     slug: "confidence",
@@ -280,5 +296,5 @@ export function getActiveMentorProfileByDatabaseSlug(slug: string) {
 }
 
 export function getMentorDisplayName(profile: ActiveMentorProfile) {
-  return profile.slug === "life" ? "Marcus" : profile.name;
+  return profile.personaName;
 }

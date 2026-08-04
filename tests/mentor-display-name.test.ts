@@ -25,12 +25,12 @@ test("continues to label user messages as You", () => {
   );
 });
 
-test("resolves specialist names from the selected mentor profile", () => {
+test("resolves persona names from the selected mentor profile", () => {
   const healthMentor = getActiveMentorProfile("health-fitness");
   const lifeMentor = getActiveMentorProfile("life");
 
   assert.ok(healthMentor);
   assert.ok(lifeMentor);
-  assert.equal(getMentorDisplayName(healthMentor), "Health & Fitness Mentor");
+  assert.equal(getMentorDisplayName(healthMentor), "Leo");
   assert.equal(getMentorDisplayName(lifeMentor), "Marcus");
 });

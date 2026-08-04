@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 
 import { Container } from "@/components/layout/Container";
@@ -44,8 +45,19 @@ export default function MentorsPage() {
               key={mentor.slug}
               variant="bordered"
             >
+              <Image
+                alt={`${mentor.personaName}, ${mentor.name}`}
+                className="aspect-[4/3] w-full rounded-xl object-cover object-top"
+                height={600}
+                src={mentor.portraitSrc}
+                width={800}
+              />
+
               <div>
-                <Heading level={3}>{mentor.cardName}</Heading>
+                <Heading level={3}>{mentor.personaName}</Heading>
+                <p className="mt-1 text-sm font-semibold text-sky-900">
+                  {mentor.name}
+                </p>
                 <Text className="mt-3 leading-7">{mentor.shortDescription}</Text>
               </div>
 
@@ -76,12 +88,18 @@ export default function MentorsPage() {
                 ) : null}
               </div>
 
-              <div className="mt-auto border-t border-zinc-200 pt-4">
+              <div className="mt-auto flex flex-wrap gap-3 border-t border-zinc-200 pt-4">
                 <Link
                   className="inline-flex h-11 items-center justify-center rounded-lg bg-sky-950 px-5 text-sm font-semibold text-white transition hover:bg-sky-900"
+                  href={`/mentors/${mentor.slug}`}
+                >
+                  View profile
+                </Link>
+                <Link
+                  className="inline-flex h-11 items-center justify-center rounded-lg border border-sky-200 px-5 text-sm font-semibold text-sky-950 transition hover:bg-sky-50"
                   href={`/mentor?mentor=${mentor.slug}`}
                 >
-                  Start with this mentor
+                  Start with {mentor.personaName}
                 </Link>
               </div>
             </Card>
