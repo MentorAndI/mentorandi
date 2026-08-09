@@ -7,14 +7,12 @@ import type { ValidatedAlphaInvite } from "@/services/alpha-invite/alpha-invite.
 import {
   buildAuthCallbackUrl,
   getPublicAppOrigin,
-  normalizeSafeAuthNextPath,
 } from "@/services/auth/redirects";
 import { UserService } from "@/services/user/user.service";
 
 export interface AlphaSignupInput {
   email: string;
   inviteCode?: string;
-  nextPath?: string;
   password: string;
   requestOrigin: string;
 }
@@ -59,11 +57,10 @@ export class AlphaSignupService {
 
     const supabase = await createSupabaseServerClient();
     const publicOrigin = getPublicAppOrigin(input.requestOrigin);
-    const nextPath = normalizeSafeAuthNextPath(input.nextPath);
     const { data, error } = await supabase.auth.signUp({
       email,
       options: {
-        emailRedirectTo: buildAuthCallbackUrl(publicOrigin, nextPath),
+        emailRedirectTo: buildAuthCallbackUrl(publicOrigin),
       },
       password,
     });

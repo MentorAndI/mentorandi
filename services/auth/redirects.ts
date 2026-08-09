@@ -41,13 +41,8 @@ export function getSafeAuthRedirectPath(
   return requestedPath;
 }
 
-export function buildAuthCallbackUrl(
-  origin: string,
-  nextPath = defaultAuthCallbackNextPath,
-) {
+export function buildAuthCallbackUrl(origin: string) {
   const callbackUrl = new URL("/auth/callback", origin);
-
-  callbackUrl.searchParams.set("next", normalizeSafeAuthNextPath(nextPath));
 
   return callbackUrl.toString();
 }

@@ -148,8 +148,9 @@ Mentor And I
 - Successful login redirects to `/mentor`.
 - Successful signup either creates an immediate session and continues to mentor
   selection, or shows email confirmation instructions. Email confirmation links
-  return through `/auth/callback` and continue to `/mentors` by default. Safe
-  requested `/start` or mentor destinations are preserved.
+  return through `/auth/callback` and continue to `/start` by default. The
+  callback preserves safe requested `/start` or mentor destinations for future
+  flows, while signup emails use the callback URL without a `next` query.
 - Sign out clears the Supabase session and sends the user to `/login`.
 - In development, `/mentor` and `/settings` may use the seeded fallback user when no Supabase session exists.
 - In production, unauthenticated users are redirected from `/mentor` and `/settings` to `/login`.
