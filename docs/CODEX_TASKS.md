@@ -84,6 +84,21 @@ Prepare final deployment checklist for Hostinger/VPS.
 Goal:
 Deploy staging version and verify health, auth, real provider, and protected dev routes.
 
+### Feature 096 - Charisma Mentor Teaching System
+
+Status:
+Documentation complete. The Charisma Mentor teaching contract, method library,
+expertise model, progression, safety boundaries, and future evaluation scenarios
+are specified. No runtime mentor, database, payment, Prisma, or package changes
+were made.
+
+Goal:
+Create a dedicated Charisma Mentor that teaches ethical charisma as a learnable
+skill through lessons, demonstrations, drills, feedback, real-world practice,
+and follow-up. This is a new teaching/training mentor, not the Confidence Mentor
+renamed and not a system for manipulation, dominance, pickup tactics, or a fake
+personality.
+
 ### Feature 097 - Alpha Feedback Capture
 
 Status:
