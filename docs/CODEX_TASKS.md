@@ -186,7 +186,29 @@ Goal:
 Provide a simple internal view of early alpha activity without SQL, public admin
 APIs, client-only authorization or database schema changes.
 
-### Feature 103 - Alpha Invite Gate
+### Feature 103 - Pricing, Plans And Mentor Credits Model
+
+Status:
+Documentation complete. The planned Free Trial, Single Mentor, Mentor Plus,
+Premium, and Company Stress Mentor prices and access boundaries are defined,
+along with user-facing credits, future server-side enforcement, upgrade logic,
+privacy constraints, and the division between Stripe billing and MentorAndI
+entitlements. No payment, schema, package, or runtime changes were made.
+
+Goal:
+Define a sustainable paid-access model in which plans control mentor access and
+mentor credits fund bounded product usage without exposing provider tokens or
+claiming unlimited use.
+
+Rules:
+
+- Stripe handles payment, subscription state, Checkout, and signed webhooks.
+- MentorAndI handles plan access, mentor locks, credits, and the usage ledger.
+- UI locks are explanatory only; future enforcement must be server-side.
+- Employer customers never receive individual Company Stress Mentor chats.
+- Do not implement payments or change the Prisma schema in this feature.
+
+### Feature 103A - Alpha Invite Gate (Legacy Feature 103)
 
 Status:
 Implemented. Signup accepts an optional invite code and validates it on the
