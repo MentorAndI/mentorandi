@@ -99,23 +99,24 @@ Important:
 
 ## Build And Start
 
-From the repository directory on the VPS:
+From the repository root on the VPS, deploy the latest `origin/main` with one
+command:
 
 ```bash
-git fetch origin main
-git checkout main
-git pull --ff-only origin main
-npm run check:env
-docker compose --env-file .env.staging -f docker-compose.staging.yml --profile tools build mentorandi-staging-migrate
-docker compose --env-file .env.staging -f docker-compose.staging.yml --profile tools run --rm mentorandi-staging-migrate
-docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build
+npm run deploy:staging
 ```
 
-The one-shot migration service runs `prisma migrate deploy` and must succeed
-before the application image starts using a new schema. The `--env-file
-.env.staging` flag is required because Docker build args for public Supabase
-values are interpolated from the compose environment. The same file is also
-mounted into the services for runtime variables.
+The command must be run from the repository root. It fetches and fast-forward
+pulls `origin/main`, prints the exact commit being deployed, requires the
+server-only `.env.staging`, rebuilds and starts the staging Compose service,
+waits briefly, and verifies that the public health endpoint returns HTTP success
+with `status: "ok"`. It stops with a clear error if any step fails.
+
+The `--env-file .env.staging` flag is required because Docker build args for
+public Supabase values are interpolated from the compose environment. The same
+file is also mounted into the service for runtime variables. Apply any required
+Prisma migrations separately before deploying a release that changes the
+database schema.
 
 ## Verify Container And Traefik
 
@@ -201,38 +202,29 @@ the job. No SSH key, environment file, password, or application secret belongs
 in the repository. The workflow host-key scan should be compared with the VPS
 host fingerprint during initial setup.
 
-### Manual fallback
+### Manual deployment on the VPS
 
-To deploy `origin/main` from a local Mentor And I checkout with one command:
+Connect to the VPS, change to the MentorAndI repository root, and run:
 
 ```bash
 npm run deploy:staging
 ```
 
-The command defaults to the `mentorandi-vps` alias in the local SSH config and
-requires working SSH authentication for that alias. To use a different SSH
-destination, set `DEPLOY_HOST` to a host or `user@host` value:
-
-```bash
-DEPLOY_HOST=deploy@example-vps npm run deploy:staging
-```
-
-The script opens a normal interactive SSH session and may prompt for the VPS
-password when an SSH key is not available. It then changes to
-`/docker/mentorandi`, fetches and fast-forward pulls `origin/main`, rebuilds the
-staging Compose service with the server-only `.env.staging`, waits, and checks
-`https://staging.mentorandi.com/api/health`. It exits unsuccessfully unless the
-endpoint returns HTTP success, valid JSON, and `status: "ok"`. The script does
-not contain, store, or transfer the SSH password or environment secrets.
+The script does not connect over SSH, contain credentials, or transfer the
+environment file. `.env.staging` remains on the VPS and must never be committed.
+Because the pull is fast-forward-only, the deploy stops instead of rewriting a
+diverged server checkout.
 
 The equivalent manual server commands remain:
 
 ```bash
 git fetch origin main
 git pull --ff-only origin main
-docker compose --env-file .env.staging -f docker-compose.staging.yml --profile tools build mentorandi-staging-migrate
-docker compose --env-file .env.staging -f docker-compose.staging.yml --profile tools run --rm mentorandi-staging-migrate
+git log -1 --oneline
+test -f .env.staging
 docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build
+sleep 10
+curl --fail https://staging.mentorandi.com/api/health
 ```
 
 ## Rollback

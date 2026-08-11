@@ -2,46 +2,73 @@
 
 set -Eeuo pipefail
 
-readonly DEFAULT_DEPLOY_HOST="mentorandi-vps"
+readonly STAGING_ENV_FILE=".env.staging"
+readonly STAGING_COMPOSE_FILE="docker-compose.staging.yml"
 readonly STAGING_HEALTH_URL="https://staging.mentorandi.com/api/health"
 
-deploy_host="${DEPLOY_HOST:-$DEFAULT_DEPLOY_HOST}"
+on_error() {
+  local exit_code=$?
+  echo "Staging deploy failed near line ${BASH_LINENO[0]}." >&2
+  exit "$exit_code"
+}
 
-if [[ -z "$deploy_host" || "$deploy_host" == -* ]]; then
-  echo "Staging deploy failed: DEPLOY_HOST must be a valid SSH destination." >&2
+trap on_error ERR
+
+fail() {
+  echo "Staging deploy failed: $*" >&2
   exit 1
+}
+
+command -v git >/dev/null 2>&1 || fail "git is required."
+
+repo_root="$(git rev-parse --show-toplevel 2>/dev/null)" ||
+  fail "run this command from the MentorAndI repository root."
+
+if [[ "$PWD" != "$repo_root" ]]; then
+  fail "run this command from the repository root: $repo_root"
 fi
 
-echo "Deploying MentorAndI staging through ${deploy_host}..."
+command -v docker >/dev/null 2>&1 || fail "Docker is required."
+command -v curl >/dev/null 2>&1 || fail "curl is required."
+command -v node >/dev/null 2>&1 || fail "Node.js is required."
 
-ssh -o ConnectTimeout=15 "$deploy_host" '
-  set -eu
-  cd /docker/mentorandi
-  git fetch origin main
-  git pull --ff-only origin main
-  docker compose --env-file .env.staging -f docker-compose.staging.yml --profile tools build mentorandi-staging-migrate
-  docker compose --env-file .env.staging -f docker-compose.staging.yml --profile tools run --rm mentorandi-staging-migrate
-  docker compose --env-file .env.staging -f docker-compose.staging.yml up -d --build
-'
+[[ -f "$STAGING_COMPOSE_FILE" ]] ||
+  fail "$STAGING_COMPOSE_FILE was not found in the repository root."
 
-echo "Deployment command completed. Waiting for staging to become healthy..."
+echo "Updating the staging checkout from origin/main..."
+git fetch origin main
+git pull --ff-only origin main
+
+echo "Latest commit:"
+git log -1 --oneline
+
+[[ -f "$STAGING_ENV_FILE" ]] ||
+  fail "$STAGING_ENV_FILE is required. Create it on the staging server; do not commit it."
+
+echo "Building and starting MentorAndI staging..."
+docker compose \
+  --env-file "$STAGING_ENV_FILE" \
+  -f "$STAGING_COMPOSE_FILE" \
+  up -d --build
+
+echo "Waiting briefly for the staging service to start..."
 sleep 10
 
-health_response="$({
-  curl \
-    --connect-timeout 10 \
-    --fail \
-    --max-time 20 \
-    --retry 6 \
-    --retry-all-errors \
-    --retry-delay 5 \
-    --show-error \
-    --silent \
-    "$STAGING_HEALTH_URL"
-} || {
-  echo "Staging deploy failed: health endpoint did not return HTTP success." >&2
-  exit 1
-})"
+echo "Checking $STAGING_HEALTH_URL ..."
+if ! health_response="$(curl \
+  --connect-timeout 10 \
+  --fail \
+  --max-time 20 \
+  --retry 6 \
+  --retry-all-errors \
+  --retry-delay 5 \
+  --show-error \
+  --silent \
+  "$STAGING_HEALTH_URL")"; then
+  fail "the health endpoint did not return an HTTP success response."
+fi
+
+echo "$health_response"
 
 if ! printf '%s' "$health_response" | node -e '
   const fs = require("node:fs");
@@ -55,7 +82,7 @@ if ! printf '%s' "$health_response" | node -e '
       );
       process.exit(1);
     }
-  } catch (error) {
+  } catch {
     console.error("Staging deploy failed: health response was not valid JSON.");
     process.exit(1);
   }
@@ -63,4 +90,4 @@ if ! printf '%s' "$health_response" | node -e '
   exit 1
 fi
 
-echo "Staging deploy succeeded: ${STAGING_HEALTH_URL} returned status ok."
+echo "Staging deploy succeeded: $STAGING_HEALTH_URL reported status ok."
