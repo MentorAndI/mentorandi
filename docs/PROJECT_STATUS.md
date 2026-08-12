@@ -25,9 +25,12 @@ Mentor And I
   `/admin` and review recent feedback at `/admin/feedback`.
 - Public alpha privacy, terms and contact pages are available, with direct
   support, in-product feedback and bug-report guidance on `/contact`.
-- A public `/alpha` entry page explains the invited tester flow, safety
-  boundaries, test checklist and feedback format, then shows session-aware
-  signup/login or mentor-start actions without exposing admin routes.
+- A public `/alpha` entry page explains the tester flow, safety boundaries,
+  test checklist and feedback format, then shows session-aware signup/login or
+  mentor-start actions without exposing admin routes.
+- Email/password signup is open without an alpha invite code. Supabase email
+  confirmation remains active, and new/default login flows continue to the
+  protected `/onboarding` route.
 - The active alpha mentor lineup is Life, ADHD, Relationship, Stress / Burnout,
   Parenting, Health & Fitness, Focus and Charisma; Business and Career are not
   active mentor categories.
@@ -74,8 +77,8 @@ Mentor And I
 ## Core Systems Built
 
 - Supabase Auth foundation.
-- Database-backed alpha invites with email/expiry/use controls, one-time code
-  display, revocation, and an emergency environment-code fallback.
+- Legacy database-backed alpha invite administration remains available for
+  internal records, but signup no longer validates or consumes invite codes.
 - Prisma database models.
 - User resolution.
 - Conversation ownership and user isolation.
@@ -144,16 +147,14 @@ Mentor And I
 ## Alpha Auth Behavior
 
 - `/login`, `/signup` and `/forgot-password` are public auth pages.
-- `/signup` requires an active database invite; revoked, expired, exhausted, and
-  email-mismatched invites are rejected before Supabase signup. Invite use is
-  recorded after Supabase and local user creation. `ALPHA_INVITE_CODE` is an
-  emergency/development fallback only.
-- Successful login redirects to `/mentor`.
-- Successful signup either creates an immediate session and continues to mentor
-  selection, or shows email confirmation instructions. Email confirmation links
-  return through `/auth/callback` and continue to `/start` by default. The
-  callback preserves safe requested `/start` or mentor destinations for future
-  flows, while signup emails use the callback URL without a `next` query.
+- `/signup` accepts email and password without an invite code. Supabase still
+  owns account authentication and email confirmation.
+- Successful login defaults to `/onboarding`; explicit safe `next` destinations
+  are preserved.
+- Successful signup either creates an immediate session and continues to
+  onboarding, or shows email confirmation instructions. Email confirmation links
+  return through `/auth/callback` and continue to `/onboarding` by default. The
+  callback preserves safe requested onboarding, start, or mentor destinations.
 - Sign out clears the Supabase session and sends the user to `/login`.
 - In development, `/mentor` and `/settings` may use the seeded fallback user when no Supabase session exists.
 - In production, unauthenticated users are redirected from `/mentor` and `/settings` to `/login`.

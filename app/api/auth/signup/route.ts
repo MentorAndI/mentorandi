@@ -11,13 +11,13 @@ export async function POST(request: NextRequest) {
   try {
     const body = (await request.json().catch(() => null)) as {
       email?: unknown;
-      inviteCode?: unknown;
+      nextPath?: unknown;
       password?: unknown;
     } | null;
 
     const result = await new AlphaSignupService().signup({
       email: readString(body?.email),
-      inviteCode: readOptionalString(body?.inviteCode),
+      nextPath: readOptionalString(body?.nextPath),
       password: readString(body?.password),
       requestOrigin: request.nextUrl.origin,
     });

@@ -419,3 +419,16 @@ while the prompt uses at most one natural intervention.
 Goal:
 Make specialization substantive without list-heavy responses, weakening safety
 boundaries, or losing Marcus's warm personal mentoring response contract.
+
+### Feature 110B - Remove Alpha Invite Code Signup Gate
+
+Status:
+Implemented. Email/password signup no longer displays, accepts, validates, or
+consumes an alpha invite code. Supabase email confirmation remains active.
+Signup and default login/callback paths continue to protected onboarding, while
+plan query parameters remain non-entitling context. New users without an active
+subscription resolve to Free/Life-only in production and staging.
+
+Goal:
+Allow new staging test accounts to reach onboarding without weakening Supabase
+authentication or granting paid mentor access.

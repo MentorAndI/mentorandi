@@ -1,10 +1,11 @@
 const allowedNextPathPrefixes = [
   "/start",
+  "/onboarding",
   "/mentor",
   "/mentors",
   "/settings",
 ] as const;
-const defaultAuthCallbackNextPath = "/start";
+const defaultAuthCallbackNextPath = "/onboarding";
 const internalHostnames = new Set([
   "0.0.0.0",
   "::",
@@ -41,8 +42,12 @@ export function getSafeAuthRedirectPath(
   return requestedPath;
 }
 
-export function buildAuthCallbackUrl(origin: string) {
+export function buildAuthCallbackUrl(origin: string, nextPath?: string) {
   const callbackUrl = new URL("/auth/callback", origin);
+
+  if (nextPath) {
+    callbackUrl.searchParams.set("next", normalizeSafeAuthNextPath(nextPath));
+  }
 
   return callbackUrl.toString();
 }

@@ -12,16 +12,21 @@ export const metadata: Metadata = {
 export default async function SignupPage({
   searchParams,
 }: {
-  searchParams: Promise<{ next?: string | string[] }>;
+  searchParams: Promise<{
+    next?: string | string[];
+    plan?: string | string[];
+  }>;
 }) {
   const params = await searchParams;
   const requestedPath = Array.isArray(params.next) ? params.next[0] : params.next;
-  const redirectPath = normalizeSafeAuthNextPath(requestedPath ?? "/mentors");
+  const requestedPlan = Array.isArray(params.plan) ? params.plan[0] : params.plan;
+  const onboardingPath = buildOnboardingPath(requestedPlan);
+  const redirectPath = normalizeSafeAuthNextPath(requestedPath ?? onboardingPath);
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 py-16 text-zinc-950">
       <AuthFormShell
-        description="Mentor And I is a private alpha for invited testers. Use your invite code, verify your email, then choose the mentor closest to what you want help with."
+        description="Create your account, verify your email, and continue to onboarding."
         footerLink={{
           href: "/login",
           label: "Log in",
@@ -37,4 +42,12 @@ export default async function SignupPage({
       </AuthFormShell>
     </main>
   );
+}
+
+function buildOnboardingPath(plan?: string) {
+  if (!plan || !["free", "single", "plus", "premium"].includes(plan)) {
+    return "/onboarding";
+  }
+
+  return `/onboarding?plan=${encodeURIComponent(plan)}`;
 }

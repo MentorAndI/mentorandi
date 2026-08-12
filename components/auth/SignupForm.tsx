@@ -16,7 +16,6 @@ import { validateSignupForm } from "@/services/auth/validation";
 
 interface SignupFormValues {
   email: string;
-  inviteCode: string;
   password: string;
   passwordConfirmation: string;
 }
@@ -24,7 +23,6 @@ interface SignupFormValues {
 interface SignupFormErrors {
   email?: string;
   form?: string;
-  inviteCode?: string;
   password?: string;
   passwordConfirmation?: string;
 }
@@ -34,12 +32,11 @@ export interface SignupFormProps {
 }
 
 export function SignupForm({
-  redirectPath = "/mentors",
+  redirectPath = "/onboarding",
 }: SignupFormProps) {
   const router = useRouter();
   const [values, setValues] = useState<SignupFormValues>({
     email: "",
-    inviteCode: "",
     password: "",
     passwordConfirmation: "",
   });
@@ -70,17 +67,11 @@ export function SignupForm({
     try {
       const { data, error } = await signUpWithEmailPassword({
         email: values.email,
-        inviteCode: values.inviteCode,
         nextPath: redirectPath,
         password: values.password,
       });
 
       if (error) {
-        if (isInviteError(error.message)) {
-          setErrors({ inviteCode: error.message });
-          return;
-        }
-
         setErrors({
           form: formatSignupAuthError(error.message),
         });
@@ -124,7 +115,7 @@ export function SignupForm({
             </p>
             <p>
               Clicking the confirmation link will log you in and take you to
-              the next step: choosing a mentor or starting your conversation.
+              your onboarding.
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -161,22 +152,6 @@ export function SignupForm({
         }
         type="email"
         value={values.email}
-      />
-
-      <Input
-        autoComplete="off"
-        error={errors.inviteCode}
-        id="signup-invite-code"
-        hint="Use the private code included with your alpha invitation."
-        label="Alpha invite code"
-        onChange={(event) =>
-          setValues((current) => ({
-            ...current,
-            inviteCode: event.target.value,
-          }))
-        }
-        type="text"
-        value={values.inviteCode}
       />
 
       <Input
@@ -220,15 +195,6 @@ export function SignupForm({
       </Button>
     </form>
   );
-}
-
-function isInviteError(message?: string) {
-  return [
-    "Invalid or expired alpha invite.",
-    "This alpha invite has already been used.",
-    "This alpha invite does not match that email address.",
-    "This alpha invite is no longer available.",
-  ].includes(message ?? "");
 }
 
 function formatSignupAuthError(message?: string) {

@@ -1,10 +1,5 @@
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
-  AlphaInviteService,
-  AlphaInviteServiceError,
-} from "@/services/alpha-invite/alpha-invite.service";
-import type { ValidatedAlphaInvite } from "@/services/alpha-invite/alpha-invite.types";
-import {
   buildAuthCallbackUrl,
   getPublicAppOrigin,
 } from "@/services/auth/redirects";
@@ -12,7 +7,7 @@ import { UserService } from "@/services/user/user.service";
 
 export interface AlphaSignupInput {
   email: string;
-  inviteCode?: string;
+  nextPath?: string;
   password: string;
   requestOrigin: string;
 }
@@ -28,10 +23,7 @@ export class AlphaSignupServiceError extends Error {
 }
 
 export class AlphaSignupService {
-  constructor(
-    private readonly inviteService = new AlphaInviteService(),
-    private readonly userService = new UserService(),
-  ) {}
+  constructor(private readonly userService = new UserService()) {}
 
   async signup(input: AlphaSignupInput) {
     const email = input.email.trim();
@@ -44,23 +36,12 @@ export class AlphaSignupService {
       );
     }
 
-    let validatedInvite: ValidatedAlphaInvite;
-
-    try {
-      validatedInvite = await this.inviteService.validateForSignup(
-        input.inviteCode,
-        email,
-      );
-    } catch (error) {
-      throw translateInviteError(error);
-    }
-
     const supabase = await createSupabaseServerClient();
     const publicOrigin = getPublicAppOrigin(input.requestOrigin);
     const { data, error } = await supabase.auth.signUp({
       email,
       options: {
-        emailRedirectTo: buildAuthCallbackUrl(publicOrigin),
+        emailRedirectTo: buildAuthCallbackUrl(publicOrigin, input.nextPath),
       },
       password,
     });
@@ -82,28 +63,13 @@ export class AlphaSignupService {
       );
     }
 
-    const appUser = await this.userService.getOrCreateUserByAuthUserId(
-      data.user.id,
-    );
-    try {
-      await this.inviteService.consumeAfterSignup(validatedInvite, appUser.id);
-    } catch (error) {
-      throw translateInviteError(error);
-    }
+    await this.userService.getOrCreateUserByAuthUserId(data.user.id);
 
     return {
       confirmationRequired: !data.session,
       hasSession: Boolean(data.session),
     };
   }
-}
-
-function translateInviteError(error: unknown) {
-  if (error instanceof AlphaInviteServiceError) {
-    return new AlphaSignupServiceError(error.message, error.statusCode);
-  }
-
-  return error;
 }
 
 function formatSafeSignupError(message?: string) {

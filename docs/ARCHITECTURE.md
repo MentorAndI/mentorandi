@@ -63,16 +63,19 @@ services read cross-user data through Prisma. There is no public admin or
 feedback read API and no browser-facing Supabase access. See
 `docs/ALPHA_ADMIN.md`.
 
-## Alpha Invite Management
+## Signup And Legacy Alpha Invites
 
-`/signup` sends account-creation requests to the server-only
-`/api/auth/signup` boundary. The invite service hashes the submitted code and
-validates an active `AlphaInvite` before calling Supabase Auth. It records usage
-only after Supabase and local user creation succeed. The allowlisted internal
-`/admin/invites` page can create, inspect safe metadata, and revoke invites; raw
-codes are shown once and never stored. `ALPHA_INVITE_CODE` remains a server-only
-emergency/development fallback. Login and existing accounts are unchanged. See
-`docs/ALPHA_INVITE_GATE.md`.
+`/signup` sends email/password account-creation requests to the server-only
+`/api/auth/signup` boundary, which calls Supabase Auth and creates the local user
+record. Signup does not accept, validate, or consume an alpha invite code.
+Supabase email confirmation remains authoritative. The allowlisted
+`/admin/invites` tooling and existing `AlphaInvite` records remain legacy
+internal administration only and are not part of account creation.
+
+New users have no active paid subscription by default. In production and
+staging, the mentor-access service therefore resolves them to Free and Life
+Mentor only. Plan query parameters are onboarding context, never entitlements.
+See `docs/ONBOARDING_INTAKE.md`.
 
 ## Alpha Trust Pages
 

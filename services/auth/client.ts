@@ -18,18 +18,16 @@ export async function signInWithEmailPassword({
 }
 
 export interface SignupCredentials extends EmailPasswordCredentials {
-  inviteCode?: string;
   nextPath?: string;
 }
 
 export async function signUpWithEmailPassword({
   email,
-  inviteCode,
   nextPath,
   password,
 }: SignupCredentials) {
   const response = await fetch("/api/auth/signup", {
-    body: JSON.stringify({ email, inviteCode, nextPath, password }),
+    body: JSON.stringify({ email, nextPath, password }),
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",

@@ -18,6 +18,7 @@ const checks = [
   { path: "/contact", redirectsAllowed: false },
   { path: "/start", redirectsAllowed: false },
   { path: "/mentor", redirectsAllowed: true },
+  { path: "/onboarding", redirectsAllowed: true },
   { path: "/settings", redirectsAllowed: true },
   { path: "/admin", redirectsAllowed: true },
   { path: "/admin/feedback", redirectsAllowed: true },
