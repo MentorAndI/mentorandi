@@ -17,6 +17,7 @@ import {
   getMentorDisplayName,
 } from "@/services/mentor-catalog/mentor-catalog";
 import type { ActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog.types";
+import { MentorAccessService } from "@/services/mentor-access/mentor-access.service";
 import { UserService } from "@/services/user/user.service";
 import type { UserDto } from "@/services/user/user.types";
 
@@ -59,6 +60,7 @@ export class MentorSessionService {
     private readonly userService = new UserService(),
     private readonly conversationService = new ConversationService(),
     private readonly goalService = new GoalService(),
+    private readonly mentorAccessService = new MentorAccessService(),
   ) {}
 
   async getMentorSessionForUser(
@@ -66,6 +68,7 @@ export class MentorSessionService {
     mentorSlug: ActiveMentorSlug,
   ): Promise<MentorSessionDto> {
     try {
+      await this.mentorAccessService.assertMentorAccess(user.id, mentorSlug);
       const profile = requireMentorProfile(mentorSlug);
       const conversation =
         await this.conversationService.getOrCreateConversationForUserAndMentorSlug(
@@ -119,6 +122,7 @@ export class MentorSessionService {
     mentorSlug: ActiveMentorSlug,
   ): Promise<MentorSessionDto> {
     try {
+      await this.mentorAccessService.assertMentorAccess(user.id, mentorSlug);
       const profile = requireMentorProfile(mentorSlug);
       const conversation =
         await this.conversationService.getConversationForUserId(
@@ -149,6 +153,7 @@ export class MentorSessionService {
     mentorSlug: ActiveMentorSlug,
   ): Promise<MentorSessionDto> {
     try {
+      await this.mentorAccessService.assertMentorAccess(user.id, mentorSlug);
       const profile = requireMentorProfile(mentorSlug);
       const conversation =
         await this.conversationService.createConversationForUserAndMentorSlug(

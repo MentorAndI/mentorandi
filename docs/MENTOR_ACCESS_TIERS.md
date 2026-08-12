@@ -2,8 +2,9 @@
 
 ## Purpose
 
-This document maps pricing plans to mentor and capability access. It is a future
-authorization model, not current runtime behavior.
+This document maps pricing plans to mentor and capability access. Feature 104
+adds the first server-side mentor-access foundation; credit and deep-session
+enforcement remain future work.
 
 Plan access must eventually be enforced server-side at every boundary that can
 select a mentor, load or create a mentor conversation, send a mentor request,
@@ -70,6 +71,39 @@ legal terms.
 
 ## Server-Side Enforcement Direction
 
+### Foundation implemented in Feature 104
+
+`services/mentor-access/mentor-access-policy.ts` is the central policy for
+`free`, `single_mentor`, `plus`, `premium`, and `company_stress`. Mentor session
+loading and creation now check this policy before returning or creating a
+conversation, and both mentor response API paths check access before Mentor Core
+or model work. Locked access returns HTTP 403 with:
+
+- “This mentor is not included in your current plan.”
+- “Upgrade to unlock specialist mentors.”
+
+The current schema predates this plan model. Active/trialing `FREE` maps to
+`free`; legacy `ALPHA` and `PERSONAL` map to `plus` to preserve the existing
+multi-mentor alpha/test flow; and `PREMIUM` and `FOUNDER` map to `premium`.
+Missing or inactive subscription state fails down to `free` in production and
+staging, never Premium. Local development receives an explicit non-Premium
+`plus` test entitlement so specialist dev/eval flows remain usable. Only
+authenticated users reach production/staging mentor response and session APIs;
+development fallback users remain confined to development-only paths.
+
+The schema cannot yet assign `single_mentor` or `company_stress`, because
+`SubscriptionPlan` lacks those values and there is no persisted selected mentor
+or company-seat entitlement. A later reviewed migration must add the new plan
+values (or a replacement entitlement model), a user-owned selected specialist,
+and company seat state before those plans can be sold or activated. No
+environment variable or client request can grant these plans in this
+foundation.
+
+Deep-session tiers (`none`, `limited`, and `expanded`) and Premium advanced-
+program eligibility are represented in policy for later enforcement, but the
+current request contract does not identify a deep session or advanced program.
+Feature 104 therefore does not pretend to meter either capability.
+
 A future authorization flow should:
 
 1. Resolve the authenticated user without trusting client identifiers.
@@ -130,8 +164,9 @@ Company employee memory must never become an employer-visible record. Anonymous
 company insights require a separately reviewed aggregation path and cannot be
 constructed by exposing individual mentor context.
 
-## Not Implemented
+## Still Not Implemented
 
-This document adds no entitlement service, locks, Stripe integration, credit
-ledger, schema, UI, or model routing. Current alpha mentor access and usage
-limits remain unchanged until a separately authorized implementation feature.
+This foundation adds mentor access checks and policy only. It adds no Stripe
+integration, credit ledger, schema, UI locks, purchased-plan activation, deep-
+session meter, advanced program, or priority model routing. Existing request-
+count usage limits remain separate.

@@ -15,6 +15,10 @@ import {
   MentorUsageLimitService,
   MentorUsageMonitoringError,
 } from "@/services/usage-limits/mentor-usage-limits.service";
+import {
+  MentorAccessService,
+  MentorAccessServiceError,
+} from "@/services/mentor-access/mentor-access.service";
 
 export const dynamic = "force-dynamic";
 
@@ -54,6 +58,11 @@ export async function POST(request: Request) {
     if (validation.input.userId !== userId) {
       return NextResponse.json({ error: "Forbidden." }, { status: 403 });
     }
+
+    await new MentorAccessService().assertConversationMentorAccess(
+      userId,
+      validation.input.conversationId,
+    );
 
     const usageLimitService = new MentorUsageLimitService();
     const usageContext = {
@@ -96,6 +105,18 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ response }, { status: 200 });
   } catch (error) {
+    if (error instanceof MentorAccessServiceError) {
+      return NextResponse.json(
+        {
+          error: error.message,
+          ...(error.upgradeMessage
+            ? { upgradeMessage: error.upgradeMessage }
+            : {}),
+        },
+        { status: error.statusCode },
+      );
+    }
+
     if (error instanceof MentorUsageMonitoringError) {
       return createSafeErrorResponse({
         context: "api/mentor-core/respond:usage",

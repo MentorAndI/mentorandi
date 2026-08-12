@@ -17,6 +17,7 @@ import {
   MentorUsageLimitService,
   MentorUsageMonitoringError,
 } from "@/services/usage-limits/mentor-usage-limits.service";
+import { MentorAccessServiceError } from "@/services/mentor-access/mentor-access.service";
 
 export const dynamic = "force-dynamic";
 
@@ -73,6 +74,18 @@ export async function POST(request: Request) {
       { status: 200 },
     );
   } catch (error) {
+    if (error instanceof MentorAccessServiceError) {
+      return NextResponse.json(
+        {
+          error: error.message,
+          ...(error.upgradeMessage
+            ? { upgradeMessage: error.upgradeMessage }
+            : {}),
+        },
+        { status: error.statusCode },
+      );
+    }
+
     if (error instanceof MentorUsageMonitoringError) {
       return createSafeErrorResponse({
         context: "api/first-conversation:usage",

@@ -218,7 +218,29 @@ Goal:
 Restrict new alpha accounts to invited testers without exposing the configured
 code to client bundles or affecting login, existing users or email confirmation.
 
-### Feature 104 - Alpha Tester Instructions
+### Feature 104 - Plan-Based Mentor Access Enforcement Foundation
+
+Status:
+Implemented. A central policy represents free, single-mentor, Plus, Premium,
+and Company Stress access; mentor session creation/loading and both mentor
+response API paths enforce the resolved user's mentor access server-side before
+model work. Missing or inactive subscriptions default to Free in production and
+staging, never Premium; local development uses a non-Premium Plus test default.
+
+Goal:
+Prevent users from accessing mentors outside their plan through direct API or
+conversation requests while billing, credits, deep-session metering, and UI
+locks remain future work.
+
+Current schema note:
+The legacy subscription enum cannot represent `single_mentor`, `plus`, or
+`company_stress`, and it has no selected-specialist or company-seat field. The
+foundation safely maps active legacy Alpha/Personal to Plus for alpha/test
+compatibility, Free to Free, Premium/Founder to Premium, and everything inactive
+or missing to Free. A later reviewed migration is required before new plans are
+sold or assigned.
+
+### Feature 104A - Alpha Tester Instructions (Legacy Feature 104)
 
 Status:
 Implemented. The public `/alpha` page gives invited testers a signup-to-feedback

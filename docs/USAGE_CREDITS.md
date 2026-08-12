@@ -125,6 +125,12 @@ A future system may enforce both layers:
 Passing one layer never bypasses the other. Production should fail closed if
 authoritative plan or credit state cannot be checked.
 
+Feature 104 enforces mentor eligibility before mentor response work but does not
+create or debit credits. The access policy exposes deep-session tiers for later
+use; because current requests do not identify credit-bearing action types or
+deep sessions, existing `UsageEvent` request limits remain the only active usage
+meter. They are still not a credit ledger.
+
 ## Privacy And Ownership
 
 Credit events belong to one resolved user or, for a company seat, to the

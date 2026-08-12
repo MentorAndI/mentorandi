@@ -12,6 +12,7 @@ import {
   isActiveMentorSlug,
 } from "@/services/mentor-catalog/mentor-catalog";
 import type { ActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog.types";
+import { MentorAccessServiceError } from "@/services/mentor-access/mentor-access.service";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +65,18 @@ export async function GET(request: Request) {
       { status: 200 },
     );
   } catch (error) {
+    if (error instanceof MentorAccessServiceError) {
+      return NextResponse.json(
+        {
+          error: error.message,
+          ...(error.upgradeMessage
+            ? { upgradeMessage: error.upgradeMessage }
+            : {}),
+        },
+        { status: error.statusCode },
+      );
+    }
+
     if (error instanceof MentorSessionServiceError) {
       return createSafeErrorResponse({
         context: "api/mentor/session:session",
