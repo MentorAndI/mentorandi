@@ -1,9 +1,9 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { Container } from "@/components/layout/Container";
+import { MentorPortrait } from "@/components/mentor/MentorPortrait";
 import { Badge } from "@/components/ui/Badge";
 import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
@@ -55,13 +55,11 @@ export default async function MentorProfilePage({
         </Link>
 
         <div className="mt-8 grid overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm lg:grid-cols-[0.9fr_1.1fr]">
-          <Image
-            alt={`${mentor.personaName}, ${mentor.name}`}
-            className="h-full min-h-[360px] w-full object-cover object-top"
-            height={900}
+          <MentorPortrait
+            className="relative min-h-[360px] w-full overflow-hidden"
+            name={mentor.personaName}
+            portraitSrc={mentor.portraitSrc}
             priority
-            src={mentor.portraitSrc}
-            width={900}
           />
 
           <div className="flex flex-col justify-center p-7 sm:p-10 lg:p-12">

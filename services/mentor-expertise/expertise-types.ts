@@ -1,6 +1,6 @@
 export type MentorExpertiseDomain =
   | "ADHD mentor"
-  | "confidence mentor"
+  | "charisma mentor"
   | "focus mentor"
   | "health and fitness mentor"
   | "life mentor"

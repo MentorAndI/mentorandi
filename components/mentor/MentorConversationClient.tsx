@@ -1,6 +1,7 @@
 "use client";
 
 import { type FormEvent, useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 import { MentorConversationHistory } from "@/components/mentor/MentorConversationHistory";
@@ -41,7 +42,7 @@ interface MentorResponsePayload {
 
 const defaultMentor = {
   name: "Marcus",
-  portraitSrc: "/images/mentors/marcus.png",
+  portraitSrc: null,
   role: "Life Mentor",
   slug: "life",
   tagline: "Personal clarity, honest reflection, and sustainable change.",
@@ -49,7 +50,7 @@ const defaultMentor = {
 
 interface SelectedMentorPreview {
   name: string;
-  portraitSrc: string;
+  portraitSrc: string | null;
   role: string;
   slug: string;
   tagline: string;
@@ -63,6 +64,7 @@ export function MentorConversationClient({
   const router = useRouter();
   const [conversationId, setConversationId] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [upgradeMessage, setUpgradeMessage] = useState("");
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isLoadingMemories, setIsLoadingMemories] = useState(false);
   const [isLoadingSession, setIsLoadingSession] = useState(true);
@@ -92,7 +94,11 @@ export function MentorConversationClient({
       | MentorApiError;
 
     if (!response.ok) {
-      throw new Error(formatErrorResponse(responseBody as MentorApiError));
+      const apiError = responseBody as MentorApiError;
+      throw new MentorRequestError(
+        formatErrorResponse(apiError),
+        apiError.upgradeMessage,
+      );
     }
 
     return responseBody as MentorSession;
@@ -206,6 +212,11 @@ export function MentorConversationClient({
         }
 
         if (isActive) {
+          setUpgradeMessage(
+            error instanceof MentorRequestError
+              ? (error.upgradeMessage ?? "")
+              : "",
+          );
           setErrorMessage(
             error instanceof Error
               ? error.message
@@ -238,6 +249,7 @@ export function MentorConversationClient({
     }
 
     setErrorMessage("");
+    setUpgradeMessage("");
     setMessageError("");
     setIsSending(true);
 
@@ -258,7 +270,9 @@ export function MentorConversationClient({
         | MentorApiError;
 
       if (!response.ok) {
-        setErrorMessage(formatErrorResponse(responseBody as MentorApiError));
+        const apiError = responseBody as MentorApiError;
+        setErrorMessage(formatErrorResponse(apiError));
+        setUpgradeMessage(apiError.upgradeMessage ?? "");
         return;
       }
 
@@ -282,6 +296,7 @@ export function MentorConversationClient({
 
   async function handleStartNewConversation() {
     setErrorMessage("");
+    setUpgradeMessage("");
     setMessageError("");
     setIsStartingNewConversation(true);
 
@@ -298,7 +313,9 @@ export function MentorConversationClient({
         | MentorApiError;
 
       if (!response.ok) {
-        setErrorMessage(formatErrorResponse(responseBody as MentorApiError));
+        const apiError = responseBody as MentorApiError;
+        setErrorMessage(formatErrorResponse(apiError));
+        setUpgradeMessage(apiError.upgradeMessage ?? "");
         return;
       }
 
@@ -356,9 +373,17 @@ export function MentorConversationClient({
         />
 
         {errorMessage ? (
-          <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
-            {errorMessage}
-          </p>
+          <div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+            <p>{errorMessage}</p>
+            {upgradeMessage ? (
+              <Link
+                className="mt-2 inline-flex font-semibold text-sky-950 underline decoration-sky-300 underline-offset-4 hover:text-sky-700"
+                href="/pricing"
+              >
+                Upgrade to unlock this mentor
+              </Link>
+            ) : null}
+          </div>
         ) : null}
 
         <MentorConversationHistory
@@ -424,4 +449,14 @@ function formatErrorResponse(responseBody: MentorApiError) {
   }
 
   return "Something went wrong.";
+}
+
+class MentorRequestError extends Error {
+  constructor(
+    message: string,
+    public readonly upgradeMessage?: string,
+  ) {
+    super(message);
+    this.name = "MentorRequestError";
+  }
 }

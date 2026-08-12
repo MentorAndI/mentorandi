@@ -2,7 +2,7 @@ import type { ActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog.
 
 export type MentorMethodDomain =
   | "ADHD"
-  | "Confidence"
+  | "Charisma"
   | "Focus"
   | "Health & Fitness"
   | "Life"

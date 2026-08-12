@@ -52,7 +52,10 @@ import {
   UserService,
   UserServiceError,
 } from "@/services/user/user.service";
-import { getActiveMentorProfile } from "@/services/mentor-catalog/mentor-catalog";
+import {
+  getActiveMentorProfile,
+  getActiveMentorProfileByDatabaseSlug,
+} from "@/services/mentor-catalog/mentor-catalog";
 import { MentorSpecialistContextService } from "@/services/mentor-specialization/specialist-context.service";
 import { normalizeMentorResponseFormatting } from "@/services/mentor-core/response-formatting/mentor-response-formatting";
 
@@ -113,6 +116,10 @@ export class MentorResponsePipelineService {
         authContext,
       );
 
+      const specialization =
+        getActiveMentorProfile(input.mentorSpecialty) ??
+        getActiveMentorProfileByDatabaseSlug(context.mentor.slug) ??
+        undefined;
       const promptPackage = this.promptComposer.compose({
         context,
         currentUserMessage: input.message,
@@ -122,7 +129,10 @@ export class MentorResponsePipelineService {
               (goal) => `${goal.title} ${goal.description ?? ""}`,
             ),
             latestUserMessage: input.message,
-            mentorSlug: context.mentor.slug,
+            mentorSlug:
+              specialization?.slug === "charisma"
+                ? specialization.slug
+                : context.mentor.slug,
             recentConversationSummary: context.recentMessages.map(
               (message) => message.content,
             ),
@@ -130,7 +140,7 @@ export class MentorResponsePipelineService {
               (memory) => `${memory.title} ${memory.content}`,
             ),
           }),
-        specialization: getActiveMentorProfile(input.mentorSpecialty) ?? undefined,
+        specialization,
       });
       const model = input.model?.trim() || undefined;
 

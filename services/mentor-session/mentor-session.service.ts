@@ -253,7 +253,7 @@ function toMentorSessionDto(
     conversation: { id: conversation.id },
     mentor: {
       name: getMentorDisplayName(profile),
-      role: profile.slug === "life" ? "Life Mentor" : "Specialized Mentor",
+      role: profile.name,
       slug: profile.slug,
       tagline: profile.shortDescription,
     },

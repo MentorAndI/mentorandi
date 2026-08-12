@@ -1,12 +1,11 @@
-import Image from "next/image";
-
+import { MentorPortrait } from "@/components/mentor/MentorPortrait";
 import { Button } from "@/components/ui/Button";
 
 export interface MentorHeaderProps {
   isStartingNewConversation?: boolean;
   name: string;
   onNewConversation?: () => void;
-  portraitSrc: string;
+  portraitSrc: string | null;
   role: string;
   tagline: string;
 }
@@ -22,13 +21,11 @@ export function MentorHeader({
   return (
     <header className="border-b border-zinc-200 pb-6">
       <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-        <Image
-          alt={`${name}, ${role}`}
-          className="h-20 w-20 rounded-2xl object-cover object-top"
-          height={160}
+        <MentorPortrait
+          className="relative h-20 w-20 shrink-0 overflow-hidden rounded-2xl"
+          name={name}
+          portraitSrc={portraitSrc}
           priority
-          src={portraitSrc}
-          width={160}
         />
         <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>

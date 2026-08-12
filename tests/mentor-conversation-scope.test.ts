@@ -22,21 +22,21 @@ after(async () => {
   });
 });
 
-test("mentor conversations keep confidence, ADHD, and legacy Life messages isolated", async () => {
+test("mentor conversations keep Charisma, ADHD, and legacy Life messages isolated", async () => {
   const authUserId = randomUUID();
   createdAuthUserIds.push(authUserId);
 
   const user = await prisma.user.create({ data: { authUserId } });
   const conversationService = new ConversationService();
   const messageService = new MessageService();
-  const confidenceProfile = requireProfile("confidence");
+  const charismaProfile = requireProfile("charisma");
   const adhdProfile = requireProfile("adhd");
   const lifeProfile = requireProfile("life");
 
-  const confidenceConversation =
+  const charismaConversation =
     await conversationService.getOrCreateConversationForUserAndMentorSlug(
       user.id,
-      confidenceProfile.databaseSlug,
+      charismaProfile.databaseSlug,
     );
   const adhdConversation =
     await conversationService.getOrCreateConversationForUserAndMentorSlug(
@@ -49,14 +49,14 @@ test("mentor conversations keep confidence, ADHD, and legacy Life messages isola
       lifeProfile.databaseSlug,
     );
 
-  assert.notEqual(confidenceConversation.id, adhdConversation.id);
-  assert.notEqual(confidenceConversation.id, legacyLifeConversation.id);
+  assert.notEqual(charismaConversation.id, adhdConversation.id);
+  assert.notEqual(charismaConversation.id, legacyLifeConversation.id);
   assert.notEqual(adhdConversation.id, legacyLifeConversation.id);
   assert.equal(legacyLifeConversation.mentor.slug, "marcus");
 
   await messageService.createMessage(
-    confidenceConversation.id,
-    { content: "confidence-only-message", role: "USER" },
+    charismaConversation.id,
+    { content: "charisma-only-message", role: "USER" },
     { authUserId },
   );
   await messageService.createMessage(
@@ -70,8 +70,8 @@ test("mentor conversations keep confidence, ADHD, and legacy Life messages isola
     { authUserId },
   );
 
-  const confidenceMessages = await messageService.getMessagesForConversation(
-    confidenceConversation.id,
+  const charismaMessages = await messageService.getMessagesForConversation(
+    charismaConversation.id,
     { authUserId },
   );
   const adhdMessages = await messageService.getMessagesForConversation(
@@ -84,8 +84,8 @@ test("mentor conversations keep confidence, ADHD, and legacy Life messages isola
   );
 
   assert.deepEqual(
-    confidenceMessages.map((message) => message.content),
-    ["confidence-only-message"],
+    charismaMessages.map((message) => message.content),
+    ["charisma-only-message"],
   );
   assert.deepEqual(
     adhdMessages.map((message) => message.content),
@@ -96,10 +96,10 @@ test("mentor conversations keep confidence, ADHD, and legacy Life messages isola
     ["legacy-life-only-message"],
   );
 
-  const resolvedConfidence =
+  const resolvedCharisma =
     await conversationService.getOrCreateConversationForUserAndMentorSlug(
       user.id,
-      confidenceProfile.databaseSlug,
+      charismaProfile.databaseSlug,
     );
   const resolvedAdhd =
     await conversationService.getOrCreateConversationForUserAndMentorSlug(
@@ -107,11 +107,11 @@ test("mentor conversations keep confidence, ADHD, and legacy Life messages isola
       adhdProfile.databaseSlug,
     );
 
-  assert.equal(resolvedConfidence.id, confidenceConversation.id);
+  assert.equal(resolvedCharisma.id, charismaConversation.id);
   assert.equal(resolvedAdhd.id, adhdConversation.id);
 });
 
-function requireProfile(slug: "adhd" | "confidence" | "life") {
+function requireProfile(slug: "adhd" | "charisma" | "life") {
   const profile = getActiveMentorProfile(slug);
 
   assert.ok(profile);

@@ -13,7 +13,7 @@ users, testimonials, growth claims, revenue claims, or usage metrics.
 | Supabase auth and database | Email/password authentication, session resolution, PostgreSQL persistence, and Prisma repositories are integrated. | Signup/login/callback routes, Supabase server clients, Prisma schema and repositories. The health endpoint reports auth configured and database connected. |
 | Resend email verification | The alpha signup flow supports verification email delivery through the current Resend/Supabase Auth setup and returns confirmation links through `/auth/callback`. | The repo implements Supabase signup, `emailRedirectTo`, code/OTP verification, and the safe callback. Resend delivery configuration is operational infrastructure outside this repository; no API key is committed. |
 | Managed alpha invites | Signup requires an active database-backed invite that can be email-restricted, expired, usage-limited, tracked, and revoked. | `AlphaInvite`, the invite service, and protected `/admin/invites`. Raw generated codes are shown once and stored only as hashes; `ALPHA_INVITE_CODE` remains an emergency/development fallback. |
-| Specialized mentors | Eight alpha profiles provide distinct focus, tone, boundaries, expertise, and openings. | Life, ADHD, Relationship, Stress / Burnout, Parenting, Health & Fitness, Focus, and Confidence in the active Mentor Catalog and `/mentors`. |
+| Specialized mentors | Eight alpha profiles provide distinct focus, tone, boundaries, expertise, and openings. | Life, ADHD, Relationship, Stress / Burnout, Parenting, Health & Fitness, Focus, and Charisma in the active Mentor Catalog and `/mentors`. |
 | Mentor-scoped conversations | Each selected mentor loads or creates a separate owned conversation; switching profiles does not merge message history. | Mentor session services, ownership validation, stale-request protection, and `npm run test:mentor-scope`. User-level memories/goals remain shared context in v1. |
 | Mentor-specific methods | Each active mentor has four curated methods, selected only from that mentor's library using the current message and lower-weight recent context. | `services/mentor-methods/` and `docs/MENTOR_METHOD_LIBRARIES.md`. At most two matches enter context and the prompt uses at most one primary intervention. |
 | Admin overview | Allowlisted admins can inspect aggregate alpha activity and recent records and manage invitations. | `/admin` and `/admin/invites` check a real Supabase user against `ALPHA_ADMIN_EMAILS`; they are not linked publicly. Counts are operational, not investor traction metrics. |
@@ -49,7 +49,7 @@ Returning users can resume history instead of beginning with a blank chat.
 
 ### Mentor contexts remain separate
 
-ADHD and Confidence can belong to one user while retaining different
+ADHD and Charisma can belong to one user while retaining different
 conversation threads. Server-side mentor matching and client-side stale-request
 protection prevent a switch from attaching or displaying the wrong thread.
 

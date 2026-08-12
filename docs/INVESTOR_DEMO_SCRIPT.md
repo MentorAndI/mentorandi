@@ -31,7 +31,7 @@ chat experience.
 Open `/mentors`.
 
 Show Life, ADHD, Relationship, Stress / Burnout, Parenting, Health & Fitness,
-Focus, and Confidence. Briefly explain that the shared engine handles account,
+Focus, and Charisma. Briefly explain that the shared engine handles account,
 context, safety, model routing, and persistence, while the selected profile
 controls the mentoring stance and eligible methods.
 
@@ -54,13 +54,14 @@ methods are eligible in this conversation. The method context is deliberately
 small so the answer stays human and conversational rather than becoming a list
 of frameworks.”
 
-## 3:00–4:15 — Switch to Confidence and prove separation
+## 3:00–4:15 — Switch to Charisma and prove separation
 
-Return to `/mentors`, choose Confidence Mentor, and send:
+Return to `/mentors`, choose Charisma Mentor, and send:
 
-> I feel like I am not good enough even when I do well.
+> I get self-conscious in networking conversations and stop listening. Teach
+> me one way to be more present and let me practice it.
 
-Show that the ADHD thread is not present in the Confidence conversation. If
+Show that the ADHD thread is not present in the Charisma conversation. If
 useful, switch back to ADHD and show that its history remains intact.
 
 Say: “The account persists, but the conversation context is mentor-scoped. A

@@ -3,10 +3,9 @@
 ## Purpose And Positioning
 
 Charisma Mentor is a teaching and training mentor for learning charisma as a
-practical, ethical skill. It is not the existing Confidence Mentor under a new
-name. Confidence Mentor helps a user work with self-doubt and act with grounded
-courage; Charisma Mentor teaches observable communication and connection skills
-through a structured curriculum.
+practical, ethical skill. It is not a cosmetic rename of the former runtime
+Confidence Mentor: its purpose, teaching loop, methods, expertise, and practice
+model are built around observable communication and connection skills.
 
 The mentor does more than offer emotional support or confidence encouragement.
 It explains a skill, models it, gives the user a bounded practice attempt,
@@ -198,7 +197,18 @@ while offering only low-pressure, general skill practice.
 
 ## Product Boundary
 
-This document defines the future Charisma Mentor teaching behavior. It does not
-activate a new mentor, change the current Confidence Mentor, alter the database,
-or specify payments. Runtime catalog, prompt, persistence, UI, and evaluation
-runner integration require separate implementation work.
+Feature 096B activates this teaching behavior in the runtime catalog, prompt,
+method and expertise libraries, demo/evaluation data, mentor cards, profiles,
+and conversation selection. Confidence is no longer an active mentor choice.
+
+For persistence compatibility, Charisma currently maps internally to the
+existing `confidence` Mentor database slug. This preserves owned conversations
+without a Prisma or data migration; user-facing routes and selection use
+`charisma`, and the legacy Confidence specialist content is not injected into
+Charisma prompts. A later reviewed migration may rename that identifier after
+billing and conversation compatibility are accounted for.
+
+The exact public-site card portraits are not currently present in this repo.
+Runtime mentor surfaces therefore use neutral initials rather than displaying
+the repo's older, visually unverified PNG portraits. See
+`docs/MENTOR_PORTRAIT_ASSETS.md` for the approved-asset handoff.

@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 
 import { Container } from "@/components/layout/Container";
+import { MentorPortrait } from "@/components/mentor/MentorPortrait";
 import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { Heading } from "@/components/ui/Heading";
@@ -45,12 +45,10 @@ export default function MentorsPage() {
               key={mentor.slug}
               variant="bordered"
             >
-              <Image
-                alt={`${mentor.personaName}, ${mentor.name}`}
-                className="aspect-[4/3] w-full rounded-xl object-cover object-top"
-                height={600}
-                src={mentor.portraitSrc}
-                width={800}
+              <MentorPortrait
+                className="relative aspect-[4/3] w-full overflow-hidden rounded-xl"
+                name={mentor.personaName}
+                portraitSrc={mentor.portraitSrc}
               />
 
               <div>

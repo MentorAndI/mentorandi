@@ -29,8 +29,11 @@ Mentor And I
   boundaries, test checklist and feedback format, then shows session-aware
   signup/login or mentor-start actions without exposing admin routes.
 - The active alpha mentor lineup is Life, ADHD, Relationship, Stress / Burnout,
-  Parenting, Health & Fitness, Focus and Confidence; Business and Career are not
+  Parenting, Health & Fitness, Focus and Charisma; Business and Career are not
   active mentor categories.
+- Charisma is a teaching/training mentor with lessons, demonstrations, drills,
+  feedback and real-world challenges. Runtime mentor portraits use neutral
+  placeholders until the approved public-site card assets are added.
 - `/mentors` lets users preview and select those eight distinct profiles. The
   selection safely specializes the shared Mentor Core and loads a separate
   persisted conversation history for that mentor.

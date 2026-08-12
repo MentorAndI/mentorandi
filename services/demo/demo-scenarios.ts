@@ -12,7 +12,7 @@ export interface DemoScenario {
 
 const demoPrompts: Record<ActiveMentorSlug, string> = {
   adhd: "I keep avoiding an important task even though I know I need to do it.",
-  confidence: "I feel like I am not good enough even when I do well.",
+  charisma: "I want to be more present and engaging when I meet new people.",
   focus: "I keep getting distracted and reach the end of the day without finishing what matters.",
   "health-fitness": "I start health routines with good intentions, but I cannot make them last in real life.",
   life: "I feel stuck and I don’t know what I should change first.",

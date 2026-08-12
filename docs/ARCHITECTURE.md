@@ -139,7 +139,7 @@ not become framework-heavy or list-like. See `docs/MENTOR_METHOD_LIBRARIES.md`.
 Mentor And I uses one core engine with specialized mentor profiles. The Active
 Mentor Catalog defines the slug, positioning, tone, boundaries, opening style,
 and persona instructions for Life, ADHD, Relationship, Stress / Burnout,
-Parenting, Health & Fitness, Focus, and Confidence. An explicit selection from
+Parenting, Health & Fitness, Focus, and Charisma. An explicit selection from
 `/mentors` is validated at the server boundary and makes that profile's prompt
 and expertise primary. Each specialist maps to an active `Mentor` record, and
 each `Conversation` keeps its existing `mentorId` relation. Session services
@@ -147,7 +147,9 @@ load or create a conversation for the authenticated user and selected mentor;
 response services verify both user ownership and mentor match before accepting
 a message. Changing a URL parameter cannot attach another profile to an
 existing conversation. Legacy `marcus` conversations map to Life and are not
-rewritten.
+rewritten. Charisma uses the legacy `confidence` database slug as a temporary
+persistence compatibility alias while exposing only the `charisma` runtime
+slug and its dedicated teaching prompt, methods, and expertise.
 
 The recent-conversation view can summarize conversations across mentors, but
 message history is loaded only for the selected owned conversation. User-level

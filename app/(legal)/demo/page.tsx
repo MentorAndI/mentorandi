@@ -85,15 +85,15 @@ const demoSteps = [
     title: "Show the mentor response",
   },
   {
-    action: "Open Confidence Mentor",
+    action: "Open Charisma Mentor",
     description:
-      "Switch profiles and use the confidence prompt to demonstrate a distinct mentoring emphasis.",
-    href: "/mentor?mentor=confidence",
-    title: "Switch to the Confidence Mentor",
+      "Switch profiles and use a training prompt to demonstrate Charisma Mentor’s teaching loop.",
+    href: "/mentor?mentor=charisma",
+    title: "Switch to the Charisma Mentor",
   },
   {
     description:
-      "Show that the ADHD thread does not appear in Confidence. Each mentor loads its own persisted conversation.",
+      "Show that the ADHD thread does not appear in Charisma. Each mentor loads its own persisted conversation.",
     title: "Show the separate context",
   },
   {
@@ -118,7 +118,7 @@ const whatThisProves = [
   },
   {
     description:
-      "ADHD, Confidence, Relationship, Stress / Burnout, and Life use distinct positioning, expertise, tone, and boundaries.",
+      "ADHD, Charisma, Relationship, Stress / Burnout, and Life use distinct positioning, expertise, tone, and boundaries.",
     title: "Mentor specialization works",
   },
   {

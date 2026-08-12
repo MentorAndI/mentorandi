@@ -80,7 +80,13 @@ conversation, and both mentor response API paths check access before Mentor Core
 or model work. Locked access returns HTTP 403 with:
 
 - “This mentor is not included in your current plan.”
-- “Upgrade to unlock specialist mentors.”
+- “Upgrade to unlock this mentor”
+
+The conversation UI renders the second string as a `/pricing` upgrade link.
+Charisma is an active main specialist mentor for Single Mentor, Mentor Plus,
+and Premium policy evaluation. Its legacy internal database slug does not grant
+access: authorization resolves it to the active `charisma` policy slug before
+checking the user's authoritative entitlement.
 
 The current schema predates this plan model. Active/trialing `FREE` maps to
 `free`; legacy `ALPHA` and `PERSONAL` map to `plus` to preserve the existing

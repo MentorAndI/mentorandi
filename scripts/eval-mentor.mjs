@@ -97,15 +97,15 @@ const scenarioGroups = [
     ],
   },
   {
-    name: "confidence",
+    name: "charisma",
     messages: [
       {
         expectsMentorShape: true,
         expectsWarmAffirmation: true,
-        expectedMethodDomain: "Confidence",
-        mentorSpecialty: "confidence",
-        name: "Self-doubt in a group",
-        text: "I had an idea in the meeting but stayed quiet because everyone else sounded more capable. Someone else said almost the same thing later, and now I'm frustrated with myself.",
+        expectedMethodDomain: "Charisma",
+        mentorSpecialty: "charisma",
+        name: "Presence in a group",
+        text: "I get self-conscious in networking conversations and start monitoring every word instead of listening. Help me practice being more present.",
       },
     ],
   },

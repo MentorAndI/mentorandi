@@ -41,7 +41,7 @@ test("single mentor access includes Life and only the selected specialist", () =
   );
   assert.equal(
     evaluateMentorAccess({
-      mentorSlug: "confidence",
+      mentorSlug: "charisma",
       plan: "single_mentor",
       selectedMentorSlug: "adhd",
     }).allowed,
@@ -95,7 +95,7 @@ test("locked mentor copy is stable and user facing", () => {
   );
   assert.equal(
     mentorUpgradeMessage,
-    "Upgrade to unlock specialist mentors.",
+    "Upgrade to unlock this mentor",
   );
 });
 

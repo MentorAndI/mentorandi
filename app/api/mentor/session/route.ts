@@ -48,10 +48,7 @@ export async function GET(request: Request) {
                   latestMessagePreview: conversation.latestMessagePreview,
                   mentor: {
                     name: getMentorDisplayName(profile),
-                    role:
-                      profile.slug === "life"
-                        ? "Life Mentor"
-                        : "Specialized Mentor",
+                    role: profile.name,
                     slug: profile.slug,
                     tagline: profile.shortDescription,
                   },

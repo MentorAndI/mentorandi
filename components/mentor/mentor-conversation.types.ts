@@ -62,4 +62,5 @@ export interface MentorSession {
 export interface MentorApiError {
   error?: string;
   errors?: Record<string, string>;
+  upgradeMessage?: string;
 }

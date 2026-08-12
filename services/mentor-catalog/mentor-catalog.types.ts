@@ -8,7 +8,7 @@ export type ActiveMentorSlug =
   | "parenting"
   | "health-fitness"
   | "focus"
-  | "confidence";
+  | "charisma";
 
 export interface ActiveMentorProfile {
   boundaries: string[];
@@ -22,7 +22,7 @@ export interface ActiveMentorProfile {
   name: string;
   personaName: string;
   personaPrompt: string[];
-  portraitSrc: string;
+  portraitSrc: string | null;
   shortDescription: string;
   slug: ActiveMentorSlug;
   tone: string;

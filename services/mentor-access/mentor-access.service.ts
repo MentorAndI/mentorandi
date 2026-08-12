@@ -14,7 +14,7 @@ import { MentorAccessRepository } from "@/services/mentor-access/mentor-access.r
 
 export const mentorLockedMessage =
   "This mentor is not included in your current plan.";
-export const mentorUpgradeMessage = "Upgrade to unlock specialist mentors.";
+export const mentorUpgradeMessage = "Upgrade to unlock this mentor";
 
 interface StoredSubscription {
   plan: SubscriptionPlan;

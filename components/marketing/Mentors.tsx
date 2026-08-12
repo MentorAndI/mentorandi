@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 
 import { Section } from "@/components/layout/Section";
+import { MentorPortrait } from "@/components/mentor/MentorPortrait";
 import { activeMentorProfiles } from "@/services/mentor-catalog/mentor-catalog";
 
 export function Mentors() {
@@ -18,12 +18,10 @@ export function Mentors() {
             className="flex h-full flex-col rounded-2xl border border-zinc-200 bg-white p-7 shadow-sm"
             key={mentor.slug}
           >
-            <Image
-              alt={`${mentor.personaName}, ${mentor.name}`}
-              className="aspect-[4/3] w-full rounded-xl object-cover object-top"
-              height={600}
-              src={mentor.portraitSrc}
-              width={800}
+            <MentorPortrait
+              className="relative aspect-[4/3] w-full overflow-hidden rounded-xl"
+              name={mentor.personaName}
+              portraitSrc={mentor.portraitSrc}
             />
             <h3 className="mt-5 text-xl font-semibold text-zinc-950">
               {mentor.personaName}

@@ -99,6 +99,21 @@ and follow-up. This is a new teaching/training mentor, not the Confidence Mentor
 renamed and not a system for manipulation, dominance, pickup tactics, or a fake
 personality.
 
+### Feature 096B - Charisma Mentor Runtime And Portrait Alignment
+
+Status:
+Implemented. Charisma replaces Confidence in the active runtime catalog and is
+wired through selection, prompting, methods, expertise, demo/evaluation data,
+and plan enforcement. Existing conversations remain compatible through the
+legacy internal `confidence` database slug. Locked mentor responses show the
+required denial and a `/pricing` upgrade link. Because the exact approved
+public-site card WebPs are not in this repo, runtime mentor surfaces use neutral
+initial placeholders and the missing asset handoff is documented.
+
+Goal:
+Align runtime mentor selection with the public product direction without
+inventing portraits, weakening access checks, or requiring a Prisma migration.
+
 ### Feature 097 - Alpha Feedback Capture
 
 Status:
@@ -123,7 +138,7 @@ feedback read API.
 Status:
 Implemented. Marcus is positioned as the Life Mentor, and the active alpha
 support lineup is Life, ADHD, Relationship, Stress / Burnout, Parenting, Health
-& Fitness, Focus and Confidence.
+& Fitness, Focus and Charisma.
 
 Goal:
 Move Mentor And I away from Business/Career mentor positioning and toward
@@ -278,7 +293,7 @@ mixing messages or weakening user ownership checks.
 Status:
 Implemented. Mentor switches now remount and lock the conversation client,
 abort stale history requests, and ignore responses from the previous mentor.
-A database-backed regression test verifies Confidence, ADHD, and legacy Life
+A database-backed regression test verifies Charisma, ADHD, and legacy Life
 messages remain isolated.
 
 Goal:

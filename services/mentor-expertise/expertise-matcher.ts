@@ -19,14 +19,15 @@ const domainSignals: Record<MentorExpertiseProfile["mentorDomain"], string[]> = 
     "executive function",
     "task initiation",
   ],
-  "confidence mentor": [
-    "confidence",
-    "self-doubt",
-    "self doubt",
-    "imposter",
-    "not good enough",
-    "speak up",
-    "taking up space",
+  "charisma mentor": [
+    "charisma",
+    "presence",
+    "warmth",
+    "body language",
+    "eye contact",
+    "storytelling",
+    "networking",
+    "first impression",
   ],
   "focus mentor": [
     "focus",
