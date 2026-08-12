@@ -4,34 +4,41 @@
 
 Mentor portraits must use approved product assets. The app must not invent,
 generate, remotely hotlink, or silently substitute a different person for a
-public-site mentor. Until an approved asset is checked into this repository,
-mentor cards, profiles, and conversation headers use neutral initials.
+public-site mentor. Neutral initials remain the component fallback only when a
+catalog profile has no approved local asset.
 
-## Public Website Audit
+## Approved Runtime Assets
 
-The public mentor section at `https://mentorandi.com/#mentors` currently uses
-these card assets, none of which are present in this repository:
+The approved source portraits live in `public/images/mentors/`. They were added
+together in repository commit `b9791cc` for mentor portraits and profile pages.
+Next.js serves these local public assets in development and includes them in the
+production/Docker output without remote-image configuration.
 
-| Mentor | Required approved website asset |
+| Mentor | Runtime asset |
 | --- | --- |
-| Marcus — Life Mentor | `images/mentors/cards/marcus-life-mentor.webp` |
-| Adrian — ADHD Mentor | `images/mentors/cards/adrian-adhd-mentor.webp` |
-| Celine — Relationship Mentor | `images/mentors/cards/celine-relationship-mentor.webp` |
-| Victor — Stress & Burnout Mentor | `images/mentors/cards/victor-stress-burnout-mentor.webp` |
-| Suzan — Parenting Mentor | `images/mentors/cards/suzan-parenting-mentor.webp` |
-| Leo — Health & Fitness Mentor | `images/mentors/cards/leo-health-fitness-mentor.webp` |
-| Elias — Focus Mentor | `images/mentors/cards/elias-focus-mentor.webp` |
-| Joyce — Charisma Mentor | `images/mentors/cards/joyce-confidence-mentor.webp` |
+| Marcus — Life Mentor | `/images/mentors/marcus.png` |
+| Adrian — ADHD Mentor | `/images/mentors/adrian.png` |
+| Celine — Relationship Mentor | `/images/mentors/celine.png` |
+| Victor — Stress & Burnout Mentor | `/images/mentors/victor.png` |
+| Suzan — Parenting Mentor | `/images/mentors/suzan.png` |
+| Leo — Health & Fitness Mentor | `/images/mentors/leo.png` |
+| Elias — Focus Mentor | `/images/mentors/elias.png` |
+| Joyce — Charisma Mentor | `/images/mentors/joyce.png` |
 
-The repository has older square PNG files with matching persona first names,
-but their approval and visual equivalence to the current public cards cannot be
-established from repository metadata. Feature 096B therefore stops rendering
-them rather than claiming alignment.
+The public website currently uses Joyce's previously named Confidence portrait
+for Charisma, so the same approved Joyce asset is used by the runtime Charisma
+profile. No approved mentor portrait is missing.
 
-## Approved Asset Handoff
+## Pricing CTA Handoff
 
-When product supplies these files, they should be copied into a reviewed local
-asset directory with their origin and approval recorded. Then set each active
-catalog profile's `portraitSrc` to that local path and verify crops at card,
-profile, and conversation-header sizes. No external image dependency or Next.js
-remote-image configuration is needed.
+Designer and developer pricing actions should target these application routes:
+
+- Free Trial: `/signup?plan=free`
+- Single Mentor: `/signup?plan=single`
+- Mentor Plus: `/signup?plan=plus`
+- Premium: `/signup?plan=premium`
+- Company Stress Mentor: `/company-stress-mentor`
+- Extra mentor credits: `/billing/credits`
+
+These targets document navigation only. They do not enable payments, alter
+pricing, or change current billing behavior.

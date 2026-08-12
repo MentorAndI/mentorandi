@@ -106,13 +106,27 @@ Implemented. Charisma replaces Confidence in the active runtime catalog and is
 wired through selection, prompting, methods, expertise, demo/evaluation data,
 and plan enforcement. Existing conversations remain compatible through the
 legacy internal `confidence` database slug. Locked mentor responses show the
-required denial and a `/pricing` upgrade link. Because the exact approved
-public-site card WebPs are not in this repo, runtime mentor surfaces use neutral
-initial placeholders and the missing asset handoff is documented.
+required denial and a `/pricing` upgrade link. Feature 096C subsequently
+confirmed and restored the approved source portraits already tracked in
+`public/images/mentors/`.
 
 Goal:
 Align runtime mentor selection with the public product direction without
 inventing portraits, weakening access checks, or requiring a Prisma migration.
+
+### Feature 096C - Restore Approved Mentor Portraits
+
+Status:
+Implemented. Runtime mentor cards, profile pages, and conversation headers use
+the eight approved repository portraits in `public/images/mentors/`. Joyce's
+approved portrait is shared with Charisma because the public website uses the
+former Confidence portrait for the Charisma card. Pricing CTA route targets are
+documented in `docs/MENTOR_PORTRAIT_ASSETS.md`; no pricing or payment behavior
+was changed.
+
+Goal:
+Restore the existing approved website portrait set through local Next.js public
+asset paths that work in development and production/Docker builds.
 
 ### Feature 097 - Alpha Feedback Capture
 

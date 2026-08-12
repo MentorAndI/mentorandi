@@ -208,7 +208,7 @@ without a Prisma or data migration; user-facing routes and selection use
 Charisma prompts. A later reviewed migration may rename that identifier after
 billing and conversation compatibility are accounted for.
 
-The exact public-site card portraits are not currently present in this repo.
-Runtime mentor surfaces therefore use neutral initials rather than displaying
-the repo's older, visually unverified PNG portraits. See
-`docs/MENTOR_PORTRAIT_ASSETS.md` for the approved-asset handoff.
+Feature 096C confirmed that the approved source portrait set is tracked in
+`public/images/mentors/`. Charisma uses `/images/mentors/joyce.png`, matching
+the public website's use of Joyce's former Confidence portrait for Charisma.
+See `docs/MENTOR_PORTRAIT_ASSETS.md` for the complete runtime mapping.

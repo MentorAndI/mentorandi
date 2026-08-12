@@ -32,8 +32,8 @@ Mentor And I
   Parenting, Health & Fitness, Focus and Charisma; Business and Career are not
   active mentor categories.
 - Charisma is a teaching/training mentor with lessons, demonstrations, drills,
-  feedback and real-world challenges. Runtime mentor portraits use neutral
-  placeholders until the approved public-site card assets are added.
+  feedback and real-world challenges. Runtime cards, profiles, and conversation
+  headers use the approved local portraits in `public/images/mentors/`.
 - `/mentors` lets users preview and select those eight distinct profiles. The
   selection safely specializes the shared Mentor Core and loads a separate
   persisted conversation history for that mentor.
