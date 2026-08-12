@@ -82,10 +82,11 @@ See `docs/ONBOARDING_INTAKE.md`.
 `/alpha`, `/demo`, `/privacy`, `/terms` and `/contact` are public informational pages.
 They use simple alpha wording and do not create database records or expose an
 API. `/alpha` reads server-side auth state only to show appropriate signup/login
-or mentor-start actions. It explains the invited tester flow, safe test scope,
+or mentor-start actions. It explains the external tester flow, safe test scope,
 feedback path and bug-report format without linking to internal admin pages. New
 signup confirmation emails use the bare `/auth/callback` URL, which defaults to
-`/start`; safe requested onboarding destinations remain supported by the
+`/onboarding`; safe requested onboarding, start, mentor, and feedback
+destinations remain supported by the
 callback for future flows. See
 `docs/ALPHA_TESTER_GUIDE.md`.
 `/contact` provides the alpha support email, directs authenticated users to the

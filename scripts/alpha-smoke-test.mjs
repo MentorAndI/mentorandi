@@ -36,9 +36,11 @@ checks.push({
   redirectsAllowed: false,
 });
 
-if (isDevelopment) {
-  checks.push({ path: "/dev/mentor-test", redirectsAllowed: false });
-}
+checks.push({
+  expectedStatus: isDevelopment ? 200 : 404,
+  path: "/dev/mentor-test",
+  redirectsAllowed: false,
+});
 
 console.log("MentorAndI Alpha Smoke Test");
 console.log(`Base URL: ${baseUrl}`);

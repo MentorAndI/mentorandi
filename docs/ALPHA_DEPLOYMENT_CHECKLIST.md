@@ -59,10 +59,9 @@ Cost and usage guardrails:
 - Configure `ALPHA_DAILY_MESSAGE_LIMIT`, `ALPHA_WEEKLY_MESSAGE_LIMIT`, `ALPHA_MONTHLY_MESSAGE_LIMIT` and `ALPHA_WEEKLY_DEEP_LIMIT` if overriding the defaults.
 - Configure `ALPHA_ADMIN_EMAILS` with the authenticated emails allowed to review
   `/admin`, `/admin/feedback`, `/admin/usage` and `/admin/invites`.
-- Create database-backed tester invites from `/admin/invites` and verify that
-  missing, expired, revoked, exhausted, and email-mismatched codes are rejected.
-- Configure `ALPHA_INVITE_CODE` only if an emergency/development fallback is
-  needed; do not use it as the primary shared alpha access mechanism.
+- Treat `/admin/invites` and existing invite records as legacy internal tooling;
+  external alpha signup does not consume an invite code.
+- Do not require `ALPHA_INVITE_CODE` for signup or environment validation.
 - Confirm `/contact` links to `support@mentorandi.com` and describes in-product
   feedback and useful bug reports.
 
@@ -104,6 +103,7 @@ After deployment, verify:
 ```bash
 APP_URL=https://your-domain.example npm run smoke:prod
 APP_URL=https://your-domain.example npm run smoke:alpha
+NODE_ENV=production APP_URL=https://your-domain.example npm run alpha:readiness
 ```
 
 Open:

@@ -46,9 +46,9 @@ Mentor And I
 - `/demo` provides an investor-friendly private-alpha overview, a 5–7 minute
   presenter script, proof points, and five fixed prompt scenarios that open the
   matching mentor.
-- `/pricing` describes invite-only Alpha and adjustable planned Personal and
-  Premium tiers. Payments remain disabled unless the explicit Stripe flag and
-  complete server configuration are present.
+- `/pricing` describes no-charge external Alpha access and adjustable planned
+  Personal and Premium tiers. Payments remain disabled unless the explicit
+  Stripe flag and complete server configuration are present.
 - Stripe Checkout, Customer Portal, and signed subscription webhooks can be
   exercised end to end on staging in test mode only. Live secret keys and live
   webhook events are rejected during alpha; setup is documented in
@@ -60,6 +60,10 @@ Mentor And I
   presenter-ready walkthrough and evidence-based alpha capability inventory.
 - Full Mentor Evaluation Runner exists for dev-only Mentor Core evaluation through the seeded database-backed flow.
 - Alpha Deployment Checklist exists for Hostinger/VPS go/no-go review.
+- External Alpha Readiness Gate provides a read-only staging command plus auth,
+  access-policy, mentor identity, specialist-runtime, and database-backed
+  isolation regressions. Automated checks pass; a fresh email-confirmed account
+  must still complete the human authenticated checklist before broad invites.
 - One-command staging deployment is available through `npm run deploy:staging`
   for operators with configured VPS SSH access.
 - GitHub Actions automatically deploys pushes to `main` to Hostinger staging
@@ -73,7 +77,7 @@ Mentor And I
 - `/mentor` main mentor experience.
 - `/dev/mentor-test` development test page.
 - `/privacy`, `/terms` and `/contact` alpha trust pages.
-- `/alpha` invited tester instructions.
+- `/alpha` external tester instructions.
 - `/mentors` active alpha mentor selection and preview.
 - `/demo` investor and product demonstration flow.
 

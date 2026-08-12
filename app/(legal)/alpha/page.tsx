@@ -9,7 +9,7 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export const metadata: Metadata = {
   title: "Alpha tester guide | Mentor And I",
-  description: "How invited testers can test Mentor And I safely.",
+  description: "How external alpha testers can test Mentor And I safely.",
 };
 
 const linkClassName =
@@ -24,17 +24,17 @@ export default async function AlphaTesterGuidePage() {
 
   return (
     <LegalPage
-      description="Your entry point for the invited alpha: what Mentor And I does, how to begin, what to test, and where its boundaries are."
+      description="Your entry point for the external alpha: what Mentor And I does, how to begin, what to test, and where its boundaries are."
       title="Welcome to the Mentor And I private alpha"
     >
       <div className="rounded-2xl border border-sky-200 bg-sky-50 p-5 sm:p-6">
         <p className="text-sm font-semibold uppercase tracking-[0.14em] text-sky-800">
-          {isAuthenticated ? "You are signed in" : "Invite-only testing"}
+          {isAuthenticated ? "You are signed in" : "External alpha testing"}
         </p>
         <p className="mt-2 text-base leading-7 text-sky-950">
           {isAuthenticated
             ? "Choose a specialized mentor, or begin with Marcus as your Life mentor."
-            : "You need your private invite code to create an account. Existing testers can log in below."}
+            : "Create an account, verify your email, and continue to onboarding. Existing testers can log in below."}
         </p>
         <div className="mt-4 flex flex-wrap gap-3">
           {isAuthenticated ? (
@@ -44,7 +44,7 @@ export default async function AlphaTesterGuidePage() {
             </>
           ) : (
             <>
-              <AlphaAction href="/signup" label="Sign up with invite code" primary />
+              <AlphaAction href="/signup" label="Create an account" primary />
               <AlphaAction href="/login" label="Log in" />
               <AlphaAction href="/demo" label="View the demo" />
             </>
@@ -65,8 +65,8 @@ export default async function AlphaTesterGuidePage() {
         <p>
           This is an early test environment, not a finished public product.
           Features and responses may change, and you may encounter rough edges.
-          New accounts require the invite code sent to you, followed by email
-          verification. Your honest feedback directly informs alpha improvements.
+          New accounts require email verification before sign-in. Your honest
+          feedback directly informs alpha improvements.
         </p>
         <p>
           Please use a real but low-risk personal issue when testing. Do not
@@ -76,7 +76,7 @@ export default async function AlphaTesterGuidePage() {
 
       <LegalSection title="What to test">
         <ol className="list-decimal space-y-2 pl-6">
-          <li>Create an account with your invite code.</li>
+          <li>Create an account.</li>
           <li>Verify your email.</li>
           <li>Start your first mentor conversation.</li>
           <li>Ask for help with a real but low-risk personal issue.</li>

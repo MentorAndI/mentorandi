@@ -16,8 +16,8 @@ export const metadata: Metadata = {
 
 const plans = [
   {
-    description: "Current private-alpha access for invited testers.",
-    features: ["Invite required", "Alpha usage limits", "Feedback helps shape the product"],
+    description: "Current no-charge access for external alpha testers.",
+    features: ["Email verification required", "Alpha usage limits", "Feedback helps shape the product"],
     name: "Alpha",
     plan: null,
   },
@@ -55,8 +55,9 @@ export default async function PricingPage({
           <Badge>{enabled ? "Stripe test mode" : "Private alpha"}</Badge>
           <Heading className="mt-5" level={1}>Simple access, built for an ongoing mentor relationship</Heading>
           <Text className="mx-auto mt-4 max-w-2xl text-lg">
-            Mentor And I is currently invite-based. Personal and Premium are
-            planned paid tiers; final pricing and availability will be set before launch.
+            Mentor And I currently accepts external alpha tester signups.
+            Personal and Premium are planned paid tiers; final pricing and
+            availability will be set before launch.
           </Text>
           {!enabled ? (
             <p className="mt-4 text-sm font-medium text-amber-800">
@@ -77,7 +78,7 @@ export default async function PricingPage({
                 <Heading level={2}>{plan.name}</Heading>
                 <Text className="mt-3">{plan.description}</Text>
                 <p className="mt-5 text-sm font-semibold text-zinc-900">
-                  {plan.plan ? "Monthly price to be confirmed" : "Invite-only during alpha"}
+                  {plan.plan ? "Monthly price to be confirmed" : "No charge during alpha"}
                 </p>
                 <ul className="my-6 space-y-3 text-sm text-zinc-700">
                   {plan.features.map((feature) => <li key={feature}>✓ {feature}</li>)}

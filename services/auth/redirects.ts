@@ -1,6 +1,7 @@
 const allowedNextPathPrefixes = [
   "/start",
   "/onboarding",
+  "/feedback",
   "/mentor",
   "/mentors",
   "/settings",

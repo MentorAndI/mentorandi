@@ -381,6 +381,36 @@ Goal:
 Make alpha volume, estimated cost, and limit enforcement durable across app
 restarts without treating operational estimates as billing-grade analytics.
 
+### Feature 113 - External Alpha Readiness Gate
+
+Status:
+Implemented. `npm run alpha:readiness` verifies the public staging surface,
+exact logged-out redirects, protected API rejection, health configuration,
+trust-page content, real-provider status, and production dev-route blocking.
+Auth redirect, plan policy, mentor identity, specialist runtime, and
+database-backed mentor isolation regressions form the remaining automated gate.
+The audit fixed obsolete invite-code wording without changing pricing or access.
+`docs/ALPHA_READINESS_REPORT.md` records the conditional pass and the required
+human authenticated checklist.
+
+Goal:
+Determine whether MentorAndI staging is ready for external alpha testers by
+testing signup and authentication redirects, onboarding, mentor selection, Life
+Mentor conversation continuity, mentor-scoped isolation, plan access, feedback,
+admin access controls, public trust pages, health, and staging routes.
+
+Rules:
+
+- Extend existing smoke and regression coverage instead of adding unrelated
+  product behavior.
+- Classify findings as `BLOCKER`, `IMPORTANT`, or `POLISH` in
+  `docs/ALPHA_READINESS_REPORT.md`.
+- Fix only clear blockers or regressions found during the readiness work.
+- Preserve real Supabase session enforcement, user ownership, plan access, and
+  admin allowlisting.
+- Do not enable production or live Stripe, change pricing, or redesign the UI.
+- Commit, push, and deploy staging only after all implementation checks pass.
+
 ### Feature 107 - One-Command Staging Deploy
 
 Status:
