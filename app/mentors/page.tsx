@@ -46,7 +46,7 @@ export default function MentorsPage() {
               variant="bordered"
             >
               <MentorPortrait
-                className="relative aspect-[4/3] w-full overflow-hidden rounded-xl"
+                className="relative aspect-[4/5] w-full overflow-hidden rounded-xl"
                 name={mentor.personaName}
                 portraitSrc={mentor.portraitSrc}
               />

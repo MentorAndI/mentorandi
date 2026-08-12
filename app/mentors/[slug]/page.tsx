@@ -56,7 +56,7 @@ export default async function MentorProfilePage({
 
         <div className="mt-8 grid overflow-hidden rounded-3xl border border-zinc-200 bg-white shadow-sm lg:grid-cols-[0.9fr_1.1fr]">
           <MentorPortrait
-            className="relative min-h-[360px] w-full overflow-hidden"
+            className="relative aspect-[4/5] w-full self-start overflow-hidden"
             name={mentor.personaName}
             portraitSrc={mentor.profilePortraitSrc ?? mentor.portraitSrc}
             priority

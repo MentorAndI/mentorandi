@@ -20,7 +20,10 @@ export function MentorPortrait({
       <div className={className}>
         <Image
           alt={`${name} mentor portrait`}
-          className={imageClassName ?? "h-full w-full object-cover object-top"}
+          className={
+            imageClassName ??
+            "h-full w-full object-cover object-[50%_22%]"
+          }
           fill
           priority={priority}
           sizes="(min-width: 1024px) 50vw, 100vw"
