@@ -23,6 +23,7 @@ export interface ActiveMentorProfile {
   personaName: string;
   personaPrompt: string[];
   portraitSrc: string | null;
+  profilePortraitSrc?: string | null;
   shortDescription: string;
   slug: ActiveMentorSlug;
   tone: string;

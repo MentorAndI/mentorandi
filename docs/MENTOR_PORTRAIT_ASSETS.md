@@ -9,25 +9,33 @@ catalog profile has no approved local asset.
 
 ## Approved Runtime Assets
 
-The approved source portraits live in `public/images/mentors/`. They were added
-together in repository commit `b9791cc` for mentor portraits and profile pages.
-Next.js serves these local public assets in development and includes them in the
-production/Docker output without remote-image configuration.
+The canonical portraits come from the `main` branch of
+`MentorAndI/mentorandi-website`, specifically `images/mentors/cards/` and
+`images/mentors/profiles/`. Feature 096E copies those exact WebPs into this app:
 
-| Mentor | Runtime asset |
-| --- | --- |
-| Marcus — Life Mentor | `/images/mentors/marcus.png` |
-| Adrian — ADHD Mentor | `/images/mentors/adrian.png` |
-| Celine — Relationship Mentor | `/images/mentors/celine.png` |
-| Victor — Stress & Burnout Mentor | `/images/mentors/victor.png` |
-| Suzan — Parenting Mentor | `/images/mentors/suzan.png` |
-| Leo — Health & Fitness Mentor | `/images/mentors/leo.png` |
-| Elias — Focus Mentor | `/images/mentors/elias.png` |
-| Joyce — Charisma Mentor | `/images/mentors/joyce.png` |
+- `public/images/mentors/cards/` for mentor pickers, lists, chat avatars, and
+  other compact card surfaces.
+- `public/images/mentors/profiles/` for mentor profile/detail and other large
+  portrait surfaces.
 
-The public website currently uses Joyce's previously named Confidence portrait
-for Charisma, so the same approved Joyce asset is used by the runtime Charisma
-profile. No approved mentor portrait is missing.
+The browser uses only these local copies. Source PNG masters and OG images are
+not used in runtime UI, and production does not hotlink the website repository.
+Next.js serves the files from `public/`; the Docker image copies that directory
+into the production runner.
+
+| Mentor | Card and compact UI | Profile and large UI |
+| --- | --- | --- |
+| Marcus — Life Mentor | `/images/mentors/cards/marcus-life-mentor.webp` | `/images/mentors/profiles/marcus-life-mentor.webp` |
+| Adrian — ADHD Mentor | `/images/mentors/cards/adrian-adhd-mentor.webp` | `/images/mentors/profiles/adrian-adhd-mentor.webp` |
+| Celine — Relationship Mentor | `/images/mentors/cards/celine-relationship-mentor.webp` | `/images/mentors/profiles/celine-relationship-mentor.webp` |
+| Victor — Stress & Burnout Mentor | `/images/mentors/cards/victor-stress-burnout-mentor.webp` | `/images/mentors/profiles/victor-stress-burnout-mentor.webp` |
+| Suzan — Parenting Mentor | `/images/mentors/cards/suzan-parenting-mentor.webp` | `/images/mentors/profiles/suzan-parenting-mentor.webp` |
+| Leo — Health & Fitness Mentor | `/images/mentors/cards/leo-health-fitness-mentor.webp` | `/images/mentors/profiles/leo-health-fitness-mentor.webp` |
+| Elias — Focus Mentor | `/images/mentors/cards/elias-focus-mentor.webp` | `/images/mentors/profiles/elias-focus-mentor.webp` |
+| Joyce — Charisma Mentor | `/images/mentors/cards/joyce-confidence-mentor.webp` | `/images/mentors/profiles/joyce-confidence-mentor.webp` |
+
+Joyce remains `joyce-confidence-mentor` in both approved filenames while the
+runtime display role remains Charisma Mentor. No approved portrait is missing.
 
 ## Pricing CTA Handoff
 
@@ -38,7 +46,7 @@ Designer and developer pricing actions should target these application routes:
 - Mentor Plus: `/signup?plan=plus`
 - Premium: `/signup?plan=premium`
 - Company Stress Mentor: `/company-stress-mentor`
-- Extra mentor credits: `/billing/credits`
+- Extra Credits: `/billing/credits`
 
 These targets document navigation only. They do not enable payments, alter
 pricing, or change current billing behavior.

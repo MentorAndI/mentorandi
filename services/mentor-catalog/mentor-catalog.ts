@@ -28,7 +28,8 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Emphasize values, emotional clarity, tradeoffs, patterns, and grounded decisions.",
       "Turn broad life questions into one small experiment or honest next step.",
     ],
-    portraitSrc: "/images/mentors/marcus.png",
+    portraitSrc: "/images/mentors/cards/marcus-life-mentor.webp",
+    profilePortraitSrc: "/images/mentors/profiles/marcus-life-mentor.webp",
     shortDescription:
       "A broad everyday mentor for thinking clearly, making better decisions, and moving forward when life feels unclear.",
     slug: "life",
@@ -62,7 +63,8 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Emphasize task entry, visible cues, external structure, time awareness, and realistic accountability.",
       "Reduce friction before asking for discipline, motivation, or consistency.",
     ],
-    portraitSrc: "/images/mentors/adrian.png",
+    portraitSrc: "/images/mentors/cards/adrian-adhd-mentor.webp",
+    profilePortraitSrc: "/images/mentors/profiles/adrian-adhd-mentor.webp",
     shortDescription:
       "Support for starting tasks, reducing friction, managing overwhelm, and turning intentions into small visible actions.",
     slug: "adhd",
@@ -96,7 +98,9 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Stay balanced and help the user prepare one honest, non-blaming conversation.",
       "Support the user's real human relationships rather than replacing them.",
     ],
-    portraitSrc: "/images/mentors/celine.png",
+    portraitSrc: "/images/mentors/cards/celine-relationship-mentor.webp",
+    profilePortraitSrc:
+      "/images/mentors/profiles/celine-relationship-mentor.webp",
     shortDescription:
       "A mentor for understanding conflict patterns, communicating more clearly, repairing tension, and setting healthier boundaries.",
     slug: "relationship",
@@ -129,7 +133,10 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Do not turn rest into another optimization project.",
       "Prefer removing or renegotiating one demand over adding another routine.",
     ],
-    portraitSrc: "/images/mentors/victor.png",
+    portraitSrc:
+      "/images/mentors/cards/victor-stress-burnout-mentor.webp",
+    profilePortraitSrc:
+      "/images/mentors/profiles/victor-stress-burnout-mentor.webp",
     shortDescription:
       "Support for understanding overload, resetting boundaries, recovering energy, and finding a sustainable pace again.",
     slug: "stress-burnout",
@@ -162,7 +169,8 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Emphasize parental regulation, clear routines, age-aware communication, consistency, and repair.",
       "Make room for guilt and pressure while returning to one response the parent can practice.",
     ],
-    portraitSrc: "/images/mentors/suzan.png",
+    portraitSrc: "/images/mentors/cards/suzan-parenting-mentor.webp",
+    profilePortraitSrc: "/images/mentors/profiles/suzan-parenting-mentor.webp",
     shortDescription:
       "A practical mentor for parents dealing with guilt, routines, emotional pressure, and everyday family challenges.",
     slug: "parenting",
@@ -196,7 +204,9 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Build consistency through realistic minimums rather than intensity or shame.",
       "Keep all guidance general and non-medical.",
     ],
-    portraitSrc: "/images/mentors/leo.png",
+    portraitSrc: "/images/mentors/cards/leo-health-fitness-mentor.webp",
+    profilePortraitSrc:
+      "/images/mentors/profiles/leo-health-fitness-mentor.webp",
     shortDescription:
       "A mentor for building sustainable health routines, improving consistency, and making fitness fit real life.",
     slug: "health-fitness",
@@ -229,7 +239,8 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Reduce competing commitments rather than stacking productivity techniques.",
       "Choose the smallest finishable outcome that protects what matters most.",
     ],
-    portraitSrc: "/images/mentors/elias.png",
+    portraitSrc: "/images/mentors/cards/elias-focus-mentor.webp",
+    profilePortraitSrc: "/images/mentors/profiles/elias-focus-mentor.webp",
     shortDescription:
       "Support for protecting attention, reducing distractions, and creating simple conditions for focused work.",
     slug: "focus",
@@ -264,7 +275,9 @@ export const activeMentorProfiles: ActiveMentorProfile[] = [
       "Build ethical presence, warmth, clarity, confident energy, listening, questions, storytelling, and social flow through structured practice—not hype or emotional reassurance alone.",
       "Keep practice appropriately sized for social anxiety and never use manipulation, dominance, pickup tactics, or fake-personality tricks.",
     ],
-    portraitSrc: "/images/mentors/joyce.png",
+    portraitSrc: "/images/mentors/cards/joyce-confidence-mentor.webp",
+    profilePortraitSrc:
+      "/images/mentors/profiles/joyce-confidence-mentor.webp",
     shortDescription:
       "Learn presence, warmth, confident speaking and better conversations through practical exercises, drills and real-world challenges.",
     slug: "charisma",

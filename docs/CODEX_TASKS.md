@@ -128,6 +128,21 @@ Goal:
 Restore the existing approved website portrait set through local Next.js public
 asset paths that work in development and production/Docker builds.
 
+### Feature 096E - Import Canonical Website Mentor Portraits
+
+Status:
+Implemented. The 8 card and 8 profile WebPs from
+`MentorAndI/mentorandi-website@main` are stored locally under
+`public/images/mentors/cards/` and `public/images/mentors/profiles/`. Active
+mentor compact UI uses the card assets, while mentor detail pages use the
+profile assets. The old short PNGs and source masters are not referenced by
+active mentor UI.
+
+Goal:
+Use the exact approved public-website portraits locally in the Next.js app and
+Docker build without hotlinking or changing Joyce's approved Confidence-based
+asset filename.
+
 ### Feature 097 - Alpha Feedback Capture
 
 Status:

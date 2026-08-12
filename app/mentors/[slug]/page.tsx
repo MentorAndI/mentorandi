@@ -58,7 +58,7 @@ export default async function MentorProfilePage({
           <MentorPortrait
             className="relative min-h-[360px] w-full overflow-hidden"
             name={mentor.personaName}
-            portraitSrc={mentor.portraitSrc}
+            portraitSrc={mentor.profilePortraitSrc ?? mentor.portraitSrc}
             priority
           />
 
