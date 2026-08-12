@@ -71,3 +71,13 @@ It is not a generic chatbot. It is built around memory, goals, reflections and a
 - Manual check `/dev/mentor-test`
 
 Before committing, confirm that only MentorAndI files are changed and no cross-project content was introduced.
+
+## Staging Deployment From Codex
+
+- After runtime changes are committed and pushed to `main`, and only after all
+  required checks pass, Codex may run `scripts/deploy-staging-remote.sh` when
+  the user has explicitly approved a staging deployment.
+- Staging deployment approval does not authorize a production deployment.
+- Never add SSH keys, passwords, `.env`, `.env.staging`, or other deployment
+  secrets to the repository or command output.
+- See `docs/STAGING_DEPLOY.md` for defaults, overrides, and prerequisites.
