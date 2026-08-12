@@ -10,9 +10,11 @@ terminal manually. The helper connects over SSH and runs:
 cd /docker/mentorandi && ./scripts/deploy-staging.sh
 ```
 
-The server-side script remains responsible for updating `origin/main`, building
-the Docker service, applying its established deployment flow, and checking the
-public staging health endpoint.
+The server-side script remains responsible for updating `origin/main`, running
+the one-shot `prisma migrate deploy` container, building the Docker service,
+applying its established deployment flow, and checking the public staging
+health endpoint. A migration failure stops the deploy before the new app image
+is started.
 
 ## Prerequisites
 

@@ -64,7 +64,7 @@ export default async function StartPage({
 
         <FirstConversationForm mentorSlug={mentor} />
       </ConversationCard>
-      <FeedbackButton />
+      <FeedbackButton mentorSlug={mentor} />
     </main>
   );
 }

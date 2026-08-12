@@ -19,6 +19,7 @@ const checks = [
   { path: "/start", redirectsAllowed: false },
   { path: "/mentor", redirectsAllowed: true },
   { path: "/onboarding", redirectsAllowed: true },
+  { path: "/feedback", redirectsAllowed: true },
   { path: "/settings", redirectsAllowed: true },
   { path: "/admin", redirectsAllowed: true },
   { path: "/admin/feedback", redirectsAllowed: true },
@@ -26,6 +27,14 @@ const checks = [
   { path: "/admin/invites", redirectsAllowed: true },
   { path: "/admin/billing", redirectsAllowed: true },
 ];
+
+checks.push({
+  body: JSON.stringify({ category: "OTHER", message: "Unauthenticated check" }),
+  expectedStatus: 401,
+  method: "POST",
+  path: "/api/feedback",
+  redirectsAllowed: false,
+});
 
 if (isDevelopment) {
   checks.push({ path: "/dev/mentor-test", redirectsAllowed: false });
@@ -62,11 +71,15 @@ async function runCheck(check) {
 
   try {
     const response = await fetch(url, {
+      body: check.body,
+      headers: check.body ? { "Content-Type": "application/json" } : undefined,
+      method: check.method ?? "GET",
       redirect: "manual",
     });
     const redirected = isRedirectStatus(response.status);
-    const passed =
-      response.status < 500 && (!redirected || check.redirectsAllowed);
+    const passed = check.expectedStatus
+      ? response.status === check.expectedStatus
+      : response.status < 500 && (!redirected || check.redirectsAllowed);
 
     return {
       passed,

@@ -31,6 +31,7 @@ export default async function MentorPage({
           links={[
             { href: "/mentor", label: "Mentor" },
             { href: "/mentors", label: "Specializations" },
+            { href: "/feedback?context=%2Fmentor", label: "Feedback" },
             { href: "/settings", label: "Settings" },
           ]}
         />
@@ -48,7 +49,7 @@ export default async function MentorPage({
               "Personal clarity, honest reflection, and sustainable change.",
           }}
         />
-        <FeedbackButton />
+        <FeedbackButton mentorSlug={selectedMentor?.slug} />
       </Container>
     </main>
   );

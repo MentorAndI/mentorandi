@@ -30,6 +30,8 @@ enum FeedbackCategory {
   BUG
   CONFUSING
   MENTOR_QUALITY
+  ONBOARDING
+  PRICING
   IDEA
   OTHER
 }
@@ -139,13 +141,15 @@ model AlphaInvite {
 }
 
 model Feedback {
-  id        String           @id @default(uuid()) @db.Uuid
-  userId    String           @db.Uuid
-  rating    FeedbackRating
-  category  FeedbackCategory
-  message   String
-  pagePath  String?
-  createdAt DateTime         @default(now())
+  id          String           @id @default(uuid()) @db.Uuid
+  userId      String           @db.Uuid
+  rating      FeedbackRating
+  ratingScore Int?
+  category    FeedbackCategory
+  message     String
+  pagePath    String?
+  mentorSlug  String?
+  createdAt   DateTime         @default(now())
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

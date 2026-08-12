@@ -9,10 +9,7 @@ import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
 import { AdminAuthService } from "@/services/admin/admin-auth.service";
 import { FeedbackService } from "@/services/feedback/feedback.service";
-import type {
-  FeedbackCategoryInput,
-  FeedbackRatingInput,
-} from "@/services/feedback/feedback.types";
+import type { LegacyFeedbackRating } from "@/services/feedback/feedback.types";
 
 export const dynamic = "force-dynamic";
 
@@ -70,6 +67,7 @@ export default async function AdminFeedbackPage() {
                   <TableHeader>Created</TableHeader>
                   <TableHeader>Rating</TableHeader>
                   <TableHeader>Category</TableHeader>
+                  <TableHeader>Mentor</TableHeader>
                   <TableHeader>Message</TableHeader>
                   <TableHeader>Page</TableHeader>
                   <TableHeader>User</TableHeader>
@@ -84,12 +82,15 @@ export default async function AdminFeedbackPage() {
                       </time>
                     </TableCell>
                     <TableCell>
-                      <Badge variant={getRatingVariant(entry.rating)}>
-                        {formatLabel(entry.rating)}
+                      <Badge variant={getRatingVariant(entry)}>
+                        {formatRating(entry)}
                       </Badge>
                     </TableCell>
                     <TableCell className="whitespace-nowrap">
                       {formatLabel(entry.category)}
+                    </TableCell>
+                    <TableCell className="whitespace-nowrap text-zinc-600">
+                      {entry.mentorSlug ? formatLabel(entry.mentorSlug) : "—"}
                     </TableCell>
                     <TableCell className="min-w-80 max-w-xl whitespace-pre-wrap text-zinc-800">
                       {entry.message}
@@ -125,20 +126,38 @@ function TableCell({
   return <td className={`align-top px-4 py-4 ${className}`}>{children}</td>;
 }
 
-function formatLabel(value: FeedbackCategoryInput | FeedbackRatingInput) {
+function formatLabel(value: string) {
   return value
     .toLowerCase()
-    .split("_")
+    .split(/[_-]/)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
 }
 
-function getRatingVariant(rating: FeedbackRatingInput) {
-  if (rating === "USEFUL") {
+function formatRating(entry: {
+  rating: LegacyFeedbackRating;
+  ratingScore: number | null;
+}) {
+  return entry.ratingScore === null
+    ? "Not rated"
+    : `${entry.ratingScore}/5`;
+}
+
+function getRatingVariant(entry: {
+  rating: LegacyFeedbackRating;
+  ratingScore: number | null;
+}) {
+  if (entry.ratingScore !== null) {
+    if (entry.ratingScore >= 4) return "success" as const;
+    if (entry.ratingScore <= 2) return "warning" as const;
+    return "muted" as const;
+  }
+
+  if (entry.rating === "USEFUL") {
     return "success" as const;
   }
 
-  if (rating === "NOT_USEFUL") {
+  if (entry.rating === "NOT_USEFUL") {
     return "warning" as const;
   }
 

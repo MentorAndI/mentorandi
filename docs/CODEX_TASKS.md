@@ -146,7 +146,13 @@ asset filename.
 ### Feature 097 - Alpha Feedback Capture
 
 Status:
-Implemented. Authenticated alpha users can submit categorized usefulness feedback from `/start` and `/mentor`; submissions are stored per user through the server-side Feedback service and Prisma repository.
+Implemented. Authenticated alpha users can open `/feedback` from the mentoring
+and settings UI and submit bug, confusing, mentor-quality, onboarding, pricing,
+or other feedback with an optional 1–5 rating and optional page/mentor context.
+Submissions are stored per user through the server-side Feedback service and
+Prisma repository. Logged-out submissions return `401`; recent feedback remains
+available only to allowlisted internal admins at `/admin/feedback`. See
+`docs/ALPHA_FEEDBACK.md`.
 
 Goal:
 Capture lightweight usefulness, bug and product feedback before expanding the alpha.

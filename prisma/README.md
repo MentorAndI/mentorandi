@@ -13,7 +13,7 @@ there is no public readback API or permissive Supabase policy.
 Database administrators can also use a read-only query:
 
 ```sql
-select "createdAt", rating, category, message, "pagePath"
+select "createdAt", "ratingScore", rating, category, "mentorSlug", message, "pagePath"
 from "Feedback"
 order by "createdAt" desc
 limit 100;

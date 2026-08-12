@@ -26,7 +26,10 @@ export default async function SettingsPage({
     <main className="min-h-screen bg-zinc-50 py-10 text-zinc-950">
       <Container className="max-w-5xl">
         <AccountNavigation
-          links={[{ href: "/mentor", label: "Back to Mentor" }]}
+          links={[
+            { href: "/mentor", label: "Back to Mentor" },
+            { href: "/feedback?context=%2Fsettings", label: "Feedback" },
+          ]}
         />
         {billing === "success" ? (
           <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950">

@@ -45,6 +45,18 @@ git log -1 --oneline
 [[ -f "$STAGING_ENV_FILE" ]] ||
   fail "$STAGING_ENV_FILE is required. Create it on the staging server; do not commit it."
 
+echo "Applying pending staging database migrations..."
+docker compose \
+  --env-file "$STAGING_ENV_FILE" \
+  -f "$STAGING_COMPOSE_FILE" \
+  --profile tools \
+  build mentorandi-staging-migrate
+docker compose \
+  --env-file "$STAGING_ENV_FILE" \
+  -f "$STAGING_COMPOSE_FILE" \
+  --profile tools \
+  run --rm mentorandi-staging-migrate
+
 echo "Building and starting MentorAndI staging..."
 docker compose \
   --env-file "$STAGING_ENV_FILE" \

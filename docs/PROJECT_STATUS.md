@@ -20,7 +20,10 @@ Mentor And I
 - Usage and cost monitoring persists safe mentor-request metadata, token usage,
   estimated cost, failures, and blocked attempts. Alpha limits query successful
   usage in UTC periods instead of relying on process memory in production.
-- Authenticated alpha feedback capture is available from `/start` and `/mentor`.
+- Authenticated alpha feedback capture is available at `/feedback`, with visible
+  entries from `/start`, `/mentor`, mentor navigation and settings. It stores a
+  required message, six-category classification, optional 1–5 rating, page
+  context and optional mentor slug per authenticated user.
 - Allowlisted internal admins can monitor aggregate and recent alpha activity at
   `/admin` and review recent feedback at `/admin/feedback`.
 - Public alpha privacy, terms and contact pages are available, with direct
@@ -95,7 +98,8 @@ Mentor And I
   example openings for all eight alpha specializations.
 - Four-method specialist libraries for each active mentor, selected only within
   the persisted mentor context; default prompts carry one primary method.
-- Alpha feedback capture with usefulness rating, category and page context.
+- Alpha feedback capture with an optional 1–5 rating, category, page context
+  and mentor context.
 - Server-rendered alpha admin overview and feedback review.
 - Allowlisted `/admin/usage` monitoring for persistent counts, estimated cost,
   24-hour/7-day average input and output tokens, provider/model/mentor
