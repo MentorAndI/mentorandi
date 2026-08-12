@@ -101,7 +101,7 @@ test("locked mentor copy is stable and user facing", () => {
 
 test("production users without an active subscription fail down to free", async () => {
   const previousNodeEnv = process.env.NODE_ENV;
-  process.env.NODE_ENV = "production";
+  Reflect.set(process.env, "NODE_ENV", "production");
 
   try {
     const service = new MentorAccessService({
@@ -126,9 +126,9 @@ test("production users without an active subscription fail down to free", async 
     );
   } finally {
     if (previousNodeEnv === undefined) {
-      delete process.env.NODE_ENV;
+      Reflect.deleteProperty(process.env, "NODE_ENV");
     } else {
-      process.env.NODE_ENV = previousNodeEnv;
+      Reflect.set(process.env, "NODE_ENV", previousNodeEnv);
     }
   }
 });

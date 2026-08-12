@@ -390,6 +390,8 @@ trust-page content, real-provider status, and production dev-route blocking.
 Auth redirect, plan policy, mentor identity, specialist runtime, and
 database-backed mentor isolation regressions form the remaining automated gate.
 The audit fixed obsolete invite-code wording without changing pricing or access.
+It also updated Next.js from `16.2.9` to `16.3.0` after the dependency audit
+identified a proxy-bypass advisory directly relevant to route protection.
 `docs/ALPHA_READINESS_REPORT.md` records the conditional pass and the required
 human authenticated checklist.
 
