@@ -10,11 +10,15 @@ const activeStatuses = new Set<SubscriptionStatus>([
   SubscriptionStatus.TRIALING,
 ]);
 
+// These are operational request-limit multipliers, not Mentor Credits.
 const limitMultipliers: Record<SubscriptionPlan, { deep: number; messages: number }> = {
   ALPHA: { deep: 1, messages: 1 },
   FREE: { deep: 1, messages: 1 },
   PERSONAL: { deep: 2, messages: 2 },
+  SINGLE: { deep: 2, messages: 2 },
+  PLUS: { deep: 2, messages: 2 },
   PREMIUM: { deep: 4, messages: 4 },
+  COMPANY_STRESS: { deep: 2, messages: 2 },
   FOUNDER: { deep: 4, messages: 4 },
 };
 
