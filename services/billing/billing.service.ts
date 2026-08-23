@@ -110,6 +110,11 @@ export class BillingService {
       return;
     }
 
+    if (event.type === "invoice.payment_succeeded") {
+      await this.applyPaidInvoice(object);
+      return;
+    }
+
     if (event.type.startsWith("customer.subscription.")) {
       await this.applySubscription(object, event.type.endsWith(".deleted"));
     }
@@ -119,13 +124,74 @@ export class BillingService {
     const userId = readString(object.client_reference_id) ?? readMetadata(object, "user_id");
     if (!userId) return;
 
+    const subscriptionId = readId(object.subscription);
+    const plan = readPlan(readMetadata(object, "plan"));
+    const paid = isCheckoutPaid(object);
+
     await this.repository.upsert({
       billingCustomerId: readId(object.customer),
-      billingSubscriptionId: readId(object.subscription),
-      plan: readPlan(readMetadata(object, "plan")),
-      status: isCheckoutPaid(object)
+      billingSubscriptionId: subscriptionId,
+      plan,
+      status: paid
         ? SubscriptionStatus.ACTIVE
         : SubscriptionStatus.INCOMPLETE,
+      userId,
+    });
+
+    // The paid-invoice webhook is the primary credit grant trigger. This is a
+    // safe fallback for webhook reordering when subscription state (including
+    // period end) reached us before Checkout completed.
+    if (paid && subscriptionId) {
+      const stored = await this.repository.findByBillingSubscriptionId(subscriptionId);
+      if (stored?.currentPeriodEnd) {
+        await this.credits.applyPlanCredits({
+          billingSubscriptionId: subscriptionId,
+          periodEnd: stored.currentPeriodEnd,
+          plan: stored.plan,
+          userId,
+        });
+      }
+    }
+  }
+
+  private async applyPaidInvoice(object: Record<string, unknown>) {
+    const billingReason = readString(object.billing_reason);
+    if (
+      billingReason !== "subscription_create" &&
+      billingReason !== "subscription_cycle" &&
+      billingReason !== "subscription_update"
+    ) {
+      return;
+    }
+
+    const subscriptionDetails = readSubscriptionDetails(object);
+    const subscriptionId =
+      readId(subscriptionDetails?.subscription) ?? readInvoiceLineSubscriptionId(object);
+    if (!subscriptionId) return;
+
+    const existing = await this.repository.findByBillingSubscriptionId(subscriptionId);
+    const userId =
+      readMetadataFromObject(subscriptionDetails, "user_id") ?? existing?.userId;
+    if (!userId) return;
+
+    const metadataPlan = readMetadataFromObject(subscriptionDetails, "plan");
+    const plan = readPlan(metadataPlan, existing?.plan);
+    const periodEnd = readInvoicePeriodEnd(object);
+    if (!periodEnd) return;
+
+    await this.repository.upsert({
+      billingCustomerId: readId(object.customer) ?? existing?.billingCustomerId,
+      billingSubscriptionId: subscriptionId,
+      currentPeriodEnd: periodEnd,
+      plan,
+      status: SubscriptionStatus.ACTIVE,
+      userId,
+    });
+
+    await this.credits.applyPlanCredits({
+      billingSubscriptionId: subscriptionId,
+      periodEnd,
+      plan,
       userId,
     });
   }
@@ -162,20 +228,6 @@ export class BillingService {
         userId,
         `subscription:${subscriptionId ?? userId}:ended`,
       );
-      return;
-    }
-
-    if (
-      currentPeriodEnd &&
-      (status === SubscriptionStatus.ACTIVE ||
-        status === SubscriptionStatus.TRIALING)
-    ) {
-      await this.credits.applyPlanCredits({
-        billingSubscriptionId: subscriptionId,
-        periodEnd: currentPeriodEnd,
-        plan,
-        userId,
-      });
     }
   }
 }
@@ -198,10 +250,16 @@ async function resolveAuthenticatedEmail() {
 }
 
 function readMetadata(object: Record<string, unknown>, key: string) {
-  const metadata = object.metadata;
-  return metadata && typeof metadata === "object"
-    ? readString((metadata as Record<string, unknown>)[key])
-    : null;
+  return readMetadataFromObject(readObject(object.metadata), key);
+}
+
+function readMetadataFromObject(
+  object: Record<string, unknown> | null,
+  key: string,
+) {
+  if (!object) return null;
+  const metadata = key in object ? object : readObject(object.metadata);
+  return metadata ? readString(metadata[key]) : null;
 }
 
 function readString(value: unknown) {
@@ -235,6 +293,40 @@ function readSubscriptionPeriodEnd(object: Record<string, unknown>) {
   return periodEnds.length > 0
     ? new Date(Math.max(...periodEnds.map((date) => date.getTime())))
     : null;
+}
+
+function readSubscriptionDetails(object: Record<string, unknown>) {
+  const parent = readObject(object.parent);
+  return parent ? readObject(parent.subscription_details) : null;
+}
+
+function readInvoiceLineSubscriptionId(object: Record<string, unknown>) {
+  const lines = readObject(object.lines);
+  const data = lines && Array.isArray(lines.data) ? lines.data : [];
+
+  for (const lineValue of data) {
+    const line = readObject(lineValue);
+    const parent = line ? readObject(line.parent) : null;
+    const details = parent ? readObject(parent.subscription_item_details) : null;
+    const subscriptionId = readId(details?.subscription);
+    if (subscriptionId) return subscriptionId;
+  }
+
+  return null;
+}
+
+function readInvoicePeriodEnd(object: Record<string, unknown>) {
+  const lines = readObject(object.lines);
+  const data = lines && Array.isArray(lines.data) ? lines.data : [];
+  const periodEnds = data
+    .map((lineValue) => readObject(lineValue))
+    .map((line) => (line ? readObject(line.period) : null))
+    .map((period) => readUnixDate(period?.end))
+    .filter((date): date is Date => Boolean(date));
+
+  return periodEnds.length > 0
+    ? new Date(Math.max(...periodEnds.map((date) => date.getTime())))
+    : readUnixDate(object.period_end);
 }
 
 function readSubscriptionPlan(
