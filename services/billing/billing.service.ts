@@ -4,10 +4,11 @@ import {
 } from "@/lib/generated/prisma/client";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
-  assertStripeTestModeReady,
+  assertStripeReady,
+  getExpectedStripeLivemode,
   getPlanForStripePrice,
   getStripePriceId,
-  isStripeTestModeReady,
+  isStripeReady,
 } from "@/services/billing/billing-config";
 import { BillingRepository } from "@/services/billing/billing.repository";
 import type { PurchasablePlan } from "@/services/billing/billing.types";
@@ -16,6 +17,7 @@ import { UserService } from "@/services/user/user.service";
 
 interface StripeEvent {
   data?: { object?: Record<string, unknown> };
+  id?: string;
   livemode?: boolean;
   type?: string;
 }
@@ -28,7 +30,7 @@ export class BillingService {
   ) {}
 
   async createCheckoutSession(plan: PurchasablePlan, origin: string) {
-    assertStripeTestModeReady();
+    assertStripeReady();
     const [user, email] = await Promise.all([
       this.users.resolveAuthenticatedUser(),
       resolveAuthenticatedEmail(),
@@ -45,7 +47,7 @@ export class BillingService {
       "subscription_data[metadata][plan]": plan,
       "subscription_data[metadata][user_id]": user.id,
       success_url: `${origin}/settings?billing=success`,
-      cancel_url: `${origin}/pricing?billing=canceled`,
+      cancel_url: `${origin}/onboarding?plan=${toPublicPlan(plan)}`,
     };
 
     if (subscription?.billingCustomerId) {
@@ -64,7 +66,7 @@ export class BillingService {
   }
 
   async createPortalSession(origin: string) {
-    assertStripeTestModeReady();
+    assertStripeReady();
     const user = await this.users.resolveAuthenticatedUser();
     const subscription = await this.repository.findByUserId(user.id);
 
@@ -94,9 +96,9 @@ export class BillingService {
 
     if (!object || !event.type) return;
 
-    if (event.livemode !== false) {
+    if (event.livemode !== getExpectedStripeLivemode()) {
       throw new BillingServiceError(
-        "Live Stripe events are disabled during alpha testing.",
+        "Stripe event mode does not match the configured billing environment.",
         400,
       );
     }
@@ -159,7 +161,7 @@ export class BillingServiceError extends Error {
 }
 
 export function paymentsAvailable() {
-  return isStripeTestModeReady();
+  return isStripeReady();
 }
 
 async function resolveAuthenticatedEmail() {
@@ -239,11 +241,26 @@ function isCheckoutPaid(object: Record<string, unknown>) {
 }
 
 function readPlan(value: string | null, fallback?: SubscriptionPlan) {
-  return value === "PREMIUM"
-    ? SubscriptionPlan.PREMIUM
-    : value === "PERSONAL"
-      ? SubscriptionPlan.PERSONAL
-      : (fallback ?? SubscriptionPlan.ALPHA);
+  switch (value) {
+    case "SINGLE":
+      return SubscriptionPlan.SINGLE;
+    case "PLUS":
+      return SubscriptionPlan.PLUS;
+    case "PREMIUM":
+      return SubscriptionPlan.PREMIUM;
+    case "COMPANY_STRESS":
+      return SubscriptionPlan.COMPANY_STRESS;
+    case "FREE":
+      return SubscriptionPlan.FREE;
+    case "FOUNDER":
+      return SubscriptionPlan.FOUNDER;
+    case "PERSONAL":
+      return SubscriptionPlan.PERSONAL;
+    case "ALPHA":
+      return SubscriptionPlan.ALPHA;
+    default:
+      return fallback ?? SubscriptionPlan.ALPHA;
+  }
 }
 
 function readStatus(value: string | null) {
@@ -258,4 +275,15 @@ function readStatus(value: string | null) {
     unpaid: SubscriptionStatus.UNPAID,
   };
   return statusMap[value ?? ""] ?? SubscriptionStatus.INACTIVE;
+}
+
+function toPublicPlan(plan: PurchasablePlan) {
+  switch (plan) {
+    case "SINGLE":
+      return "single";
+    case "PLUS":
+      return "plus";
+    case "PREMIUM":
+      return "premium";
+  }
 }
