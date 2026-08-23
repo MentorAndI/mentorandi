@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - production-launch-2026-08-23
+      - credit-ledger-2026-08-23
   pull_request:
     branches:
       - main
@@ -39,4 +40,5 @@ jobs:
       - run: npm run lint
       - run: npm run test:auth-contract
       - run: npm run test:mentor-access
+      - run: npm run test:credits
       - run: npm run build

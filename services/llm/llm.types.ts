@@ -34,6 +34,7 @@ export interface LlmCompletionResponse {
   content: string;
   createdAt?: string;
   metadata: {
+    cachedInputTokens?: number;
     inputTokens?: number;
     latencyMs?: number;
     maxOutputTokens?: number;

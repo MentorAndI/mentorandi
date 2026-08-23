@@ -2,138 +2,156 @@
 
 ## Purpose
 
-This document defines the intended commercial model for MentorAndI. It is a
-product and implementation direction, not a statement that billing, paid plan
-access, or mentor credits are live. Current alpha behavior remains unchanged.
-
-MentorAndI sells access to an ongoing mentor relationship, practical specialist
-support, continuity, and deeper guidance. It does not sell raw model tokens and
-does not promise unlimited usage.
+This document defines the commercial launch model for MentorAndI. MentorAndI
+sells access to an ongoing mentor relationship, specialist support, continuity,
+and deeper guidance. It does not sell raw model tokens and does not promise
+unlimited usage.
 
 ## Plans
 
-| Plan | Price | Intended access | Usage position |
-| --- | ---: | --- | --- |
-| Free Trial | $0 | Life Mentor only | Limited starter credits; no deep mentor sessions |
-| Single Mentor | $19/month | One specialist mentor chosen by the user | Monthly mentor credits |
-| Mentor Plus | $39/month | All main mentors | Monthly mentor credits and occasional deep mentor sessions |
-| Premium | $69/month | All main mentors plus advanced programs and deeper plans | More monthly credits and more deep mentor sessions |
-| Company Stress Mentor | $125/user/month | Dedicated employee Stress Mentor experience | Per-user access; no minimum seats |
+| Plan | Price | Access | Credits |
+| --- | ---: | --- | ---: |
+| Free Trial | $0 | Life Mentor only | 25 starter credits once |
+| Single Mentor | $19/month | Life Mentor + one chosen specialist | 800/month |
+| Mentor Plus | $39/month | All main mentors | 2,000/month |
+| Premium | $69/month | All main mentors + advanced/deeper programs | 5,000/month |
+| Company Stress Mentor | $125/user/month | Dedicated employee Stress Mentor | 5,000/user/month |
 
-Prices are product direction in US dollars. Taxes, supported currencies,
-billing intervals other than monthly, refunds, proration, credit quantities,
-credit-pack sizes, and regional pricing require later commercial and legal
-decisions. They must not be invented in UI or runtime configuration.
+Company Stress Mentor remains hidden from the public consumer purchase flow
+until the company product is deliberately launched.
+
+## Credit Economics
+
+The credit system is tied to MentorAI Corp's variable provider cost rather than
+a fixed message count:
+
+- 1 credit represents $0.01 of user-facing AI usage value.
+- Every successful OpenAI or Anthropic call is charged to the user at exactly
+  2× MentorAI Corp's calculated provider API cost.
+- Credits debited are `(provider cost × 2) / $0.01`, rounded upward to two
+  decimal places.
+- Failed provider/pipeline work does not consume credits.
+- Provider/model/token usage is measured server-side and cannot be supplied by
+  the browser.
+
+This means the included allocations correspond to the following maximum
+provider-cost budgets if fully consumed:
+
+| Plan allocation | User AI usage value | Maximum provider API cost at 2× |
+| ---: | ---: | ---: |
+| 25 | $0.25 | $0.125 |
+| 800 | $8.00 | $4.00 |
+| 2,000 | $20.00 | $10.00 |
+| 5,000 | $50.00 | $25.00 |
+
+Subscription revenue also pays for the MentorAndI product, infrastructure,
+payment fees, development, support and margin; the credit allocation only meters
+variable AI-provider consumption.
 
 ## Free Trial — $0
 
-The Free Trial gives a new user a useful but deliberately bounded introduction:
+The Free Trial gives a new user a useful but bounded introduction:
 
 - Life Mentor only.
-- A limited allocation of starter mentor credits.
+- 25 starter credits, granted once.
+- No card required.
 - No specialist mentor access.
-- No deep mentor sessions.
-- No claim of unlimited use.
+- No deep mentor-session entitlement.
 
-The Life Mentor may identify that specialist support would better fit the
-user's situation and may recommend Mentor Plus or Premium. A recommendation
-must be relevant and transparent, not fear-based, repetitive, or allowed to
-interrupt crisis/safety guidance. The mentor must not pretend it cannot help
-with ordinary Life Mentor support merely to force an upgrade.
+When the starter credits are exhausted, the next provider call is blocked before
+incurring API cost and the user is shown an upgrade path.
 
 ## Single Mentor — $19/month
 
 Single Mentor is for a user who wants sustained access to one specialist:
 
-- The user chooses one specialist mentor.
-- The plan includes a monthly allocation of mentor credits.
-- Other specialist mentors remain locked and display a clear upgrade path.
-- The user may upgrade at any time to unlock more mentors.
+- Life Mentor plus one chosen specialist.
+- 800 credits for each authoritative paid billing period.
+- Other specialist mentors remain locked and display an upgrade path.
+- The user may upgrade to Mentor Plus or Premium.
 
-Changing the chosen specialist, any waiting period, and any limits on switching
-are intentionally undecided. Runtime implementation must define these policies
-before sale and must not silently switch, delete, or merge conversation history.
+The first specialist selected for the plan is stored server-side and is not
+trusted from a browser plan claim.
 
 ## Mentor Plus — $39/month
 
 Mentor Plus is the main multi-mentor plan:
 
-- Access to all main mentors.
-- A monthly allocation of mentor credits.
-- Practical techniques, exercises, and step-by-step guidance.
-- Occasional deep mentor sessions within a separate plan allowance.
-- Shared user-level memory across mentors, subject to the user's privacy and
+- Access to all main consumer mentors.
+- 2,000 credits per paid billing period.
+- Practical techniques, exercises and step-by-step guidance.
+- Limited deep mentor sessions under the separate operational entitlement.
+- Shared user-level memory across eligible mentors, subject to user privacy and
   memory controls.
-
-“All main mentors” means the consumer mentor catalog designated as main at the
-time of implementation. It does not automatically include company-only
-experiences, future premium-only programs, or every experimental mentor.
-
-Shared memory does not mean shared conversation transcripts. Conversation
-history remains scoped to its mentor and user; approved user-level memories,
-goals, and reflections may support continuity across eligible mentors.
 
 ## Premium — $69/month
 
 Premium is for users who want greater capacity and continuity:
 
-- More monthly mentor credits than Mentor Plus.
-- More deep mentor sessions than Mentor Plus.
-- Stronger long-term memory, implemented through greater continuity capacity
-  and careful retrieval—not weaker privacy boundaries.
-- Priority model quality when plan routing is implemented.
-- Advanced programs and deeper plans.
+- Access to all main consumer mentors.
+- 5,000 credits per paid billing period.
+- Expanded deep mentor sessions.
+- Advanced and longer-term mentor programs.
+- Priority model quality when routing policy selects it.
 
-“Priority model quality” is a routing entitlement, not a guarantee that every
-response uses the most expensive model or produces a superior outcome. Stronger
-memory must remain user-owned, editable, exportable, and deletable. It must not
-mean retaining content the user has asked MentorAndI to forget.
+Priority model quality is a routing entitlement, not a promise that every
+response uses the most expensive model.
 
 ## Company Stress Mentor — $125/User/Month
 
 The company offering has no minimum seat requirement. Each paid seat provides a
-private employee Stress Mentor experience. Employers may receive only anonymous
-company-level insights; they never receive individual conversations, messages,
-memories, goals, reflections, prompts, or response content.
+private employee Stress Mentor experience with 5,000 credits per paid billing
+period. Employers may receive only anonymous company-level insights; they never
+receive individual conversations, messages, memories, goals, reflections,
+prompts, credit history, or response content.
 
-Company pricing, privacy boundaries, aggregation requirements, and unresolved
-decisions are specified in `docs/COMPANY_STRESS_MENTOR.md`.
+## Credit Periods And Rollover
+
+Plan credits reset when a new paid Stripe subscription period becomes
+authoritative through a verified webhook. Unused plan credits do not roll over.
+
+The system maintains a separate top-up bucket so purchased credits can later be
+preserved across monthly resets. Public top-up purchases are not active at
+launch until their pack sizes/prices are reconciled with the strict 2×
+provider-cost rule.
+
+When a paid subscription actually ends, remaining plan credits are cleared.
+Future purchased top-up credits remain separate.
 
 ## Upgrade Logic
 
 The intended upgrade flow is:
 
-1. Explain what is currently locked and what the higher plan adds.
-2. Show the exact new recurring price before checkout.
+1. Explain what is locked and what the higher plan adds.
+2. Show the exact recurring price before checkout.
 3. Use Stripe Checkout for payment authorization.
-4. Treat access as pending until the app receives and validates authoritative
-   subscription state through a signed webhook or safe server reconciliation.
-5. Apply the new plan and credit entitlement server-side.
-6. Unlock eligible mentors without rewriting or combining their histories.
+4. Treat browser redirects as non-authoritative.
+5. Apply subscription state only from signed Stripe webhooks or safe server
+   reconciliation.
+6. Apply the plan's credit allocation server-side from authoritative
+   subscription-period state.
+7. Unlock eligible mentors without rewriting or combining conversation history.
 
-Upgrades should be available at any time. Exact proration and immediate credit
-grant rules must be chosen before implementation and kept consistent with
-Stripe configuration. The UI must not assume success from a checkout redirect.
+The initial launch implementation grants the target plan's full allocation when
+a verified active/trialing subscription event establishes a new plan/period
+key. The idempotency key prevents repeated webhooks from granting the same
+allocation twice.
 
-Downgrades and cancellations should normally take effect at the end of the
-paid period unless an explicit, disclosed policy says otherwise. Losing access
-must lock future use, not delete prior user data. Reactivation should restore
-eligible access to the user's existing owned conversations.
+Downgrades and cancellations normally take effect according to the authoritative
+Stripe subscription state. Losing access locks future use; it does not delete
+prior user data.
 
 ## Upgrade Recommendations
 
 An upgrade prompt may appear when:
 
 - the user selects a mentor their plan does not include;
-- the user has insufficient credits for a requested action;
+- the user's credit balance is exhausted;
 - a Free Trial conversation clearly calls for a specialist mentor; or
 - the user requests a deep session or advanced program outside their plan.
 
-The prompt should say what is unavailable, which plan enables it, its price,
-and what happens to existing data. It must offer a way back to currently
-available support. Locked mentor cards should remain visible enough to explain
-their purpose and show an upgrade call to action, but the server remains the
-authority.
+Upgrade messaging must remain relevant and transparent, not fear-based or
+repetitive.
 
 ## Stripe And Application Responsibilities
 
@@ -147,35 +165,29 @@ Stripe is responsible for:
 
 The MentorAndI application is responsible for:
 
-- Mapping verified subscription state to an internal plan entitlement.
+- Mapping verified subscription state to internal plan entitlement.
 - Mentor access and server-side locks.
-- Credit grants, reservations/debits, balances, and usage ledger.
+- Credit grants, balances and usage debits.
+- Provider/model token-cost calculation.
 - Deep-session allowances and model-routing eligibility.
 - Upgrade messaging and product access decisions.
-- User ownership, privacy, and auditability.
+- User ownership, privacy and auditability.
 
 Stripe metadata is not the user-facing credit ledger, and browser-provided plan
-claims are never authoritative. Webhook processing must be authenticated,
-idempotent, replay-safe, and able to handle events out of order.
+or credit claims are never authoritative. Webhook processing must remain signed,
+idempotent and environment-matched.
 
-The repository already contains disabled/test-mode billing-readiness
-foundations. This feature does not activate, extend, or configure them. No live
-payment implementation is authorized by this document.
+## Launch Decisions Remaining
 
-## Launch Decisions Still Required
+The core subscription and credit quantities are now decided. Remaining
+commercial decisions include:
 
-Before implementation or sale, product, finance, privacy, and engineering must
-define:
+- public top-up pack sizes/prices and any expiry policy;
+- refund/manual credit-adjustment support policy;
+- detailed proration behavior for mid-period upgrades/downgrades;
+- Single Mentor specialist-switching policy;
+- tax, regional pricing and consumer-law disclosures;
+- company anonymity thresholds and reporting governance.
 
-- Exact starter and monthly credit allocations.
-- Credit costs for each action and deep-session allowance quantities.
-- Rollover, expiry, refund, failed-response, retry, and purchased-pack policy.
-- Upgrade proration, downgrade timing, cancellation, grace period, and failed
-  payment behavior.
-- Single Mentor switching rules.
-- What counts as a main mentor, advanced program, and deeper plan.
-- Tax, currency, regional pricing, invoicing, and consumer-law requirements.
-- Company anonymity thresholds, insight governance, and contract terms.
-
-Until those decisions and server-side enforcement exist, pricing documentation
-must not be presented as an active paid entitlement.
+These items do not change the launch rule that successful AI usage is metered at
+2× provider API cost through the credit ledger.

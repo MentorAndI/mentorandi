@@ -18,6 +18,7 @@
     "alpha:readiness": "node scripts/alpha-readiness-check.mjs",
     "smoke:alpha": "node scripts/alpha-smoke-test.mjs",
     "smoke:prod": "node scripts/production-smoke-test.mjs",
+    "test:credits": "prisma generate && node scripts/run-credit-pricing-test.mjs",
     "test:mentor-scope": "node scripts/run-mentor-scope-test.mjs",
     "test:mentor-display-name": "node scripts/run-mentor-display-name-test.mjs",
     "test:auth-contract": "node scripts/run-auth-contract-test.mjs",

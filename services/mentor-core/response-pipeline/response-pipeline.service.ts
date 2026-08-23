@@ -174,6 +174,9 @@ export class MentorResponsePipelineService {
         createdGoals: goalStorageResult.createdGoals,
         extractedMemories: memoryStorageResult.createdMemories,
         llmUsage: {
+          ...(llmResponse.metadata.cachedInputTokens !== undefined
+            ? { cachedInputTokens: llmResponse.metadata.cachedInputTokens }
+            : {}),
           ...(llmResponse.metadata.inputTokens !== undefined
             ? { inputTokens: llmResponse.metadata.inputTokens }
             : {}),

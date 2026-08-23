@@ -1,4 +1,5 @@
 import type { MentorResponsePipelineLlmUsage } from "@/services/mentor-core/response-pipeline/response-pipeline.types";
+import { calculateProviderCostUsd } from "@/services/credits/credit-pricing";
 
 export interface UsageCostEstimate {
   estimatedCostUsd: number | null;
@@ -7,26 +8,19 @@ export interface UsageCostEstimate {
 }
 
 export function estimateMentorUsageCost(
-  usage: Pick<
-    MentorResponsePipelineLlmUsage,
-    "inputTokens" | "outputTokens"
-  >,
+  usage: MentorResponsePipelineLlmUsage,
 ): UsageCostEstimate {
-  const inputCostPer1m = readOptionalCost("LLM_INPUT_COST_PER_1M");
-  const outputCostPer1m = readOptionalCost("LLM_OUTPUT_COST_PER_1M");
+  const estimate = calculateProviderCostUsd(usage);
 
-  if (inputCostPer1m === null || outputCostPer1m === null) {
+  if (!estimate.pricingConfigured) {
     return {
       estimatedCostUsd: null,
       isConfigured: false,
-      message: "Cost estimate not configured",
+      message: "Cost estimate not configured for this model",
     };
   }
 
-  if (
-    usage.inputTokens === undefined ||
-    usage.outputTokens === undefined
-  ) {
+  if (estimate.providerCostUsd === null) {
     return {
       estimatedCostUsd: null,
       isConfigured: true,
@@ -35,24 +29,8 @@ export function estimateMentorUsageCost(
   }
 
   return {
-    estimatedCostUsd:
-      (usage.inputTokens / 1_000_000) * inputCostPer1m +
-      (usage.outputTokens / 1_000_000) * outputCostPer1m,
+    estimatedCostUsd: estimate.providerCostUsd,
     isConfigured: true,
     message: null,
   };
-}
-
-function readOptionalCost(name: string) {
-  const value = process.env[name]?.trim();
-
-  if (!value) {
-    return null;
-  }
-
-  const parsedValue = Number(value);
-
-  return Number.isFinite(parsedValue) && parsedValue >= 0
-    ? parsedValue
-    : null;
 }

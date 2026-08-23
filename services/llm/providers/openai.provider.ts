@@ -29,6 +29,9 @@ interface OpenAiResponsesApiResponse {
   usage?: {
     completion_tokens?: unknown;
     input_tokens?: unknown;
+    input_tokens_details?: {
+      cached_tokens?: unknown;
+    } | null;
     output_tokens?: unknown;
     prompt_tokens?: unknown;
     total_tokens?: unknown;
@@ -205,6 +208,9 @@ function readOpenAiUsage(response: OpenAiResponsesApiResponse) {
   const inputTokens =
     readNumber(response.usage?.input_tokens) ??
     readNumber(response.usage?.prompt_tokens);
+  const cachedInputTokens = readNumber(
+    response.usage?.input_tokens_details?.cached_tokens,
+  );
   const outputTokens =
     readNumber(response.usage?.output_tokens) ??
     readNumber(response.usage?.completion_tokens);
@@ -215,6 +221,7 @@ function readOpenAiUsage(response: OpenAiResponsesApiResponse) {
       : undefined);
 
   return {
+    ...(cachedInputTokens !== undefined ? { cachedInputTokens } : {}),
     ...(inputTokens !== undefined ? { inputTokens } : {}),
     ...(outputTokens !== undefined ? { outputTokens } : {}),
     ...(totalTokens !== undefined ? { totalTokens } : {}),
