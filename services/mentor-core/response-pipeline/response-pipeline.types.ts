@@ -24,6 +24,7 @@ export interface MentorResponsePipelineAuthContext {
 }
 
 export interface MentorResponsePipelineLlmUsage {
+  cachedInputTokens?: number;
   inputTokens?: number;
   latencyMs?: number;
   maxOutputTokens?: number;
