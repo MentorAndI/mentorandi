@@ -53,21 +53,34 @@ if (provider) {
 
 if (stripeEnabled) {
   for (const variableName of [
+    "STRIPE_MODE",
     "STRIPE_SECRET_KEY",
     "STRIPE_WEBHOOK_SECRET",
-    "STRIPE_PRICE_PERSONAL_MONTHLY",
+    "STRIPE_PRICE_SINGLE_MONTHLY",
+    "STRIPE_PRICE_PLUS_MONTHLY",
     "STRIPE_PRICE_PREMIUM_MONTHLY",
   ]) {
     if (!hasEnvironmentValue(variableName)) missingVariables.push(variableName);
   }
 
-  if (
-    hasEnvironmentValue("STRIPE_SECRET_KEY") &&
-    !process.env.STRIPE_SECRET_KEY.trim().startsWith("sk_test_")
-  ) {
-    errors.push(
-      "STRIPE_SECRET_KEY must be a Stripe test secret key (sk_test_) during alpha.",
-    );
+  const stripeMode = process.env.STRIPE_MODE?.trim().toLowerCase();
+
+  if (stripeMode && !["test", "live"].includes(stripeMode)) {
+    errors.push("STRIPE_MODE must be test or live.");
+  }
+
+  if (hasEnvironmentValue("STRIPE_SECRET_KEY") && stripeMode) {
+    const secretKey = process.env.STRIPE_SECRET_KEY.trim();
+    const allowedPrefixes =
+      stripeMode === "live"
+        ? ["sk_live_", "rk_live_"]
+        : ["sk_test_", "rk_test_"];
+
+    if (!allowedPrefixes.some((prefix) => secretKey.startsWith(prefix))) {
+      errors.push(
+        `STRIPE_SECRET_KEY does not match STRIPE_MODE=${stripeMode}.`,
+      );
+    }
   }
 
   if (
@@ -78,7 +91,8 @@ if (stripeEnabled) {
   }
 
   for (const variableName of [
-    "STRIPE_PRICE_PERSONAL_MONTHLY",
+    "STRIPE_PRICE_SINGLE_MONTHLY",
+    "STRIPE_PRICE_PLUS_MONTHLY",
     "STRIPE_PRICE_PREMIUM_MONTHLY",
   ]) {
     if (
@@ -90,7 +104,7 @@ if (stripeEnabled) {
   }
 } else {
   warnings.push(
-    "Stripe payments are disabled; pricing will show that payments are not enabled yet.",
+    "Stripe payments are disabled; paid checkout will remain unavailable.",
   );
 }
 
