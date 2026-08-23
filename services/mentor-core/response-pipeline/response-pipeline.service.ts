@@ -344,11 +344,11 @@ export class MentorResponsePipelineService {
         );
 
       if (result.status === "created") {
-        createdMemories.push(result.understanding);
+        createdMemories.push(result.memory);
       } else if (result.status === "updated") {
-        updatedMemories.push(result.understanding);
+        updatedMemories.push(result.memory);
       } else {
-        skippedDuplicateMemories.push(result.understanding);
+        skippedDuplicateMemories.push(result.memory);
       }
     }
 
@@ -361,17 +361,21 @@ export class MentorResponsePipelineService {
 
   private async createReflectionForMoment(
     input: MentorResponsePipelineInput,
-    mentorResponse: string,
+    mentorMessage: string,
   ) {
-    const reflection = this.reflectionEngine.createReflection({
-      mentorResponse,
+    const reflectionResult = this.reflectionEngine.buildReflectionCandidate({
+      conversationId: input.conversationId,
+      mentorMessage,
+      userId: input.userId,
       userMessage: input.message,
     });
 
-    if (!reflection) return null;
+    if (!reflectionResult.reflectionCandidate) {
+      return null;
+    }
 
     return this.reflectionService.createReflectionForUserId(input.userId, {
-      summary: reflection.summary,
+      summary: reflectionResult.reflectionCandidate.summary,
     });
   }
 
@@ -379,16 +383,30 @@ export class MentorResponsePipelineService {
     userId: string,
     authContext: MentorResponsePipelineAuthContext,
   ) {
-    const user = await this.userService.getUserById(userId);
-
-    if (!user) {
-      throw new MentorResponsePipelineServiceError("User not found.", 404);
+    if (!authContext.authUserId) {
+      throw new MentorResponsePipelineServiceError("Unauthorized.", 401);
     }
 
-    if (authContext.authUserId && user.authUserId !== authContext.authUserId) {
+    const user = await this.userService.getUserByAuthUserId(
+      authContext.authUserId,
+    );
+
+    if (!user) {
+      throw new MentorResponsePipelineServiceError("Unauthorized.", 401);
+    }
+
+    if (user.id !== userId) {
       throw new MentorResponsePipelineServiceError("Forbidden.", 403);
     }
   }
+}
+
+function toCreateGoalInput(candidate: GoalCandidate): CreateGoalInput {
+  return {
+    description: candidate.description,
+    status: candidate.status,
+    title: candidate.title,
+  };
 }
 
 function isUsefulMemoryCandidate(candidate: MemoryCandidate) {
@@ -396,15 +414,6 @@ function isUsefulMemoryCandidate(candidate: MemoryCandidate) {
     candidate.confidence >= minimumMemoryConfidence &&
     candidate.importance >= minimumMemoryImportance
   );
-}
-
-function toCreateGoalInput(candidate: GoalCandidate): CreateGoalInput {
-  return {
-    description: candidate.description,
-    status: candidate.status,
-    targetDate: candidate.targetDate,
-    title: candidate.title,
-  };
 }
 
 function toCreateMemoryInput(candidate: MemoryCandidate): CreateMemoryInput {
