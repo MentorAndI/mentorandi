@@ -1,0 +1,52 @@
+services:
+  mentorandi-production-migrate:
+    profiles:
+      - tools
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: migrator
+    env_file:
+      - ./.env.production
+    restart: "no"
+
+  mentorandi-production-rls:
+    profiles:
+      - tools
+    image: postgres:17-alpine
+    env_file:
+      - ./.env.production
+    volumes:
+      - ./prisma/security/rls-hardening.sql:/scripts/rls-hardening.sql:ro
+    command:
+      - sh
+      - -c
+      - psql "$$DATABASE_URL" -v ON_ERROR_STOP=1 -f /scripts/rls-hardening.sql
+    restart: "no"
+
+  mentorandi-production:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_SUPABASE_URL: ${NEXT_PUBLIC_SUPABASE_URL:?Set NEXT_PUBLIC_SUPABASE_URL in the production env file}
+        NEXT_PUBLIC_SUPABASE_ANON_KEY: ${NEXT_PUBLIC_SUPABASE_ANON_KEY:?Set NEXT_PUBLIC_SUPABASE_ANON_KEY in the production env file}
+        NEXT_PUBLIC_STRIPE_ENABLED: ${NEXT_PUBLIC_STRIPE_ENABLED:-false}
+    container_name: mentorandi-production
+    env_file:
+      - ./.env.production
+    environment:
+      NODE_ENV: production
+      PORT: "3000"
+      HOSTNAME: 0.0.0.0
+      NEXT_TELEMETRY_DISABLED: "1"
+    expose:
+      - "3000"
+    restart: unless-stopped
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.mentorandi-production.rule=Host(`app.mentorandi.com`)
+      - traefik.http.routers.mentorandi-production.entrypoints=websecure
+      - traefik.http.routers.mentorandi-production.tls=true
+      - traefik.http.routers.mentorandi-production.tls.certresolver=letsencrypt
+      - traefik.http.services.mentorandi-production.loadbalancer.server.port=3000
