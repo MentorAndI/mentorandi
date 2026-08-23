@@ -174,6 +174,9 @@ export class MentorResponsePipelineService {
         createdGoals: goalStorageResult.createdGoals,
         extractedMemories: memoryStorageResult.createdMemories,
         llmUsage: {
+          ...(llmResponse.metadata.cachedInputTokens !== undefined
+            ? { cachedInputTokens: llmResponse.metadata.cachedInputTokens }
+            : {}),
           ...(llmResponse.metadata.inputTokens !== undefined
             ? { inputTokens: llmResponse.metadata.inputTokens }
             : {}),
@@ -341,11 +344,11 @@ export class MentorResponsePipelineService {
         );
 
       if (result.status === "created") {
-        createdMemories.push(result.memory);
+        createdMemories.push(result.understanding);
       } else if (result.status === "updated") {
-        updatedMemories.push(result.memory);
+        updatedMemories.push(result.understanding);
       } else {
-        skippedDuplicateMemories.push(result.memory);
+        skippedDuplicateMemories.push(result.understanding);
       }
     }
 
@@ -358,21 +361,17 @@ export class MentorResponsePipelineService {
 
   private async createReflectionForMoment(
     input: MentorResponsePipelineInput,
-    mentorMessage: string,
+    mentorResponse: string,
   ) {
-    const reflectionResult = this.reflectionEngine.buildReflectionCandidate({
-      conversationId: input.conversationId,
-      mentorMessage,
-      userId: input.userId,
+    const reflection = this.reflectionEngine.createReflection({
+      mentorResponse,
       userMessage: input.message,
     });
 
-    if (!reflectionResult.reflectionCandidate) {
-      return null;
-    }
+    if (!reflection) return null;
 
     return this.reflectionService.createReflectionForUserId(input.userId, {
-      summary: reflectionResult.reflectionCandidate.summary,
+      summary: reflection.summary,
     });
   }
 
@@ -380,30 +379,16 @@ export class MentorResponsePipelineService {
     userId: string,
     authContext: MentorResponsePipelineAuthContext,
   ) {
-    if (!authContext.authUserId) {
-      throw new MentorResponsePipelineServiceError("Unauthorized.", 401);
-    }
-
-    const user = await this.userService.getUserByAuthUserId(
-      authContext.authUserId,
-    );
+    const user = await this.userService.getUserById(userId);
 
     if (!user) {
-      throw new MentorResponsePipelineServiceError("Unauthorized.", 401);
+      throw new MentorResponsePipelineServiceError("User not found.", 404);
     }
 
-    if (user.id !== userId) {
+    if (authContext.authUserId && user.authUserId !== authContext.authUserId) {
       throw new MentorResponsePipelineServiceError("Forbidden.", 403);
     }
   }
-}
-
-function toCreateGoalInput(candidate: GoalCandidate): CreateGoalInput {
-  return {
-    description: candidate.description,
-    status: candidate.status,
-    title: candidate.title,
-  };
 }
 
 function isUsefulMemoryCandidate(candidate: MemoryCandidate) {
@@ -411,6 +396,15 @@ function isUsefulMemoryCandidate(candidate: MemoryCandidate) {
     candidate.confidence >= minimumMemoryConfidence &&
     candidate.importance >= minimumMemoryImportance
   );
+}
+
+function toCreateGoalInput(candidate: GoalCandidate): CreateGoalInput {
+  return {
+    description: candidate.description,
+    status: candidate.status,
+    targetDate: candidate.targetDate,
+    title: candidate.title,
+  };
 }
 
 function toCreateMemoryInput(candidate: MemoryCandidate): CreateMemoryInput {
