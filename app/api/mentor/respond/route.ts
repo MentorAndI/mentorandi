@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 
 import { createSafeErrorResponse } from "@/lib/api/safe-error-response";
 import {
+  CreditService,
+  CreditServiceError,
+} from "@/services/credits/credit.service";
+import {
   MentorSessionService,
   MentorSessionServiceError,
 } from "@/services/mentor-session/mentor-session.service";
@@ -53,6 +57,7 @@ export async function POST(request: Request) {
         )
       : await sessionService.getResolvedMentorSession(mentorSlug);
     const usageLimitService = new MentorUsageLimitService();
+    const creditService = new CreditService();
     const usageContext = {
       authUserId: session.authUserId,
       conversationId: session.conversation.id,
@@ -66,6 +71,8 @@ export async function POST(request: Request) {
     if (usageDecision.message) {
       return createUsageLimitResponse(usageDecision.message);
     }
+
+    await creditService.assertCreditsAvailable(session.userId);
 
     const pipeline = new MentorResponsePipelineService();
     let response;
@@ -94,21 +101,42 @@ export async function POST(request: Request) {
       throw error;
     }
 
-    await usageLimitService.recordSuccessfulMentorResponse({
+    const usageRecord = await usageLimitService.recordSuccessfulMentorResponse({
       ...usageContext,
       llmUsage: response.llmUsage,
       specialistContext: response.promptPackage.specialistContext,
     });
 
+    const creditResult = usageRecord.usageEventId
+      ? await creditService.debitUsageCredits({
+          llmUsage: response.llmUsage,
+          usageEventId: usageRecord.usageEventId,
+          userId: session.userId,
+        })
+      : await creditService.getBalanceForUser(session.userId);
+
     return NextResponse.json(
       {
         conversation: session.conversation,
+        creditsRemaining: creditResult.balance,
         mentorMessage: response.mentorMessage,
         userMessage: response.userMessage,
       },
       { status: 200 },
     );
   } catch (error) {
+    if (error instanceof CreditServiceError) {
+      return NextResponse.json(
+        {
+          error: error.message,
+          ...(error.upgradeMessage
+            ? { upgradeMessage: error.upgradeMessage }
+            : {}),
+        },
+        { status: error.statusCode },
+      );
+    }
+
     if (error instanceof MentorAccessServiceError) {
       return createMentorAccessResponse(error);
     }
