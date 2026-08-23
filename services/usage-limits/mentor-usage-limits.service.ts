@@ -51,6 +51,11 @@ export interface MentorUsageLimitCheckResult {
   status: UsageLimitStatus;
 }
 
+export interface MentorUsageRecordResult {
+  estimatedCostUsd: number | null;
+  usageEventId: string | null;
+}
+
 export class MentorUsageMonitoringError extends Error {
   readonly statusCode = 503;
 
@@ -108,7 +113,9 @@ export class MentorUsageLimitService {
     };
   }
 
-  async recordSuccessfulMentorResponse(input: MentorUsageLimitRecordInput) {
+  async recordSuccessfulMentorResponse(
+    input: MentorUsageLimitRecordInput,
+  ): Promise<MentorUsageRecordResult> {
     const estimate = estimateMentorUsageCost(input.llmUsage);
 
     try {
@@ -118,7 +125,8 @@ export class MentorUsageLimitService {
           input.conversationId,
         ));
 
-      await this.repository.createUsageEvent({
+      const usageEvent = await this.repository.createUsageEvent({
+        cachedInputTokens: input.llmUsage.cachedInputTokens,
         conversationId: input.conversationId,
         ...(estimate.estimatedCostUsd === null
           ? {}
@@ -136,6 +144,11 @@ export class MentorUsageLimitService {
           sumTokens(input.llmUsage.inputTokens, input.llmUsage.outputTokens),
         userId: input.userId,
       });
+
+      return {
+        estimatedCostUsd: estimate.estimatedCostUsd,
+        usageEventId: usageEvent.id,
+      };
     } catch {
       if (requiresPersistentUsage()) {
         throw new MentorUsageMonitoringError();
@@ -154,6 +167,10 @@ export class MentorUsageLimitService {
       }
 
       logDevelopmentFallback();
+      return {
+        estimatedCostUsd: estimate.estimatedCostUsd,
+        usageEventId: null,
+      };
     }
   }
 
