@@ -106,7 +106,13 @@ export function getStripeWebhookSecret() {
 }
 
 export function getStripePriceId(plan: PurchasablePlan) {
-  const priceId = requireStripeValue(priceEnvironmentVariables[plan]);
+  const priceId = readConfiguredPrice(plan);
+
+  if (!priceId) {
+    throw new BillingConfigurationError(
+      "Payments are temporarily unavailable because billing setup is incomplete.",
+    );
+  }
 
   if (!priceId.startsWith("price_")) {
     throw new BillingConfigurationError(
@@ -119,12 +125,27 @@ export function getStripePriceId(plan: PurchasablePlan) {
 
 export function getPlanForStripePrice(priceId: string): PurchasablePlan | null {
   for (const plan of ["SINGLE", "PLUS", "PREMIUM"] as const) {
-    if (priceId === readStripeValue(priceEnvironmentVariables[plan])) {
+    if (priceId === readConfiguredPrice(plan)) {
       return plan;
     }
   }
 
   return null;
+}
+
+function readConfiguredPrice(plan: PurchasablePlan) {
+  const current = readStripeValue(priceEnvironmentVariables[plan]);
+  if (current) return current;
+
+  // Preserve the existing staging configuration during the production rollout.
+  // Live mode never falls back to legacy price variables.
+  if (getStripeMode() !== "test") return null;
+
+  if (plan === "SINGLE" || plan === "PLUS") {
+    return readStripeValue("STRIPE_PRICE_PERSONAL_MONTHLY");
+  }
+
+  return readStripeValue("STRIPE_PRICE_PREMIUM_MONTHLY");
 }
 
 function requireStripeValue(name: string) {
