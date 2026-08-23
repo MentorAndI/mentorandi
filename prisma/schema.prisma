@@ -42,6 +42,15 @@ enum UsageEventStatus {
   BLOCKED
 }
 
+enum CreditTransactionType {
+  STARTER_GRANT
+  PLAN_RESET
+  PLAN_GRANT
+  USAGE_DEBIT
+  TOP_UP
+  ADJUSTMENT
+}
+
 enum SubscriptionPlan {
   ALPHA
   FREE
@@ -87,15 +96,17 @@ model User {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 
-  conversations    Conversation[]
-  feedback         Feedback[]
-  goals            Goal[]
-  journalEntries   JournalEntry[]
-  memories         Memory[]
-  reflections      Reflection[]
-  usageEvents      UsageEvent[]
-  alphaInvitesUsed AlphaInvite[]  @relation("AlphaInviteUsedBy")
-  subscription     Subscription?
+  conversations       Conversation[]
+  creditAccount       CreditAccount?
+  creditTransactions  CreditTransaction[]
+  feedback            Feedback[]
+  goals               Goal[]
+  journalEntries      JournalEntry[]
+  memories            Memory[]
+  reflections         Reflection[]
+  usageEvents         UsageEvent[]
+  alphaInvitesUsed    AlphaInvite[]  @relation("AlphaInviteUsedBy")
+  subscription        Subscription?
 
   @@index([createdAt])
 }
@@ -119,6 +130,47 @@ model Subscription {
   @@index([plan, status])
   @@index([selectedMentorSlug])
   @@index([status, currentPeriodEnd])
+  @@index([createdAt])
+}
+
+model CreditAccount {
+  id              String   @id @default(uuid()) @db.Uuid
+  userId          String   @unique @db.Uuid
+  planBalance     Decimal  @default(0) @db.Decimal(14, 2)
+  topUpBalance    Decimal  @default(0) @db.Decimal(14, 2)
+  periodKey       String?  @db.VarChar(255)
+  lifetimeGranted Decimal  @default(0) @db.Decimal(14, 2)
+  lifetimeUsed    Decimal  @default(0) @db.Decimal(14, 2)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user         User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions CreditTransaction[]
+
+  @@index([updatedAt])
+}
+
+model CreditTransaction {
+  id             String                @id @default(uuid()) @db.Uuid
+  userId         String                @db.Uuid
+  accountId      String                @db.Uuid
+  type           CreditTransactionType
+  amount         Decimal               @db.Decimal(14, 2)
+  balanceAfter   Decimal               @db.Decimal(14, 2)
+  apiCostUsd     Decimal?              @db.Decimal(14, 8)
+  retailCostUsd  Decimal?              @db.Decimal(14, 8)
+  provider       String?               @db.VarChar(32)
+  model          String?               @db.VarChar(128)
+  usageEventId   String?               @unique @db.Uuid
+  idempotencyKey String                @unique @db.VarChar(255)
+  createdAt      DateTime              @default(now())
+
+  user       User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account    CreditAccount  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  usageEvent UsageEvent?    @relation(fields: [usageEventId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([type, createdAt])
   @@index([createdAt])
 }
 
@@ -336,6 +388,7 @@ model UsageEvent {
   model                    String?
   route                    String?
   inputTokens              Int?
+  cachedInputTokens        Int?
   outputTokens             Int?
   totalTokens              Int?
   estimatedCostUsd         Decimal?         @db.Decimal(14, 8)
@@ -353,9 +406,10 @@ model UsageEvent {
   specialistPromptTokens   Int?
   createdAt                DateTime         @default(now())
 
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  mentor       Mentor?       @relation(fields: [mentorId], references: [id], onDelete: SetNull)
-  conversation Conversation? @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  mentor            Mentor?            @relation(fields: [mentorId], references: [id], onDelete: SetNull)
+  conversation      Conversation?      @relation(fields: [conversationId], references: [id], onDelete: SetNull)
+  creditTransaction CreditTransaction?
 
   @@index([userId, status, createdAt])
   @@index([status, createdAt])
