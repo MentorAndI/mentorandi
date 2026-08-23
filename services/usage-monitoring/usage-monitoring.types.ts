@@ -31,6 +31,7 @@ export interface RecordUnsuccessfulUsageInput extends UsageEventContext {
 }
 
 export interface UsageEventWriteInput extends UsageEventContext {
+  cachedInputTokens?: number;
   errorCode?: string;
   estimatedCostUsd?: number;
   inputTokens?: number;
