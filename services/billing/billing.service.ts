@@ -13,6 +13,7 @@ import {
 import { BillingRepository } from "@/services/billing/billing.repository";
 import type { PurchasablePlan } from "@/services/billing/billing.types";
 import { StripeClient } from "@/services/billing/stripe-client";
+import { CreditService } from "@/services/credits/credit.service";
 import { UserService } from "@/services/user/user.service";
 
 interface StripeEvent {
@@ -27,6 +28,7 @@ export class BillingService {
     private readonly repository = new BillingRepository(),
     private readonly stripe = new StripeClient(),
     private readonly users = new UserService(),
+    private readonly credits = new CreditService(),
   ) {}
 
   async createCheckoutSession(plan: PurchasablePlan, origin: string) {
@@ -139,17 +141,42 @@ export class BillingService {
     const userId = readMetadata(object, "user_id") ?? existing?.userId;
     if (!userId) return;
 
+    const currentPeriodEnd = readSubscriptionPeriodEnd(object);
+    const plan = readSubscriptionPlan(object, existing?.plan);
+    const status = deleted
+      ? SubscriptionStatus.CANCELED
+      : readStatus(readString(object.status));
+
     await this.repository.upsert({
       billingCustomerId: readId(object.customer),
       billingSubscriptionId: subscriptionId,
       cancelAtPeriodEnd: object.cancel_at_period_end === true,
-      currentPeriodEnd: readSubscriptionPeriodEnd(object),
-      plan: readSubscriptionPlan(object, existing?.plan),
-      status: deleted
-        ? SubscriptionStatus.CANCELED
-        : readStatus(readString(object.status)),
+      currentPeriodEnd,
+      plan,
+      status,
       userId,
     });
+
+    if (deleted || status === SubscriptionStatus.CANCELED) {
+      await this.credits.clearPlanCredits(
+        userId,
+        `subscription:${subscriptionId ?? userId}:ended`,
+      );
+      return;
+    }
+
+    if (
+      currentPeriodEnd &&
+      (status === SubscriptionStatus.ACTIVE ||
+        status === SubscriptionStatus.TRIALING)
+    ) {
+      await this.credits.applyPlanCredits({
+        billingSubscriptionId: subscriptionId,
+        periodEnd: currentPeriodEnd,
+        plan,
+        userId,
+      });
+    }
   }
 }
 
