@@ -1,38 +1,92 @@
 import type { PurchasablePlan } from "@/services/billing/billing.types";
 
+type StripeMode = "live" | "test";
+
+const priceEnvironmentVariables: Record<PurchasablePlan, string> = {
+  PLUS: "STRIPE_PRICE_PLUS_MONTHLY",
+  PREMIUM: "STRIPE_PRICE_PREMIUM_MONTHLY",
+  SINGLE: "STRIPE_PRICE_SINGLE_MONTHLY",
+};
+
 export function isStripeEnabled() {
   return process.env.NEXT_PUBLIC_STRIPE_ENABLED?.trim().toLowerCase() === "true";
 }
 
-export function isStripeTestModeReady() {
-  return (
-    isStripeEnabled() &&
-    readStripeValue("STRIPE_SECRET_KEY")?.startsWith("sk_test_") === true &&
-    readStripeValue("STRIPE_WEBHOOK_SECRET")?.startsWith("whsec_") === true &&
-    readStripeValue("STRIPE_PRICE_PERSONAL_MONTHLY")?.startsWith("price_") === true &&
-    readStripeValue("STRIPE_PRICE_PREMIUM_MONTHLY")?.startsWith("price_") === true
+export function getStripeMode(): StripeMode {
+  const configured = process.env.STRIPE_MODE?.trim().toLowerCase();
+
+  if (!configured) return "test";
+  if (configured === "test" || configured === "live") return configured;
+
+  throw new BillingConfigurationError(
+    "Payments are temporarily unavailable because the Stripe environment is invalid.",
   );
 }
 
-export function assertStripeTestModeReady() {
+export function getExpectedStripeLivemode() {
+  return getStripeMode() === "live";
+}
+
+export function isStripeReady() {
+  if (!isStripeEnabled()) return false;
+
+  try {
+    getStripeMode();
+    getStripeSecretKey();
+    getStripeWebhookSecret();
+    getStripePriceId("SINGLE");
+    getStripePriceId("PLUS");
+    getStripePriceId("PREMIUM");
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function assertStripeReady() {
   if (!isStripeEnabled()) {
     throw new BillingConfigurationError(
       "Payments are not enabled yet. No charge was created.",
     );
   }
 
+  getStripeMode();
   getStripeSecretKey();
   getStripeWebhookSecret();
-  getStripePriceId("PERSONAL");
+  getStripePriceId("SINGLE");
+  getStripePriceId("PLUS");
   getStripePriceId("PREMIUM");
+}
+
+// Backwards-compatible staging helpers. They intentionally fail closed in live mode.
+export function isStripeTestModeReady() {
+  try {
+    return getStripeMode() === "test" && isStripeReady();
+  } catch {
+    return false;
+  }
+}
+
+export function assertStripeTestModeReady() {
+  if (getStripeMode() !== "test") {
+    throw new BillingConfigurationError(
+      "Stripe test mode is required for this operation.",
+    );
+  }
+
+  assertStripeReady();
 }
 
 export function getStripeSecretKey() {
   const key = requireStripeValue("STRIPE_SECRET_KEY");
+  const allowedPrefixes =
+    getStripeMode() === "live"
+      ? ["sk_live_", "rk_live_"]
+      : ["sk_test_", "rk_test_"];
 
-  if (!key.startsWith("sk_test_")) {
+  if (!allowedPrefixes.some((prefix) => key.startsWith(prefix))) {
     throw new BillingConfigurationError(
-      "Only Stripe test mode is allowed in the alpha environment.",
+      `Stripe credentials do not match STRIPE_MODE=${getStripeMode()}.`,
     );
   }
 
@@ -52,11 +106,7 @@ export function getStripeWebhookSecret() {
 }
 
 export function getStripePriceId(plan: PurchasablePlan) {
-  const priceId = requireStripeValue(
-    plan === "PERSONAL"
-      ? "STRIPE_PRICE_PERSONAL_MONTHLY"
-      : "STRIPE_PRICE_PREMIUM_MONTHLY",
-  );
+  const priceId = requireStripeValue(priceEnvironmentVariables[plan]);
 
   if (!priceId.startsWith("price_")) {
     throw new BillingConfigurationError(
@@ -67,13 +117,11 @@ export function getStripePriceId(plan: PurchasablePlan) {
   return priceId;
 }
 
-export function getPlanForStripePrice(priceId: string) {
-  if (priceId === readStripeValue("STRIPE_PRICE_PERSONAL_MONTHLY")) {
-    return "PERSONAL" as const;
-  }
-
-  if (priceId === readStripeValue("STRIPE_PRICE_PREMIUM_MONTHLY")) {
-    return "PREMIUM" as const;
+export function getPlanForStripePrice(priceId: string): PurchasablePlan | null {
+  for (const plan of ["SINGLE", "PLUS", "PREMIUM"] as const) {
+    if (priceId === readStripeValue(priceEnvironmentVariables[plan])) {
+      return plan;
+    }
   }
 
   return null;
