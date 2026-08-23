@@ -1,7 +1,7 @@
 -- MentorAndI Supabase RLS hardening.
 --
 -- Purpose:
--- - Enable Row Level Security on all public application tables.
+-- - Enable Row Level Security on all public application tables and Prisma's migration metadata table.
 -- - Revoke direct browser-facing role grants from those tables.
 -- - Verify no unrestricted anon/authenticated policies allow table access.
 --
@@ -31,7 +31,8 @@ declare
     'MentorKnowledgeCard',
     'MentorSource',
     'MentorSafetyRule',
-    'MentorEvalScenario'
+    'MentorEvalScenario',
+    '_prisma_migrations'
   ];
 begin
   foreach app_table in array app_tables loop
@@ -70,12 +71,13 @@ begin
       'MentorKnowledgeCard',
       'MentorSource',
       'MentorSafetyRule',
-      'MentorEvalScenario'
+      'MentorEvalScenario',
+      '_prisma_migrations'
     )
     and not c.relrowsecurity;
 
   if disabled_tables is not null then
-    raise exception 'RLS is not enabled on application tables: %', disabled_tables;
+    raise exception 'RLS is not enabled on protected tables: %', disabled_tables;
   end if;
 
   with app_tables(table_name) as (
@@ -97,7 +99,8 @@ begin
       ('MentorKnowledgeCard'),
       ('MentorSource'),
       ('MentorSafetyRule'),
-      ('MentorEvalScenario')
+      ('MentorEvalScenario'),
+      ('_prisma_migrations')
   ),
   risky_policies as (
     select
