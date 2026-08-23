@@ -86,16 +86,17 @@ export class CreditService {
       input.periodEnd.toISOString(),
     ].join(":");
 
+    await this.ensureEmptyCreditAccount(input.userId);
+
     const account = await this.prisma.$transaction(async (tx) => {
-      const current = await tx.creditAccount.upsert({
-        create: {
-          lifetimeGranted: 0,
-          lifetimeUsed: 0,
-          planBalance: 0,
-          topUpBalance: 0,
-          userId: input.userId,
-        },
-        update: {},
+      await tx.$queryRaw`
+        SELECT "id"
+        FROM "CreditAccount"
+        WHERE "userId" = ${input.userId}::uuid
+        FOR UPDATE
+      `;
+
+      const current = await tx.creditAccount.findUniqueOrThrow({
         where: { userId: input.userId },
       });
 
@@ -145,13 +146,60 @@ export class CreditService {
     return toBalanceSnapshot(account);
   }
 
+  async clearPlanCredits(userId: string, reasonKey: string) {
+    const existing = await this.prisma.creditAccount.findUnique({
+      where: { userId },
+    });
+    if (!existing) return null;
+
+    const account = await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`
+        SELECT "id"
+        FROM "CreditAccount"
+        WHERE "userId" = ${userId}::uuid
+        FOR UPDATE
+      `;
+      const current = await tx.creditAccount.findUniqueOrThrow({
+        where: { userId },
+      });
+      const currentPlanBalance = decimalToNumber(current.planBalance);
+      const topUpBalance = decimalToNumber(current.topUpBalance);
+
+      if (currentPlanBalance === 0) return current;
+
+      const idempotencyKey = `clear:${reasonKey}`.slice(0, 255);
+      const existingClear = await tx.creditTransaction.findUnique({
+        where: { idempotencyKey },
+      });
+      if (existingClear) return current;
+
+      await tx.creditTransaction.create({
+        data: {
+          accountId: current.id,
+          amount: -currentPlanBalance,
+          balanceAfter: topUpBalance,
+          idempotencyKey,
+          type: CreditTransactionType.PLAN_RESET,
+          userId,
+        },
+      });
+
+      return tx.creditAccount.update({
+        data: {
+          periodKey: null,
+          planBalance: 0,
+        },
+        where: { id: current.id },
+      });
+    });
+
+    return toBalanceSnapshot(account);
+  }
+
   async debitUsageCredits(input: DebitUsageCreditsInput) {
     const cost = calculateProviderCostUsd(input.llmUsage);
 
     if (cost.providerCostUsd === null) {
-      // Never invent a debit if token usage or provider pricing is unavailable.
-      // The usage event remains auditable and the pricing gap can be fixed
-      // without charging a user an arbitrary amount.
       return {
         ...(await this.getBalanceForUser(input.userId)),
         creditsDebited: 0,
@@ -175,6 +223,13 @@ export class CreditService {
     await this.ensureCreditAccount(input.userId);
 
     const result = await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`
+        SELECT "id"
+        FROM "CreditAccount"
+        WHERE "userId" = ${input.userId}::uuid
+        FOR UPDATE
+      `;
+
       const existingDebit = await tx.creditTransaction.findUnique({
         where: { usageEventId: input.usageEventId },
       });
@@ -183,7 +238,10 @@ export class CreditService {
         const account = await tx.creditAccount.findUniqueOrThrow({
           where: { userId: input.userId },
         });
-        return { account, creditsDebited: Math.abs(decimalToNumber(existingDebit.amount)) };
+        return {
+          account,
+          creditsDebited: Math.abs(decimalToNumber(existingDebit.amount)),
+        };
       }
 
       const account = await tx.creditAccount.findUniqueOrThrow({
@@ -201,9 +259,6 @@ export class CreditService {
       topUpBalance -= topUpDebit;
       remainingDebit -= topUpDebit;
 
-      // Usage is metered after the provider returns its actual token count. If a
-      // final response slightly exceeds the remaining balance, preserve the
-      // exact charge as a small negative plan balance and block the next call.
       if (remainingDebit > 0) {
         planBalance -= remainingDebit;
       }
@@ -243,6 +298,20 @@ export class CreditService {
       providerCostUsd: cost.providerCostUsd,
       retailCostUsd,
     };
+  }
+
+  private async ensureEmptyCreditAccount(userId: string) {
+    return this.prisma.creditAccount.upsert({
+      create: {
+        lifetimeGranted: 0,
+        lifetimeUsed: 0,
+        planBalance: 0,
+        topUpBalance: 0,
+        userId,
+      },
+      update: {},
+      where: { userId },
+    });
   }
 
   private async ensureCreditAccount(userId: string) {
