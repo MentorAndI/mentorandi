@@ -1,6 +1,11 @@
 import type { SubscriptionPlan, SubscriptionStatus } from "@/lib/generated/prisma/client";
 
-export type PurchasablePlan = Extract<SubscriptionPlan, "PERSONAL" | "PREMIUM">;
+export type PurchasablePlan = Extract<
+  SubscriptionPlan,
+  "SINGLE" | "PLUS" | "PREMIUM"
+>;
+
+export type PublicPurchasablePlan = "single" | "plus" | "premium";
 
 export interface SubscriptionUpdate {
   billingCustomerId?: string | null;
@@ -8,6 +13,7 @@ export interface SubscriptionUpdate {
   cancelAtPeriodEnd?: boolean;
   currentPeriodEnd?: Date | null;
   plan: SubscriptionPlan;
+  selectedMentorSlug?: string | null;
   status: SubscriptionStatus;
   userId: string;
 }

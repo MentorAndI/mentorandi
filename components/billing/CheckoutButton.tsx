@@ -4,8 +4,20 @@ import { useState } from "react";
 
 interface CheckoutButtonProps {
   enabled: boolean;
-  plan: "PERSONAL" | "PREMIUM";
+  plan: "SINGLE" | "PLUS" | "PREMIUM";
 }
+
+const planLabels = {
+  PLUS: "Mentor Plus — $39/month",
+  PREMIUM: "Premium — $69/month",
+  SINGLE: "Single Mentor — $19/month",
+} as const;
+
+const publicPlanKeys = {
+  PLUS: "plus",
+  PREMIUM: "premium",
+  SINGLE: "single",
+} as const;
 
 export function CheckoutButton({ enabled, plan }: CheckoutButtonProps) {
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +36,8 @@ export function CheckoutButton({ enabled, plan }: CheckoutButtonProps) {
       const body = (await response.json()) as { error?: string; url?: string };
 
       if (response.status === 401) {
-        window.location.assign(`/login?next=${encodeURIComponent("/pricing")}`);
+        const nextPath = `/onboarding?plan=${publicPlanKeys[plan]}`;
+        window.location.assign(`/login?next=${encodeURIComponent(nextPath)}`);
         return;
       }
 
@@ -52,10 +65,10 @@ export function CheckoutButton({ enabled, plan }: CheckoutButtonProps) {
         type="button"
       >
         {!enabled
-          ? "Payments are not enabled yet"
+          ? "Payments are temporarily unavailable"
           : loading
             ? "Opening secure checkout…"
-            : `Test ${plan === "PERSONAL" ? "Personal" : "Premium"} checkout`}
+            : `Continue to secure checkout — ${planLabels[plan]}`}
       </button>
       {error ? <p className="text-sm text-red-700" role="alert">{error}</p> : null}
     </div>

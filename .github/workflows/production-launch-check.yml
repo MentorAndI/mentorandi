@@ -1,0 +1,42 @@
+name: Production launch check
+
+on:
+  push:
+    branches:
+      - production-launch-2026-08-23
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      DATABASE_URL: postgresql://user:password@localhost:5432/mentorandi_ci
+      APP_URL: https://app.mentorandi.com
+      NEXT_PUBLIC_SUPABASE_URL: https://example.supabase.co
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: ci-public-key
+      NEXT_PUBLIC_STRIPE_ENABLED: "false"
+      STRIPE_MODE: test
+      LLM_PROVIDER: openai
+      OPENAI_API_KEY: ci-placeholder
+      OPENAI_MODEL: ci-placeholder
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run test:auth-contract
+      - run: npm run test:mentor-access
+      - run: npm run build

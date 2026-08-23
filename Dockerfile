@@ -25,6 +25,7 @@ RUN npm run build
 FROM deps AS migrator
 COPY prisma ./prisma
 COPY prisma.config.ts ./
+COPY scripts/check-env.mjs ./scripts/check-env.mjs
 CMD ["npx", "prisma", "migrate", "deploy"]
 
 FROM node:22-alpine AS runner

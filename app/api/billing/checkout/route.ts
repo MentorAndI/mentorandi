@@ -13,7 +13,7 @@ export async function POST(request: Request) {
 
     if (!plan) {
       return NextResponse.json(
-        { error: "Choose the Personal or Premium plan." },
+        { error: "Choose Single Mentor, Mentor Plus or Premium." },
         { status: 400 },
       );
     }
@@ -30,6 +30,8 @@ export async function POST(request: Request) {
 }
 
 function normalizePlan(value: unknown): PurchasablePlan | null {
-  if (value === "PERSONAL" || value === "PREMIUM") return value;
+  if (value === "single" || value === "SINGLE") return "SINGLE";
+  if (value === "plus" || value === "PLUS") return "PLUS";
+  if (value === "premium" || value === "PREMIUM") return "PREMIUM";
   return null;
 }

@@ -33,8 +33,8 @@ export default async function SettingsPage({
         />
         {billing === "success" ? (
           <div className="mb-6 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-950">
-            Stripe test checkout returned successfully. Subscription status is
-            applied by the verified webhook and may take a moment to appear.
+            Checkout returned successfully. Subscription access is applied only
+            after Mentor And I receives and verifies the Stripe webhook.
           </div>
         ) : null}
         <div className="mb-8 max-w-2xl space-y-3">

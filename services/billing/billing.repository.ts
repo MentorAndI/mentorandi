@@ -1,3 +1,4 @@
+import { SubscriptionPlan } from "@/lib/generated/prisma/client";
 import { getPrismaClient } from "@/lib/prisma";
 import type { SubscriptionUpdate } from "@/services/billing/billing.types";
 
@@ -29,6 +30,11 @@ export class BillingRepository {
       ...(input.currentPeriodEnd !== undefined
         ? { currentPeriodEnd: input.currentPeriodEnd }
         : {}),
+      ...(input.plan !== SubscriptionPlan.SINGLE
+        ? { selectedMentorSlug: null }
+        : input.selectedMentorSlug !== undefined
+          ? { selectedMentorSlug: input.selectedMentorSlug }
+          : {}),
       plan: input.plan,
       status: input.status,
     };

@@ -3,6 +3,7 @@ import type {
   SubscriptionStatus,
 } from "@/lib/generated/prisma/client";
 import {
+  getActiveMentorProfile,
   getActiveMentorProfileByDatabaseSlug,
 } from "@/services/mentor-catalog/mentor-catalog";
 import type { ActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog.types";
@@ -18,10 +19,12 @@ export const mentorUpgradeMessage = "Upgrade to unlock this mentor";
 
 interface StoredSubscription {
   plan: SubscriptionPlan;
+  selectedMentorSlug: string | null;
   status: SubscriptionStatus;
 }
 
 interface MentorAccessRepositoryContract {
+  claimSingleMentor(userId: string, mentorSlug: string): Promise<unknown>;
   findOwnedConversationMentor(userId: string, conversationId: string): Promise<{
     mentor: { slug: string };
   } | null>;
@@ -55,7 +58,17 @@ export class MentorAccessService {
   ) {}
 
   async assertMentorAccess(userId: string, mentorSlug: ActiveMentorSlug) {
-    const entitlement = await this.resolveEntitlement(userId);
+    let entitlement = await this.resolveEntitlement(userId);
+
+    if (
+      entitlement.plan === "single_mentor" &&
+      !entitlement.selectedMentorSlug &&
+      mentorSlug !== "life"
+    ) {
+      await this.repository.claimSingleMentor(userId, mentorSlug);
+      entitlement = await this.resolveEntitlement(userId);
+    }
+
     const decision = evaluateMentorAccess({
       mentorSlug,
       plan: entitlement.plan,
@@ -105,7 +118,9 @@ export class MentorAccessService {
 
     return {
       plan: mapStoredPlan(subscription.plan),
-      selectedMentorSlug: null,
+      selectedMentorSlug: normalizeSelectedMentorSlug(
+        subscription.selectedMentorSlug,
+      ),
       source: "active_subscription",
     };
   }
@@ -119,10 +134,20 @@ function isActiveSubscription(status: SubscriptionStatus) {
   return status === "ACTIVE" || status === "TRIALING";
 }
 
+function normalizeSelectedMentorSlug(value: string | null) {
+  return getActiveMentorProfile(value)?.slug ?? null;
+}
+
 export function mapStoredPlan(plan: SubscriptionPlan): MentorPlan {
   switch (plan) {
     case "FREE":
       return "free";
+    case "SINGLE":
+      return "single_mentor";
+    case "PLUS":
+      return "plus";
+    case "COMPANY_STRESS":
+      return "company_stress";
     case "PREMIUM":
     case "FOUNDER":
       return "premium";
