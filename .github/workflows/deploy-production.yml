@@ -61,6 +61,7 @@ jobs:
              git fetch origin main
              git pull --ff-only origin main
              docker compose --env-file .env.production -f docker-compose.production.yml --profile tools build mentorandi-production-migrate
+             docker compose --env-file .env.production -f docker-compose.production.yml --profile tools run --rm -e NODE_ENV=production --entrypoint node mentorandi-production-migrate scripts/check-env.mjs
              docker compose --env-file .env.production -f docker-compose.production.yml --profile tools run --rm mentorandi-production-migrate
              docker compose --env-file .env.production -f docker-compose.production.yml --profile tools run --rm mentorandi-production-rls
              docker compose --env-file .env.production -f docker-compose.production.yml up -d --build mentorandi-production'
