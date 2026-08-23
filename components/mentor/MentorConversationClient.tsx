@@ -32,10 +32,17 @@ interface MentorNewConversationResponse {
   conversationId: string;
 }
 
+interface CreditBalanceResponse {
+  balance: number;
+  planBalance: number;
+  topUpBalance: number;
+}
+
 interface MentorResponsePayload {
   conversation: {
     id: string;
   };
+  creditsRemaining: number;
   mentorMessage: MentorConversationMessage;
   userMessage: MentorConversationMessage;
 }
@@ -63,6 +70,7 @@ export function MentorConversationClient({
 }) {
   const router = useRouter();
   const [conversationId, setConversationId] = useState("");
+  const [creditsRemaining, setCreditsRemaining] = useState<number | null>(null);
   const [errorMessage, setErrorMessage] = useState("");
   const [upgradeMessage, setUpgradeMessage] = useState("");
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
@@ -179,6 +187,23 @@ export function MentorConversationClient({
     }
   }
 
+  async function loadCredits(signal?: AbortSignal) {
+    try {
+      const response = await fetch("/api/credits", { signal });
+      const responseBody = (await response.json()) as
+        | CreditBalanceResponse
+        | MentorApiError;
+
+      if (response.ok) {
+        setCreditsRemaining((responseBody as CreditBalanceResponse).balance);
+      }
+    } catch (error) {
+      if (!(error instanceof DOMException && error.name === "AbortError")) {
+        setCreditsRemaining(null);
+      }
+    }
+  }
+
   useEffect(() => {
     const controller = new AbortController();
     let isActive = true;
@@ -204,6 +229,7 @@ export function MentorConversationClient({
               shouldCommit: () => isActive,
             }),
             loadMemories(),
+            loadCredits(controller.signal),
           ]);
         }
       } catch (error) {
@@ -280,6 +306,7 @@ export function MentorConversationClient({
       const nextConversationId = mentorResponse.conversation.id;
 
       setConversationId(nextConversationId);
+      setCreditsRemaining(mentorResponse.creditsRemaining);
       setMessage("");
 
       await Promise.all([
@@ -380,7 +407,7 @@ export function MentorConversationClient({
                 className="mt-2 inline-flex font-semibold text-sky-950 underline decoration-sky-300 underline-offset-4 hover:text-sky-700"
                 href="/pricing"
               >
-                Upgrade to unlock this mentor
+                {upgradeMessage}
               </Link>
             ) : null}
           </div>
@@ -413,6 +440,22 @@ export function MentorConversationClient({
 
       <div className="space-y-4 self-start">
         <Card className="p-5 sm:p-6" variant="bordered">
+          <p className="text-sm font-semibold text-zinc-900">Mentor credits</p>
+          <p className="mt-2 text-3xl font-semibold tracking-tight text-zinc-950">
+            {creditsRemaining === null
+              ? "—"
+              : formatCredits(creditsRemaining)}
+          </p>
+          <p className="mt-1 text-sm text-zinc-500">credits remaining</p>
+          <Link
+            className="mt-4 inline-flex text-sm font-semibold text-sky-950 underline decoration-sky-300 underline-offset-4 hover:text-sky-700"
+            href="/pricing"
+          >
+            View plans
+          </Link>
+        </Card>
+
+        <Card className="p-5 sm:p-6" variant="bordered">
           <MentorConversationList
             activeConversationId={conversationId}
             conversations={recentConversations}
@@ -437,6 +480,13 @@ export function MentorConversationClient({
       </div>
     </div>
   );
+}
+
+function formatCredits(value: number) {
+  return value.toLocaleString(undefined, {
+    maximumFractionDigits: 2,
+    minimumFractionDigits: value % 1 === 0 ? 0 : 2,
+  });
 }
 
 function formatErrorResponse(responseBody: MentorApiError) {
