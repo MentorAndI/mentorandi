@@ -39,6 +39,7 @@ export class UsageMonitoringRepository {
   async createUsageEvent(input: UsageEventWriteInput) {
     return this.prisma.usageEvent.create({
       data: {
+        cachedInputTokens: input.cachedInputTokens,
         conversationId: input.conversationId,
         errorCode: input.errorCode,
         estimatedCostUsd: input.estimatedCostUsd,
