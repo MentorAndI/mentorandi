@@ -125,6 +125,10 @@ export function logCrisisSafetyDecision(
   decision: CrisisSafetyDecision,
   conversationId: string,
 ) {
+  if (decision.classification === "none") {
+    return;
+  }
+
   const conversationRef = createHash("sha256")
     .update(conversationId)
     .digest("hex")
