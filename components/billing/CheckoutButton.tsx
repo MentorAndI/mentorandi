@@ -7,12 +7,6 @@ interface CheckoutButtonProps {
   plan: "SINGLE" | "PLUS" | "PREMIUM";
 }
 
-const planLabels = {
-  PLUS: "Mentor Plus — $39/month",
-  PREMIUM: "Premium — $69/month",
-  SINGLE: "Single Mentor — $19/month",
-} as const;
-
 const publicPlanKeys = {
   PLUS: "plus",
   PREMIUM: "premium",
@@ -68,7 +62,7 @@ export function CheckoutButton({ enabled, plan }: CheckoutButtonProps) {
           ? "Payments are temporarily unavailable"
           : loading
             ? "Opening secure checkout…"
-            : `Continue to secure checkout — ${planLabels[plan]}`}
+            : "Continue to secure payment"}
       </button>
       {error ? <p className="text-sm text-red-700" role="alert">{error}</p> : null}
     </div>

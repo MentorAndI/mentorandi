@@ -87,9 +87,9 @@ export default async function MentorProfilePage({
             </ul>
             <Link
               className="mt-8 inline-flex h-12 items-center justify-center self-start rounded-lg bg-sky-950 px-6 text-sm font-semibold text-white transition hover:bg-sky-900"
-              href={`/mentor?mentor=${mentor.slug}`}
+              href={`/start?mentor=${mentor.slug}`}
             >
-              Start with {mentor.personaName}
+              Start intake with {mentor.personaName}
             </Link>
           </div>
         </div>

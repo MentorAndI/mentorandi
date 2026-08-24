@@ -12,6 +12,7 @@ import {
   signUpWithEmailPassword,
   syncCurrentUser,
 } from "@/services/auth/client";
+import { buildLoginPath } from "@/services/auth/redirects";
 import { validateSignupForm } from "@/services/auth/validation";
 
 interface SignupFormValues {
@@ -121,7 +122,7 @@ export function SignupForm({
           <div className="flex flex-col gap-3 sm:flex-row">
             <Link
               className="inline-flex h-10 items-center justify-center rounded-md bg-zinc-950 px-4 text-sm font-medium text-white hover:bg-zinc-800"
-              href="/login"
+              href={buildLoginPath(redirectPath)}
             >
               Login
             </Link>

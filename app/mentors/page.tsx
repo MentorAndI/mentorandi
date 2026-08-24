@@ -7,14 +7,20 @@ import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
+import { BillingAccessService } from "@/services/billing/billing-access.service";
 import { activeMentorProfiles } from "@/services/mentor-catalog/mentor-catalog";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Mentors | Mentor And I",
   description: "Choose an active Mentor And I alpha mentor specialization.",
 };
 
-export default function MentorsPage() {
+export default async function MentorsPage() {
+  const purchaseStatus =
+    await new BillingAccessService().getCurrentPurchaseStatus();
+
   return (
     <main className="min-h-screen bg-gradient-to-b from-stone-50 via-white to-sky-50 py-12 text-zinc-950 sm:py-16">
       <Container className="max-w-6xl">
@@ -32,10 +38,22 @@ export default function MentorsPage() {
         </div>
 
         <div className="mx-auto mt-8 max-w-3xl rounded-xl border border-sky-200 bg-sky-50 p-4 text-center text-sm leading-6 text-sky-950">
-          <span className="font-semibold">First time here?</span> Choose the
-          mentor closest to your situation, write as naturally as you would to
-          a thoughtful person, and use the Feedback button after chatting to
-          help improve the alpha.
+          {purchaseStatus.hasActivePaidSubscription ? (
+            <>
+              <p className="font-semibold">Your subscription is ready.</p>
+              <ol className="mt-2 flex flex-col justify-center gap-2 sm:flex-row sm:gap-5">
+                <li>1. Choose your mentor</li>
+                <li>2. Answer the opening question</li>
+                <li>3. Start your conversation</li>
+              </ol>
+            </>
+          ) : (
+            <>
+              <span className="font-semibold">First time here?</span> Choose the
+              mentor closest to your situation, then answer a short opening
+              question before your conversation begins.
+            </>
+          )}
         </div>
 
         <div className="mt-12 grid gap-6 md:grid-cols-2">
@@ -95,9 +113,9 @@ export default function MentorsPage() {
                 </Link>
                 <Link
                   className="inline-flex h-11 items-center justify-center rounded-lg border border-sky-200 px-5 text-sm font-semibold text-sky-950 transition hover:bg-sky-50"
-                  href={`/mentor?mentor=${mentor.slug}`}
+                  href={`/start?mentor=${mentor.slug}`}
                 >
-                  Start with {mentor.personaName}
+                  Start intake with {mentor.personaName}
                 </Link>
               </div>
             </Card>

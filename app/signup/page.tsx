@@ -1,8 +1,14 @@
 import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 
 import { AuthFormShell } from "@/components/auth/AuthFormShell";
 import { SignupForm } from "@/components/auth/SignupForm";
-import { normalizeSafeAuthNextPath } from "@/services/auth/redirects";
+import {
+  buildLoginPath,
+  normalizeSafeAuthNextPath,
+} from "@/services/auth/redirects";
+import { BillingAccessService } from "@/services/billing/billing-access.service";
+import { buildOnboardingPath } from "@/services/billing/purchase-flow";
 
 export const metadata: Metadata = {
   title: "Sign up | Mentor And I",
@@ -22,13 +28,19 @@ export default async function SignupPage({
   const requestedPlan = Array.isArray(params.plan) ? params.plan[0] : params.plan;
   const onboardingPath = buildOnboardingPath(requestedPlan);
   const redirectPath = normalizeSafeAuthNextPath(requestedPath ?? onboardingPath);
+  const purchaseStatus =
+    await new BillingAccessService().getCurrentPurchaseStatus();
+
+  if (purchaseStatus.hasActivePaidSubscription) {
+    redirect("/mentors");
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 py-16 text-zinc-950">
       <AuthFormShell
         description="Create your account, verify your email, and continue to onboarding."
         footerLink={{
-          href: "/login",
+          href: buildLoginPath(redirectPath),
           label: "Log in",
           text: "Already have an account?",
         }}
@@ -42,12 +54,4 @@ export default async function SignupPage({
       </AuthFormShell>
     </main>
   );
-}
-
-function buildOnboardingPath(plan?: string) {
-  if (!plan || !["free", "single", "plus", "premium"].includes(plan)) {
-    return "/onboarding";
-  }
-
-  return `/onboarding?plan=${encodeURIComponent(plan)}`;
 }

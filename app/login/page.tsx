@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 
 import { AuthFormShell } from "@/components/auth/AuthFormShell";
 import { LoginForm } from "@/components/auth/LoginForm";
-import { getSafeAuthRedirectPath } from "@/services/auth/redirects";
+import {
+  buildSignupPath,
+  getSafeAuthRedirectPath,
+} from "@/services/auth/redirects";
 
 export const metadata: Metadata = {
   title: "Log in | Mentor And I",
@@ -26,7 +29,7 @@ export default async function LoginPage({
       <AuthFormShell
         description="Welcome back. Sign in to continue with Marcus, or choose a specialized mentor from the mentor screen."
         footerLink={{
-          href: "/signup",
+          href: buildSignupPath(redirectPath),
           label: "Create an account",
           text: "New to Mentor And I?",
         }}

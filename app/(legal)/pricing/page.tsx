@@ -1,14 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { CheckoutButton } from "@/components/billing/CheckoutButton";
 import { Container } from "@/components/layout/Container";
 import { Badge } from "@/components/ui/Badge";
 import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
-import { paymentsAvailable } from "@/services/billing/billing.service";
-
-export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Pricing | Mentor And I",
@@ -24,7 +20,7 @@ const plans = [
       "No card required",
     ],
     name: "Free Trial",
-    plan: null,
+    plan: "free",
     price: "$0",
   },
   {
@@ -35,7 +31,7 @@ const plans = [
       "Ongoing monthly access",
     ],
     name: "Single Mentor",
-    plan: "SINGLE" as const,
+    plan: "single",
     price: "$19/month",
   },
   {
@@ -46,7 +42,7 @@ const plans = [
       "Limited deep mentor sessions",
     ],
     name: "Mentor Plus",
-    plan: "PLUS" as const,
+    plan: "plus",
     price: "$39/month",
   },
   {
@@ -57,28 +53,15 @@ const plans = [
       "Advanced and long-term mentor programs",
     ],
     name: "Premium",
-    plan: "PREMIUM" as const,
+    plan: "premium",
     price: "$69/month",
   },
 ];
 
-export default async function PricingPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ billing?: string }>;
-}) {
-  const enabled = paymentsAvailable();
-  const billing = (await searchParams).billing;
-
+export default function PricingPage() {
   return (
     <main className="min-h-screen bg-gradient-to-b from-amber-50 via-white to-emerald-50 py-16 text-zinc-950">
       <Container>
-        {billing === "canceled" ? (
-          <div className="mx-auto mb-8 max-w-3xl rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-center text-sm text-amber-900">
-            Checkout was canceled. No charge or subscription change was made.
-          </div>
-        ) : null}
-
         <div className="mx-auto max-w-3xl text-center">
           <Badge>Simple monthly plans</Badge>
           <Heading className="mt-5" level={1}>
@@ -89,12 +72,6 @@ export default async function PricingPage({
             main mentors with Mentor Plus or Premium. Paid plans are billed
             monthly and can be managed from your account.
           </Text>
-          {!enabled ? (
-            <p className="mt-4 text-sm font-medium text-amber-800">
-              Paid checkout is temporarily unavailable. You can still start
-              with the Free Trial.
-            </p>
-          ) : null}
         </div>
 
         <div className="mt-12 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
@@ -115,29 +92,17 @@ export default async function PricingPage({
                   ))}
                 </ul>
                 <div className="mt-auto">
-                  {plan.plan ? (
-                    <CheckoutButton enabled={enabled} plan={plan.plan} />
-                  ) : (
-                    <Link
-                      className="block rounded-xl border border-zinc-300 px-4 py-3 text-center text-sm font-semibold text-zinc-800 hover:bg-zinc-50"
-                      href="/signup?plan=free"
-                    >
-                      Start Free Trial
-                    </Link>
-                  )}
+                  <Link
+                    className="block rounded-xl border border-zinc-300 px-4 py-3 text-center text-sm font-semibold text-zinc-800 hover:bg-zinc-50"
+                    href={`/signup?plan=${plan.plan}`}
+                  >
+                    {plan.plan === "free" ? "Start Free Trial" : "Choose plan"}
+                  </Link>
                 </div>
               </div>
             </section>
           ))}
         </div>
-
-        <Text
-          className="mx-auto mt-10 max-w-3xl text-center text-sm"
-          variant="muted"
-        >
-          Company Stress Mentor is available separately for organizations at
-          $125 per employee per month.
-        </Text>
       </Container>
     </main>
   );

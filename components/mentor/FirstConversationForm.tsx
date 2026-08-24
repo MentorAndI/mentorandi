@@ -24,6 +24,7 @@ export function FirstConversationForm({
   const [requiresAuth, setRequiresAuth] = useState(false);
   const [reflection, setReflection] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const startPath = `/start?mentor=${encodeURIComponent(mentorSlug)}`;
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -125,13 +126,13 @@ export function FirstConversationForm({
           {requiresAuth ? (
             <div className="flex flex-col gap-2 pt-2 sm:flex-row">
               <Button
-                href={`/signup?next=${encodeURIComponent("/start")}`}
+                href={`/signup?next=${encodeURIComponent(startPath)}`}
                 size="sm"
               >
                 Create account
               </Button>
               <Button
-                href={`/login?next=${encodeURIComponent("/start")}`}
+                href={`/login?next=${encodeURIComponent(startPath)}`}
                 size="sm"
                 variant="secondary"
               >

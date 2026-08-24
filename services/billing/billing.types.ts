@@ -17,3 +17,8 @@ export interface SubscriptionUpdate {
   status: SubscriptionStatus;
   userId: string;
 }
+
+export interface PurchaseStatus {
+  hasActivePaidSubscription: boolean;
+  isAuthenticated: boolean;
+}

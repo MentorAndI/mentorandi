@@ -61,6 +61,14 @@ export class UserService {
     return this.getOrCreateUserByAuthUserId(authUserId);
   }
 
+  async resolveOptionalAuthenticatedUser(): Promise<UserDto | null> {
+    const authUserId = await this.getCurrentSupabaseAuthUserId();
+
+    return authUserId
+      ? this.getOrCreateUserByAuthUserId(authUserId)
+      : null;
+  }
+
   async resolveCurrentUser(): Promise<UserDto> {
     const authUserId = await this.getCurrentSupabaseAuthUserId();
 

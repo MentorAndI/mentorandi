@@ -22,6 +22,7 @@
     "test:mentor-scope": "node scripts/run-mentor-scope-test.mjs",
     "test:mentor-display-name": "node scripts/run-mentor-display-name-test.mjs",
     "test:auth-contract": "node scripts/run-auth-contract-test.mjs",
+    "test:billing": "prisma generate && node scripts/run-billing-purchase-flow-test.mjs",
     "test:mentor-access": "node scripts/run-mentor-access-test.mjs",
     "prisma": "prisma",
     "db:seed": "prisma generate && jiti prisma/seed.ts",

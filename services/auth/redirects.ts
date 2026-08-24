@@ -53,6 +53,14 @@ export function buildAuthCallbackUrl(origin: string, nextPath?: string) {
   return callbackUrl.toString();
 }
 
+export function buildLoginPath(nextPath: string) {
+  return buildAuthEntryPath("/login", nextPath);
+}
+
+export function buildSignupPath(nextPath: string) {
+  return buildAuthEntryPath("/signup", nextPath);
+}
+
 export function getPublicAppOrigin(requestOrigin: string) {
   const configuredOrigin = getConfiguredPublicAppOrigin();
 
@@ -95,6 +103,14 @@ function isAllowedAuthNextPath(pathname: string) {
   return allowedNextPathPrefixes.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
   );
+}
+
+function buildAuthEntryPath(route: "/login" | "/signup", nextPath: string) {
+  const searchParams = new URLSearchParams({
+    next: normalizeSafeAuthNextPath(nextPath),
+  });
+
+  return `${route}?${searchParams.toString()}`;
 }
 
 function getConfiguredPublicAppOrigin() {

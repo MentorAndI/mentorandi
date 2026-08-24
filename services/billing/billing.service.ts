@@ -10,8 +10,10 @@ import {
   getStripePriceId,
   isStripeReady,
 } from "@/services/billing/billing-config";
+import { isVerifiedActivePaidSubscription } from "@/services/billing/billing-access.service";
 import { BillingRepository } from "@/services/billing/billing.repository";
 import type { PurchasablePlan } from "@/services/billing/billing.types";
+import { toPublicPlan } from "@/services/billing/purchase-flow";
 import { StripeClient } from "@/services/billing/stripe-client";
 import { CreditService } from "@/services/credits/credit.service";
 import { UserService } from "@/services/user/user.service";
@@ -29,15 +31,25 @@ export class BillingService {
     private readonly stripe = new StripeClient(),
     private readonly users = new UserService(),
     private readonly credits = new CreditService(),
+    private readonly resolveEmail = resolveAuthenticatedEmail,
   ) {}
 
   async createCheckoutSession(plan: PurchasablePlan, origin: string) {
     assertStripeReady();
     const [user, email] = await Promise.all([
       this.users.resolveAuthenticatedUser(),
-      resolveAuthenticatedEmail(),
+      this.resolveEmail(),
     ]);
     const subscription = await this.repository.findByUserId(user.id);
+
+    if (isVerifiedActivePaidSubscription(subscription)) {
+      throw new BillingServiceError(
+        "Your active subscription is already ready. Continue to mentor selection instead.",
+        409,
+      );
+    }
+
+    const publicPlan = toPublicPlan(plan);
     const values: Record<string, string> = {
       "allow_promotion_codes": "true",
       "client_reference_id": user.id,
@@ -48,8 +60,8 @@ export class BillingService {
       mode: "subscription",
       "subscription_data[metadata][plan]": plan,
       "subscription_data[metadata][user_id]": user.id,
-      success_url: `${origin}/settings?billing=success`,
-      cancel_url: `${origin}/onboarding?plan=${toPublicPlan(plan)}`,
+      success_url: `${origin}/onboarding?plan=${publicPlan}&checkout=returned`,
+      cancel_url: `${origin}/onboarding?plan=${publicPlan}`,
     };
 
     if (subscription?.billingCustomerId) {
@@ -394,15 +406,4 @@ function readStatus(value: string | null) {
     unpaid: SubscriptionStatus.UNPAID,
   };
   return statusMap[value ?? ""] ?? SubscriptionStatus.INACTIVE;
-}
-
-function toPublicPlan(plan: PurchasablePlan) {
-  switch (plan) {
-    case "SINGLE":
-      return "single";
-    case "PLUS":
-      return "plus";
-    case "PREMIUM":
-      return "premium";
-  }
 }

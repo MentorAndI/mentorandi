@@ -29,6 +29,7 @@ export async function GET(request: Request) {
   const errorUrl = new URL("/login", publicAppOrigin);
 
   errorUrl.searchParams.set("error", "auth_callback_failed");
+  errorUrl.searchParams.set("next", nextPath);
 
   const supabase = await createSupabaseServerClient();
   const code = requestUrl.searchParams.get("code");
