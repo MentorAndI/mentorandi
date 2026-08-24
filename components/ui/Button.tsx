@@ -32,7 +32,7 @@ export type ButtonProps = ButtonLinkProps | ButtonActionProps;
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-[var(--terra)] text-[var(--on-terra)] shadow-[var(--shadow-sm)] hover:bg-[var(--terra-hover)] active:bg-[var(--terra-press)]",
+    "bg-[var(--terra-hover)] text-[var(--on-terra)] shadow-[var(--shadow-sm)] hover:bg-[var(--terra-press)] active:bg-[var(--terra-press)]",
   secondary:
     "border border-[var(--line-strong)] bg-[var(--surface-raised)] text-[var(--ink)] shadow-[var(--shadow-sm)] hover:bg-[var(--band)]",
   ghost:
