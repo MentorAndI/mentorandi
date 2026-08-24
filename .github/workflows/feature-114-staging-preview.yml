@@ -104,7 +104,7 @@ jobs:
             "https://api.github.com/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
             -d "{\"state\":\"$state\",\"context\":\"feature-114-staging-deploy\"}" >/dev/null
 
-      - name: Verify exact commit inside container
+      - name: Verify exact commit inside running container
         id: container_marker
         if: steps.deploy.outcome == 'success'
         continue-on-error: true
@@ -116,7 +116,23 @@ jobs:
             -o BatchMode=yes \
             -o ConnectTimeout=15 \
             "$STAGING_SSH_USER@$STAGING_SSH_HOST" \
-            'docker exec mentorandi-staging cat /app/public/feature-114-preview-marker.txt')"
+            "bash -s -- '$GITHUB_SHA'" <<'REMOTE'
+          set -eu
+          expected="$1"
+          for attempt in $(seq 1 30); do
+            state="$(docker inspect mentorandi-staging --format '{{.State.Status}}' 2>/dev/null || true)"
+            if [ "$state" = "running" ]; then
+              marker="$(docker exec mentorandi-staging cat /app/public/feature-114-preview-marker.txt 2>/dev/null || true)"
+              if [ "$marker" = "$expected" ]; then
+                printf '%s' "$marker"
+                exit 0
+              fi
+            fi
+            sleep 2
+          done
+          exit 1
+          REMOTE
+          )"
           [[ "$marker" == "$GITHUB_SHA" ]]
 
       - name: Publish container marker status
@@ -141,14 +157,24 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          sleep 10
-          health_response="$(curl --connect-timeout 10 --fail --max-time 20 --retry 6 --retry-all-errors --retry-delay 5 --show-error --silent "${STAGING_APP_URL%/}/api/health")"
-          HEALTH_RESPONSE="$health_response" node <<'NODE'
-          const health = JSON.parse(process.env.HEALTH_RESPONSE ?? "");
-          if (health.status !== "ok") process.exit(1);
+          for attempt in $(seq 1 24); do
+            health_response="$(curl --connect-timeout 10 --max-time 20 --silent --show-error "${STAGING_APP_URL%/}/api/health" 2>/dev/null || true)"
+            health_ok="$(HEALTH_RESPONSE="$health_response" node <<'NODE'
+          try {
+            const health = JSON.parse(process.env.HEALTH_RESPONSE ?? "");
+            process.stdout.write(health.status === "ok" ? "yes" : "no");
+          } catch {
+            process.stdout.write("no");
+          }
           NODE
-          public_marker="$(curl --connect-timeout 10 --fail --max-time 20 --retry 6 --retry-all-errors --retry-delay 5 --show-error --silent "${STAGING_APP_URL%/}/feature-114-preview-marker.txt")"
-          [[ "$public_marker" == "$GITHUB_SHA" ]]
+            )"
+            public_marker="$(curl --connect-timeout 10 --max-time 20 --silent --show-error "${STAGING_APP_URL%/}/feature-114-preview-marker.txt" 2>/dev/null || true)"
+            if [[ "$health_ok" == "yes" && "$public_marker" == "$GITHUB_SHA" ]]; then
+              exit 0
+            fi
+            sleep 5
+          done
+          exit 1
 
       - name: Publish public marker status
         if: always()
