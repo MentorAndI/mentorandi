@@ -26,7 +26,7 @@ export function Input({
   return (
     <div className={cn("space-y-2", wrapperClassName)}>
       {label ? (
-        <label className="block text-sm font-medium text-zinc-900" htmlFor={id}>
+        <label className="block text-sm font-semibold text-[var(--ink)]" htmlFor={id}>
           {label}
         </label>
       ) : null}
@@ -34,22 +34,22 @@ export function Input({
         aria-describedby={descriptionId}
         aria-invalid={error ? true : undefined}
         className={cn(
-          "block h-11 w-full rounded-md border border-zinc-300 bg-white px-3 text-sm text-zinc-950",
-          "placeholder:text-zinc-400",
-          "focus:border-zinc-950 focus:outline-none focus:ring-2 focus:ring-zinc-950/10",
-          "disabled:cursor-not-allowed disabled:bg-zinc-100 disabled:text-zinc-500",
-          error && "border-red-500 focus:border-red-600 focus:ring-red-600/10",
+          "block h-11 w-full rounded-[var(--r-md)] border border-[var(--line-strong)] bg-[var(--surface-raised)] px-3 text-sm text-[var(--ink)] shadow-[var(--shadow-sm)]",
+          "placeholder:text-[var(--ink-faint)]",
+          "focus:border-[var(--ring)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--ring)_18%,transparent)]",
+          "disabled:cursor-not-allowed disabled:bg-[var(--band)] disabled:text-[var(--ink-faint)]",
+          error && "border-[var(--danger)] focus:border-[var(--danger)]",
           inputClassName,
         )}
         id={id}
         {...props}
       />
       {error ? (
-        <p className="text-sm text-red-600" id={`${id}-error`}>
+        <p className="text-sm text-[var(--danger)]" id={`${id}-error`}>
           {error}
         </p>
       ) : hint ? (
-        <p className="text-sm text-zinc-500" id={`${id}-hint`}>
+        <p className="text-sm text-[var(--ink-faint)]" id={`${id}-hint`}>
           {hint}
         </p>
       ) : null}
