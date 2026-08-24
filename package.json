@@ -24,6 +24,7 @@
     "test:auth-contract": "node scripts/run-auth-contract-test.mjs",
     "test:billing": "prisma generate && node scripts/run-billing-purchase-flow-test.mjs",
     "test:mentor-access": "node scripts/run-mentor-access-test.mjs",
+    "test:safety": "node scripts/run-crisis-safety-test.mjs",
     "prisma": "prisma",
     "db:seed": "prisma generate && jiti prisma/seed.ts",
     "import:mentor-specialization": "prisma generate && jiti scripts/import-mentor-specialization.ts",
