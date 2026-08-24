@@ -6,6 +6,7 @@ import {
   buildFailSafeSafetyDecision,
   evaluateCrisisSafety,
 } from "@/services/safety/crisis-safety";
+import { personaSafetyInstructions } from "@/services/safety/persona-safety";
 
 test("explicit current suicide intent triggers deterministic override", () => {
   for (const message of [
@@ -60,4 +61,18 @@ test("safety evaluator failure fails closed to the crisis path", () => {
     overrideMentorResponse: true,
     ruleId: "safety_evaluator_failure",
   });
+});
+
+test("persona safety contract blocks human, dependent, secretive and replacement framing", () => {
+  const contract = personaSafetyInstructions.join(" ").toLowerCase();
+
+  assert.match(contract, /never claim to be human/);
+  assert.match(contract, /human feelings/);
+  assert.match(contract, /emotional dependence/);
+  assert.match(contract, /exclusivity/);
+  assert.match(contract, /secrecy/);
+  assert.match(contract, /therapist/);
+  assert.match(contract, /romantic partner/);
+  assert.match(contract, /replacement for real human relationships/);
+  assert.match(contract, /real-world relationships/);
 });
