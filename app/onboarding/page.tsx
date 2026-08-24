@@ -47,64 +47,68 @@ export default async function OnboardingPage({
   }
 
   return (
-    <main className="min-h-screen bg-gradient-to-b from-stone-50 via-white to-sky-50 py-16 text-zinc-950">
+    <main className="min-h-screen bg-[var(--app-bg)] py-10 text-[var(--ink)] sm:py-16">
       <Container className="max-w-3xl">
-        <div className="rounded-3xl border border-zinc-200 bg-white p-8 shadow-sm sm:p-12">
+        <p className="mb-5 font-serif text-xl font-medium tracking-[-0.02em] text-[var(--ink)]">
+          Mentor <span className="text-[var(--terra-text)]">And I</span>
+        </p>
+
+        <div className="rounded-[var(--r-xl)] border border-[var(--line)] bg-[var(--surface-raised)] p-7 shadow-[var(--shadow-md)] sm:p-10">
           {planDetails ? (
             checkoutValue === "returned" ? (
               <SubscriptionActivationWaiter plan={planDetails.publicPlan} />
             ) : (
               <>
-                <Badge variant="muted">Payment confirmation</Badge>
+                <Badge variant="muted">Plan confirmation</Badge>
                 <Heading className="mt-5" level={1}>
-                  Confirm {planDetails.name}
+                  {planDetails.name}
                 </Heading>
-                <Text className="mt-4 text-lg leading-8">
-                  Review your plan, then continue to Stripe for secure payment.
-                  You’ll choose your mentor after your subscription is verified.
+                <Text className="mt-3 text-lg leading-8">
+                  Confirm your plan, then continue to Stripe for secure payment.
+                  Mentor selection comes next.
                 </Text>
 
-                <section className="mt-8 rounded-2xl border border-sky-200 bg-sky-50 p-6">
+                <section className="mt-8 rounded-[var(--r-lg)] border border-[var(--line)] bg-[var(--band)] p-6">
                   <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                     <div>
-                      <h2 className="text-xl font-semibold text-zinc-950">
+                      <h2 className="text-xl font-semibold text-[var(--ink)]">
                         {planDetails.name}
                       </h2>
-                      <p className="mt-2 text-sm leading-6 text-zinc-700">
+                      <p className="mt-2 text-sm leading-6 text-[var(--ink-muted)]">
                         {planDetails.summary}
                       </p>
                     </div>
-                    <p className="shrink-0 text-2xl font-semibold text-zinc-950">
+                    <p className="shrink-0 text-2xl font-semibold text-[var(--ink)]">
                       ${planDetails.monthlyPrice}
-                      <span className="text-sm font-medium text-zinc-600">
+                      <span className="text-sm font-medium text-[var(--ink-muted)]">
                         /month
                       </span>
                     </p>
                   </div>
-                  <div className="mt-5 rounded-xl bg-white px-4 py-3 text-sm text-zinc-800">
-                    <span className="font-semibold">
+                  <div className="mt-5 rounded-[var(--r-md)] bg-[var(--surface-raised)] px-4 py-3 text-sm text-[var(--ink-muted)]">
+                    <span className="font-semibold text-[var(--ink)]">
                       {planDetails.monthlyCredits.toLocaleString("en-US")}
                     </span>{" "}
-                    Mentor Credits each month
+                    credits each month
                   </div>
                 </section>
 
-                <div className="mt-6 space-y-4">
+                <div className="mt-6 flex flex-col items-start gap-4">
                   <CheckoutButton
                     enabled={paymentsAvailable()}
                     plan={planDetails.checkoutPlan}
                   />
                   <Link
-                    className="inline-flex text-sm font-semibold text-sky-950 underline underline-offset-4"
+                    className="text-sm font-semibold text-[var(--terra-text)] underline decoration-[var(--line-strong)] underline-offset-4"
                     href="/pricing"
                   >
                     Change plan
                   </Link>
                 </div>
 
-                <p className="mt-6 text-xs leading-5 text-zinc-500">
-                  Access begins only after Mentor And I verifies your active
-                  Stripe subscription. This page does not grant entitlement.
+                <p className="mt-6 text-xs leading-5 text-[var(--ink-faint)]">
+                  Access is activated only after Mentor And I verifies the
+                  Stripe subscription.
                 </p>
               </>
             )
@@ -112,17 +116,17 @@ export default async function OnboardingPage({
             <>
               <Badge variant="muted">Free Trial</Badge>
               <Heading className="mt-5" level={1}>
-                Choose your mentor
+                Ready to choose your mentor
               </Heading>
-              <Text className="mt-5 text-lg leading-8">
-                No payment is needed. Continue to mentor selection, answer a
-                short opening question, and begin your first conversation.
+              <Text className="mt-4 text-lg leading-8">
+                No payment is needed for the trial. Continue to mentor selection
+                and begin your first conversation.
               </Text>
               <Link
-                className="mt-8 inline-flex h-12 items-center justify-center rounded-lg bg-sky-950 px-6 text-sm font-semibold text-white transition hover:bg-sky-900"
+                className="mt-8 inline-flex h-11 items-center justify-center rounded-[var(--r-md)] bg-[var(--terra-hover)] px-5 text-sm font-semibold text-[var(--on-terra)] transition hover:bg-[var(--terra-press)]"
                 href="/mentors"
               >
-                Continue to mentor selection
+                Choose a mentor
               </Link>
             </>
           )}
