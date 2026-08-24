@@ -41,4 +41,5 @@ jobs:
       - run: npm run test:auth-contract
       - run: npm run test:mentor-access
       - run: npm run test:credits
+      - run: npm run test:safety
       - run: npm run build
