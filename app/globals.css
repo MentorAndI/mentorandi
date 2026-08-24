@@ -9,24 +9,24 @@
   --surface: #fbf7ef;
   --surface-raised: #fefcf8;
   --line: #e3d9c6;
-  --line-strong: #d6c9b2;
+  --line-strong: #8f887a;
 
   /* Text */
   --ink: #201f1b;
   --ink-muted: #5c574d;
-  --ink-faint: #716a5e;
+  --ink-faint: #6e675c;
 
   /* Brand action */
   --terra: #bc5b38;
   --terra-hover: #9e4a2c;
   --terra-press: #863e24;
   --terra-text: #8f4227;
-  --on-terra: #ffffff;
+  --on-terra: #fbf3ec;
   --ring: #9e4a2c;
 
   /* Semantic */
-  --success: #4e7a5a;
-  --warning: #b8842a;
+  --success: #487153;
+  --warning: #87611f;
   --danger: #a32e28;
   --info: #3e6b8a;
 
@@ -56,10 +56,10 @@
   --surface: #2a2824;
   --surface-raised: #322f2a;
   --line: #3a362f;
-  --line-strong: #48433a;
+  --line-strong: #6a6355;
   --ink: #f1eadd;
   --ink-muted: #b7ae9d;
-  --ink-faint: #8a8271;
+  --ink-faint: #9a927f;
   --terra: #d06a44;
   --terra-hover: #e07c55;
   --terra-press: #b85a38;
@@ -68,39 +68,11 @@
   --ring: #e07c55;
   --success: #5e8e68;
   --warning: #cf9a42;
-  --danger: #c9564a;
+  --danger: #d97267;
   --info: #5e8aae;
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.18);
-  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.24);
-  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.32);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    color-scheme: dark;
-    --app-bg: #1c1b18;
-    --band: #24221e;
-    --surface: #2a2824;
-    --surface-raised: #322f2a;
-    --line: #3a362f;
-    --line-strong: #48433a;
-    --ink: #f1eadd;
-    --ink-muted: #b7ae9d;
-    --ink-faint: #8a8271;
-    --terra: #d06a44;
-    --terra-hover: #e07c55;
-    --terra-press: #b85a38;
-    --terra-text: #e58a63;
-    --on-terra: #1c1b18;
-    --ring: #e07c55;
-    --success: #5e8e68;
-    --warning: #cf9a42;
-    --danger: #c9564a;
-    --info: #5e8aae;
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.18);
-    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.24);
-    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.32);
-  }
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.42);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
 }
 
 @theme inline {
@@ -111,7 +83,7 @@
   --font-serif: var(--font-newsreader);
   --font-mono: var(--font-space-mono);
 
-  /* Compatibility bridge for the existing Tailwind UI while it migrates to semantic tokens. */
+  /* Compatibility bridge for existing Tailwind UI while it migrates to semantic tokens. */
   --color-white: var(--surface-raised);
   --color-zinc-50: var(--app-bg);
   --color-zinc-100: var(--band);
