@@ -16,12 +16,14 @@ import { buildLoginPath } from "@/services/auth/redirects";
 import { validateSignupForm } from "@/services/auth/validation";
 
 interface SignupFormValues {
+  ageConfirmed: boolean;
   email: string;
   password: string;
   passwordConfirmation: string;
 }
 
 interface SignupFormErrors {
+  ageConfirmation?: string;
   email?: string;
   form?: string;
   password?: string;
@@ -37,6 +39,7 @@ export function SignupForm({
 }: SignupFormProps) {
   const router = useRouter();
   const [values, setValues] = useState<SignupFormValues>({
+    ageConfirmed: false,
     email: "",
     password: "",
     passwordConfirmation: "",
@@ -56,6 +59,7 @@ export function SignupForm({
       values.email,
       values.password,
       values.passwordConfirmation,
+      values.ageConfirmed,
     );
 
     if (!validation.isValid) {
@@ -67,6 +71,7 @@ export function SignupForm({
 
     try {
       const { data, error } = await signUpWithEmailPassword({
+        ageConfirmed: values.ageConfirmed,
         email: values.email,
         nextPath: redirectPath,
         password: values.password,
@@ -185,6 +190,34 @@ export function SignupForm({
         type="password"
         value={values.passwordConfirmation}
       />
+
+      <div>
+        <label className="flex cursor-pointer items-start gap-3 text-sm leading-6 text-[var(--ink-muted)]" htmlFor="signup-age-confirmation">
+          <input
+            aria-describedby={errors.ageConfirmation ? "signup-age-confirmation-error" : undefined}
+            checked={values.ageConfirmed}
+            className="mt-1 h-4 w-4 shrink-0 accent-[var(--terra-hover)]"
+            id="signup-age-confirmation"
+            onChange={(event) =>
+              setValues((current) => ({
+                ...current,
+                ageConfirmed: event.target.checked,
+              }))
+            }
+            type="checkbox"
+          />
+          <span>I confirm that I am 18 years of age or older.</span>
+        </label>
+        {errors.ageConfirmation ? (
+          <p
+            className="mt-2 text-sm text-[var(--danger)]"
+            id="signup-age-confirmation-error"
+            role="alert"
+          >
+            {errors.ageConfirmation}
+          </p>
+        ) : null}
+      </div>
 
       <Button
         aria-describedby={errors.form ? "signup-form-error" : undefined}
