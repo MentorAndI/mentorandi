@@ -34,6 +34,7 @@ test("signup and callback redirects preserve safe product destinations", () => {
   }
 
   assert.equal(normalizeSafeAuthNextPath("/mentor?mentor=life"), "/mentor?mentor=life");
+  assert.equal(normalizeSafeAuthNextPath("/credits?topup=returned"), "/credits?topup=returned");
   assert.equal(normalizeSafeAuthNextPath("/feedback?context=%2Fmentor"), "/feedback?context=%2Fmentor");
 });
 
@@ -71,6 +72,7 @@ test("production-facing account, mentor, feedback, and admin routes are protecte
     "/admin",
     "/admin/feedback",
     "/admin/usage",
+    "/credits",
     "/feedback",
     "/mentor",
     "/onboarding",

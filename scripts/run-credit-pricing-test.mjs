@@ -7,3 +7,4 @@ const jiti = createJiti(import.meta.url, {
 });
 
 await jiti.import("../tests/credit-pricing.test.ts");
+await jiti.import("../tests/credit-ledger.test.ts");

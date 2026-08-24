@@ -448,10 +448,10 @@ export function MentorConversationClient({
           </p>
           <p className="mt-1 text-sm text-zinc-500">credits remaining</p>
           <Link
-            className="mt-4 inline-flex text-sm font-semibold text-sky-950 underline decoration-sky-300 underline-offset-4 hover:text-sky-700"
-            href="/pricing"
+            className="mt-4 inline-flex rounded-lg bg-sky-950 px-4 py-2 text-sm font-semibold text-white transition hover:bg-sky-900"
+            href="/credits"
           >
-            View plans
+            Buy more credits
           </Link>
         </Card>
 

@@ -36,6 +36,12 @@ export interface ApplyPlanCreditsInput {
   userId: string;
 }
 
+export interface ApplyPurchasedTopUpInput {
+  checkoutSessionId: string;
+  credits: number;
+  userId: string;
+}
+
 export interface DebitUsageCreditsInput {
   llmUsage: MentorResponsePipelineLlmUsage;
   usageEventId: string;
@@ -54,7 +60,7 @@ export class CreditServiceError extends Error {
 }
 
 export class CreditService {
-  private readonly prisma = getPrismaClient();
+  constructor(private readonly prisma = getPrismaClient()) {}
 
   async getBalanceForUser(userId: string): Promise<CreditBalanceSnapshot> {
     const account = await this.ensureCreditAccount(userId);
@@ -141,6 +147,63 @@ export class CreditService {
         },
         where: { id: current.id },
       });
+    });
+
+    return toBalanceSnapshot(account);
+  }
+
+  async applyPurchasedTopUp(input: ApplyPurchasedTopUpInput) {
+    if (
+      !input.checkoutSessionId.trim() ||
+      !Number.isInteger(input.credits) ||
+      input.credits <= 0
+    ) {
+      throw new CreditServiceError("Invalid Mentor Credit top-up.", 400);
+    }
+
+    const idempotencyKey = `topup:checkout:${input.checkoutSessionId}`;
+    await this.ensureEmptyCreditAccount(input.userId);
+
+    const account = await this.prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`
+        SELECT "id"
+        FROM "CreditAccount"
+        WHERE "userId" = ${input.userId}::uuid
+        FOR UPDATE
+      `;
+
+      const existingTopUp = await tx.creditTransaction.findUnique({
+        where: { idempotencyKey },
+      });
+      const current = await tx.creditAccount.findUniqueOrThrow({
+        where: { userId: input.userId },
+      });
+
+      if (existingTopUp) return current;
+
+      const planBalance = decimalToNumber(current.planBalance);
+      const nextTopUpBalance =
+        decimalToNumber(current.topUpBalance) + input.credits;
+      const updated = await tx.creditAccount.update({
+        data: {
+          lifetimeGranted: { increment: input.credits },
+          topUpBalance: nextTopUpBalance,
+        },
+        where: { id: current.id },
+      });
+
+      await tx.creditTransaction.create({
+        data: {
+          accountId: current.id,
+          amount: input.credits,
+          balanceAfter: planBalance + nextTopUpBalance,
+          idempotencyKey,
+          type: CreditTransactionType.TOP_UP,
+          userId: input.userId,
+        },
+      });
+
+      return updated;
     });
 
     return toBalanceSnapshot(account);

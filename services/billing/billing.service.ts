@@ -5,16 +5,22 @@ import {
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import {
   assertStripeReady,
+  assertTopUpReady,
   getExpectedStripeLivemode,
   getPlanForStripePrice,
   getStripePriceId,
   isStripeReady,
 } from "@/services/billing/billing-config";
-import { isVerifiedActivePaidSubscription } from "@/services/billing/billing-access.service";
+import {
+  isEligibleForTopUpPurchase,
+  isVerifiedActivePaidSubscription,
+} from "@/services/billing/billing-access.service";
 import { BillingRepository } from "@/services/billing/billing.repository";
 import type { PurchasablePlan } from "@/services/billing/billing.types";
 import { toPublicPlan } from "@/services/billing/purchase-flow";
 import { StripeClient } from "@/services/billing/stripe-client";
+import { getTopUpPack } from "@/services/billing/topup-catalog";
+import { isTopUpPackKey, type TopUpPackKey } from "@/services/billing/topup.types";
 import { CreditService } from "@/services/credits/credit.service";
 import { UserService } from "@/services/user/user.service";
 
@@ -103,6 +109,40 @@ export class BillingService {
     return { url: session.url };
   }
 
+  async createTopUpCheckoutSession(packKey: TopUpPackKey, origin: string) {
+    const user = await this.users.resolveAuthenticatedUser();
+    const subscription = await this.repository.findByUserId(user.id);
+    const billingCustomerId = subscription?.billingCustomerId;
+
+    if (!isEligibleForTopUpPurchase(subscription) || !billingCustomerId) {
+      throw new BillingServiceError(
+        "Top-ups are available with an active Mentor And I subscription.",
+        403,
+      );
+    }
+
+    assertTopUpReady();
+    const pack = getTopUpPack(packKey);
+    const session = await this.stripe.post("/checkout/sessions", {
+      "client_reference_id": user.id,
+      "customer": billingCustomerId,
+      "line_items[0][price]": pack.priceId,
+      "line_items[0][quantity]": "1",
+      "metadata[pack_key]": pack.key,
+      "metadata[purchase_type]": "credit_topup",
+      "metadata[user_id]": user.id,
+      "mode": "payment",
+      "success_url": `${origin}/credits?topup=returned`,
+      "cancel_url": `${origin}/credits?topup=canceled`,
+    });
+
+    if (!session.url) {
+      throw new BillingServiceError("Stripe did not return a checkout URL.", 502);
+    }
+
+    return { url: session.url };
+  }
+
   async handleWebhook(rawBody: string, signature: string | null) {
     this.stripe.verifyWebhook(rawBody, signature);
     const event = JSON.parse(rawBody) as StripeEvent;
@@ -115,6 +155,15 @@ export class BillingService {
         "Stripe event mode does not match the configured billing environment.",
         400,
       );
+    }
+
+    if (
+      (event.type === "checkout.session.completed" ||
+        event.type === "checkout.session.async_payment_succeeded") &&
+      readMetadata(object, "purchase_type") === "credit_topup"
+    ) {
+      await this.applyTopUpCheckout(object);
+      return;
     }
 
     if (event.type === "checkout.session.completed") {
@@ -164,6 +213,23 @@ export class BillingService {
         });
       }
     }
+  }
+
+  private async applyTopUpCheckout(object: Record<string, unknown>) {
+    if (readString(object.payment_status) !== "paid") return;
+
+    const checkoutSessionId = readString(object.id);
+    const packKey = readMetadata(object, "pack_key");
+    const userId = readMetadata(object, "user_id");
+
+    if (!checkoutSessionId || !isTopUpPackKey(packKey) || !userId) return;
+
+    const pack = getTopUpPack(packKey);
+    await this.credits.applyPurchasedTopUp({
+      checkoutSessionId,
+      credits: pack.credits,
+      userId,
+    });
   }
 
   private async applyPaidInvoice(object: Record<string, unknown>) {

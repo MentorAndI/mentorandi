@@ -1,5 +1,6 @@
 export const AUTH_PROTECTED_ROUTE_PREFIXES = [
   "/admin",
+  "/credits",
   "/dashboard",
   "/feedback",
   "/mentor",

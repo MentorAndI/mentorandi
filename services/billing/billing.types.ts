@@ -19,6 +19,7 @@ export interface SubscriptionUpdate {
 }
 
 export interface PurchaseStatus {
+  canPurchaseTopUps: boolean;
   hasActivePaidSubscription: boolean;
   isAuthenticated: boolean;
 }

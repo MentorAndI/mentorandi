@@ -1,4 +1,8 @@
 import type { PurchasablePlan } from "@/services/billing/billing.types";
+import { BillingConfigurationError } from "@/services/billing/billing-configuration-error";
+import { assertTopUpPricesReady } from "@/services/billing/topup-catalog";
+
+export { BillingConfigurationError } from "@/services/billing/billing-configuration-error";
 
 type StripeMode = "live" | "test";
 
@@ -56,6 +60,22 @@ export function assertStripeReady() {
   getStripePriceId("SINGLE");
   getStripePriceId("PLUS");
   getStripePriceId("PREMIUM");
+}
+
+export function isTopUpReady() {
+  if (!isStripeReady()) return false;
+
+  try {
+    assertTopUpPricesReady();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function assertTopUpReady() {
+  assertStripeReady();
+  assertTopUpPricesReady();
 }
 
 // Backwards-compatible staging helpers. They intentionally fail closed in live mode.
@@ -168,13 +188,4 @@ function requireStripeValue(name: string) {
 
 function readStripeValue(name: string) {
   return process.env[name]?.trim() || null;
-}
-
-export class BillingConfigurationError extends Error {
-  readonly statusCode = 503;
-
-  constructor(message: string) {
-    super(message);
-    this.name = "BillingConfigurationError";
-  }
 }
