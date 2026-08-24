@@ -38,6 +38,9 @@ export function MentorHeader({
             <p className="mt-3 max-w-2xl text-base leading-7 text-[var(--ink-muted)]">
               {tagline}
             </p>
+            <p className="mt-3 max-w-2xl text-xs leading-5 text-[var(--ink-faint)]">
+              {name} is an AI mentor, not a human or licensed therapist. Mentor And I provides mentoring and self-help support, not therapy, diagnosis, or emergency care.
+            </p>
           </div>
 
           {onNewConversation ? (

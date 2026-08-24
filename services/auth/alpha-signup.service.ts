@@ -3,9 +3,11 @@ import {
   buildAuthCallbackUrl,
   getPublicAppOrigin,
 } from "@/services/auth/redirects";
+import { validateAgeConfirmation } from "@/services/auth/validation";
 import { UserService } from "@/services/user/user.service";
 
 export interface AlphaSignupInput {
+  ageConfirmed: boolean;
   email: string;
   nextPath?: string;
   password: string;
@@ -28,6 +30,7 @@ export class AlphaSignupService {
   async signup(input: AlphaSignupInput) {
     const email = input.email.trim();
     const password = input.password;
+    const ageConfirmationError = validateAgeConfirmation(input.ageConfirmed);
 
     if (!email || !password) {
       throw new AlphaSignupServiceError(
@@ -36,11 +39,20 @@ export class AlphaSignupService {
       );
     }
 
+    if (ageConfirmationError) {
+      throw new AlphaSignupServiceError(ageConfirmationError, 400);
+    }
+
     const supabase = await createSupabaseServerClient();
     const publicOrigin = getPublicAppOrigin(input.requestOrigin);
+    const ageConfirmedAt = new Date().toISOString();
     const { data, error } = await supabase.auth.signUp({
       email,
       options: {
+        data: {
+          age_confirmed_18_plus: true,
+          age_confirmed_at: ageConfirmedAt,
+        },
         emailRedirectTo: buildAuthCallbackUrl(publicOrigin, input.nextPath),
       },
       password,

@@ -10,12 +10,14 @@ export const dynamic = "force-dynamic";
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json().catch(() => null)) as {
+      ageConfirmed?: unknown;
       email?: unknown;
       nextPath?: unknown;
       password?: unknown;
     } | null;
 
     const result = await new AlphaSignupService().signup({
+      ageConfirmed: body?.ageConfirmed === true,
       email: readString(body?.email),
       nextPath: readOptionalString(body?.nextPath),
       password: readString(body?.password),

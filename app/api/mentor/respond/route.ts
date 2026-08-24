@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { MessageRole } from "@/lib/generated/prisma/client";
 import { createSafeErrorResponse } from "@/lib/api/safe-error-response";
 import {
   CreditService,
@@ -18,11 +19,20 @@ import {
   MentorUsageMonitoringError,
 } from "@/services/usage-limits/mentor-usage-limits.service";
 import { UserServiceError } from "@/services/user/user.service";
-import {
-  isActiveMentorSlug,
-} from "@/services/mentor-catalog/mentor-catalog";
+import { isActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog";
 import type { ActiveMentorSlug } from "@/services/mentor-catalog/mentor-catalog.types";
 import { MentorAccessServiceError } from "@/services/mentor-access/mentor-access.service";
+import {
+  MessageService,
+  MessageServiceError,
+} from "@/services/message/message.service";
+import {
+  buildCrisisSafetyResponse,
+  buildFailSafeSafetyDecision,
+  evaluateCrisisSafety,
+  logCrisisSafetyDecision,
+  type CrisisSafetyDecision,
+} from "@/services/safety/crisis-safety";
 
 export const dynamic = "force-dynamic";
 
@@ -56,8 +66,25 @@ export async function POST(request: Request) {
           mentorSlug,
         )
       : await sessionService.getResolvedMentorSession(mentorSlug);
-    const usageLimitService = new MentorUsageLimitService();
     const creditService = new CreditService();
+    const safetyDecision = evaluateSafetyFailClosed(validation.input.message);
+
+    logSafetyDecisionWithoutBlocking(
+      safetyDecision,
+      session.conversation.id,
+    );
+
+    if (safetyDecision.overrideMentorResponse) {
+      return createCrisisOverrideResponse({
+        authUserId: session.authUserId,
+        conversation: session.conversation,
+        creditService,
+        message: validation.input.message,
+        userId: session.userId,
+      });
+    }
+
+    const usageLimitService = new MentorUsageLimitService();
     const usageContext = {
       authUserId: session.authUserId,
       conversationId: session.conversation.id,
@@ -150,6 +177,15 @@ export async function POST(request: Request) {
       });
     }
 
+    if (error instanceof MessageServiceError) {
+      return createSafeErrorResponse({
+        context: "api/mentor/respond:message",
+        error,
+        fallbackMessage: "Unable to send your message.",
+        statusCode: error.statusCode,
+      });
+    }
+
     if (error instanceof MentorSessionServiceError) {
       return createSafeErrorResponse({
         context: "api/mentor/respond:session",
@@ -182,6 +218,67 @@ export async function POST(request: Request) {
       error,
       fallbackMessage: "Unable to send your message.",
     });
+  }
+}
+
+async function createCrisisOverrideResponse(input: {
+  authUserId: string;
+  conversation: { id: string } & Record<string, unknown>;
+  creditService: CreditService;
+  message: string;
+  userId: string;
+}) {
+  const messageService = new MessageService();
+  const authContext = { authUserId: input.authUserId };
+  const userMessage = await messageService.createMessage(
+    input.conversation.id,
+    {
+      content: input.message,
+      role: MessageRole.USER,
+    },
+    authContext,
+  );
+  const mentorMessage = await messageService.createMessage(
+    input.conversation.id,
+    {
+      content: buildCrisisSafetyResponse(),
+      role: MessageRole.MENTOR,
+    },
+    authContext,
+  );
+  const creditResult = await input.creditService.getBalanceForUser(input.userId);
+
+  return NextResponse.json(
+    {
+      conversation: input.conversation,
+      creditsRemaining: creditResult.balance,
+      mentorMessage,
+      safety: {
+        classification: "high",
+        override: true,
+      },
+      userMessage,
+    },
+    { status: 200 },
+  );
+}
+
+function evaluateSafetyFailClosed(message: string): CrisisSafetyDecision {
+  try {
+    return evaluateCrisisSafety(message);
+  } catch {
+    return buildFailSafeSafetyDecision();
+  }
+}
+
+function logSafetyDecisionWithoutBlocking(
+  decision: CrisisSafetyDecision,
+  conversationId: string,
+) {
+  try {
+    logCrisisSafetyDecision(decision, conversationId);
+  } catch {
+    // Safety decisions must never be blocked by telemetry failures.
   }
 }
 

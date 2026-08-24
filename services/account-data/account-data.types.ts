@@ -5,11 +5,15 @@ export interface AccountDataDeleteInput {
 }
 
 export interface AccountDataDeleteCounts {
+  clearedSelectedMentor: boolean;
   deletedConversations: number;
+  deletedFeedback: number;
   deletedGoals: number;
+  deletedJournalEntries: number;
   deletedMemories: number;
   deletedMessages: number;
   deletedReflections: number;
+  deletedUsageEvents: number;
 }
 
 export interface AccountDataValidationResult<TInput> {
