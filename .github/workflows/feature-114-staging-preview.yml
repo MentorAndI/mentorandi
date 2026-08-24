@@ -62,6 +62,7 @@ jobs:
           deploy_sha="$1"
           repo_dir="/docker/mentorandi"
           preview_dir="/docker/mentorandi-staging-preview-feature-114"
+          preview_image="mentorandi-feature-114-preview:${deploy_sha}"
 
           cd "$repo_dir"
           git fetch origin feature-114-compliance-runtime
@@ -75,18 +76,40 @@ jobs:
           cat > "$preview_dir/docker-compose.preview.yml" <<EOF
           services:
             mentorandi-staging:
-              image: mentorandi-feature-114-preview:${deploy_sha}
+              image: ${preview_image}
+              build:
+                context: .
+                dockerfile: Dockerfile
+                args:
+                  NEXT_PUBLIC_SUPABASE_URL: \${NEXT_PUBLIC_SUPABASE_URL:?Set NEXT_PUBLIC_SUPABASE_URL in the staging env file}
+                  NEXT_PUBLIC_SUPABASE_ANON_KEY: \${NEXT_PUBLIC_SUPABASE_ANON_KEY:?Set NEXT_PUBLIC_SUPABASE_ANON_KEY in the staging env file}
+                  NEXT_PUBLIC_STRIPE_ENABLED: \${NEXT_PUBLIC_STRIPE_ENABLED:-false}
           EOF
 
           cd "$preview_dir"
+
+          # Apply migrations using the branch code and staging environment.
           docker compose -p mentorandi --env-file .env.staging -f docker-compose.staging.yml --profile tools build mentorandi-staging-migrate
           docker compose -p mentorandi --env-file .env.staging -f docker-compose.staging.yml --profile tools run --rm mentorandi-staging-migrate
+
+          # Build the application with an immutable per-commit tag.
           docker compose -p mentorandi --env-file .env.staging -f docker-compose.staging.yml -f docker-compose.preview.yml build --no-cache mentorandi-staging
+
+          # Prove the image itself contains the requested commit before it can be started.
+          image_marker="$(docker run --rm --entrypoint cat "$preview_image" /app/public/feature-114-preview-marker.txt)"
+          [ "$image_marker" = "$deploy_sha" ]
+
+          # Prove Compose resolves the service to the immutable preview tag.
+          resolved_image="$(docker compose -p mentorandi --env-file .env.staging -f docker-compose.staging.yml -f docker-compose.preview.yml config --format json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const c=JSON.parse(s);process.stdout.write(c.services["mentorandi-staging"].image||"")})')"
+          [ "$resolved_image" = "$preview_image" ]
+
           docker compose -p mentorandi --env-file .env.staging -f docker-compose.staging.yml -f docker-compose.preview.yml up -d --force-recreate --no-deps mentorandi-staging
 
-          expected_image="$(docker image inspect "mentorandi-feature-114-preview:${deploy_sha}" --format '{{.Id}}')"
-          running_image="$(docker inspect mentorandi-staging --format '{{.Image}}')"
-          [ "$expected_image" = "$running_image" ]
+          # Verify both the exact configured tag and content of the running container.
+          running_tag="$(docker inspect mentorandi-staging --format '{{.Config.Image}}')"
+          [ "$running_tag" = "$preview_image" ]
+          running_marker="$(docker exec mentorandi-staging cat /app/public/feature-114-preview-marker.txt)"
+          [ "$running_marker" = "$deploy_sha" ]
           REMOTE
 
       - name: Publish deploy status
@@ -111,7 +134,7 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          marker="$(ssh \
+          result="$(ssh \
             -i "$HOME/.ssh/staging_deploy_key" \
             -o BatchMode=yes \
             -o ConnectTimeout=15 \
@@ -119,21 +142,21 @@ jobs:
             "bash -s -- '$GITHUB_SHA'" <<'REMOTE'
           set -eu
           expected="$1"
+          expected_tag="mentorandi-feature-114-preview:${expected}"
           for attempt in $(seq 1 30); do
             state="$(docker inspect mentorandi-staging --format '{{.State.Status}}' 2>/dev/null || true)"
-            if [ "$state" = "running" ]; then
-              marker="$(docker exec mentorandi-staging cat /app/public/feature-114-preview-marker.txt 2>/dev/null || true)"
-              if [ "$marker" = "$expected" ]; then
-                printf '%s' "$marker"
-                exit 0
-              fi
+            tag="$(docker inspect mentorandi-staging --format '{{.Config.Image}}' 2>/dev/null || true)"
+            marker="$(docker exec mentorandi-staging cat /app/public/feature-114-preview-marker.txt 2>/dev/null || true)"
+            if [ "$state" = "running" ] && [ "$tag" = "$expected_tag" ] && [ "$marker" = "$expected" ]; then
+              printf '%s' "$marker"
+              exit 0
             fi
             sleep 2
           done
           exit 1
           REMOTE
           )"
-          [[ "$marker" == "$GITHUB_SHA" ]]
+          [[ "$result" == "$GITHUB_SHA" ]]
 
       - name: Publish container marker status
         if: always()
