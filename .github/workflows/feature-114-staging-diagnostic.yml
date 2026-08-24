@@ -50,7 +50,12 @@ jobs:
              exit_code="$(docker inspect mentorandi-staging --format "{{.State.ExitCode}}" 2>/dev/null || echo unknown)"
              restarting="$(docker inspect mentorandi-staging --format "{{.State.Restarting}}" 2>/dev/null || echo unknown)"
              oom="$(docker inspect mentorandi-staging --format "{{.State.OOMKilled}}" 2>/dev/null || echo unknown)"
+             created="$(docker inspect mentorandi-staging --format "{{.Created}}" 2>/dev/null || echo unknown)"
              image="$(docker inspect mentorandi-staging --format "{{.Config.Image}}" 2>/dev/null || echo missing)"
+             project="$(docker inspect mentorandi-staging --format "{{index .Config.Labels \"com.docker.compose.project\"}}" 2>/dev/null || echo unknown)"
+             working_dir="$(docker inspect mentorandi-staging --format "{{index .Config.Labels \"com.docker.compose.project.working_dir\"}}" 2>/dev/null || echo unknown)"
+             config_files="$(docker inspect mentorandi-staging --format "{{index .Config.Labels \"com.docker.compose.project.config_files\"}}" 2>/dev/null || echo unknown)"
+             service="$(docker inspect mentorandi-staging --format "{{index .Config.Labels \"com.docker.compose.service\"}}" 2>/dev/null || echo unknown)"
              marker_exists=no
              marker_value=unavailable
              if [ "$status" = running ]; then
@@ -59,7 +64,8 @@ jobs:
                  marker_value="$(docker exec mentorandi-staging cat /app/public/feature-114-preview-marker.txt 2>/dev/null || echo unreadable)"
                fi
              fi
-             printf "container_status=%s\nexit_code=%s\nrestarting=%s\noom_killed=%s\nimage=%s\nmarker_exists=%s\nmarker_value=%s\n" "$status" "$exit_code" "$restarting" "$oom" "$image" "$marker_exists" "$marker_value"')"
+             events="$(docker events --since 15m --until 0s --filter container=mentorandi-staging --format "{{.Time}} {{.Action}} image={{.Actor.Attributes.image}}" 2>/dev/null | tail -n 30 || true)"
+             printf "container_status=%s\nexit_code=%s\nrestarting=%s\noom_killed=%s\ncreated=%s\nimage=%s\ncompose_project=%s\ncompose_working_dir=%s\ncompose_config_files=%s\ncompose_service=%s\nmarker_exists=%s\nmarker_value=%s\ndocker_events_begin\n%s\ndocker_events_end\n" "$status" "$exit_code" "$restarting" "$oom" "$created" "$image" "$project" "$working_dir" "$config_files" "$service" "$marker_exists" "$marker_value" "$events"')"
 
           health_body="$(curl --connect-timeout 10 --max-time 20 --silent --show-error "${STAGING_APP_URL%/}/api/health" 2>/dev/null || true)"
           health_code="$(curl --connect-timeout 10 --max-time 20 --silent --output /dev/null --write-out '%{http_code}' "${STAGING_APP_URL%/}/api/health" 2>/dev/null || true)"
@@ -80,5 +86,5 @@ jobs:
           git config user.name "MentorAndI staging diagnostic"
           git config user.email "37156918+MentorAndI@users.noreply.github.com"
           git add "$file"
-          git commit -m "Record sanitized Feature 114 staging diagnostic"
+          git commit -m "Record sanitized staging ownership diagnostic"
           git push origin HEAD:feature-114-compliance-runtime
