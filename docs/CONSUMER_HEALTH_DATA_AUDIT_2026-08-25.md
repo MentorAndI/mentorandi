@@ -111,21 +111,22 @@ Those records can be required to administer an active subscription, reconcile pu
 
 A full account/deletion request remains available through the privacy-request process described in the published policies. Full account deletion must include coordinated handling of authentication, active Stripe subscriptions and any legally required billing retention; it should not be implemented as a blind database delete.
 
-## Retention
+## Retention and backups
 
 Current active-application behavior does not implement a universal automatic age-based purge of mentor content. The practical active-data model is therefore:
 
 - mentor content remains while needed for the user's ongoing account/continuity until the user deletes mentor data or a full deletion request is processed;
 - direct mentor-data deletion removes the listed active-database mentoring records immediately when the transaction succeeds;
 - billing/credit/account records are retained separately where needed for account operation, accounting, fraud prevention or legal obligations;
-- provider-side AI request retention is governed by the actual OpenAI/Anthropic account configuration and contracts as described above;
-- deleted data may remain temporarily in infrastructure backups according to the infrastructure provider's backup-retention mechanics and legal/security constraints.
+- provider-side AI request retention is governed by the actual OpenAI/Anthropic account configuration and contracts as described above.
 
-Operational gate before broader launch: document the production backup-retention schedule and the internal procedure for full privacy deletion requests, including who executes it, systems covered, and how completion is recorded.
+Production Supabase verification on 25 August 2026 shows the `MentorAndI Production` project is in `eu-west-1` and the organization is currently on the **Free** plan. Supabase's current detailed backup documentation states that automatic daily backups are available to Pro, Team and Enterprise projects, and recommends that Free-plan projects regularly create their own off-site database dumps. Therefore the current production project must not be documented internally as having a restorable Supabase daily-backup history.
+
+Production reliability gate before broader launch: either upgrade the production Supabase organization/project to a plan with appropriate managed backups, or establish an automated encrypted off-site backup process with tested restore procedures. Whichever route is chosen must have a documented retention period and a deletion/restoration procedure that prevents intentionally deleted mentor data from being silently reintroduced by a later restore.
 
 ## Safety processing
 
-Feature 114 adds a pre-response deterministic crisis-safety layer. High-risk safety events do not send the high-risk message to an LLM because ordinary mentor generation is bypassed. Safety telemetry records only classification, rule ID, override status and a short SHA-256-derived conversation reference; it does not log the message text.
+Feature 114 adds a pre-response deterministic crisis-safety layer. High-risk safety events do not send the high-risk message to an LLM because ordinary mentor generation is bypassed. Safety telemetry records only classification, rule ID, override status and a short SHA-256-derived conversation reference; it does not log the message text. `none` classifications are not logged.
 
 This reduces unnecessary propagation of high-risk content while preserving enough metadata for safety operations.
 
@@ -143,15 +144,16 @@ This reduces unnecessary propagation of high-risk content while preserving enoug
 
 - Direct export previously omitted journal entries, feedback, usage and billing/credit data.
 - Direct mentor-data deletion previously omitted journal entries, feedback, usage events and saved mentor selection.
+- Safety telemetry now avoids logging ordinary `none` classifications and does not log user message content.
 
 ### Remaining operational gates
 
 1. Verify and record actual OpenAI project data-retention control (default vs MAM/ZDR) and contract/DPA status.
 2. Verify and record actual Anthropic organization retention agreement/control and contract/DPA status.
-3. Document Supabase/production backup-retention behavior and deletion-from-backup lifecycle.
-4. Create a written full-account privacy-deletion runbook covering Supabase Auth/database, Stripe state and any legally retained billing records.
+3. Resolve the current production backup gap: Supabase Free has no managed daily-backup entitlement described by the detailed backup docs; use an appropriate paid backup plan or automated encrypted off-site dumps.
+4. Create and maintain a written full-account privacy-deletion runbook covering Supabase Auth/database, Stripe state, AI-provider retention and any legally retained billing records.
 5. Illinois-specific launch position remains pending U.S. counsel; this audit does not resolve that legal question.
 
 ## Release conclusion
 
-The application data model and published policies are broadly consistent after the Feature 114 export/deletion fixes. The remaining gaps are operational/contractual verification and the Illinois legal decision, not an undisclosed advertising use or an unbounded hidden health-data store.
+The application data model and published policies are broadly consistent after the Feature 114 export/deletion fixes. The remaining gaps are operational/contractual verification, production backup resilience and the Illinois legal decision, not an undisclosed advertising use or an unbounded hidden health-data store.
