@@ -14,6 +14,7 @@ import {
   isStripeReady,
   isTopUpReady,
 } from "@/services/billing/billing-config";
+import { getBillingOrigin } from "@/services/billing/billing-http";
 import { getTopUpPack } from "@/services/billing/topup-catalog";
 import { parseTopUpCheckoutInput } from "@/services/billing/topup-input";
 import { UserServiceError } from "@/services/user/user.service";
@@ -90,6 +91,144 @@ test("checkout receives a server-configured Price ID and returns for verified ac
       "https://app.mentorandi.com/onboarding?plan=plus&checkout=returned",
     );
   });
+});
+
+test("portal session uses the authenticated user's persisted customer and returns to production settings", async () => {
+  await withStripeTestEnvironment(async () => {
+    let lookedUpUserId = "";
+    let postedPath = "";
+    let postedValues: Record<string, string> = {};
+    const service = new BillingService(
+      {
+        findByUserId: async (userId: string) => {
+          lookedUpUserId = userId;
+          return { billingCustomerId: "cus_from_server_record" };
+        },
+      } as never,
+      {
+        post: async (path: string, values: Record<string, string>) => {
+          postedPath = path;
+          postedValues = values;
+          return { url: "https://billing.stripe.test/session" };
+        },
+      } as never,
+      { resolveAuthenticatedUser: async () => authenticatedUser } as never,
+      {} as never,
+      async () => null,
+    );
+
+    await service.createPortalSession("https://app.mentorandi.com");
+
+    assert.equal(lookedUpUserId, authenticatedUser.id);
+    assert.equal(postedPath, "/billing_portal/sessions");
+    assert.deepEqual(postedValues, {
+      customer: "cus_from_server_record",
+      return_url: "https://app.mentorandi.com/settings",
+    });
+  });
+});
+
+test("unauthenticated users cannot create a portal session", async () => {
+  await withStripeTestEnvironment(async () => {
+    let repositoryCalls = 0;
+    let stripeCalls = 0;
+    const service = new BillingService(
+      {
+        findByUserId: async () => {
+          repositoryCalls += 1;
+          return { billingCustomerId: "cus_should_not_be_used" };
+        },
+      } as never,
+      {
+        post: async () => {
+          stripeCalls += 1;
+          return { url: "https://billing.stripe.test/session" };
+        },
+      } as never,
+      {
+        resolveAuthenticatedUser: async () => {
+          throw new UserServiceError("Unauthorized.", 401);
+        },
+      } as never,
+      {} as never,
+      async () => null,
+    );
+
+    await assert.rejects(
+      service.createPortalSession("https://app.mentorandi.com"),
+      (error: unknown) =>
+        error instanceof UserServiceError && error.statusCode === 401,
+    );
+    assert.equal(repositoryCalls, 0);
+    assert.equal(stripeCalls, 0);
+  });
+});
+
+test("users without a persisted billing customer cannot create a portal session", async () => {
+  await withStripeTestEnvironment(async () => {
+    let stripeCalls = 0;
+    const service = new BillingService(
+      { findByUserId: async () => ({ billingCustomerId: null }) } as never,
+      {
+        post: async () => {
+          stripeCalls += 1;
+          return { url: "https://billing.stripe.test/session" };
+        },
+      } as never,
+      { resolveAuthenticatedUser: async () => authenticatedUser } as never,
+      {} as never,
+      async () => null,
+    );
+
+    await assert.rejects(
+      service.createPortalSession("https://app.mentorandi.com"),
+      (error: unknown) =>
+        error instanceof BillingServiceError && error.statusCode === 409,
+    );
+    assert.equal(stripeCalls, 0);
+  });
+});
+
+test("portal HTTP boundary accepts no browser customer ID and uses the configured production origin", async () => {
+  const previousAppUrl = process.env.APP_URL;
+  process.env.APP_URL = "https://app.mentorandi.com";
+
+  try {
+    const route = await readFile("app/api/billing/portal/route.ts", "utf8");
+    const origin = getBillingOrigin(
+      new Request("https://attacker.example/api/billing/portal"),
+    );
+
+    assert.equal(origin, "https://app.mentorandi.com");
+    assert.match(
+      route,
+      /createPortalSession\(getBillingOrigin\(request\)\)/,
+    );
+    assert.doesNotMatch(route, /request\.json\(|customer(Id)?/i);
+  } finally {
+    if (previousAppUrl === undefined) delete process.env.APP_URL;
+    else process.env.APP_URL = previousAppUrl;
+  }
+});
+
+test("billing portal UI contains production copy only", async () => {
+  const source = await readFile(
+    "components/billing/BillingPortalButton.tsx",
+    "utf8",
+  );
+
+  assert.match(source, />Plan and billing</);
+  assert.match(
+    source,
+    /Manage your subscription, payment method and invoices securely through Stripe\./,
+  );
+  assert.match(source, /Manage subscription/);
+  assert.match(source, /Opening…/);
+  assert.match(
+    source,
+    /subscription remains active until the end of the[\s\S]*current billing period\./,
+  );
+  assert.doesNotMatch(source, /test customer portal|Manage test billing|sandbox|alpha billing/i);
 });
 
 test("production plan credit allocations remain unchanged", async () => {

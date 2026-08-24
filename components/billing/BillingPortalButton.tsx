@@ -26,9 +26,15 @@ export function BillingPortalButton({ enabled }: { enabled: boolean }) {
       <h2 className="text-lg font-semibold text-zinc-950">Plan and billing</h2>
       <p className="mt-2 text-sm leading-6 text-zinc-600">
         {enabled
-          ? "Open Stripe's test customer portal to manage an existing test subscription."
-          : "Payments are not enabled yet. Your alpha access is unchanged."}
+          ? "Manage your subscription, payment method and invoices securely through Stripe."
+          : "Billing management is not available right now."}
       </p>
+      {enabled ? (
+        <p className="mt-2 text-sm leading-6 text-zinc-600">
+          If you cancel, your subscription remains active until the end of the
+          current billing period.
+        </p>
+      ) : null}
       <button
         className="mt-4 rounded-lg border border-zinc-300 px-4 py-2 text-sm font-semibold text-zinc-800 enabled:hover:bg-zinc-50 disabled:cursor-not-allowed disabled:text-zinc-400"
         disabled={!enabled || loading}
@@ -38,8 +44,8 @@ export function BillingPortalButton({ enabled }: { enabled: boolean }) {
         {loading
           ? "Opening…"
           : enabled
-            ? "Manage test billing"
-            : "Payments are not enabled yet"}
+            ? "Manage subscription"
+            : "Billing unavailable"}
       </button>
       {message ? <p className="mt-3 text-sm text-amber-800" role="status">{message}</p> : null}
     </div>

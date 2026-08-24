@@ -8,6 +8,11 @@ on:
         required: false
         default: false
         type: boolean
+      verify_billing_portal:
+        description: Create and validate a live Customer Portal session without exposing its URL
+        required: false
+        default: false
+        type: boolean
 
 permissions:
   contents: read
@@ -91,3 +96,24 @@ jobs:
           }
           console.log("Production health check passed.");
           NODE
+
+      - name: Verify production Customer Portal
+        if: ${{ inputs.verify_billing_portal }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          ssh \
+            -i "$HOME/.ssh/production_deploy_key" \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            "$SSH_USER@$SSH_HOST" \
+            'set -eu
+             cd /docker/mentorandi
+             docker compose --env-file .env.production -f docker-compose.production.yml --profile tools run --rm --no-deps --entrypoint node mentorandi-production-migrate scripts/verify-production-portal.mjs
+             docker exec mentorandi-production sh -c '\''
+               grep -R -F -q "Plan and billing" /app/.next &&
+               grep -R -F -q "Manage subscription" /app/.next &&
+               ! grep -R -F -q "test customer portal" /app/.next &&
+               ! grep -R -F -q "Manage test billing" /app/.next
+             '\''
+             echo "PRODUCTION PORTAL COPY: PASS"'
