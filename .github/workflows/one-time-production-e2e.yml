@@ -1,0 +1,135 @@
+name: One-time production E2E audit
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/one-time-production-e2e.yml"
+
+permissions:
+  contents: read
+  statuses: write
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      APP_URL: https://app.mentorandi.com
+    steps:
+      - name: Report E2E pending
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          curl --fail --silent --show-error -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -d "{\"state\":\"pending\",\"context\":\"production-e2e\",\"target_url\":\"$run_url\"}" >/dev/null
+
+      - name: Verify public health
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          body="$(curl --fail --silent --show-error --max-time 20 "$APP_URL/api/health")"
+          HEALTH="$body" node <<'NODE'
+          const h = JSON.parse(process.env.HEALTH || "");
+          if (h.status !== "ok") throw new Error("health status not ok");
+          if (h.database !== "connected") throw new Error("database not connected");
+          if (h.auth !== "configured") throw new Error("auth not configured");
+          if (!["openai","anthropic","routed"].includes(h.llmProvider)) throw new Error("real LLM not configured");
+          NODE
+
+      - name: Verify unauthenticated product entry
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          effective="$(curl --silent --show-error --location --max-time 20 --output /dev/null --write-out '%{url_effective}' "$APP_URL/")"
+          [[ "$effective" == "$APP_URL/login"* ]]
+          mentor_effective="$(curl --silent --show-error --location --max-time 20 --output /dev/null --write-out '%{url_effective}' "$APP_URL/mentor")"
+          [[ "$mentor_effective" == "$APP_URL/login"* ]]
+
+      - name: Verify signup age gate is visible
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          html="$(curl --fail --silent --show-error --max-time 20 "$APP_URL/signup")"
+          grep -Fq "I confirm that I am 18 years of age or older." <<<"$html"
+
+      - name: Verify signup age gate is server enforced
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          response_file="$(mktemp)"
+          code="$(curl --silent --show-error --max-time 20 \
+            --output "$response_file" \
+            --write-out '%{http_code}' \
+            -H 'Content-Type: application/json' \
+            -X POST "$APP_URL/api/auth/signup" \
+            --data '{"email":"e2e-age-gate@invalid.test","password":"E2E!StrongPassword123","ageConfirmed":false}')"
+          [[ "$code" == "400" ]]
+          grep -Eqi '18|age' "$response_file"
+          rm -f "$response_file"
+
+      - name: Verify protected account and billing APIs reject anonymous access
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          export_code="$(curl --silent --show-error --max-time 20 --output /dev/null --write-out '%{http_code}' "$APP_URL/api/account/export")"
+          [[ "$export_code" == "401" || "$export_code" == "403" ]]
+
+          delete_code="$(curl --silent --show-error --max-time 20 --output /dev/null --write-out '%{http_code}' \
+            -H 'Content-Type: application/json' -X POST "$APP_URL/api/account/delete-data" \
+            --data '{"confirmation":"DELETE_MY_MENTOR_DATA"}')"
+          [[ "$delete_code" == "401" || "$delete_code" == "403" ]]
+
+          credits_code="$(curl --silent --show-error --max-time 20 --output /dev/null --write-out '%{http_code}' "$APP_URL/api/credits")"
+          [[ "$credits_code" == "401" || "$credits_code" == "403" ]]
+
+          portal_code="$(curl --silent --show-error --max-time 20 --output /dev/null --write-out '%{http_code}' \
+            -H 'Content-Type: application/json' -X POST "$APP_URL/api/billing/portal" --data '{}')"
+          [[ "$portal_code" == "401" || "$portal_code" == "403" ]]
+
+      - name: Verify login and signup are mobile-capable documents
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          for path in login signup; do
+            html="$(curl --fail --silent --show-error --max-time 20 "$APP_URL/$path")"
+            grep -Eqi '<meta[^>]+name="viewport"[^>]+width=device-width' <<<"$html"
+          done
+
+      - name: Report E2E success
+        if: success()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          curl --fail --silent --show-error -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -d "{\"state\":\"success\",\"context\":\"production-e2e\",\"target_url\":\"$run_url\"}" >/dev/null
+
+      - name: Report E2E failure
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          curl --fail --silent --show-error -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $GH_TOKEN" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            "https://api.github.com/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" \
+            -d "{\"state\":\"failure\",\"context\":\"production-e2e\",\"target_url\":\"$run_url\"}" >/dev/null
