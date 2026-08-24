@@ -31,10 +31,14 @@ export interface ButtonActionProps
 export type ButtonProps = ButtonLinkProps | ButtonActionProps;
 
 const variantClasses: Record<ButtonVariant, string> = {
-  primary: "bg-zinc-950 text-white hover:bg-zinc-800",
-  secondary: "border border-zinc-300 bg-white text-zinc-950 hover:bg-zinc-50",
-  ghost: "bg-transparent text-zinc-700 hover:bg-zinc-100 hover:text-zinc-950",
-  destructive: "bg-red-600 text-white hover:bg-red-700",
+  primary:
+    "bg-[var(--terra)] text-[var(--on-terra)] shadow-[var(--shadow-sm)] hover:bg-[var(--terra-hover)] active:bg-[var(--terra-press)]",
+  secondary:
+    "border border-[var(--line-strong)] bg-[var(--surface-raised)] text-[var(--ink)] shadow-[var(--shadow-sm)] hover:bg-[var(--band)]",
+  ghost:
+    "bg-transparent text-[var(--ink-muted)] hover:bg-[var(--band)] hover:text-[var(--ink)]",
+  destructive:
+    "bg-[var(--danger)] text-white shadow-[var(--shadow-sm)] hover:brightness-95 active:brightness-90",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
@@ -51,8 +55,9 @@ export function Button({
   ...props
 }: ButtonProps) {
   const classes = cn(
-    "inline-flex items-center justify-center rounded-md font-medium",
-    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2",
+    "inline-flex items-center justify-center rounded-[var(--r-md)] font-semibold",
+    "transition-colors duration-200",
+    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--app-bg)]",
     "disabled:pointer-events-none disabled:opacity-50",
     "aria-disabled:pointer-events-none aria-disabled:opacity-50",
     variantClasses[variant],
