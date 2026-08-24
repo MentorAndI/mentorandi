@@ -24,11 +24,17 @@ export class AccountDataService {
 
     return {
       conversations: data.conversations,
+      creditAccount: data.creditAccount,
+      creditTransactions: data.creditTransactions,
       exportedAt: new Date().toISOString(),
+      feedback: data.feedback,
       goals: data.goals,
+      journalEntries: data.journalEntries,
       memories: data.memories,
       messages: data.messages,
       reflections: data.reflections,
+      subscription: data.subscription,
+      usageEvents: data.usageEvents,
       user: data.user,
     };
   }
