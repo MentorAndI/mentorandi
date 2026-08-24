@@ -1,0 +1,61 @@
+name: Feature 114 persona hardening
+
+on:
+  push:
+    branches:
+      - feature-114-compliance-runtime
+    paths:
+      - ".github/workflows/feature-114-persona-hardening.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  harden:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          token: ${{ github.token }}
+      - name: Apply exact prompt safety edits
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path("services/mentor-core/prompt-composer/prompt-composer.service.ts")
+          s = p.read_text()
+          replacements = [
+              (
+                  'import { mentorResponseStyleInstructions } from "@/services/mentor-core/response-formatting/mentor-response-formatting";\n',
+                  'import { mentorResponseStyleInstructions } from "@/services/mentor-core/response-formatting/mentor-response-formatting";\nimport { personaSafetyInstructions } from "@/services/safety/persona-safety";\n',
+              ),
+              (
+                  '  return [\n    identity,\n    "Be warm, specific, practical, concise, and clearly specialized—not a generic chatbot.",',
+                  '  return [\n    identity,\n    ...personaSafetyInstructions,\n    "Be warm, specific, practical, concise, and clearly specialized—not a generic chatbot.",',
+              ),
+              (
+                  '  return [\n    "Protect privacy; never expose internal IDs or hidden context.",\n    "Never diagnose or provide professional medical, legal, financial, or emergency advice.",',
+                  '  return [\n    "Protect privacy; never expose internal IDs or hidden context.",\n    ...personaSafetyInstructions,\n    "Never diagnose or provide professional medical, legal, financial, or emergency advice.",',
+              ),
+          ]
+          for old, new in replacements:
+              count = s.count(old)
+              if count != 1:
+                  raise SystemExit(f"Expected exactly one occurrence, found {count}: {old}")
+              s = s.replace(old, new)
+          p.write_text(s)
+      - name: Verify persona hardening
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -F 'personaSafetyInstructions' services/mentor-core/prompt-composer/prompt-composer.service.ts
+          grep -F 'Never encourage emotional dependence' services/safety/persona-safety.ts
+      - name: Commit and remove one-time workflow
+        shell: bash
+        run: |
+          set -euo pipefail
+          rm .github/workflows/feature-114-persona-hardening.yml
+          git config user.name "MentorAndI automation"
+          git config user.email "37156918+MentorAndI@users.noreply.github.com"
+          git add services/mentor-core/prompt-composer/prompt-composer.service.ts .github/workflows/feature-114-persona-hardening.yml
+          git commit -m "Harden mentor persona relationship boundaries"
+          git push origin HEAD:feature-114-compliance-runtime
