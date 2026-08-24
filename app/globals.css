@@ -1,26 +1,180 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: light;
+
+  /* Surfaces */
+  --app-bg: #f4ede1;
+  --band: #efe6d4;
+  --surface: #fbf7ef;
+  --surface-raised: #fefcf8;
+  --line: #e3d9c6;
+  --line-strong: #d6c9b2;
+
+  /* Text */
+  --ink: #201f1b;
+  --ink-muted: #5c574d;
+  --ink-faint: #716a5e;
+
+  /* Brand action */
+  --terra: #bc5b38;
+  --terra-hover: #9e4a2c;
+  --terra-press: #863e24;
+  --terra-text: #8f4227;
+  --on-terra: #ffffff;
+  --ring: #9e4a2c;
+
+  /* Semantic */
+  --success: #4e7a5a;
+  --warning: #b8842a;
+  --danger: #a32e28;
+  --info: #3e6b8a;
+
+  /* Radius */
+  --r-sm: 6px;
+  --r-md: 10px;
+  --r-lg: 14px;
+  --r-xl: 20px;
+  --r-pill: 999px;
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(32, 31, 27, 0.06);
+  --shadow-md: 0 2px 8px rgba(32, 31, 27, 0.08);
+  --shadow-lg: 0 8px 24px rgba(32, 31, 27, 0.12);
+
+  /* Motion */
+  --dur-fast: 120ms;
+  --dur: 180ms;
+  --dur-slow: 240ms;
+  --ease: cubic-bezier(0.2, 0.6, 0.2, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --app-bg: #1c1b18;
+  --band: #24221e;
+  --surface: #2a2824;
+  --surface-raised: #322f2a;
+  --line: #3a362f;
+  --line-strong: #48433a;
+  --ink: #f1eadd;
+  --ink-muted: #b7ae9d;
+  --ink-faint: #8a8271;
+  --terra: #d06a44;
+  --terra-hover: #e07c55;
+  --terra-press: #b85a38;
+  --terra-text: #e58a63;
+  --on-terra: #1c1b18;
+  --ring: #e07c55;
+  --success: #5e8e68;
+  --warning: #cf9a42;
+  --danger: #c9564a;
+  --info: #5e8aae;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.18);
+  --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.24);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.32);
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --app-bg: #1c1b18;
+    --band: #24221e;
+    --surface: #2a2824;
+    --surface-raised: #322f2a;
+    --line: #3a362f;
+    --line-strong: #48433a;
+    --ink: #f1eadd;
+    --ink-muted: #b7ae9d;
+    --ink-faint: #8a8271;
+    --terra: #d06a44;
+    --terra-hover: #e07c55;
+    --terra-press: #b85a38;
+    --terra-text: #e58a63;
+    --on-terra: #1c1b18;
+    --ring: #e07c55;
+    --success: #5e8e68;
+    --warning: #cf9a42;
+    --danger: #c9564a;
+    --info: #5e8aae;
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.18);
+    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.24);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.32);
   }
 }
 
+@theme inline {
+  --color-background: var(--app-bg);
+  --color-foreground: var(--ink);
+
+  --font-sans: var(--font-hanken);
+  --font-serif: var(--font-newsreader);
+  --font-mono: var(--font-space-mono);
+
+  /* Compatibility bridge for the existing Tailwind UI while it migrates to semantic tokens. */
+  --color-white: var(--surface-raised);
+  --color-zinc-50: var(--app-bg);
+  --color-zinc-100: var(--band);
+  --color-zinc-200: var(--line);
+  --color-zinc-300: var(--line-strong);
+  --color-zinc-400: var(--ink-faint);
+  --color-zinc-500: var(--ink-faint);
+  --color-zinc-600: var(--ink-muted);
+  --color-zinc-700: var(--ink-muted);
+  --color-zinc-800: var(--ink);
+  --color-zinc-900: var(--ink);
+  --color-zinc-950: var(--ink);
+
+  --color-sky-50: var(--surface);
+  --color-sky-300: var(--line-strong);
+  --color-sky-700: var(--terra-text);
+  --color-sky-900: var(--terra-hover);
+  --color-sky-950: var(--terra);
+
+  --color-red-600: var(--danger);
+  --color-red-700: var(--danger);
+  --color-emerald-600: var(--success);
+  --color-amber-800: var(--warning);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--app-bg);
+  text-rendering: optimizeLegibility;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  min-height: 100%;
+  background: var(--app-bg);
+  color: var(--ink);
+  font-family: var(--font-hanken), system-ui, sans-serif;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--terra) 24%, transparent);
+  color: var(--ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+
+input,
+textarea,
+button,
+select {
+  font: inherit;
+}
+
+.font-editorial {
+  font-family: var(--font-newsreader), Georgia, serif;
+}
+
+.font-meta {
+  font-family: var(--font-space-mono), ui-monospace, monospace;
+  letter-spacing: 0.04em;
 }
