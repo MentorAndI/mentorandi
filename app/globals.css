@@ -128,8 +128,8 @@
   --color-sky-50: var(--surface);
   --color-sky-300: var(--line-strong);
   --color-sky-700: var(--terra-text);
-  --color-sky-900: var(--terra-hover);
-  --color-sky-950: var(--terra);
+  --color-sky-900: var(--terra-press);
+  --color-sky-950: var(--terra-hover);
 
   --color-red-600: var(--danger);
   --color-red-700: var(--danger);
