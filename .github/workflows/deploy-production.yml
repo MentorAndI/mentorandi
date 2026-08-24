@@ -13,14 +13,9 @@ on:
         required: false
         default: false
         type: boolean
-  push:
-    branches: [main]
-    paths:
-      - ".github/workflows/deploy-production.yml"
 
 permissions:
   contents: read
-  statuses: write
 
 concurrency:
   group: mentorandi-production-deploy
@@ -38,21 +33,12 @@ jobs:
       SSH_USER: ${{ secrets.STAGING_SSH_USER }}
 
     steps:
-      - name: Report production deploy pending
-        if: github.event_name == 'push'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          curl --fail --silent --show-error -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GH_TOKEN" -H "X-GitHub-Api-Version: 2022-11-28" "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -d "{\"state\":\"pending\",\"context\":\"route-hygiene-production-deploy\",\"target_url\":\"$run_url\"}" >/dev/null
-
       - name: Validate deployment connection
         shell: bash
         run: |
           set -Eeuo pipefail
           [[ "$SSH_HOST" =~ ^[A-Za-z0-9.-]+$ ]] || { echo "Missing or invalid SSH host" >&2; exit 1; }
-          [[ "$SSH_USER" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "Missing SSH user" >&2; exit 1; }
+          [[ "$SSH_USER" =~ ^[A-Za-z0-9._-]+$ ]] || { echo "Missing or invalid SSH user" >&2; exit 1; }
           [[ -n "$SSH_KEY" ]] || { echo "Missing SSH key" >&2; exit 1; }
 
       - name: Configure SSH
@@ -69,7 +55,12 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          ssh -i "$HOME/.ssh/production_deploy_key" -o BatchMode=yes -o ConnectTimeout=15 "$SSH_USER@$SSH_HOST" 'set -eu
+          ssh \
+            -i "$HOME/.ssh/production_deploy_key" \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            "$SSH_USER@$SSH_HOST" \
+            'set -eu
              cd /docker/mentorandi
              test -f .env.production || { echo ".env.production is missing" >&2; exit 1; }
              git fetch origin main
@@ -85,11 +76,27 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          health_response="$(curl --connect-timeout 10 --fail --max-time 20 --retry 8 --retry-all-errors --retry-delay 5 --show-error --silent "${PROD_APP_URL%/}/api/health")"
+          health_url="${PROD_APP_URL%/}/api/health"
+          health_response="$(curl \
+            --connect-timeout 10 \
+            --fail \
+            --max-time 20 \
+            --retry 8 \
+            --retry-all-errors \
+            --retry-delay 5 \
+            --show-error \
+            --silent \
+            "$health_url")"
+
           HEALTH_RESPONSE="$health_response" node <<'NODE'
-          const health = JSON.parse(process.env.HEALTH_RESPONSE ?? "");
-          if (health.status !== "ok") process.exit(1);
-          console.log("Production health check passed.");
+          try {
+            const health = JSON.parse(process.env.HEALTH_RESPONSE ?? "");
+            if (health.status !== "ok") process.exit(1);
+            console.log("Production health check passed.");
+          } catch {
+            console.error("Production health response was invalid.");
+            process.exit(1);
+          }
           NODE
 
       - name: Verify production billing portal
@@ -97,24 +104,11 @@ jobs:
         shell: bash
         run: |
           set -Eeuo pipefail
-          ssh -i "$HOME/.ssh/production_deploy_key" -o BatchMode=yes -o ConnectTimeout=15 "$SSH_USER@$SSH_HOST" 'set -eu
+          ssh \
+            -i "$HOME/.ssh/production_deploy_key" \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            "$SSH_USER@$SSH_HOST" \
+            'set -eu
              cd /docker/mentorandi
              docker compose --env-file .env.production -f docker-compose.production.yml run --rm -e NODE_ENV=production --entrypoint node mentorandi-production scripts/verify-production-portal.mjs'
-
-      - name: Report production deploy success
-        if: success() && github.event_name == 'push'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          curl --fail --silent --show-error -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GH_TOKEN" -H "X-GitHub-Api-Version: 2022-11-28" "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -d "{\"state\":\"success\",\"context\":\"route-hygiene-production-deploy\",\"target_url\":\"$run_url\"}" >/dev/null
-
-      - name: Report production deploy failure
-        if: failure() && github.event_name == 'push'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        shell: bash
-        run: |
-          run_url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
-          curl --fail --silent --show-error -X POST -H "Accept: application/vnd.github+json" -H "Authorization: Bearer $GH_TOKEN" -H "X-GitHub-Api-Version: 2022-11-28" "$GITHUB_API_URL/repos/$GITHUB_REPOSITORY/statuses/$GITHUB_SHA" -d "{\"state\":\"failure\",\"context\":\"route-hygiene-production-deploy\",\"target_url\":\"$run_url\"}" >/dev/null
