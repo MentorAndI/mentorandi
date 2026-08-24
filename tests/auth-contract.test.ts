@@ -14,6 +14,7 @@ import {
 } from "@/services/billing/purchase-flow";
 import {
   isDevelopmentProtectedRouteBypass,
+  isProductionHiddenLegacyRoute,
   isProtectedAuthRoute,
 } from "@/services/auth/routes";
 import {
@@ -113,6 +114,23 @@ test("production-facing account, mentor, feedback, and admin routes are protecte
 
   assert.equal(isProtectedAuthRoute("/alpha"), false);
   assert.equal(isProtectedAuthRoute("/privacy"), false);
+});
+
+test("legacy prototype routes are hidden from the production app host", () => {
+  for (const route of [
+    "/alpha",
+    "/demo",
+    "/match",
+    "/reflection",
+    "/welcome",
+    "/demo/scenario",
+  ]) {
+    assert.equal(isProductionHiddenLegacyRoute(route), true, route);
+  }
+
+  for (const route of ["/", "/login", "/pricing", "/privacy", "/terms", "/mentors"]) {
+    assert.equal(isProductionHiddenLegacyRoute(route), false, route);
+  }
 });
 
 test("development bypass never includes onboarding, feedback, or admin", () => {

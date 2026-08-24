@@ -8,9 +8,23 @@ export const AUTH_PROTECTED_ROUTE_PREFIXES = [
   "/settings",
 ] as const;
 
+export const PRODUCTION_HIDDEN_LEGACY_ROUTES = [
+  "/alpha",
+  "/demo",
+  "/match",
+  "/reflection",
+  "/welcome",
+] as const;
+
 export function isProtectedAuthRoute(pathname: string) {
   return AUTH_PROTECTED_ROUTE_PREFIXES.some(
     (prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`),
+  );
+}
+
+export function isProductionHiddenLegacyRoute(pathname: string) {
+  return PRODUCTION_HIDDEN_LEGACY_ROUTES.some(
+    (route) => pathname === route || pathname.startsWith(`${route}/`),
   );
 }
 
