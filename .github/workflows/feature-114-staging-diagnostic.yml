@@ -1,0 +1,84 @@
+name: Feature 114 staging diagnostic
+
+on:
+  push:
+    branches:
+      - feature-114-compliance-runtime
+    paths:
+      - ".github/workflows/feature-114-staging-diagnostic.yml"
+
+permissions:
+  contents: write
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      STAGING_APP_URL: ${{ secrets.STAGING_APP_URL }}
+      STAGING_SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+      STAGING_SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+      STAGING_SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature-114-compliance-runtime
+          token: ${{ github.token }}
+
+      - name: Configure SSH
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          install -d -m 700 "$HOME/.ssh"
+          printf '%s\n' "$STAGING_SSH_KEY" > "$HOME/.ssh/staging_deploy_key"
+          chmod 600 "$HOME/.ssh/staging_deploy_key"
+          ssh-keyscan -H -T 15 "$STAGING_SSH_HOST" > "$HOME/.ssh/known_hosts"
+          chmod 600 "$HOME/.ssh/known_hosts"
+
+      - name: Collect sanitized staging diagnostics
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          remote_diag="$(ssh \
+            -i "$HOME/.ssh/staging_deploy_key" \
+            -o BatchMode=yes \
+            -o ConnectTimeout=15 \
+            "$STAGING_SSH_USER@$STAGING_SSH_HOST" \
+            'set -eu
+             status="$(docker inspect mentorandi-staging --format "{{.State.Status}}" 2>/dev/null || echo missing)"
+             exit_code="$(docker inspect mentorandi-staging --format "{{.State.ExitCode}}" 2>/dev/null || echo unknown)"
+             restarting="$(docker inspect mentorandi-staging --format "{{.State.Restarting}}" 2>/dev/null || echo unknown)"
+             oom="$(docker inspect mentorandi-staging --format "{{.State.OOMKilled}}" 2>/dev/null || echo unknown)"
+             image="$(docker inspect mentorandi-staging --format "{{.Config.Image}}" 2>/dev/null || echo missing)"
+             marker_exists=no
+             marker_value=unavailable
+             if [ "$status" = running ]; then
+               if docker exec mentorandi-staging test -f /app/public/feature-114-preview-marker.txt 2>/dev/null; then
+                 marker_exists=yes
+                 marker_value="$(docker exec mentorandi-staging cat /app/public/feature-114-preview-marker.txt 2>/dev/null || echo unreadable)"
+               fi
+             fi
+             printf "container_status=%s\nexit_code=%s\nrestarting=%s\noom_killed=%s\nimage=%s\nmarker_exists=%s\nmarker_value=%s\n" "$status" "$exit_code" "$restarting" "$oom" "$image" "$marker_exists" "$marker_value"')"
+
+          health_body="$(curl --connect-timeout 10 --max-time 20 --silent --show-error "${STAGING_APP_URL%/}/api/health" 2>/dev/null || true)"
+          health_code="$(curl --connect-timeout 10 --max-time 20 --silent --output /dev/null --write-out '%{http_code}' "${STAGING_APP_URL%/}/api/health" 2>/dev/null || true)"
+          marker_code="$(curl --connect-timeout 10 --max-time 20 --silent --output /dev/null --write-out '%{http_code}' "${STAGING_APP_URL%/}/feature-114-preview-marker.txt" 2>/dev/null || true)"
+          public_marker="$(curl --connect-timeout 10 --max-time 20 --silent "${STAGING_APP_URL%/}/feature-114-preview-marker.txt" 2>/dev/null || true)"
+
+          mkdir -p docs/staging-diagnostics
+          file="docs/staging-diagnostics/${GITHUB_SHA}.txt"
+          {
+            printf 'workflow_sha=%s\n' "$GITHUB_SHA"
+            printf '%s\n' "$remote_diag"
+            printf 'health_http_code=%s\n' "$health_code"
+            printf 'health_body=%s\n' "$health_body"
+            printf 'public_marker_http_code=%s\n' "$marker_code"
+            printf 'public_marker=%s\n' "$public_marker"
+          } > "$file"
+
+          git config user.name "MentorAndI staging diagnostic"
+          git config user.email "37156918+MentorAndI@users.noreply.github.com"
+          git add "$file"
+          git commit -m "Record sanitized Feature 114 staging diagnostic"
+          git push origin HEAD:feature-114-compliance-runtime
