@@ -16,6 +16,10 @@ import {
   isDevelopmentProtectedRouteBypass,
   isProtectedAuthRoute,
 } from "@/services/auth/routes";
+import {
+  validateAgeConfirmation,
+  validateSignupForm,
+} from "@/services/auth/validation";
 
 test("signup and callback redirects preserve safe product destinations", () => {
   for (const plan of ["free", "single", "plus", "premium"] as const) {
@@ -51,6 +55,32 @@ test("paid plans resolve to payment confirmation details before mentor intake", 
 test("free signup has no Stripe checkout plan", () => {
   assert.equal(getPaidPlanDetails(normalizeRequestedPlan("free")), null);
   assert.equal(normalizeRequestedPlan("unexpected"), "free");
+});
+
+test("signup requires affirmative 18 plus confirmation", () => {
+  assert.equal(validateAgeConfirmation(false), "You must confirm that you are 18 years of age or older.");
+  assert.equal(validateAgeConfirmation(true), null);
+
+  const withoutConfirmation = validateSignupForm(
+    "adult@example.com",
+    "password123",
+    "password123",
+    false,
+  );
+  assert.equal(withoutConfirmation.isValid, false);
+  assert.equal(
+    withoutConfirmation.errors.ageConfirmation,
+    "You must confirm that you are 18 years of age or older.",
+  );
+
+  const confirmed = validateSignupForm(
+    "adult@example.com",
+    "password123",
+    "password123",
+    true,
+  );
+  assert.equal(confirmed.isValid, true);
+  assert.equal(confirmed.errors.ageConfirmation, undefined);
 });
 
 test("signup and callback redirects reject external and privileged destinations", () => {
