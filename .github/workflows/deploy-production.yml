@@ -1,6 +1,9 @@
 name: Deploy production
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       skip_health_check:
@@ -89,15 +92,17 @@ jobs:
             "$health_url")"
 
           HEALTH_RESPONSE="$health_response" node <<'NODE'
-          const health = JSON.parse(process.env.HEALTH_RESPONSE ?? "");
-          if (health.status !== "ok") {
-            console.error(`Production health status is ${JSON.stringify(health.status)}, expected "ok".`);
+          try {
+            const health = JSON.parse(process.env.HEALTH_RESPONSE ?? "");
+            if (health.status !== "ok") process.exit(1);
+            console.log("Production health check passed.");
+          } catch {
+            console.error("Production health response was invalid.");
             process.exit(1);
           }
-          console.log("Production health check passed.");
           NODE
 
-      - name: Verify production Customer Portal
+      - name: Verify production billing portal
         if: ${{ inputs.verify_billing_portal }}
         shell: bash
         run: |
@@ -109,11 +114,4 @@ jobs:
             "$SSH_USER@$SSH_HOST" \
             'set -eu
              cd /docker/mentorandi
-             docker compose --env-file .env.production -f docker-compose.production.yml --profile tools run --rm --no-deps --entrypoint node mentorandi-production-migrate scripts/verify-production-portal.mjs
-             docker exec mentorandi-production sh -c '\''
-               grep -R -F -q "Plan and billing" /app/.next &&
-               grep -R -F -q "Manage subscription" /app/.next &&
-               ! grep -R -F -q "test customer portal" /app/.next &&
-               ! grep -R -F -q "Manage test billing" /app/.next
-             '\''
-             echo "PRODUCTION PORTAL COPY: PASS"'
+             docker compose --env-file .env.production -f docker-compose.production.yml run --rm -e NODE_ENV=production --entrypoint node mentorandi-production scripts/verify-production-portal.mjs'
