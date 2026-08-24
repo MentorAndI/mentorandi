@@ -8,11 +8,15 @@ import { Input } from "@/components/ui/Input";
 import { accountDataDeleteConfirmation } from "@/services/account-data/account-data.types";
 
 interface AccountDataDeleteCounts {
+  clearedSelectedMentor: boolean;
   deletedConversations: number;
+  deletedFeedback: number;
   deletedGoals: number;
+  deletedJournalEntries: number;
   deletedMemories: number;
   deletedMessages: number;
   deletedReflections: number;
+  deletedUsageEvents: number;
 }
 
 interface AccountDataDeleteResponse {
@@ -109,8 +113,9 @@ export function AccountDataControls() {
             Export my data
           </h2>
           <p className="text-sm leading-6 text-zinc-600">
-            Download a JSON copy of your conversations, messages, memories,
-            goals and reflections.
+            Download a JSON copy of your account, conversations, messages,
+            memories, goals, reflections, journal entries, feedback, usage,
+            subscription and credit records.
           </p>
         </div>
 
@@ -136,8 +141,10 @@ export function AccountDataControls() {
             Delete my mentor data
           </h2>
           <p className="text-sm leading-6 text-zinc-600">
-            This removes your conversations, messages, memories, goals and
-            reflections. Your account sign-in is not deleted.
+            This removes your conversations, messages, memories, goals,
+            reflections, journal entries, feedback, usage events and saved
+            mentor selection. Your sign-in, subscription, billing and credit
+            records are not deleted.
           </p>
         </div>
 
@@ -219,5 +226,11 @@ function formatDeleteCounts(counts: AccountDataDeleteCounts) {
     `${counts.deletedMemories} memories`,
     `${counts.deletedGoals} goals`,
     `${counts.deletedReflections} reflections`,
-  ].join(", ");
+    `${counts.deletedJournalEntries} journal entries`,
+    `${counts.deletedFeedback} feedback entries`,
+    `${counts.deletedUsageEvents} usage events`,
+    counts.clearedSelectedMentor ? "saved mentor selection cleared" : null,
+  ]
+    .filter(Boolean)
+    .join(", ");
 }
