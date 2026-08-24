@@ -10,9 +10,9 @@ export interface TextProps extends HTMLAttributes<HTMLParagraphElement> {
 }
 
 const variantClasses: Record<TextVariant, string> = {
-  body: "text-base leading-7 text-zinc-700",
-  small: "text-sm leading-6 text-zinc-700",
-  muted: "text-sm leading-6 text-zinc-500",
+  body: "text-base leading-7 text-[var(--ink-muted)]",
+  small: "text-sm leading-6 text-[var(--ink-muted)]",
+  muted: "text-sm leading-6 text-[var(--ink-faint)]",
 };
 
 export function Text({
