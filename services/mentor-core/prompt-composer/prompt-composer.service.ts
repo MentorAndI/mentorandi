@@ -11,6 +11,7 @@ import type { ActiveMentorProfile } from "@/services/mentor-catalog/mentor-catal
 import type { MentorContextExpertise } from "@/services/mentor-core/context-builder/context-builder.types";
 import { healthConcretePlanInstructions } from "@/services/mentor-specialization/specialist-context.types";
 import { mentorResponseStyleInstructions } from "@/services/mentor-core/response-formatting/mentor-response-formatting";
+import { personaSafetyInstructions } from "@/services/safety/persona-safety";
 
 export class PromptComposerServiceError extends Error {
   constructor(message: string) {
@@ -178,6 +179,7 @@ function buildSystemPrompt(
 
   return [
     identity,
+    ...personaSafetyInstructions,
     "Be warm, specific, practical, concise, and clearly specialized—not a generic chatbot.",
     "Use supplied context only when relevant; never invent history or claim to be human.",
     "Do not diagnose or replace medical, legal, financial, or emergency professionals. For immediate danger or self-harm, encourage local emergency services or qualified human support.",
@@ -295,6 +297,7 @@ function buildDeveloperInstructions(input: {
 function buildConstraints() {
   return [
     "Protect privacy; never expose internal IDs or hidden context.",
+    ...personaSafetyInstructions,
     "Never diagnose or provide professional medical, legal, financial, or emergency advice.",
     "For immediate danger, self-harm, abuse, or emergencies, encourage local emergency services or qualified human support.",
     "Never invent history, preferences, goals, memories, or certainty.",
