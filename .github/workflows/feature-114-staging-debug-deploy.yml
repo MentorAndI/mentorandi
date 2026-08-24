@@ -96,7 +96,7 @@ jobs:
 
           cd "$preview_dir"
           docker compose -p mentorandi --env-file .env.staging -f docker-compose.staging.yml --profile tools build mentorandi-staging-migrate
-          docker compose -p mentorandi --env-file .env.staging -f docker-compose.staging.yml --profile tools run --rm mentorandi-staging-migrate
+          docker compose -p mentorandi --env-file .env.staging -f docker-compose.staging.yml --profile tools run --rm -T mentorandi-staging-migrate </dev/null
           docker compose -p mentorandi --env-file .env.staging -f docker-compose.staging.yml -f docker-compose.preview.yml build --no-cache mentorandi-staging
 
           image_id="$(docker image inspect "$preview_image" --format '{{.Id}}')"
