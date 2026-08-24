@@ -1,122 +1,99 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
+import { AccountNavigation } from "@/components/auth/AccountNavigation";
 import { Container } from "@/components/layout/Container";
 import { MentorPortrait } from "@/components/mentor/MentorPortrait";
-import { Badge } from "@/components/ui/Badge";
 import { Card } from "@/components/ui/Card";
 import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
-import { BillingAccessService } from "@/services/billing/billing-access.service";
 import { activeMentorProfiles } from "@/services/mentor-catalog/mentor-catalog";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Mentors | Mentor And I",
-  description: "Choose an active Mentor And I alpha mentor specialization.",
+  description: "Choose the mentor you want to work with.",
 };
 
-export default async function MentorsPage() {
-  const purchaseStatus =
-    await new BillingAccessService().getCurrentPurchaseStatus();
+const appLinks = [
+  { href: "/mentor", label: "Mentor" },
+  { href: "/mentors", label: "Mentors" },
+  { href: "/credits", label: "Credits" },
+  { href: "/settings", label: "Settings" },
+];
 
+export default function MentorsPage() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-stone-50 via-white to-sky-50 py-12 text-zinc-950 sm:py-16">
-      <Container className="max-w-6xl">
-        <div className="mx-auto max-w-3xl text-center">
-          <Badge variant="muted">Alpha preview</Badge>
-          <Heading className="mt-4" level={1}>
-            Choose the kind of support you need
+    <main className="min-h-screen bg-[var(--app-bg)] py-4 text-[var(--ink)] sm:py-6">
+      <Container className="max-w-7xl">
+        <AccountNavigation links={appLinks} />
+
+        <div className="mb-8 max-w-2xl">
+          <p className="font-meta text-[0.7rem] text-[var(--terra-text)]">
+            YOUR MENTORS
+          </p>
+          <Heading className="mt-2" level={1}>
+            Choose a mentor
           </Heading>
-          <Text className="mt-4 text-lg leading-8">
-            Every mentor uses the same secure Mentor Core and your existing
-            context, with a distinct profile, emphasis, methods, and safety
-            boundaries. During alpha, selections continue in the existing
-            conversation system.
+          <Text className="mt-3 leading-7">
+            Pick the person best suited to what you want to work on now. Your
+            Mentor And I context stays with you when you move between mentors.
           </Text>
         </div>
 
-        <div className="mx-auto mt-8 max-w-3xl rounded-xl border border-sky-200 bg-sky-50 p-4 text-center text-sm leading-6 text-sky-950">
-          {purchaseStatus.hasActivePaidSubscription ? (
-            <>
-              <p className="font-semibold">Your subscription is ready.</p>
-              <ol className="mt-2 flex flex-col justify-center gap-2 sm:flex-row sm:gap-5">
-                <li>1. Choose your mentor</li>
-                <li>2. Answer the opening question</li>
-                <li>3. Start your conversation</li>
-              </ol>
-            </>
-          ) : (
-            <>
-              <span className="font-semibold">First time here?</span> Choose the
-              mentor closest to your situation, then answer a short opening
-              question before your conversation begins.
-            </>
-          )}
-        </div>
-
-        <div className="mt-12 grid gap-6 md:grid-cols-2">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {activeMentorProfiles.map((mentor) => (
             <Card
-              className="flex h-full flex-col gap-6 rounded-2xl bg-white p-7 shadow-sm"
+              className="group flex h-full flex-col overflow-hidden p-0"
               key={mentor.slug}
               variant="bordered"
             >
               <MentorPortrait
-                className="relative aspect-[4/5] w-full overflow-hidden rounded-xl"
+                className="relative h-48 w-full overflow-hidden border-b border-[var(--line)]"
                 name={mentor.personaName}
                 portraitSrc={mentor.portraitSrc}
               />
 
-              <div>
-                <Heading level={3}>{mentor.personaName}</Heading>
-                <p className="mt-1 text-sm font-semibold text-sky-900">
-                  {mentor.name}
-                </p>
-                <Text className="mt-3 leading-7">{mentor.shortDescription}</Text>
-              </div>
+              <div className="flex flex-1 flex-col p-5">
+                <div>
+                  <Heading level={3}>{mentor.personaName}</Heading>
+                  <p className="mt-1 text-sm font-semibold text-[var(--terra-text)]">
+                    {mentor.name}
+                  </p>
+                  <Text className="mt-3 leading-6" variant="small">
+                    {mentor.shortDescription}
+                  </Text>
+                </div>
 
-              <div>
-                <p className="text-sm font-semibold text-zinc-900">
-                  Who this is for
-                </p>
-                <Text className="mt-1" variant="small">
-                  {mentor.whoThisIsFor}
-                </Text>
-              </div>
-
-              <div>
-                <ul aria-label={`${mentor.cardName} focus areas`} className="flex flex-wrap gap-2">
-                  {mentor.cardTags.map((item) => (
+                <ul
+                  aria-label={`${mentor.cardName} focus areas`}
+                  className="mt-4 flex flex-wrap gap-1.5"
+                >
+                  {mentor.cardTags.slice(0, 3).map((item) => (
                     <li
-                      className="rounded-full bg-zinc-100 px-3 py-1 text-sm text-zinc-700"
+                      className="rounded-[var(--r-pill)] bg-[var(--band)] px-2.5 py-1 text-xs text-[var(--ink-muted)]"
                       key={item}
                     >
                       {item}
                     </li>
                   ))}
                 </ul>
-                {mentor.cardBoundary ? (
-                  <p className="mt-3 text-xs leading-5 text-zinc-500">
-                    {mentor.cardBoundary}
-                  </p>
-                ) : null}
-              </div>
 
-              <div className="mt-auto flex flex-wrap gap-3 border-t border-zinc-200 pt-4">
-                <Link
-                  className="inline-flex h-11 items-center justify-center rounded-lg bg-sky-950 px-5 text-sm font-semibold text-white transition hover:bg-sky-900"
-                  href={`/mentors/${mentor.slug}`}
-                >
-                  View profile
-                </Link>
-                <Link
-                  className="inline-flex h-11 items-center justify-center rounded-lg border border-sky-200 px-5 text-sm font-semibold text-sky-950 transition hover:bg-sky-50"
-                  href={`/start?mentor=${mentor.slug}`}
-                >
-                  Start intake with {mentor.personaName}
-                </Link>
+                <div className="mt-auto flex items-center justify-between gap-3 pt-5">
+                  <Link
+                    className="text-sm font-semibold text-[var(--ink-muted)] underline decoration-[var(--line-strong)] underline-offset-4 transition hover:text-[var(--ink)]"
+                    href={`/mentors/${mentor.slug}`}
+                  >
+                    Profile
+                  </Link>
+                  <Link
+                    className="inline-flex h-10 items-center justify-center rounded-[var(--r-md)] bg-[var(--terra-hover)] px-4 text-sm font-semibold text-[var(--on-terra)] transition hover:bg-[var(--terra-press)]"
+                    href={`/start?mentor=${mentor.slug}`}
+                  >
+                    Choose {mentor.personaName}
+                  </Link>
+                </div>
               </div>
             </Card>
           ))}
