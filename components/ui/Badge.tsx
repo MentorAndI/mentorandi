@@ -11,10 +11,13 @@ export interface BadgeProps {
 }
 
 const variantClasses: Record<BadgeVariant, string> = {
-  default: "border-zinc-300 bg-white text-zinc-800",
-  muted: "border-zinc-200 bg-zinc-100 text-zinc-600",
-  success: "border-emerald-200 bg-emerald-50 text-emerald-800",
-  warning: "border-amber-200 bg-amber-50 text-amber-800",
+  default:
+    "border-[var(--line-strong)] bg-[var(--surface-raised)] text-[var(--ink-muted)]",
+  muted: "border-[var(--line)] bg-[var(--band)] text-[var(--ink-muted)]",
+  success:
+    "border-[color-mix(in_srgb,var(--success)_35%,var(--line))] bg-[color-mix(in_srgb,var(--success)_10%,var(--surface-raised))] text-[var(--success)]",
+  warning:
+    "border-[color-mix(in_srgb,var(--warning)_35%,var(--line))] bg-[color-mix(in_srgb,var(--warning)_10%,var(--surface-raised))] text-[var(--warning)]",
 };
 
 export function Badge({
@@ -25,7 +28,7 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-medium",
+        "font-meta inline-flex items-center rounded-[var(--r-pill)] border px-2.5 py-1 text-[0.68rem] font-bold",
         variantClasses[variant],
         className,
       )}
