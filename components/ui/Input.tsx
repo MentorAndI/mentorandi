@@ -36,7 +36,7 @@ export function Input({
         className={cn(
           "block h-11 w-full rounded-[var(--r-md)] border border-[var(--line-strong)] bg-[var(--surface-raised)] px-3 text-sm text-[var(--ink)] shadow-[var(--shadow-sm)]",
           "placeholder:text-[var(--ink-faint)]",
-          "focus:border-[var(--ring)] focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--ring)_18%,transparent)]",
+          "focus:border-[var(--ring)] focus:outline-none focus:ring-2 focus:ring-[var(--ring)]/20",
           "disabled:cursor-not-allowed disabled:bg-[var(--band)] disabled:text-[var(--ink-faint)]",
           error && "border-[var(--danger)] focus:border-[var(--danger)]",
           inputClassName,
