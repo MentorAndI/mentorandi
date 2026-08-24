@@ -1,6 +1,7 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/Button";
@@ -16,6 +17,7 @@ export interface AccountNavigationProps {
 }
 
 export function AccountNavigation({ links }: AccountNavigationProps) {
+  const pathname = usePathname();
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState("");
   const [isSigningOut, setIsSigningOut] = useState(false);
@@ -36,37 +38,60 @@ export function AccountNavigation({ links }: AccountNavigationProps) {
   }
 
   return (
-    <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <nav aria-label="Account navigation" className="flex flex-wrap gap-2">
-        {links.map((link) => (
+    <header className="mb-8 border-b border-[var(--line)] pb-4">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+          <Link
+            aria-label="Mentor And I mentor workspace"
+            className="font-serif text-xl font-medium tracking-[-0.02em] text-[var(--ink)]"
+            href="/mentor"
+          >
+            Mentor <span className="text-[var(--terra-text)]">And I</span>
+          </Link>
+
+          <nav aria-label="App navigation" className="flex flex-wrap gap-1">
+            {links.map((link) => {
+              const active =
+                pathname === link.href ||
+                (link.href !== "/mentor" && pathname.startsWith(`${link.href}/`));
+
+              return (
+                <Link
+                  aria-current={active ? "page" : undefined}
+                  className={[
+                    "rounded-[var(--r-pill)] px-3 py-2 text-sm font-semibold transition-colors",
+                    active
+                      ? "bg-[var(--band)] text-[var(--ink)]"
+                      : "text-[var(--ink-muted)] hover:bg-[var(--band)] hover:text-[var(--ink)]",
+                  ].join(" ")}
+                  href={link.href}
+                  key={`${link.href}-${link.label}`}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+
+        <div className="flex flex-col gap-2 sm:items-end">
           <Button
-            href={link.href}
-            key={`${link.href}-${link.label}`}
+            disabled={isSigningOut}
+            onClick={handleSignOut}
             size="sm"
+            type="button"
             variant="ghost"
           >
-            {link.label}
+            {isSigningOut ? "Signing out…" : "Sign out"}
           </Button>
-        ))}
-      </nav>
 
-      <div className="flex flex-col gap-2 sm:items-end">
-        <Button
-          disabled={isSigningOut}
-          onClick={handleSignOut}
-          size="sm"
-          type="button"
-          variant="secondary"
-        >
-          {isSigningOut ? "Signing out..." : "Sign out"}
-        </Button>
-
-        {errorMessage ? (
-          <p className="text-sm text-red-600" role="alert">
-            {errorMessage}
-          </p>
-        ) : null}
+          {errorMessage ? (
+            <p className="text-sm text-[var(--danger)]" role="alert">
+              {errorMessage}
+            </p>
+          ) : null}
+        </div>
       </div>
-    </div>
+    </header>
   );
 }

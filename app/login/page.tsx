@@ -25,9 +25,9 @@ export default async function LoginPage({
   );
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 py-16 text-zinc-950">
+    <main className="flex min-h-screen items-center justify-center bg-[var(--app-bg)] px-6 py-16 text-[var(--ink)]">
       <AuthFormShell
-        description="Welcome back. Sign in to continue with Marcus, or choose a specialized mentor from the mentor screen."
+        description="Welcome back. Sign in to continue with your mentor."
         footerLink={{
           href: buildSignupPath(redirectPath),
           label: "Create an account",

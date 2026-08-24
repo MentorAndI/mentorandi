@@ -18,47 +18,45 @@ export default async function StartPage({
   searchParams: Promise<{ mentor?: string }>;
 }) {
   const { mentor } = await searchParams;
-  return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 py-16 text-zinc-950">
-      <ConversationCard>
-        <div className="space-y-8">
-          <Heading
-            className="max-w-xl text-4xl sm:text-5xl"
-            id="first-conversation-heading"
-            level={1}
-          >
-            Hi. I&apos;m glad you&apos;re here.
-          </Heading>
 
-          <div className="space-y-5">
-            <Text className="text-lg leading-8 text-zinc-700">
-              Before we begin...
-            </Text>
-            <Text className="text-lg leading-8 text-zinc-700">
-              I&apos;d like to understand what brought you here today.
-            </Text>
-            <Text className="text-lg leading-8 text-zinc-700">
-              There are no right or wrong answers.
-            </Text>
-            <Text className="text-lg leading-8 text-zinc-700">
-              Just tell me whatever comes to mind.
-            </Text>
+  return (
+    <main className="min-h-screen bg-[var(--app-bg)] px-6 py-8 text-[var(--ink)] sm:py-12">
+      <div className="mx-auto mb-5 flex w-full max-w-3xl items-center justify-between gap-4">
+        <p className="font-serif text-xl font-medium tracking-[-0.02em] text-[var(--ink)]">
+          Mentor <span className="text-[var(--terra-text)]">And I</span>
+        </p>
+        <Link
+          className="text-sm font-semibold text-[var(--ink-muted)] transition hover:text-[var(--terra-text)]"
+          href="/mentors"
+        >
+          Change mentor
+        </Link>
+      </div>
+
+      <ConversationCard>
+        <div className="space-y-7">
+          <div>
+            <p className="font-meta text-[0.7rem] text-[var(--terra-text)]">
+              FIRST CONVERSATION
+            </p>
+            <Heading
+              className="mt-3 max-w-xl font-serif text-4xl font-medium sm:text-5xl"
+              id="first-conversation-heading"
+              level={1}
+            >
+              Hi. I&apos;m glad you&apos;re here.
+            </Heading>
           </div>
 
-          <div className="rounded-xl border border-sky-200 bg-sky-50 p-4 text-sm leading-6 text-sky-950">
-            <p className="font-semibold">A quick alpha guide</p>
-            <p className="mt-1">
-              Choose the mentor closest to your situation, write naturally,
-              and use the Feedback button to tell us what helped or felt off. You
-              can{" "}
-              <Link
-                className="font-semibold underline underline-offset-4"
-                href="/mentors"
-              >
-                compare mentors
-              </Link>{" "}
-              before you begin.
-            </p>
+          <div className="max-w-2xl space-y-3">
+            <Text className="text-lg leading-8">
+              Before we begin, I&apos;d like to understand what brought you here
+              today.
+            </Text>
+            <Text className="text-lg leading-8">
+              There are no right or wrong answers. Tell me what feels most
+              important to start with.
+            </Text>
           </div>
         </div>
 

@@ -36,9 +36,9 @@ export default async function SignupPage({
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-6 py-16 text-zinc-950">
+    <main className="flex min-h-screen items-center justify-center bg-[var(--app-bg)] px-6 py-16 text-[var(--ink)]">
       <AuthFormShell
-        description="Create your account, verify your email, and continue to onboarding."
+        description="Create your account to continue into Mentor And I."
         footerLink={{
           href: buildLoginPath(redirectPath),
           label: "Log in",
@@ -46,9 +46,8 @@ export default async function SignupPage({
         }}
         title="Create your account"
       >
-        <div className="rounded-lg border border-sky-200 bg-sky-50 p-4 text-sm leading-6 text-sky-950">
-          After signup, check your inbox for the verification link. It will
-          bring you back to Mentor And I and continue to your first step.
+        <div className="rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--band)] p-4 text-sm leading-6 text-[var(--ink-muted)]">
+          After signup, use the verification link in your inbox to continue.
         </div>
         <SignupForm redirectPath={redirectPath} />
       </AuthFormShell>

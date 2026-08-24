@@ -14,6 +14,13 @@ export const metadata: Metadata = {
   description: "Continue your conversation with your Mentor And I mentor.",
 };
 
+const appLinks = [
+  { href: "/mentor", label: "Mentor" },
+  { href: "/mentors", label: "Mentors" },
+  { href: "/credits", label: "Credits" },
+  { href: "/settings", label: "Settings" },
+];
+
 export default async function MentorPage({
   searchParams,
 }: {
@@ -25,16 +32,9 @@ export default async function MentorPage({
     getActiveMentorProfile("life");
 
   return (
-    <main className="min-h-screen bg-zinc-50 py-6 text-zinc-950 sm:py-10">
-      <Container className="max-w-6xl">
-        <AccountNavigation
-          links={[
-            { href: "/mentor", label: "Mentor" },
-            { href: "/mentors", label: "Specializations" },
-            { href: "/feedback?context=%2Fmentor", label: "Feedback" },
-            { href: "/settings", label: "Settings" },
-          ]}
-        />
+    <main className="min-h-screen bg-[var(--app-bg)] py-4 text-[var(--ink)] sm:py-6">
+      <Container className="max-w-7xl">
+        <AccountNavigation links={appLinks} />
         <MentorConversationClient
           key={selectedMentor?.slug ?? "life"}
           selectedMentor={{

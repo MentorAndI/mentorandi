@@ -11,9 +11,10 @@ export interface CardProps {
 }
 
 const variantClasses: Record<CardVariant, string> = {
-  default: "bg-white",
-  bordered: "border border-zinc-200 bg-white",
-  elevated: "border border-zinc-100 bg-white shadow-sm shadow-zinc-200/70",
+  default: "bg-[var(--surface)]",
+  bordered: "border border-[var(--line)] bg-[var(--surface)]",
+  elevated:
+    "border border-[var(--line)] bg-[var(--surface-raised)] shadow-[var(--shadow-md)]",
 };
 
 export function Card({
@@ -22,7 +23,13 @@ export function Card({
   variant = "default",
 }: CardProps) {
   return (
-    <div className={cn("rounded-lg p-6", variantClasses[variant], className)}>
+    <div
+      className={cn(
+        "rounded-[var(--r-lg)] p-6 text-[var(--ink)]",
+        variantClasses[variant],
+        className,
+      )}
+    >
       {children}
     </div>
   );

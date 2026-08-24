@@ -10,10 +10,10 @@ export interface HeadingProps extends HTMLAttributes<HTMLHeadingElement> {
 }
 
 const levelClasses: Record<HeadingLevel, string> = {
-  1: "text-4xl font-semibold tracking-tight text-zinc-950 sm:text-5xl",
-  2: "text-3xl font-semibold tracking-tight text-zinc-950 sm:text-4xl",
-  3: "text-2xl font-semibold tracking-tight text-zinc-950",
-  4: "text-xl font-semibold tracking-tight text-zinc-950",
+  1: "text-4xl font-semibold tracking-tight text-[var(--ink)] sm:text-5xl",
+  2: "text-3xl font-semibold tracking-tight text-[var(--ink)] sm:text-4xl",
+  3: "text-2xl font-semibold tracking-tight text-[var(--ink)]",
+  4: "text-xl font-semibold tracking-tight text-[var(--ink)]",
 };
 
 export function Heading({

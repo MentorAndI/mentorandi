@@ -27,7 +27,7 @@ export function MentorMessageForm({
   return (
     <form
       aria-busy={isSending}
-      className="space-y-4 border-t border-zinc-200 pt-5"
+      className="space-y-4 border-t border-[var(--line)] pt-5"
       onSubmit={onSubmit}
     >
       <Textarea
@@ -37,13 +37,13 @@ export function MentorMessageForm({
         onChange={(event) => onMessageChange(event.target.value)}
         placeholder="Share what is on your mind. A decision, a pattern, a goal, or just the thing you keep returning to."
         rows={5}
-        textareaClassName="resize-y rounded-xl border-zinc-300 px-4 py-4 text-base leading-7"
+        textareaClassName="resize-y rounded-[var(--r-xl)] px-4 py-4 text-base leading-7 shadow-[var(--shadow-md)]"
         value={message}
       />
 
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {isSending ? (
-          <p className="text-sm text-zinc-500" role="status">
+          <p className="text-sm text-[var(--ink-faint)]" role="status">
             {mentorName} is taking a moment with this.
           </p>
         ) : (
