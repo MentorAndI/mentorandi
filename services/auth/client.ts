@@ -18,16 +18,18 @@ export async function signInWithEmailPassword({
 }
 
 export interface SignupCredentials extends EmailPasswordCredentials {
+  ageConfirmed: boolean;
   nextPath?: string;
 }
 
 export async function signUpWithEmailPassword({
+  ageConfirmed,
   email,
   nextPath,
   password,
 }: SignupCredentials) {
   const response = await fetch("/api/auth/signup", {
-    body: JSON.stringify({ email, nextPath, password }),
+    body: JSON.stringify({ ageConfirmed, email, nextPath, password }),
     headers: {
       Accept: "application/json",
       "Content-Type": "application/json",
