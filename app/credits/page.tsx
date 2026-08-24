@@ -14,9 +14,16 @@ import { UserService } from "@/services/user/user.service";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Mentor Credits | Mentor And I",
+  title: "Credits | Mentor And I",
   description: "View and purchase Mentor And I service usage credits.",
 };
+
+const appLinks = [
+  { href: "/mentor", label: "Mentor" },
+  { href: "/mentors", label: "Mentors" },
+  { href: "/credits", label: "Credits" },
+  { href: "/settings", label: "Settings" },
+];
 
 export default async function CreditsPage({
   searchParams,
@@ -34,19 +41,20 @@ export default async function CreditsPage({
     topup === "returned" || topup === "canceled" ? topup : undefined;
 
   return (
-    <main className="min-h-screen bg-zinc-50 py-10 text-zinc-950">
-      <Container className="max-w-5xl">
-        <AccountNavigation
-          links={[
-            { href: "/mentor", label: "Back to Mentor" },
-            { href: "/settings", label: "Settings" },
-          ]}
-        />
-        <div className="mb-8 max-w-2xl space-y-3">
-          <Heading level={1}>Mentor Credits</Heading>
-          <Text>
-            See how your plan and purchased top-up credits contribute to your
-            current balance.
+    <main className="min-h-screen bg-[var(--app-bg)] py-4 text-[var(--ink)] sm:py-6">
+      <Container className="max-w-6xl">
+        <AccountNavigation links={appLinks} />
+
+        <div className="mb-8 max-w-2xl">
+          <p className="font-meta text-[0.7rem] text-[var(--terra-text)]">
+            ACCOUNT BALANCE
+          </p>
+          <Heading className="mt-2" level={1}>
+            Credits
+          </Heading>
+          <Text className="mt-3 leading-7">
+            Plan credits are used first. Purchased top-up credits stay in your
+            account until you use them.
           </Text>
         </div>
 
