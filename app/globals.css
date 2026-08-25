@@ -24,6 +24,16 @@
   --on-terra: #fbf3ec;
   --ring: #9e4a2c;
 
+  /* Canonical mentor hues — copied from mentorandi.com handoff. */
+  --mentor-life: #bc5b38;
+  --mentor-adhd: #c68a38;
+  --mentor-relationship: #b0654f;
+  --mentor-parenting: #9a7b3a;
+  --mentor-stress-burnout: #a0637a;
+  --mentor-health-fitness: #b58a2e;
+  --mentor-focus: #c56b47;
+  --mentor-charisma: #8e6e52;
+
   /* Semantic */
   --success: #487153;
   --warning: #87611f;
@@ -82,6 +92,15 @@
   --font-sans: var(--font-hanken);
   --font-serif: var(--font-newsreader);
   --font-mono: var(--font-space-mono);
+
+  --color-mentor-life: var(--mentor-life);
+  --color-mentor-adhd: var(--mentor-adhd);
+  --color-mentor-relationship: var(--mentor-relationship);
+  --color-mentor-parenting: var(--mentor-parenting);
+  --color-mentor-stress-burnout: var(--mentor-stress-burnout);
+  --color-mentor-health-fitness: var(--mentor-health-fitness);
+  --color-mentor-focus: var(--mentor-focus);
+  --color-mentor-charisma: var(--mentor-charisma);
 
   /* Compatibility bridge for existing Tailwind UI while it migrates to semantic tokens. */
   --color-white: var(--surface-raised);
@@ -149,4 +168,33 @@ select {
 .font-meta {
   font-family: var(--font-space-mono), ui-monospace, monospace;
   letter-spacing: 0.04em;
+}
+
+/* Mentor cards mirror the marketing-site hue treatment. Set --h on each card. */
+.mentor-card {
+  background: linear-gradient(
+    168deg,
+    color-mix(in srgb, var(--h, var(--terra)) 9%, var(--surface-raised)),
+    var(--surface)
+  );
+  border-color: color-mix(in srgb, var(--h, var(--terra)) 24%, var(--line));
+  border-radius: 18px;
+  transition:
+    transform 0.4s var(--ease),
+    border-color 0.4s var(--ease);
+}
+
+.mentor-card:hover {
+  border-color: color-mix(in srgb, var(--h, var(--terra)) 45%, var(--line));
+  transform: translateY(-3px);
+}
+
+.mentor-role-label {
+  color: color-mix(in srgb, var(--h, var(--terra)) 58%, var(--ink));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mentor-card {
+    transition: none;
+  }
 }
