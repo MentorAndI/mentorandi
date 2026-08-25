@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import type { CSSProperties } from "react";
 
 import { AccountNavigation } from "@/components/auth/AccountNavigation";
 import { Container } from "@/components/layout/Container";
@@ -44,58 +45,67 @@ export default function MentorsPage() {
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {activeMentorProfiles.map((mentor) => (
-            <Card
-              className="group flex h-full flex-col overflow-hidden p-0"
+            <div
+              className="h-full"
               key={mentor.slug}
-              variant="bordered"
+              style={
+                {
+                  "--h": `var(--mentor-${mentor.slug})`,
+                } as CSSProperties
+              }
             >
-              <MentorPortrait
-                className="relative h-48 w-full overflow-hidden border-b border-[var(--line)]"
-                name={mentor.personaName}
-                portraitSrc={mentor.portraitSrc}
-              />
+              <Card
+                className="mentor-card group flex h-full flex-col overflow-hidden p-0"
+                variant="bordered"
+              >
+                <MentorPortrait
+                  className="relative h-48 w-full overflow-hidden border-b border-[var(--line)]"
+                  name={mentor.personaName}
+                  portraitSrc={mentor.portraitSrc}
+                />
 
-              <div className="flex flex-1 flex-col p-5">
-                <div>
-                  <Heading level={3}>{mentor.personaName}</Heading>
-                  <p className="mt-1 text-sm font-semibold text-[var(--terra-text)]">
-                    {mentor.name}
-                  </p>
-                  <Text className="mt-3 leading-6" variant="small">
-                    {mentor.shortDescription}
-                  </Text>
-                </div>
+                <div className="flex flex-1 flex-col p-5">
+                  <div>
+                    <Heading level={3}>{mentor.personaName}</Heading>
+                    <p className="mentor-role-label mt-1 text-sm font-semibold">
+                      {mentor.name}
+                    </p>
+                    <Text className="mt-3 leading-6" variant="small">
+                      {mentor.shortDescription}
+                    </Text>
+                  </div>
 
-                <ul
-                  aria-label={`${mentor.cardName} focus areas`}
-                  className="mt-4 flex flex-wrap gap-1.5"
-                >
-                  {mentor.cardTags.slice(0, 3).map((item) => (
-                    <li
-                      className="rounded-[var(--r-pill)] bg-[var(--band)] px-2.5 py-1 text-xs text-[var(--ink-muted)]"
-                      key={item}
+                  <ul
+                    aria-label={`${mentor.cardName} focus areas`}
+                    className="mt-4 flex flex-wrap gap-1.5"
+                  >
+                    {mentor.cardTags.slice(0, 3).map((item) => (
+                      <li
+                        className="rounded-[var(--r-pill)] bg-[var(--band)] px-2.5 py-1 text-xs text-[var(--ink-muted)]"
+                        key={item}
+                      >
+                        {item}
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-auto flex items-center justify-between gap-3 pt-5">
+                    <Link
+                      className="text-sm font-semibold text-[var(--ink-muted)] underline decoration-[var(--line-strong)] underline-offset-4 transition hover:text-[var(--ink)]"
+                      href={`/mentors/${mentor.slug}`}
                     >
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="mt-auto flex items-center justify-between gap-3 pt-5">
-                  <Link
-                    className="text-sm font-semibold text-[var(--ink-muted)] underline decoration-[var(--line-strong)] underline-offset-4 transition hover:text-[var(--ink)]"
-                    href={`/mentors/${mentor.slug}`}
-                  >
-                    Profile
-                  </Link>
-                  <Link
-                    className="inline-flex h-10 items-center justify-center rounded-[var(--r-md)] bg-[var(--terra-hover)] px-4 text-sm font-semibold text-[var(--on-terra)] transition hover:bg-[var(--terra-press)]"
-                    href={`/start?mentor=${mentor.slug}`}
-                  >
-                    Choose {mentor.personaName}
-                  </Link>
+                      Profile
+                    </Link>
+                    <Link
+                      className="inline-flex h-10 items-center justify-center rounded-[var(--r-md)] bg-[var(--terra-hover)] px-4 text-sm font-semibold text-[var(--on-terra)] transition hover:bg-[var(--terra-press)]"
+                      href={`/start?mentor=${mentor.slug}`}
+                    >
+                      Choose {mentor.personaName}
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            </Card>
+              </Card>
+            </div>
           ))}
         </div>
       </Container>
