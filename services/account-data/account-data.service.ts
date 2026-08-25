@@ -31,6 +31,7 @@ export class AccountDataService {
       goals: data.goals,
       journalEntries: data.journalEntries,
       memories: data.memories,
+      mentorNotes: data.mentorNotes,
       messages: data.messages,
       reflections: data.reflections,
       subscription: data.subscription,

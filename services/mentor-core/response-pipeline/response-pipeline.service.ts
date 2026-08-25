@@ -58,6 +58,9 @@ import {
 } from "@/services/mentor-catalog/mentor-catalog";
 import { MentorSpecialistContextService } from "@/services/mentor-specialization/specialist-context.service";
 import { normalizeMentorResponseFormatting } from "@/services/mentor-core/response-formatting/mentor-response-formatting";
+import { MentorNoteService } from "@/services/mentor-notes/mentor-note.service";
+import { parseMentorResponseForNote } from "@/services/mentor-notes/mentor-note-parser";
+import type { MentorNoteCandidate } from "@/services/mentor-notes/mentor-note.types";
 
 const minimumMemoryConfidence = 0.6;
 const minimumMemoryImportance = 3;
@@ -84,6 +87,7 @@ export class MentorResponsePipelineService {
     private readonly goalService = new GoalService(),
     private readonly memoryExtractor = new MemoryExtractorService(),
     private readonly memoryService = new MemoryService(),
+    private readonly mentorNoteService = new MentorNoteService(),
     private readonly reflectionEngine = new ReflectionEngineService(),
     private readonly reflectionService = new ReflectionService(),
     private readonly userService = new UserService(),
@@ -153,14 +157,21 @@ export class MentorResponsePipelineService {
         userMessage: promptPackage.userPrompt,
       });
 
+      const parsedMentorResponse = parseMentorResponseForNote(llmResponse.content);
       const mentorMessage = await this.messageService.createMessage(
         input.conversationId,
         {
-          content: normalizeMentorResponseFormatting(llmResponse.content),
+          content: normalizeMentorResponseFormatting(parsedMentorResponse.content),
           role: MessageRole.MENTOR,
         },
         authContext,
       );
+      await this.storeMentorNoteIfPresent({
+        candidate: parsedMentorResponse.note,
+        conversationId: input.conversationId,
+        mentorId: context.mentor.id,
+        userId: input.userId,
+      });
       const memoryStorageResult = await this.extractAndStoreMemories(input);
       const createdReflection = await this.createReflectionForMoment(
         input,
@@ -357,6 +368,28 @@ export class MentorResponsePipelineService {
       skippedDuplicateMemories,
       updatedMemories,
     };
+  }
+
+  private async storeMentorNoteIfPresent(input: {
+    candidate: MentorNoteCandidate | null;
+    conversationId: string;
+    mentorId: string;
+    userId: string;
+  }) {
+    if (!input.candidate) {
+      return;
+    }
+
+    try {
+      await this.mentorNoteService.createFromMentorResponse({
+        candidate: input.candidate,
+        conversationId: input.conversationId,
+        mentorId: input.mentorId,
+        userId: input.userId,
+      });
+    } catch {
+      // Mentor notes are useful follow-up material, but must never block the conversation.
+    }
   }
 
   private async createReflectionForMoment(

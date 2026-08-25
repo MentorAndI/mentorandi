@@ -28,7 +28,8 @@
     "prisma": "prisma",
     "db:seed": "prisma generate && jiti prisma/seed.ts",
     "import:mentor-specialization": "prisma generate && jiti scripts/import-mentor-specialization.ts",
-    "test:mentor-specialization": "prisma generate && jiti tests/mentor-specialization/mentor-specialist-runtime.test.ts"
+    "test:mentor-specialization": "prisma generate && jiti tests/mentor-specialization/mentor-specialist-runtime.test.ts",
+    "test:mentor-notes": "node scripts/run-mentor-notes-test.mjs"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
