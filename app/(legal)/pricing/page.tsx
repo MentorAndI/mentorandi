@@ -63,7 +63,7 @@ const plans = [
 
 export default function PricingPage() {
   return (
-    <main className="min-h-screen bg-[var(--bg)] py-10 text-[var(--ink)] sm:py-14">
+    <main className="min-h-screen bg-[var(--app-bg)] py-10 text-[var(--ink)] sm:py-14">
       <Container>
         <div className="mx-auto max-w-6xl">
           <div className="max-w-2xl">
@@ -84,7 +84,7 @@ export default function PricingPage() {
 
               return (
                 <section
-                  className={`flex min-h-full rounded-[var(--r-card)] border p-6 shadow-[var(--shadow-soft)] ${
+                  className={`flex min-h-full rounded-[var(--r-xl)] border p-6 shadow-[var(--shadow-sm)] ${
                     isPremium
                       ? "border-[color-mix(in_srgb,var(--terra)_55%,var(--line))] bg-[color-mix(in_srgb,var(--terra)_5%,var(--surface-raised))]"
                       : "border-[var(--line)] bg-[var(--surface-raised)]"
@@ -124,7 +124,7 @@ export default function PricingPage() {
 
                     <div className="mt-auto pt-2">
                       <Link
-                        className={`block rounded-[var(--r-control)] px-4 py-3 text-center text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-raised)] ${
+                        className={`block rounded-[var(--r-md)] px-4 py-3 text-center text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--surface-raised)] ${
                           isPremium || plan.plan === "free"
                             ? "bg-[var(--terra)] text-[var(--on-terra)] hover:bg-[var(--terra-hover)]"
                             : "border border-[var(--line-strong)] bg-[var(--surface-raised)] text-[var(--ink)] hover:bg-[var(--band)]"
