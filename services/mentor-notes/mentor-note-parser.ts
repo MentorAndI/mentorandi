@@ -1,8 +1,8 @@
 import type {
   MentorNoteCandidate,
   MentorNoteType,
-} from "@/services/mentor-notes/mentor-note.types";
-import { mentorNoteTypes } from "@/services/mentor-notes/mentor-note.types";
+} from "./mentor-note.types";
+import { mentorNoteTypes } from "./mentor-note.types";
 
 const mentorNotePattern = /\s*<mentor_note>([\s\S]*?)<\/mentor_note>\s*$/i;
 const strayMentorNotePattern = /\s*<mentor_note>[\s\S]*?<\/mentor_note>\s*/gi;
