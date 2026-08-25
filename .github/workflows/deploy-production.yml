@@ -131,7 +131,8 @@ jobs:
           elif [[ "$JOB_STATUS" == "failure" ]]; then
             state="failure"
           fi
-          payload="$(printf '{\"state\":\"%s\",\"context\":\"production-deploy\",\"description\":\"Production deploy %s\"}' "$state" "$JOB_STATUS")"
+          run_url="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          payload="$(printf '{\"state\":\"%s\",\"context\":\"production-deploy\",\"description\":\"Production deploy %s\",\"target_url\":\"%s\"}' "$state" "$JOB_STATUS" "$run_url")"
           curl --fail --silent --show-error \
             -X POST \
             -H "Accept: application/vnd.github+json" \
