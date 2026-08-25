@@ -140,7 +140,7 @@ test("production runtime is identified from APP_URL rather than proxy hostname",
   assert.equal(isProductionAppRuntime("https://staging.mentorandi.com"), false);
   assert.equal(isProductionAppRuntime("http://app.mentorandi.com"), false);
   assert.equal(isProductionAppRuntime("not-a-url"), false);
-  assert.equal(isProductionAppRuntime(undefined), false);
+  assert.equal(isProductionAppRuntime(""), false);
 });
 
 test("development bypass never includes onboarding, feedback, or admin", () => {
