@@ -1,6 +1,10 @@
 name: Deploy production
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/deploy-production.yml"
   workflow_dispatch:
     inputs:
       skip_health_check:
