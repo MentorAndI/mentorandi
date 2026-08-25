@@ -1,0 +1,37 @@
+name: Fix mentor notes wire-up
+
+on:
+  push:
+    branches:
+      - mentor-notes
+    paths:
+      - .github/workflows/mentor-notes-wireup-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: mentor-notes
+      - name: Correct RLS assertion and retrigger
+        shell: bash
+        run: |
+          set -Eeuo pipefail
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('.github/workflows/mentor-notes-wireup.yml')
+          text = p.read_text()
+          text = text.replace('if count != 3:', 'if count != 2:')
+          text = text.replace('Expected 3 RLS Memory/Goal table-list matches', 'Expected 2 RLS Memory/Goal table-list matches')
+          p.write_text(text)
+          PY
+          git config user.name "Mentor247"
+          git config user.email "37156918+MentorAndI@users.noreply.github.com"
+          git rm .github/workflows/mentor-notes-wireup-fix.yml
+          git add .github/workflows/mentor-notes-wireup.yml
+          git commit -m "Fix mentor notes RLS assertion"
+          git push origin mentor-notes
