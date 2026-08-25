@@ -1,0 +1,6 @@
+alpha -> https://app.mentorandi.com/login
+demo -> https://app.mentorandi.com/login
+match -> https://app.mentorandi.com/login
+reflection -> https://app.mentorandi.com/login
+welcome -> https://app.mentorandi.com/login
+result=PASS
