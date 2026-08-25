@@ -427,7 +427,7 @@ model UsageEvent {
   status                   UsageEventStatus
   errorCode                String?
   specialistPackSlug       String?          @db.VarChar(64)
-  specialistPackName       String?          @db.VarChar(64)
+  specialistPackName       String?
   specialistPackVersion    String?          @db.VarChar(32)
   selectedTechniqueSlugs   String[]         @default([])
   selectedTechniqueTitles  String[]         @default([])

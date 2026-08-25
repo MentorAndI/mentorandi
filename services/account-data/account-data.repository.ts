@@ -9,6 +9,7 @@ export class AccountDataRepository {
       conversations,
       messages,
       memories,
+      mentorNotes,
       goals,
       reflections,
       journalEntries,
@@ -52,6 +53,11 @@ export class AccountDataRepository {
         orderBy: {
           createdAt: "asc",
         },
+        where: { userId },
+      }),
+      this.prisma.mentorNote.findMany({
+        include: { mentor: { select: { name: true, slug: true } } },
+        orderBy: { createdAt: "asc" },
         where: { userId },
       }),
       this.prisma.goal.findMany({
@@ -106,6 +112,7 @@ export class AccountDataRepository {
       goals,
       journalEntries,
       memories,
+      mentorNotes,
       messages,
       reflections,
       subscription,
@@ -123,6 +130,9 @@ export class AccountDataRepository {
         where: { userId },
       });
       const deletedUsageEvents = await transaction.usageEvent.deleteMany({
+        where: { userId },
+      });
+      const deletedMentorNotes = await transaction.mentorNote.deleteMany({
         where: { userId },
       });
       const deletedMessages = await transaction.message.deleteMany({
@@ -159,6 +169,7 @@ export class AccountDataRepository {
         deletedGoals: deletedGoals.count,
         deletedJournalEntries: deletedJournalEntries.count,
         deletedMemories: deletedMemories.count,
+        deletedMentorNotes: deletedMentorNotes.count,
         deletedMessages: deletedMessages.count,
         deletedReflections: deletedReflections.count,
         deletedUsageEvents: deletedUsageEvents.count,

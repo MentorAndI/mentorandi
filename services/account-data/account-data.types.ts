@@ -11,6 +11,7 @@ export interface AccountDataDeleteCounts {
   deletedGoals: number;
   deletedJournalEntries: number;
   deletedMemories: number;
+  deletedMentorNotes: number;
   deletedMessages: number;
   deletedReflections: number;
   deletedUsageEvents: number;
