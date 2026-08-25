@@ -4,13 +4,14 @@ import { NextResponse, type NextRequest } from "next/server";
 import { getSupabasePublicConfig } from "@/lib/supabase/config";
 import {
   isDevelopmentProtectedRouteBypass,
+  isProductionAppRuntime,
   isProductionHiddenLegacyRoute,
   isProtectedAuthRoute,
 } from "@/services/auth/routes";
 
 export async function proxy(request: NextRequest) {
   if (
-    request.nextUrl.hostname.toLowerCase() === "app.mentorandi.com" &&
+    isProductionAppRuntime() &&
     isProductionHiddenLegacyRoute(request.nextUrl.pathname)
   ) {
     const redirectUrl = request.nextUrl.clone();
