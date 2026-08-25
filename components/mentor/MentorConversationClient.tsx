@@ -9,23 +9,17 @@ import { MentorConversationList } from "@/components/mentor/MentorConversationLi
 import { MentorGoalPanel } from "@/components/mentor/MentorGoalPanel";
 import { MentorHeader } from "@/components/mentor/MentorHeader";
 import { MentorMessageForm } from "@/components/mentor/MentorMessageForm";
-import { MentorMemoryPanel } from "@/components/mentor/MentorMemoryPanel";
 import type {
   MentorApiError,
   MentorConversationMessage,
   MentorConversationSummary,
   MentorGoal,
-  MentorMemory,
   MentorSession,
 } from "@/components/mentor/mentor-conversation.types";
 import { Card } from "@/components/ui/Card";
 
 interface MentorMessagesResponse {
   messages: MentorConversationMessage[];
-}
-
-interface MentorMemoriesResponse {
-  understandings: MentorMemory[];
 }
 
 interface MentorNewConversationResponse {
@@ -74,13 +68,11 @@ export function MentorConversationClient({
   const [errorMessage, setErrorMessage] = useState("");
   const [upgradeMessage, setUpgradeMessage] = useState("");
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
-  const [isLoadingMemories, setIsLoadingMemories] = useState(false);
   const [isLoadingSession, setIsLoadingSession] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [isStartingNewConversation, setIsStartingNewConversation] =
     useState(false);
   const [goals, setGoals] = useState<MentorGoal[]>([]);
-  const [memories, setMemories] = useState<MentorMemory[]>([]);
   const [messages, setMessages] = useState<MentorConversationMessage[]>([]);
   const [message, setMessage] = useState("");
   const [messageError, setMessageError] = useState("");
@@ -165,28 +157,6 @@ export function MentorConversationClient({
     }
   }
 
-  async function loadMemories() {
-    setIsLoadingMemories(true);
-
-    try {
-      const response = await fetch("/api/memories");
-      const responseBody = (await response.json()) as
-        | MentorMemoriesResponse
-        | MentorApiError;
-
-      if (!response.ok) {
-        setErrorMessage(formatErrorResponse(responseBody as MentorApiError));
-        return;
-      }
-
-      setMemories((responseBody as MentorMemoriesResponse).understandings);
-    } catch {
-      setErrorMessage("Unable to load memories.");
-    } finally {
-      setIsLoadingMemories(false);
-    }
-  }
-
   async function loadCredits(signal?: AbortSignal) {
     try {
       const response = await fetch("/api/credits", { signal });
@@ -228,7 +198,6 @@ export function MentorConversationClient({
               signal: controller.signal,
               shouldCommit: () => isActive,
             }),
-            loadMemories(),
             loadCredits(controller.signal),
           ]);
         }
@@ -311,7 +280,6 @@ export function MentorConversationClient({
 
       await Promise.all([
         loadConversationHistory(nextConversationId),
-        loadMemories(),
         refreshMentorSessionList(),
       ]);
     } catch {
@@ -354,7 +322,7 @@ export function MentorConversationClient({
       setMessage("");
       setMessages([]);
 
-      await Promise.all([loadMemories(), refreshMentorSessionList()]);
+      await refreshMentorSessionList();
     } catch {
       setErrorMessage("Unable to start a new conversation.");
     } finally {
@@ -468,13 +436,6 @@ export function MentorConversationClient({
           <MentorGoalPanel
             goals={goals}
             isLoading={isLoadingSession || isSending}
-          />
-        </Card>
-
-        <Card className="p-5 sm:p-6" variant="bordered">
-          <MentorMemoryPanel
-            isLoading={isLoadingMemories}
-            memories={memories}
           />
         </Card>
       </div>
