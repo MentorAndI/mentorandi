@@ -36,3 +36,19 @@ FOREIGN KEY ("mentorId") REFERENCES "Mentor"("id") ON DELETE RESTRICT ON UPDATE 
 ALTER TABLE "MentorNote"
 ADD CONSTRAINT "MentorNote_conversationId_fkey"
 FOREIGN KEY ("conversationId") REFERENCES "Conversation"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- MentorAndI application data is server-only. Protect this new table at creation
+-- time so a deployment never leaves it browser-readable between migration and
+-- any later security-hardening pass.
+ALTER TABLE "MentorNote" ENABLE ROW LEVEL SECURITY;
+
+DO $$
+BEGIN
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+    REVOKE ALL ON TABLE "MentorNote" FROM anon;
+  END IF;
+
+  IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+    REVOKE ALL ON TABLE "MentorNote" FROM authenticated;
+  END IF;
+END $$;
