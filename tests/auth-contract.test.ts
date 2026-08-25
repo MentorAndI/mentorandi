@@ -14,6 +14,7 @@ import {
 } from "@/services/billing/purchase-flow";
 import {
   isDevelopmentProtectedRouteBypass,
+  isProductionAppRuntime,
   isProductionHiddenLegacyRoute,
   isProtectedAuthRoute,
 } from "@/services/auth/routes";
@@ -131,6 +132,15 @@ test("legacy prototype routes are hidden from the production app host", () => {
   for (const route of ["/", "/login", "/pricing", "/privacy", "/terms", "/mentors"]) {
     assert.equal(isProductionHiddenLegacyRoute(route), false, route);
   }
+});
+
+test("production runtime is identified from APP_URL rather than proxy hostname", () => {
+  assert.equal(isProductionAppRuntime("https://app.mentorandi.com"), true);
+  assert.equal(isProductionAppRuntime("https://app.mentorandi.com/"), true);
+  assert.equal(isProductionAppRuntime("https://staging.mentorandi.com"), false);
+  assert.equal(isProductionAppRuntime("http://app.mentorandi.com"), false);
+  assert.equal(isProductionAppRuntime("not-a-url"), false);
+  assert.equal(isProductionAppRuntime(""), false);
 });
 
 test("development bypass never includes onboarding, feedback, or admin", () => {

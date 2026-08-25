@@ -28,6 +28,22 @@ export function isProductionHiddenLegacyRoute(pathname: string) {
   );
 }
 
+export function isProductionAppRuntime(appUrl = process.env.APP_URL) {
+  if (!appUrl) {
+    return false;
+  }
+
+  try {
+    const url = new URL(appUrl);
+    return (
+      url.protocol === "https:" &&
+      url.hostname.toLowerCase() === "app.mentorandi.com"
+    );
+  } catch {
+    return false;
+  }
+}
+
 export function isDevelopmentProtectedRouteBypass(pathname: string) {
   return (
     process.env.NODE_ENV !== "production" &&
