@@ -35,7 +35,7 @@ export interface SignupFormProps {
 }
 
 export function SignupForm({
-  redirectPath = "/onboarding",
+  redirectPath = "/start?mentor=life",
 }: SignupFormProps) {
   const router = useRouter();
   const [values, setValues] = useState<SignupFormValues>({
@@ -120,8 +120,8 @@ export function SignupForm({
               take a minute to arrive.
             </p>
             <p>
-              Clicking the confirmation link will log you in and take you to
-              your onboarding.
+              Clicking the confirmation link will log you in and take you
+              directly to Marcus, your Life Mentor.
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
