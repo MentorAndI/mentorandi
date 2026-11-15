@@ -49,12 +49,7 @@ export default async function FeedbackPage({
   return (
     <main className="min-h-screen bg-zinc-50 py-10 text-zinc-950">
       <Container className="max-w-3xl">
-        <AccountNavigation
-          links={[
-            { href: "/mentor", label: "Mentor" },
-            { href: "/settings", label: "Settings" },
-          ]}
-        />
+        <AccountNavigation />
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm sm:p-8">
           <div className="mb-7 space-y-3">
             <Heading level={1}>Share alpha feedback</Heading>

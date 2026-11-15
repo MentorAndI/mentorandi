@@ -19,13 +19,6 @@ export const metadata: Metadata = {
   description: "Manage your Mentor And I account and billing.",
 };
 
-const appLinks = [
-  { href: "/mentor", label: "Mentor" },
-  { href: "/mentors", label: "Mentors" },
-  { href: "/credits", label: "Credits" },
-  { href: "/settings", label: "Settings" },
-];
-
 export default async function SettingsPage({
   searchParams,
 }: {
@@ -38,7 +31,7 @@ export default async function SettingsPage({
   return (
     <main className="min-h-screen bg-[var(--app-bg)] py-4 text-[var(--ink)] sm:py-6">
       <Container className="max-w-6xl">
-        <AccountNavigation links={appLinks} />
+        <AccountNavigation />
 
         {billing === "success" ? (
           <div className="mb-6 rounded-[var(--r-md)] border border-[color-mix(in_srgb,var(--success)_35%,var(--line))] bg-[color-mix(in_srgb,var(--success)_9%,var(--surface))] px-4 py-3 text-sm text-[var(--ink)]">

@@ -17,13 +17,6 @@ export const metadata: Metadata = {
   description: "Continue your conversation with your Mentor And I mentor.",
 };
 
-const appLinks = [
-  { href: "/mentor", label: "Mentor" },
-  { href: "/mentors", label: "Mentors" },
-  { href: "/credits", label: "Credits" },
-  { href: "/settings", label: "Settings" },
-];
-
 export default async function MentorPage({
   searchParams,
 }: {
@@ -42,7 +35,7 @@ export default async function MentorPage({
   return (
     <main className="min-h-screen bg-[var(--app-bg)] py-4 text-[var(--ink)] sm:py-6">
       <Container className="max-w-7xl">
-        <AccountNavigation links={appLinks} />
+        <AccountNavigation />
         {isFreeTrial ? (
           <div className="mb-4 flex flex-col gap-2 rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--band)] px-4 py-3 text-sm leading-6 text-[var(--ink-muted)] sm:flex-row sm:items-center sm:justify-between">
             <span>
