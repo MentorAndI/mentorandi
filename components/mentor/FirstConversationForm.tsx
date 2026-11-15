@@ -6,6 +6,7 @@ import { type FormEvent, useId, useState } from "react";
 import { CharacterCounter } from "@/components/mentor/CharacterCounter";
 import { Button } from "@/components/ui/Button";
 import { Textarea } from "@/components/ui/Textarea";
+import { getActiveMentorProfile } from "@/services/mentor-catalog/mentor-catalog";
 
 export interface FirstConversationFormProps {
   characterLimit?: number;
@@ -24,9 +25,12 @@ export function FirstConversationForm({
   const authPromptId = `${textareaId}-auth-prompt`;
   const [errorMessage, setErrorMessage] = useState("");
   const [requiresAuth, setRequiresAuth] = useState(false);
+  const [requiresUpgrade, setRequiresUpgrade] = useState(false);
   const [reflection, setReflection] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const startPath = `/start?mentor=${encodeURIComponent(mentorSlug)}`;
+  const mentorName =
+    getActiveMentorProfile(mentorSlug)?.personaName ?? "your mentor";
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,6 +39,7 @@ export function FirstConversationForm({
 
     setErrorMessage("");
     setRequiresAuth(false);
+    setRequiresUpgrade(false);
 
     if (!trimmedReflection) {
       setErrorMessage("Please write a few words before continuing.");
@@ -57,6 +62,7 @@ export function FirstConversationForm({
       const responseBody = (await response.json()) as {
         error?: string;
         errors?: Record<string, string>;
+        upgradeMessage?: string;
       };
 
       if (!response.ok) {
@@ -68,6 +74,10 @@ export function FirstConversationForm({
               : "Create an account to save your first mentor conversation.",
           );
           return;
+        }
+
+        if (response.status === 403 && responseBody.upgradeMessage) {
+          setRequiresUpgrade(true);
         }
 
         setErrorMessage(
@@ -116,6 +126,10 @@ export function FirstConversationForm({
           if (requiresAuth) {
             setRequiresAuth(false);
           }
+
+          if (requiresUpgrade) {
+            setRequiresUpgrade(false);
+          }
         }}
         placeholder="Write whatever feels true right now."
         textareaClassName="min-h-48 resize-y rounded-xl border-zinc-300 px-4 py-4 text-base leading-7"
@@ -126,7 +140,7 @@ export function FirstConversationForm({
           <CharacterCounter current={reflection.length} max={characterLimit} />
           {isSubmitting ? (
             <p className="text-sm text-zinc-500" role="status">
-              Starting your conversation with Marcus...
+              Starting your conversation with {mentorName}...
             </p>
           ) : null}
           {requiresAuth ? (
@@ -145,6 +159,13 @@ export function FirstConversationForm({
                 variant="secondary"
               >
                 Login
+              </Button>
+            </div>
+          ) : null}
+          {requiresUpgrade ? (
+            <div className="pt-2">
+              <Button href="/pricing" size="sm">
+                View plans
               </Button>
             </div>
           ) : null}
@@ -169,6 +190,7 @@ function formatFirstConversationError(
   responseBody: {
     error?: string;
     errors?: Record<string, string>;
+    upgradeMessage?: string;
   },
 ) {
   if (responseBody.errors) {
@@ -177,6 +199,16 @@ function formatFirstConversationError(
 
   if (status === 401) {
     return "Please log in before continuing.";
+  }
+
+  if (status === 403 && responseBody.upgradeMessage) {
+    return [responseBody.error, responseBody.upgradeMessage]
+      .filter(Boolean)
+      .join(" ");
+  }
+
+  if (responseBody.error) {
+    return responseBody.error;
   }
 
   return "We had trouble starting the conversation. Try again.";
