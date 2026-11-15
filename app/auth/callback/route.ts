@@ -2,6 +2,7 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { ConversationService } from "@/services/conversation/conversation.service";
 import {
   getPublicAppOrigin,
   normalizeSafeAuthNextPath,
@@ -25,7 +26,6 @@ export async function GET(request: Request) {
   const nextPath = normalizeSafeAuthNextPath(
     requestUrl.searchParams.get("next"),
   );
-  const redirectUrl = new URL(nextPath, publicAppOrigin);
   const errorUrl = new URL("/login", publicAppOrigin);
 
   errorUrl.searchParams.set("error", "auth_callback_failed");
@@ -43,9 +43,16 @@ export async function GET(request: Request) {
       return NextResponse.redirect(errorUrl);
     }
 
-    await new UserService().getOrCreateUserByAuthUserId(data.user.id);
+    const appUser =
+      await new UserService().getOrCreateUserByAuthUserId(data.user.id);
 
-    return NextResponse.redirect(redirectUrl);
+    return NextResponse.redirect(
+      await resolvePostConfirmationRedirect(
+        nextPath,
+        publicAppOrigin,
+        appUser.id,
+      ),
+    );
   }
 
   if (tokenHash && type) {
@@ -58,12 +65,38 @@ export async function GET(request: Request) {
       return NextResponse.redirect(errorUrl);
     }
 
-    await new UserService().getOrCreateUserByAuthUserId(data.user.id);
+    const appUser = await new UserService().getOrCreateUserByAuthUserId(data.user.id);
 
-    return NextResponse.redirect(redirectUrl);
+    return NextResponse.redirect(
+      await resolvePostConfirmationRedirect(
+        nextPath,
+        publicAppOrigin,
+        appUser.id,
+      ),
+    );
   }
 
   return NextResponse.redirect(errorUrl);
+}
+
+async function resolvePostConfirmationRedirect(
+  nextPath: string,
+  publicAppOrigin: string,
+  userId: string,
+) {
+  if (nextPath === "/mentors") {
+    const recentConversation =
+      (await new ConversationService().getRecentConversationsForUser(
+        userId,
+        1,
+      ))[0] ?? null;
+
+    if (!recentConversation) {
+      return new URL("/start?mentor=life", publicAppOrigin);
+    }
+  }
+
+  return new URL(nextPath, publicAppOrigin);
 }
 
 function parseOtpType(value: string | null): EmailOtpType | null {
