@@ -1,6 +1,11 @@
 name: Deploy production
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/DEPLOY_NOW"
   workflow_dispatch:
     inputs:
       skip_health_check:
