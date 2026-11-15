@@ -35,7 +35,7 @@ export interface SignupFormProps {
 }
 
 export function SignupForm({
-  redirectPath = "/start?mentor=life",
+  redirectPath = "/mentor?mentor=life",
 }: SignupFormProps) {
   const router = useRouter();
   const [values, setValues] = useState<SignupFormValues>({
@@ -117,11 +117,12 @@ export function SignupForm({
             <p>
               We sent the confirmation email to{" "}
               <span className="font-medium">{confirmationEmail}</span>. It may
-              take a minute to arrive.
+              take a minute to arrive. If it is not in your inbox, check your
+              spam or junk folder.
             </p>
             <p>
               Clicking the confirmation link will log you in and take you
-              directly to Marcus, your Life Mentor.
+              directly to Marcus in your Mentor workspace.
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -142,9 +143,27 @@ export function SignupForm({
       ) : null}
 
       {errors.form ? (
-        <AuthStatusMessage id="signup-form-error" variant="error">
-          {errors.form}
-        </AuthStatusMessage>
+        <div className="space-y-3">
+          <AuthStatusMessage id="signup-form-error" variant="error">
+            {errors.form}
+          </AuthStatusMessage>
+          {errors.form.startsWith("An account already exists") ? (
+            <div className="flex flex-wrap gap-3">
+              <Link
+                className="text-sm font-semibold text-[var(--terra-text)] underline underline-offset-4"
+                href={buildLoginPath(redirectPath)}
+              >
+                Log in
+              </Link>
+              <Link
+                className="text-sm font-semibold text-[var(--terra-text)] underline underline-offset-4"
+                href="/forgot-password"
+              >
+                Forgot password
+              </Link>
+            </div>
+          ) : null}
+        </div>
       ) : null}
 
       <Input
@@ -246,6 +265,14 @@ function formatSignupAuthError(message?: string) {
     /too many verification emails/i.test(safeMessage)
   ) {
     return "Too many verification emails have been requested. Please wait a few minutes and try again.";
+  }
+
+  if (
+    /already exists/i.test(safeMessage) ||
+    /already registered/i.test(safeMessage) ||
+    /user already registered/i.test(safeMessage)
+  ) {
+    return "An account already exists with this email. Log in instead, or use Forgot password if you do not remember the password.";
   }
 
   return `Signup failed: ${safeMessage}`;

@@ -57,7 +57,7 @@ test("paid plans resolve to payment confirmation details before mentor intake", 
 test("free signup has no Stripe checkout plan and defaults to Marcus", () => {
   assert.equal(getPaidPlanDetails(normalizeRequestedPlan("free")), null);
   assert.equal(normalizeRequestedPlan("unexpected"), "free");
-  assert.equal(normalizeSafeAuthNextPath(null), "/start?mentor=life");
+  assert.equal(normalizeSafeAuthNextPath(null), "/mentor?mentor=life");
 });
 
 test("signup requires affirmative 18 plus confirmation", () => {
@@ -89,14 +89,14 @@ test("signup requires affirmative 18 plus confirmation", () => {
 test("signup and callback redirects reject external and privileged destinations", () => {
   assert.equal(
     normalizeSafeAuthNextPath("https://example.com/mentor"),
-    "/start?mentor=life",
+    "/mentor?mentor=life",
   );
   assert.equal(
     normalizeSafeAuthNextPath("//example.com/mentor"),
-    "/start?mentor=life",
+    "/mentor?mentor=life",
   );
-  assert.equal(normalizeSafeAuthNextPath("/api/me"), "/start?mentor=life");
-  assert.equal(normalizeSafeAuthNextPath("/admin"), "/start?mentor=life");
+  assert.equal(normalizeSafeAuthNextPath("/api/me"), "/mentor?mentor=life");
+  assert.equal(normalizeSafeAuthNextPath("/admin"), "/mentor?mentor=life");
 });
 
 test("login redirects reject open redirects and auth loops", () => {

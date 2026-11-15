@@ -2,7 +2,6 @@ import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse } from "next/server";
 
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { ConversationService } from "@/services/conversation/conversation.service";
 import {
   getPublicAppOrigin,
   normalizeSafeAuthNextPath,
@@ -43,15 +42,10 @@ export async function GET(request: Request) {
       return NextResponse.redirect(errorUrl);
     }
 
-    const appUser =
-      await new UserService().getOrCreateUserByAuthUserId(data.user.id);
+    await new UserService().getOrCreateUserByAuthUserId(data.user.id);
 
     return NextResponse.redirect(
-      await resolvePostConfirmationRedirect(
-        nextPath,
-        publicAppOrigin,
-        appUser.id,
-      ),
+      resolvePostConfirmationRedirect(nextPath, publicAppOrigin),
     );
   }
 
@@ -65,35 +59,35 @@ export async function GET(request: Request) {
       return NextResponse.redirect(errorUrl);
     }
 
-    const appUser = await new UserService().getOrCreateUserByAuthUserId(data.user.id);
+    await new UserService().getOrCreateUserByAuthUserId(data.user.id);
 
     return NextResponse.redirect(
-      await resolvePostConfirmationRedirect(
-        nextPath,
-        publicAppOrigin,
-        appUser.id,
-      ),
+      resolvePostConfirmationRedirect(nextPath, publicAppOrigin),
     );
   }
 
   return NextResponse.redirect(errorUrl);
 }
 
-async function resolvePostConfirmationRedirect(
+function resolvePostConfirmationRedirect(
   nextPath: string,
   publicAppOrigin: string,
-  userId: string,
 ) {
-  if (nextPath === "/mentors") {
-    const recentConversation =
-      (await new ConversationService().getRecentConversationsForUser(
-        userId,
-        1,
-      ))[0] ?? null;
+  if (nextPath.startsWith("/start")) {
+    const legacyUrl = new URL(nextPath, "https://mentorandi.local");
+    const mentor = legacyUrl.searchParams.get("mentor") || "life";
 
-    if (!recentConversation) {
-      return new URL("/start?mentor=life", publicAppOrigin);
-    }
+    return new URL(
+      `/mentor?mentor=${encodeURIComponent(mentor)}`,
+      publicAppOrigin,
+    );
+  }
+
+  if (
+    nextPath === "/mentors" ||
+    nextPath === "/onboarding?plan=free"
+  ) {
+    return new URL("/mentor?mentor=life", publicAppOrigin);
   }
 
   return new URL(nextPath, publicAppOrigin);
