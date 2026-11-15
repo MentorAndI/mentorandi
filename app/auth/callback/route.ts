@@ -26,7 +26,6 @@ export async function GET(request: Request) {
   const nextPath = normalizeSafeAuthNextPath(
     requestUrl.searchParams.get("next"),
   );
-  const redirectUrl = new URL(nextPath, publicAppOrigin);
   const errorUrl = new URL("/login", publicAppOrigin);
 
   errorUrl.searchParams.set("error", "auth_callback_failed");
@@ -44,7 +43,8 @@ export async function GET(request: Request) {
       return NextResponse.redirect(errorUrl);
     }
 
-    const appUser = await new UserService().getOrCreateUserByAuthUserId(data.user.id);
+    const appUser =
+      await new UserService().getOrCreateUserByAuthUserId(data.user.id);
 
     return NextResponse.redirect(
       await resolvePostConfirmationRedirect(
