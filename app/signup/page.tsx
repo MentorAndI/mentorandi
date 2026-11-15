@@ -8,7 +8,10 @@ import {
   normalizeSafeAuthNextPath,
 } from "@/services/auth/redirects";
 import { BillingAccessService } from "@/services/billing/billing-access.service";
-import { buildOnboardingPath } from "@/services/billing/purchase-flow";
+import {
+  buildOnboardingPath,
+  normalizeRequestedPlan,
+} from "@/services/billing/purchase-flow";
 
 export const metadata: Metadata = {
   title: "Sign up | Mentor And I",
@@ -26,8 +29,12 @@ export default async function SignupPage({
   const params = await searchParams;
   const requestedPath = Array.isArray(params.next) ? params.next[0] : params.next;
   const requestedPlan = Array.isArray(params.plan) ? params.plan[0] : params.plan;
-  const onboardingPath = buildOnboardingPath(requestedPlan);
-  const redirectPath = normalizeSafeAuthNextPath(requestedPath ?? onboardingPath);
+  const normalizedPlan = normalizeRequestedPlan(requestedPlan);
+  const onboardingPath = buildOnboardingPath(normalizedPlan);
+  const redirectPath =
+    normalizedPlan === "free"
+      ? "/start?mentor=life"
+      : normalizeSafeAuthNextPath(requestedPath ?? onboardingPath);
   const purchaseStatus =
     await new BillingAccessService().getCurrentPurchaseStatus();
 
