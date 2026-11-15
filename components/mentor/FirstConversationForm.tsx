@@ -9,11 +9,13 @@ import { Textarea } from "@/components/ui/Textarea";
 
 export interface FirstConversationFormProps {
   characterLimit?: number;
+  isAuthenticated?: boolean;
   mentorSlug?: string;
 }
 
 export function FirstConversationForm({
   characterLimit = 1200,
+  isAuthenticated = false,
   mentorSlug = "life",
 }: FirstConversationFormProps) {
   const router = useRouter();
@@ -61,7 +63,9 @@ export function FirstConversationForm({
         if (response.status === 401) {
           setRequiresAuth(true);
           setErrorMessage(
-            "Create an account to save your first mentor conversation.",
+            isAuthenticated
+              ? "Your session has expired. Please log in again."
+              : "Create an account to save your first mentor conversation.",
           );
           return;
         }
@@ -86,13 +90,15 @@ export function FirstConversationForm({
       className="mt-10 space-y-5"
       onSubmit={handleSubmit}
     >
-      <div
-        className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm leading-6 text-zinc-700"
-        id={authPromptId}
-      >
-        Create an account to save your first mentor conversation. You can write
-        your answer here first, then log in or sign up before saving it.
-      </div>
+      {!isAuthenticated ? (
+        <div
+          className="rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm leading-6 text-zinc-700"
+          id={authPromptId}
+        >
+          Create an account to save your first mentor conversation. You can write
+          your answer here first, then log in or sign up before saving it.
+        </div>
+      ) : null}
 
       <Textarea
         error={errorMessage}
@@ -125,12 +131,14 @@ export function FirstConversationForm({
           ) : null}
           {requiresAuth ? (
             <div className="flex flex-col gap-2 pt-2 sm:flex-row">
-              <Button
-                href={`/signup?next=${encodeURIComponent(startPath)}`}
-                size="sm"
-              >
-                Create account
-              </Button>
+              {!isAuthenticated ? (
+                <Button
+                  href={`/signup?next=${encodeURIComponent(startPath)}`}
+                  size="sm"
+                >
+                  Create account
+                </Button>
+              ) : null}
               <Button
                 href={`/login?next=${encodeURIComponent(startPath)}`}
                 size="sm"

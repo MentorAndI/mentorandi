@@ -6,6 +6,7 @@ import { ConversationCard } from "@/components/mentor/ConversationCard";
 import { FirstConversationForm } from "@/components/mentor/FirstConversationForm";
 import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
+import { UserService } from "@/services/user/user.service";
 
 export const metadata: Metadata = {
   title: "Start | Mentor And I",
@@ -18,6 +19,7 @@ export default async function StartPage({
   searchParams: Promise<{ mentor?: string }>;
 }) {
   const { mentor } = await searchParams;
+  const currentUser = await new UserService().resolveOptionalAuthenticatedUser();
 
   return (
     <main className="min-h-screen bg-[var(--app-bg)] px-6 py-8 text-[var(--ink)] sm:py-12">
@@ -29,7 +31,7 @@ export default async function StartPage({
           className="text-sm font-semibold text-[var(--ink-muted)] transition hover:text-[var(--terra-text)]"
           href="/mentors"
         >
-          Change mentor
+          ← Back to mentors
         </Link>
       </div>
 
@@ -60,7 +62,10 @@ export default async function StartPage({
           </div>
         </div>
 
-        <FirstConversationForm mentorSlug={mentor} />
+        <FirstConversationForm
+          isAuthenticated={Boolean(currentUser)}
+          mentorSlug={mentor}
+        />
       </ConversationCard>
       <FeedbackButton mentorSlug={mentor} />
     </main>
