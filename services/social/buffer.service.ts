@@ -41,7 +41,7 @@ export class BufferService {
   async getOrganizations(): Promise<BufferOrganization[]> {
     const data = await this.request<{
       account?: { organizations?: BufferOrganization[] };
-    }>(\`
+    }>(`
       query MentorAndIBufferOrganizations {
         account {
           organizations {
@@ -50,14 +50,14 @@ export class BufferService {
           }
         }
       }
-    \`);
+    `);
 
     return data.account?.organizations ?? [];
   }
 
   async getChannels(organizationId: string): Promise<BufferChannel[]> {
     const data = await this.request<{ channels?: BufferChannel[] }>(
-      \`
+      `
         query MentorAndIBufferChannels($organizationId: OrganizationId!) {
           channels(input: {
             organizationId: $organizationId
@@ -70,7 +70,7 @@ export class BufferService {
             isQueuePaused
           }
         }
-      \`,
+      `,
       { organizationId },
     );
 
@@ -114,7 +114,7 @@ export class BufferService {
           }
         | { message?: string };
     }>(
-      \`
+      `
         mutation MentorAndICreateBufferPost(
           $text: String!
           $channelId: ChannelId!
@@ -142,7 +142,7 @@ export class BufferService {
             }
           }
         }
-      \`,
+      `,
       {
         channelId,
         dueAt: input.dueAt ?? null,
@@ -182,7 +182,7 @@ export class BufferService {
     const response = await fetch(BUFFER_API_URL, {
       body: JSON.stringify({ query, variables }),
       headers: {
-        Authorization: \`Bearer \${this.apiKey}\`,
+        Authorization: `Bearer ${this.apiKey}`,
         "Content-Type": "application/json",
       },
       method: "POST",
@@ -195,7 +195,7 @@ export class BufferService {
 
     if (!response.ok) {
       throw new BufferServiceError(
-        \`Buffer request failed with status \${response.status}.\`,
+        `Buffer request failed with status ${response.status}.`,
         502,
       );
     }
