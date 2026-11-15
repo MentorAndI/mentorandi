@@ -7,7 +7,7 @@ const allowedNextPathPrefixes = [
   "/mentors",
   "/settings",
 ] as const;
-const defaultAuthCallbackNextPath = "/start?mentor=life";
+const defaultAuthCallbackNextPath = "/mentor?mentor=life";
 const internalHostnames = new Set([
   "0.0.0.0",
   "::",
