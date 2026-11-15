@@ -17,7 +17,7 @@ export interface AccountNavigationProps {
 }
 
 export const defaultAccountNavigationLinks: AccountNavigationLink[] = [
-  { href: "/mentor", label: "My Mentor" },
+  { href: "/mentor", label: "My Mentors" },
   { href: "/mentors", label: "More Mentors" },
   { href: "/articles", label: "Articles" },
   { href: "/contact", label: "Contact" },
