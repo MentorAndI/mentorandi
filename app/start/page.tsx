@@ -6,6 +6,7 @@ import { ConversationCard } from "@/components/mentor/ConversationCard";
 import { FirstConversationForm } from "@/components/mentor/FirstConversationForm";
 import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
+import { MentorAccessService } from "@/services/mentor-access/mentor-access.service";
 import { UserService } from "@/services/user/user.service";
 
 export const metadata: Metadata = {
@@ -20,6 +21,10 @@ export default async function StartPage({
 }) {
   const { mentor } = await searchParams;
   const currentUser = await new UserService().resolveOptionalAuthenticatedUser();
+  const entitlement = currentUser
+    ? await new MentorAccessService().resolveEntitlement(currentUser.id)
+    : null;
+  const isFreeTrial = entitlement?.plan === "free";
 
   return (
     <main className="min-h-screen bg-[var(--app-bg)] px-6 py-8 text-[var(--ink)] sm:py-12">
@@ -27,12 +32,21 @@ export default async function StartPage({
         <p className="font-serif text-xl font-medium tracking-[-0.02em] text-[var(--ink)]">
           Mentor <span className="text-[var(--terra-text)]">And I</span>
         </p>
-        <Link
-          className="text-sm font-semibold text-[var(--ink-muted)] transition hover:text-[var(--terra-text)]"
-          href="/mentors"
-        >
-          ← Back to mentors
-        </Link>
+        {isFreeTrial ? (
+          <Link
+            className="text-sm font-semibold text-[var(--terra-text)] underline decoration-[var(--line-strong)] underline-offset-4"
+            href="/pricing"
+          >
+            Unlock specialist mentors
+          </Link>
+        ) : (
+          <Link
+            className="text-sm font-semibold text-[var(--ink-muted)] transition hover:text-[var(--terra-text)]"
+            href="/mentors"
+          >
+            ← Back to mentors
+          </Link>
+        )}
       </div>
 
       <ConversationCard>
@@ -61,6 +75,21 @@ export default async function StartPage({
             </Text>
           </div>
         </div>
+
+        {isFreeTrial ? (
+          <div className="mt-8 rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--band)] px-4 py-3 text-sm leading-6 text-[var(--ink-muted)]">
+            <span className="font-semibold text-[var(--ink)]">Free Trial:</span>{" "}
+            Marcus, your Life Mentor, is included. Want ADHD, Relationship,
+            Stress, Parenting, Health & Fitness, Focus, or Charisma mentoring?{" "}
+            <Link
+              className="font-semibold text-[var(--terra-text)] underline decoration-[var(--line-strong)] underline-offset-4"
+              href="/pricing"
+            >
+              View upgrade options
+            </Link>
+            .
+          </div>
+        ) : null}
 
         <FirstConversationForm
           isAuthenticated={Boolean(currentUser)}
