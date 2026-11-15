@@ -6,6 +6,7 @@ export const AUTH_PROTECTED_ROUTE_PREFIXES = [
   "/mentor",
   "/onboarding",
   "/settings",
+  "/start",
 ] as const;
 
 export const PRODUCTION_HIDDEN_LEGACY_ROUTES = [

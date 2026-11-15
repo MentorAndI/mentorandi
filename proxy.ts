@@ -83,6 +83,7 @@ export const config = {
     "/onboarding/:path*",
     "/reflection/:path*",
     "/settings/:path*",
+    "/start/:path*",
     "/welcome/:path*",
   ],
 };
