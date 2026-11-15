@@ -13,10 +13,22 @@ export interface AccountNavigationLink {
 }
 
 export interface AccountNavigationProps {
-  links: AccountNavigationLink[];
+  links?: AccountNavigationLink[];
 }
 
-export function AccountNavigation({ links }: AccountNavigationProps) {
+export const defaultAccountNavigationLinks: AccountNavigationLink[] = [
+  { href: "/mentor", label: "Mentor" },
+  { href: "/mentors", label: "Mentors" },
+  { href: "/pricing", label: "Upgrade" },
+  { href: "/articles", label: "Articles" },
+  { href: "/contact", label: "Contact" },
+  { href: "/credits", label: "Credits" },
+  { href: "/settings", label: "Settings" },
+];
+
+export function AccountNavigation({
+  links = defaultAccountNavigationLinks,
+}: AccountNavigationProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [errorMessage, setErrorMessage] = useState("");
