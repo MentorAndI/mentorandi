@@ -22,13 +22,6 @@ export const metadata: Metadata = {
   description: "Choose the mentor you want to work with.",
 };
 
-const appLinks = [
-  { href: "/mentor", label: "Mentor" },
-  { href: "/mentors", label: "Mentors" },
-  { href: "/credits", label: "Credits" },
-  { href: "/settings", label: "Settings" },
-];
-
 export default async function MentorsPage() {
   const currentUser = await new UserService().resolveOptionalAuthenticatedUser();
   const entitlement = currentUser
@@ -38,7 +31,7 @@ export default async function MentorsPage() {
   return (
     <main className="min-h-screen bg-[var(--app-bg)] py-4 text-[var(--ink)] sm:py-6">
       <Container className="max-w-7xl">
-        <AccountNavigation links={appLinks} />
+        <AccountNavigation />
 
         <div className="mb-8 max-w-2xl">
           <p className="font-meta text-[0.7rem] text-[var(--terra-text)]">
