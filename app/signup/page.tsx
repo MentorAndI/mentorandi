@@ -33,7 +33,7 @@ export default async function SignupPage({
   const onboardingPath = buildOnboardingPath(normalizedPlan);
   const redirectPath =
     normalizedPlan === "free"
-      ? "/start?mentor=life"
+      ? "/mentor?mentor=life"
       : normalizeSafeAuthNextPath(requestedPath ?? onboardingPath);
   const purchaseStatus =
     await new BillingAccessService().getCurrentPurchaseStatus();
