@@ -70,8 +70,8 @@ export class AlphaSignupService {
       (Array.isArray(data.user.identities) && data.user.identities.length === 0)
     ) {
       throw new AlphaSignupServiceError(
-        "Signup failed. Please check your information and try again.",
-        400,
+        "An account already exists with this email. Log in instead, or use Forgot password if you do not remember the password.",
+        409,
       );
     }
 
@@ -105,6 +105,14 @@ function formatSafeSignupError(message?: string) {
 
   if (/email rate limit exceeded/i.test(safeMessage)) {
     return "Too many verification emails have been requested. Please wait a few minutes and try again.";
+  }
+
+  if (
+    /already exists/i.test(safeMessage) ||
+    /already registered/i.test(safeMessage) ||
+    /user already registered/i.test(safeMessage)
+  ) {
+    return "An account already exists with this email. Log in instead, or use Forgot password if you do not remember the password.";
   }
 
   return safeMessage;
