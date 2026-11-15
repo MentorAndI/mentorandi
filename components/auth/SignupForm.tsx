@@ -232,10 +232,20 @@ export function SignupForm({
 }
 
 function formatSignupAuthError(message?: string) {
-  const safeMessage = sanitizeAuthErrorMessage(message);
+  const safeMessage = sanitizeAuthErrorMessage(message).replace(
+    /^signup failed:\\s*/i,
+    "",
+  );
 
   if (!safeMessage) {
     return "Signup failed. Please check your information and try again.";
+  }
+
+  if (
+    /email rate limit exceeded/i.test(safeMessage) ||
+    /too many verification emails/i.test(safeMessage)
+  ) {
+    return "Too many verification emails have been requested. Please wait a few minutes and try again.";
   }
 
   return `Signup failed: ${safeMessage}`;
