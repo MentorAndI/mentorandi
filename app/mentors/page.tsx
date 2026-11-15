@@ -118,7 +118,7 @@ export default async function MentorsPage() {
                         className="inline-flex h-10 items-center justify-center rounded-[var(--r-md)] bg-[var(--terra-hover)] px-4 text-sm font-semibold text-[var(--on-terra)] transition hover:bg-[var(--terra-press)]"
                         href={
                           canChoose
-                            ? `/start?mentor=${mentor.slug}`
+                            ? `/mentor?mentor=${mentor.slug}`
                             : "/pricing"
                         }
                       >
