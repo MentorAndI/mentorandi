@@ -6,6 +6,7 @@ import { FeedbackButton } from "@/components/feedback/FeedbackButton";
 import { Container } from "@/components/layout/Container";
 import { ConversationCard } from "@/components/mentor/ConversationCard";
 import { FirstConversationForm } from "@/components/mentor/FirstConversationForm";
+import { MentorHeader } from "@/components/mentor/MentorHeader";
 import { Button } from "@/components/ui/Button";
 import { Heading } from "@/components/ui/Heading";
 import { Text } from "@/components/ui/Text";
@@ -59,13 +60,22 @@ export default async function StartPage({
 
         <div className="mx-auto max-w-3xl">
           <ConversationCard>
-            <div className="space-y-7">
+            {requestedMentor ? (
+              <MentorHeader
+                name={getMentorDisplayName(requestedMentor)}
+                portraitSrc={requestedMentor.portraitSrc}
+                role={requestedMentor.name}
+                tagline={requestedMentor.shortDescription}
+              />
+            ) : null}
+
+            <div className="mt-7 space-y-5">
               <div>
                 <p className="font-meta text-[0.7rem] text-[var(--terra-text)]">
                   FIRST CONVERSATION
                 </p>
                 <Heading
-                  className="mt-3 max-w-xl font-serif text-4xl font-medium sm:text-5xl"
+                  className="mt-2 max-w-xl text-3xl sm:text-4xl"
                   id="first-conversation-heading"
                   level={1}
                 >
@@ -74,11 +84,11 @@ export default async function StartPage({
               </div>
 
               <div className="max-w-2xl space-y-3">
-                <Text className="text-lg leading-8">
+                <Text className="text-base leading-7 sm:text-lg sm:leading-8">
                   Before we begin, I&apos;d like to understand what brought you
                   here today.
                 </Text>
-                <Text className="text-lg leading-8">
+                <Text className="text-base leading-7 sm:text-lg sm:leading-8">
                   There are no right or wrong answers. Tell me what feels most
                   important to start with.
                 </Text>
