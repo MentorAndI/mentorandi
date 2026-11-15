@@ -7,9 +7,11 @@ import { Container } from "@/components/layout/Container";
 import { MentorConversationClient } from "@/components/mentor/MentorConversationClient";
 import {
   getActiveMentorProfile,
+  getActiveMentorProfileByDatabaseSlug,
   getMentorDisplayName,
 } from "@/services/mentor-catalog/mentor-catalog";
 import { MentorAccessService } from "@/services/mentor-access/mentor-access.service";
+import { ConversationService } from "@/services/conversation/conversation.service";
 import { UserService } from "@/services/user/user.service";
 
 export const metadata: Metadata = {
@@ -23,10 +25,20 @@ export default async function MentorPage({
   searchParams: Promise<{ mentor?: string; specialty?: string }>;
 }) {
   const { mentor, specialty } = await searchParams;
-  const selectedMentor =
-    getActiveMentorProfile(mentor ?? specialty) ??
-    getActiveMentorProfile("life");
   const currentUser = await new UserService().resolveOptionalAuthenticatedUser();
+  const requestedMentor = getActiveMentorProfile(mentor ?? specialty);
+  const recentConversation = !requestedMentor && currentUser
+    ? (await new ConversationService().getRecentConversationsForUser(
+        currentUser.id,
+        1,
+      ))[0] ?? null
+    : null;
+  const selectedMentor =
+    requestedMentor ??
+    (recentConversation
+      ? getActiveMentorProfileByDatabaseSlug(recentConversation.mentor.slug)
+      : null) ??
+    getActiveMentorProfile("life");
   const entitlement = currentUser
     ? await new MentorAccessService().resolveEntitlement(currentUser.id)
     : null;
