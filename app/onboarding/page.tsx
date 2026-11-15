@@ -116,17 +116,18 @@ export default async function OnboardingPage({
             <>
               <Badge variant="muted">Free Trial</Badge>
               <Heading className="mt-5" level={1}>
-                Ready to choose your mentor
+                Start with your Life Mentor
               </Heading>
               <Text className="mt-4 text-lg leading-8">
-                No payment is needed for the trial. Continue to mentor selection
-                and begin your first conversation.
+                No payment is needed for the trial. Free Trial includes Marcus,
+                your Life Mentor, plus 25 starter credits. Specialist mentors are
+                available on paid plans.
               </Text>
               <Link
                 className="mt-8 inline-flex h-11 items-center justify-center rounded-[var(--r-md)] bg-[var(--terra-hover)] px-5 text-sm font-semibold text-[var(--on-terra)] transition hover:bg-[var(--terra-press)]"
-                href="/mentors"
+                href="/start?mentor=life"
               >
-                Choose a mentor
+                Start with Marcus
               </Link>
             </>
           )}
