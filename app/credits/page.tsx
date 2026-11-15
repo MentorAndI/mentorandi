@@ -18,13 +18,6 @@ export const metadata: Metadata = {
   description: "View and purchase Mentor And I service usage credits.",
 };
 
-const appLinks = [
-  { href: "/mentor", label: "Mentor" },
-  { href: "/mentors", label: "Mentors" },
-  { href: "/credits", label: "Credits" },
-  { href: "/settings", label: "Settings" },
-];
-
 export default async function CreditsPage({
   searchParams,
 }: {
@@ -43,7 +36,7 @@ export default async function CreditsPage({
   return (
     <main className="min-h-screen bg-[var(--app-bg)] py-4 text-[var(--ink)] sm:py-6">
       <Container className="max-w-6xl">
-        <AccountNavigation links={appLinks} />
+        <AccountNavigation />
 
         <div className="mb-8 max-w-2xl">
           <p className="font-meta text-[0.7rem] text-[var(--terra-text)]">
