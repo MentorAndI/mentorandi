@@ -1,28 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-
-import { AccountNavigation } from "@/components/auth/AccountNavigation";
-import { FeedbackButton } from "@/components/feedback/FeedbackButton";
-import { Container } from "@/components/layout/Container";
-import { ConversationCard } from "@/components/mentor/ConversationCard";
-import { FirstConversationForm } from "@/components/mentor/FirstConversationForm";
-import { MentorHeader } from "@/components/mentor/MentorHeader";
-import { Button } from "@/components/ui/Button";
-import { Heading } from "@/components/ui/Heading";
-import { Text } from "@/components/ui/Text";
-import { evaluateMentorAccess } from "@/services/mentor-access/mentor-access-policy";
-import { MentorAccessService } from "@/services/mentor-access/mentor-access.service";
-import {
-  getActiveMentorProfile,
-  getMentorDisplayName,
-} from "@/services/mentor-catalog/mentor-catalog";
-import { UserService } from "@/services/user/user.service";
+import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Start | Mentor And I",
-  description: "Begin your first conversation with Mentor And I.",
+  title: "Mentor | Mentor And I",
+  description: "Continue to your Mentor And I workspace.",
 };
 
 export default async function StartPage({
@@ -31,120 +14,7 @@ export default async function StartPage({
   searchParams: Promise<{ mentor?: string }>;
 }) {
   const { mentor } = await searchParams;
-  const currentUser = await new UserService().resolveOptionalAuthenticatedUser();
-  const entitlement = currentUser
-    ? await new MentorAccessService().resolveEntitlement(currentUser.id)
-    : null;
-  const requestedMentor =
-    getActiveMentorProfile(mentor) ?? getActiveMentorProfile("life");
-  const requestedSlug = requestedMentor?.slug ?? "life";
-  const accessDecision = entitlement
-    ? evaluateMentorAccess({
-        mentorSlug: requestedSlug,
-        plan: entitlement.plan,
-        selectedMentorSlug: entitlement.selectedMentorSlug,
-      })
-    : null;
-  const canClaimSingleSpecialist =
-    entitlement?.plan === "single_mentor" &&
-    !entitlement.selectedMentorSlug &&
-    requestedSlug !== "life";
-  const canUseRequestedMentor =
-    !entitlement || Boolean(accessDecision?.allowed) || canClaimSingleSpecialist;
-  const isFreeTrial = entitlement?.plan === "free";
+  const mentorSlug = mentor?.trim() || "life";
 
-  return (
-    <main className="min-h-screen bg-[var(--app-bg)] py-4 text-[var(--ink)] sm:py-6">
-      <Container className="max-w-7xl">
-        <AccountNavigation />
-
-        <div className="mx-auto max-w-3xl">
-          <ConversationCard>
-            {requestedMentor ? (
-              <MentorHeader
-                name={getMentorDisplayName(requestedMentor)}
-                portraitSrc={requestedMentor.portraitSrc}
-                role={requestedMentor.name}
-                tagline={requestedMentor.shortDescription}
-              />
-            ) : null}
-
-            <div className="mt-7 space-y-5">
-              <div>
-                <p className="font-meta text-[0.7rem] text-[var(--terra-text)]">
-                  FIRST CONVERSATION
-                </p>
-                <Heading
-                  className="mt-2 max-w-xl text-3xl sm:text-4xl"
-                  id="first-conversation-heading"
-                  level={1}
-                >
-                  Hi. I&apos;m glad you&apos;re here.
-                </Heading>
-              </div>
-
-              <div className="max-w-2xl space-y-3">
-                <Text className="text-base leading-7 sm:text-lg sm:leading-8">
-                  Before we begin, I&apos;d like to understand what brought you
-                  here today.
-                </Text>
-                <Text className="text-base leading-7 sm:text-lg sm:leading-8">
-                  There are no right or wrong answers. Tell me what feels most
-                  important to start with.
-                </Text>
-              </div>
-            </div>
-
-            {!canUseRequestedMentor && requestedMentor ? (
-              <section className="mt-8 rounded-[var(--r-lg)] border border-[var(--line)] bg-[var(--band)] p-5">
-                <p className="font-meta text-[0.68rem] text-[var(--terra-text)]">
-                  SPECIALIST MENTOR
-                </p>
-                <h2 className="mt-2 text-xl font-semibold text-[var(--ink)]">
-                  {getMentorDisplayName(requestedMentor)} requires an upgrade
-                </h2>
-                <Text className="mt-2 leading-7">
-                  Your current plan includes Marcus, your Life Mentor. Upgrade
-                  to work with {getMentorDisplayName(requestedMentor)} or choose
-                  a plan with access to more specialist mentors.
-                </Text>
-                <div className="mt-5 flex flex-wrap gap-3">
-                  <Button href="/pricing">View upgrade options</Button>
-                  <Button href="/start?mentor=life" variant="secondary">
-                    Continue with Marcus
-                  </Button>
-                </div>
-              </section>
-            ) : (
-              <>
-                {isFreeTrial ? (
-                  <div className="mt-8 rounded-[var(--r-md)] border border-[var(--line)] bg-[var(--band)] px-4 py-3 text-sm leading-6 text-[var(--ink-muted)]">
-                    <span className="font-semibold text-[var(--ink)]">
-                      Free Trial:
-                    </span>{" "}
-                    Marcus, your Life Mentor, is included. Specialist mentors are
-                    available on paid plans.{" "}
-                    <Link
-                      className="font-semibold text-[var(--terra-text)] underline decoration-[var(--line-strong)] underline-offset-4"
-                      href="/pricing"
-                    >
-                      View upgrade options
-                    </Link>
-                    .
-                  </div>
-                ) : null}
-
-                <FirstConversationForm
-                  isAuthenticated={Boolean(currentUser)}
-                  mentorSlug={requestedSlug}
-                />
-              </>
-            )}
-          </ConversationCard>
-        </div>
-
-        <FeedbackButton mentorSlug={requestedSlug} />
-      </Container>
-    </main>
-  );
+  redirect(`/mentor?mentor=${encodeURIComponent(mentorSlug)}`);
 }
