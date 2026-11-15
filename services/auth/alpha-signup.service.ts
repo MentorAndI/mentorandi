@@ -61,7 +61,7 @@ export class AlphaSignupService {
     if (error) {
       throw new AlphaSignupServiceError(
         formatSafeSignupError(error.message),
-        400,
+        error.status === 429 ? 429 : 400,
       );
     }
 
@@ -96,9 +96,16 @@ function formatSafeSignupError(message?: string) {
     )
     .replace(/\b[A-Za-z0-9_-]{48,}\b/g, "[redacted]")
     .trim()
-    .slice(0, 500);
+    .slice(0, 500)
+    .replace(/^signup failed:\s*/i, "");
 
-  return safeMessage
-    ? `Signup failed: ${safeMessage}`
-    : "Signup failed. Please check your information and try again.";
+  if (!safeMessage) {
+    return "Signup failed. Please check your information and try again.";
+  }
+
+  if (/email rate limit exceeded/i.test(safeMessage)) {
+    return "Too many verification emails have been requested. Please wait a few minutes and try again.";
+  }
+
+  return safeMessage;
 }
