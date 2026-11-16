@@ -32,7 +32,7 @@ export default function ForgotPasswordPage() {
               Log in
             </Link>
             <Link
-              className="rounded-full bg-[var(--terra)] px-4 py-2 text-white transition-colors hover:bg-[var(--terra-deep)]"
+              className="rounded-full bg-[var(--terra)] px-4 py-2 text-white transition-colors hover:bg-[var(--terra-hover)]"
               href="/signup?plan=free"
             >
               Create account
